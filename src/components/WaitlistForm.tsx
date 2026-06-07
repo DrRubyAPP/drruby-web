@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, type ReactNode, type FormEvent } from "react";
 
 interface ConcernOption {
   label: string;
@@ -17,6 +17,8 @@ interface WaitlistFormProps {
   formId: string;
 }
 
+type SubmitStatus = "idle" | "loading" | "ok" | "err";
+
 export default function WaitlistForm({
   title,
   subtitle,
@@ -26,15 +28,8 @@ export default function WaitlistForm({
   showWinning,
   formId,
 }: WaitlistFormProps) {
-  const [submitted, setSubmitted] = useState(false);
-
-  const defaultAgeOptions = [
-    "Under 30",
-    "30–39",
-    "40–49",
-    "50–59",
-    "60+",
-  ];
+  const [status, setStatus] = useState<SubmitStatus>("idle");
+  const [msg, setMsg] = useState("");
 
   const spendOptions = [
     "Under $50",
@@ -43,6 +38,39 @@ export default function WaitlistForm({
     "$300–$500",
     "$500+",
   ];
+
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setStatus("loading");
+    setMsg("");
+
+    const form = e.currentTarget;
+    const data = {
+      email: (form.elements.namedItem("EMAIL") as HTMLInputElement).value,
+      firstName: (form.elements.namedItem("FNAME") as HTMLInputElement).value,
+      phone: (form.elements.namedItem("PHONE") as HTMLInputElement)?.value || "",
+      formId,
+    };
+
+    try {
+      const res = await fetch("/api/mailchimp/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const result = await res.json();
+      if (res.ok && !result.error) {
+        setStatus("ok");
+        setMsg(result.message || "You're on the list!");
+      } else {
+        setStatus("err");
+        setMsg(result.error || "Something went wrong.");
+      }
+    } catch {
+      setStatus("err");
+      setMsg("Network error. Please try again.");
+    }
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-start">
@@ -58,21 +86,18 @@ export default function WaitlistForm({
         </p>
       </div>
 
-      {submitted ? (
+      {status === "ok" ? (
         <div className="bg-dr-off border border-dr-border rounded-[20px] p-9 shadow-[0_4px_40px_rgba(0,0,0,0.06)] text-center">
           <div className="text-2xl mb-3">&#10003;</div>
-          <p className="text-lg font-semibold text-dr-black mb-2">You&apos;re on the list!</p>
+          <p className="text-lg font-semibold text-dr-black mb-2">{msg}</p>
           <p className="text-sm text-dr-muted">We&apos;ll be in touch before launch.</p>
         </div>
       ) : (
         <form
           className="bg-dr-off border border-dr-border rounded-[20px] p-9 shadow-[0_4px_40px_rgba(0,0,0,0.06)]"
-          onSubmit={(e) => {
-            e.preventDefault();
-            setSubmitted(true);
-          }}
+          onSubmit={onSubmit}
         >
-          <h3 className="text-xl font-bold tracking-tight mb-1.5">{formId === "skin" ? "Get Early Access" : "Get Early Access"}</h3>
+          <h3 className="text-xl font-bold tracking-tight mb-1.5">Get Early Access</h3>
           <p className="text-sm text-dr-muted mb-6">{subtitle.split(".")[0]}.</p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3.5">
@@ -84,6 +109,7 @@ export default function WaitlistForm({
                 name="FNAME"
                 placeholder="Your name"
                 required
+                disabled={status === "loading"}
               />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -94,6 +120,7 @@ export default function WaitlistForm({
                 name="EMAIL"
                 placeholder="your@email.com"
                 required
+                disabled={status === "loading"}
               />
             </div>
           </div>
@@ -107,6 +134,7 @@ export default function WaitlistForm({
               type="tel"
               name="PHONE"
               placeholder="+1 (___) ___-____"
+              disabled={status === "loading"}
             />
           </div>
 
@@ -158,8 +186,13 @@ export default function WaitlistForm({
                 className="p-3 border border-dr-border rounded-lg text-[15px] bg-white outline-none focus:border-dr-red transition-colors"
                 type="text"
                 placeholder="e.g. Hike with my kids, sleep through the night..."
+                disabled={status === "loading"}
               />
             </div>
+          )}
+
+          {status === "err" && (
+            <p className="text-dr-red text-sm mb-3">{msg}</p>
           )}
 
           <p className="text-xs text-[#aaa] leading-relaxed mb-4">
@@ -167,9 +200,10 @@ export default function WaitlistForm({
           </p>
           <button
             type="submit"
-            className="w-full bg-dr-red text-white border-none py-[15px] rounded-[10px] text-base font-bold cursor-pointer hover:opacity-85 transition-opacity"
+            disabled={status === "loading"}
+            className="w-full bg-dr-red text-white border-none py-[15px] rounded-[10px] text-base font-bold cursor-pointer hover:opacity-85 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            Join the Waitlist &rarr;
+            {status === "loading" ? "Subscribing..." : "Join the Waitlist →"}
           </button>
         </form>
       )}
