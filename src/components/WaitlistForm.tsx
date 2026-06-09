@@ -30,6 +30,7 @@ export default function WaitlistForm({
 }: WaitlistFormProps) {
   const [status, setStatus] = useState<SubmitStatus>("idle");
   const [msg, setMsg] = useState("");
+  const [selectedConcerns, setSelectedConcerns] = useState<string[]>([]);
 
   const spendOptions = [
     "Under $50",
@@ -38,6 +39,12 @@ export default function WaitlistForm({
     "$300–$500",
     "$500+",
   ];
+
+  function toggleConcern(value: string) {
+    setSelectedConcerns((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+    );
+  }
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -50,6 +57,17 @@ export default function WaitlistForm({
       firstName: (form.elements.namedItem("FNAME") as HTMLInputElement).value,
       phone: (form.elements.namedItem("PHONE") as HTMLInputElement)?.value || "",
       formId,
+      // Extra fields for Mailchimp merge fields
+      age: ageOptions
+        ? (form.elements.namedItem("AGE") as HTMLSelectElement)?.value || ""
+        : "",
+      concerns: selectedConcerns.join(", "),
+      spend: showSpend
+        ? (form.elements.namedItem("SPEND") as HTMLSelectElement)?.value || ""
+        : "",
+      winning: showWinning
+        ? (form.elements.namedItem("WINNING") as HTMLInputElement)?.value || ""
+        : "",
     };
 
     try {
@@ -141,7 +159,7 @@ export default function WaitlistForm({
           {ageOptions && (
             <div className="flex flex-col gap-1.5 mb-3.5">
               <label className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555]">Age range</label>
-              <select className="p-3 border border-dr-border rounded-lg text-[15px] bg-white outline-none focus:border-dr-red transition-colors text-dr-black appearance-none" defaultValue="">
+              <select name="AGE" className="p-3 border border-dr-border rounded-lg text-[15px] bg-white outline-none focus:border-dr-red transition-colors text-dr-black appearance-none" defaultValue="">
                 <option value="" disabled>Select your age</option>
                 {ageOptions.map((opt) => (
                   <option key={opt}>{opt}</option>
@@ -155,20 +173,38 @@ export default function WaitlistForm({
               {showWinning ? "What are you experiencing? (pick all that apply)" : "Main skin concern (pick all that apply)"}
             </label>
             <div className="flex flex-col gap-2.5">
-              {concerns.map((c) => (
-                <label key={c.value} className="flex items-center gap-2.5 cursor-pointer">
-                  <input type="checkbox" className="hidden" />
-                  <span className="w-[18px] h-[18px] border-[1.5px] border-dr-border rounded flex-shrink-0 flex items-center justify-center peer-checked:bg-dr-red peer-checked:border-dr-red" />
-                  <span className="text-[15px] text-dr-black">{c.label}</span>
-                </label>
-              ))}
+              {concerns.map((c) => {
+                const checked = selectedConcerns.includes(c.value);
+                return (
+                  <label
+                    key={c.value}
+                    className="flex items-center gap-2.5 cursor-pointer"
+                    onClick={() => toggleConcern(c.value)}
+                  >
+                    <span
+                      className={`w-[18px] h-[18px] border-[1.5px] rounded flex-shrink-0 flex items-center justify-center transition-colors ${
+                        checked
+                          ? "bg-dr-red border-dr-red"
+                          : "border-dr-border"
+                      }`}
+                    >
+                      {checked && (
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                          <path d="M2.5 6L5 8.5L9.5 3.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      )}
+                    </span>
+                    <span className="text-[15px] text-dr-black">{c.label}</span>
+                  </label>
+                );
+              })}
             </div>
           </div>
 
           {showSpend && (
             <div className="flex flex-col gap-1.5 mb-3.5">
               <label className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555]">Monthly skincare spend</label>
-              <select className="p-3 border border-dr-border rounded-lg text-[15px] bg-white outline-none focus:border-dr-red transition-colors text-dr-black appearance-none" defaultValue="">
+              <select name="SPEND" className="p-3 border border-dr-border rounded-lg text-[15px] bg-white outline-none focus:border-dr-red transition-colors text-dr-black appearance-none" defaultValue="">
                 <option value="" disabled>Select range</option>
                 {spendOptions.map((opt) => (
                   <option key={opt}>{opt}</option>
@@ -185,6 +221,7 @@ export default function WaitlistForm({
               <input
                 className="p-3 border border-dr-border rounded-lg text-[15px] bg-white outline-none focus:border-dr-red transition-colors"
                 type="text"
+                name="WINNING"
                 placeholder="e.g. Hike with my kids, sleep through the night..."
                 disabled={status === "loading"}
               />

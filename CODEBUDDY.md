@@ -60,12 +60,20 @@ public/           # Static assets (SVGs)
 
 The landing page should replicate `a_docs/design/DrRuby_Landing_Combined.html`. This is the authoritative design source.
 
+## Integrations
+
+- **@mailchimp/mailchimp_marketing** — email marketing ✅ integrated
+  - API route: `src/app/api/mailchimp/subscribe/route.ts`
+  - Forms: `HomeCaptureForm` (home), `WaitlistForm` (skin/healthspan)
+  - Env vars: `MAILCHIMP_API_KEY`, `MAILCHIMP_SERVER_PREFIX`, `MAILCHIMP_AUDIENCE_ID`
+  - Merge fields: `FNAME`, `PHONE`, `AGE`, `CONCERNS`, `SPEND`, `WINNING`
+  - Tags: `home-page`, `skin-page`, `healthspan-page`
+
 ## Planned Integrations (not yet installed)
 
 The `a_docs/notes-dev.md` lists these planned dependencies:
 - **Prisma** + `@prisma/client` — database ORM
 - **better-auth** — authentication
-- **@mailchimp/mailchimp_marketing** — email marketing (see `a_docs/tech/service/mailchimp.md`)
 - **Stripe** (`stripe`, `@stripe/stripe-js`) — payments
 - **shadcn/ui** — component library
 - **react-hook-form** + **zod** — form handling & validation
