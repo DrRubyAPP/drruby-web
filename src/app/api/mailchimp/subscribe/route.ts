@@ -2,22 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import mailchimp from "@mailchimp/mailchimp_marketing";
 import { createHash } from "node:crypto";
 
-// ── Env validation ──────────────────────────────────────────────────
-const API_KEY = process.env.MAILCHIMP_API_KEY;
-const SERVER_PREFIX = process.env.MAILCHIMP_SERVER_PREFIX;
-const AUDIENCE_ID = process.env.MAILCHIMP_AUDIENCE_ID;
-
-if (!API_KEY || !SERVER_PREFIX || !AUDIENCE_ID) {
-  console.error(
-    "[mailchimp] Missing required env vars: MAILCHIMP_API_KEY, MAILCHIMP_SERVER_PREFIX, MAILCHIMP_AUDIENCE_ID"
-  );
-}
-
-mailchimp.setConfig({
-  apiKey: API_KEY ?? "",
-  server: SERVER_PREFIX ?? "",
-});
-
 // ── Helpers ─────────────────────────────────────────────────────────
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -43,13 +27,27 @@ function extractMailchimpError(err: unknown): {
 
 // ── Route handler ───────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
+  // Read env vars at request time (not module level) to avoid
+  // serverless cold-start issues where env vars may not be available
+  // during module initialization.
+  const API_KEY = process.env.MAILCHIMP_API_KEY;
+  const SERVER_PREFIX = process.env.MAILCHIMP_SERVER_PREFIX;
+  const AUDIENCE_ID = process.env.MAILCHIMP_AUDIENCE_ID;
+
   if (!API_KEY || !SERVER_PREFIX || !AUDIENCE_ID) {
-    console.error("[mailchimp] Cannot process request — env vars missing");
+    console.error(
+      "[mailchimp] Missing required env vars: MAILCHIMP_API_KEY, MAILCHIMP_SERVER_PREFIX, MAILCHIMP_AUDIENCE_ID"
+    );
     return NextResponse.json(
       { error: "Service not configured. Please try again later." },
       { status: 503 }
     );
   }
+
+  mailchimp.setConfig({
+    apiKey: API_KEY,
+    server: SERVER_PREFIX,
+  });
 
   try {
     const body = await req.json();
