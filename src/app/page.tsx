@@ -1,10 +1,15 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import PageSwitcher from "@/components/common/PageSwitcher";
 import HomeCaptureForm from "@/components/forms/HomeCaptureForm";
 import Footer from "@/components/layout/Footer";
 import Navbar from "@/components/layout/Navbar";
 
-export default function Home() {
+export default async function Home() {
+  const t = await getTranslations("home");
+  const skinTags = t.raw("pathSkin.tags") as string[];
+  const healthspanTags = t.raw("pathHealthspan.tags") as string[];
+
   return (
     <>
       <PageSwitcher />
@@ -15,19 +20,20 @@ export default function Home() {
         <div className="max-w-[1100px] mx-auto py-20 px-5 md:px-10 flex flex-col items-center text-center">
           <div className="inline-flex items-center gap-2 bg-dr-red-lt border border-[#f5b8c0] text-[#a00015] text-[13px] font-medium py-[7px] px-4 rounded-[20px] mb-8">
             <span className="text-dr-red text-[8px]">&#9679;</span>
-            Early Access — Limited Spots
+            {t("hero.badge")}
           </div>
 
           <h1 className="text-[clamp(40px,5vw,68px)] font-bold tracking-[-2px] leading-[1.05] text-dr-fg mb-5 max-w-[800px]">
-            Something is changing.
-            <br />
-            <em className="not-italic text-dr-red">Understand it.</em>
+            {t.rich("hero.title", {
+              br: () => <br />,
+              em: (chunks) => (
+                <em className="not-italic text-dr-red">{chunks}</em>
+              ),
+            })}
           </h1>
 
           <p className="text-[19px] text-[#555] dark:text-[#9a9a9a] mb-14 leading-relaxed max-w-[580px]">
-            DrRuby is a women&apos;s healthspan intelligence platform. We enter
-            through skin — and connect it to everything else that&apos;s
-            shifting in your body. Tell us where you&apos;re feeling it most.
+            {t("hero.subtitle")}
           </p>
 
           {/* PATH CARDS */}
@@ -38,34 +44,30 @@ export default function Home() {
             >
               <div className="absolute top-0 left-0 right-0 h-[3px] bg-dr-red opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="text-[13px] font-bold tracking-[1.5px] uppercase text-dr-red mb-4">
-                Path 01 &middot; Skin
+                {t("pathSkin.eyebrow")}
               </div>
               <h2 className="text-[clamp(20px,2vw,26px)] font-bold tracking-tight leading-[1.2] text-dr-fg mb-3.5">
-                &ldquo;My skin changed and I don&apos;t know{" "}
-                <em className="italic text-dr-red">why.</em>&rdquo;
+                {t.rich("pathSkin.title", {
+                  em: (chunks) => (
+                    <em className="italic text-dr-red">{chunks}</em>
+                  ),
+                })}
               </h2>
               <p className="text-[15px] text-[#666] dark:text-[#9a9a9a] leading-relaxed mb-6 flex-1">
-                Inflammation, melasma, skin that aged faster than expected.
-                DrRuby tracks three imaging biomarkers so you stop guessing and
-                start seeing what&apos;s actually happening.
+                {t("pathSkin.desc")}
               </p>
               <div className="flex flex-wrap gap-[7px] mb-7">
-                {[
-                  "Inflammation",
-                  "Melasma",
-                  "Hormonal skin",
-                  "Product efficacy",
-                ].map((t) => (
+                {skinTags.map((tag) => (
                   <span
-                    key={t}
+                    key={tag}
                     className="text-xs font-medium bg-dr-off border border-dr-border py-1 px-3 rounded-[20px] text-[#555] dark:text-[#9a9a9a]"
                   >
-                    {t}
+                    {tag}
                   </span>
                 ))}
               </div>
               <span className="inline-flex items-center gap-2 text-sm font-semibold text-white bg-dr-red py-3 px-[22px] rounded-lg self-start">
-                I have skin concerns &rarr;
+                {t("pathSkin.cta")}
               </span>
             </Link>
 
@@ -75,34 +77,30 @@ export default function Home() {
             >
               <div className="absolute top-0 left-0 right-0 h-[3px] bg-dr-red opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="text-[13px] font-bold tracking-[1.5px] uppercase text-dr-red mb-4">
-                Path 02 &middot; Healthspan
+                {t("pathHealthspan.eyebrow")}
               </div>
               <h2 className="text-[clamp(20px,2vw,26px)] font-bold tracking-tight leading-[1.2] text-dr-fg mb-3.5">
-                &ldquo;My body isn&apos;t keeping up with my{" "}
-                <em className="italic text-dr-red">life.</em>&rdquo;
+                {t.rich("pathHealthspan.title", {
+                  em: (chunks) => (
+                    <em className="italic text-dr-red">{chunks}</em>
+                  ),
+                })}
               </h2>
               <p className="text-[15px] text-[#666] dark:text-[#9a9a9a] leading-relaxed mb-6 flex-1">
-                Energy, sleep, recovery, hormones. Something shifted in the last
-                few years and you can&apos;t quite name it. That&apos;s exactly
-                what DrRuby is built for.
+                {t("pathHealthspan.desc")}
               </p>
               <div className="flex flex-wrap gap-[7px] mb-7">
-                {[
-                  "Sleep & recovery",
-                  "Energy",
-                  "Perimenopause",
-                  "Hormonal resilience",
-                ].map((t) => (
+                {healthspanTags.map((tag) => (
                   <span
-                    key={t}
+                    key={tag}
                     className="text-xs font-medium bg-dr-off border border-dr-border py-1 px-3 rounded-[20px] text-[#555] dark:text-[#9a9a9a]"
                   >
-                    {t}
+                    {tag}
                   </span>
                 ))}
               </div>
               <span className="inline-flex items-center gap-2 text-sm font-semibold text-white bg-dr-red py-3 px-[22px] rounded-lg self-start">
-                I want better healthspan &rarr;
+                {t("pathHealthspan.cta")}
               </span>
             </Link>
           </div>
@@ -118,59 +116,49 @@ export default function Home() {
       <section className="bg-dr-black py-20 px-5 md:px-10">
         <div className="max-w-[1100px] mx-auto">
           <div className="text-xs font-semibold tracking-[1.5px] uppercase text-dr-red-mid mb-3">
-            What We Believe
+            {t("philosophy.eyebrow")}
           </div>
           <h2 className="text-[clamp(28px,4vw,44px)] font-bold tracking-tight leading-tight text-white mb-3.5">
-            Built for life goals.
-            <br />
-            Not lab dashboards.
+            {t.rich("philosophy.title", { br: () => <br /> })}
           </h2>
           <p className="text-[17px] text-[#aaa] max-w-[560px] leading-relaxed mb-12">
-            Every other healthspan tool rewards you for checking in more,
-            tracking more. We don&apos;t. We want you to close the app and go
-            live your life.
+            {t("philosophy.subtitle")}
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <div className="bg-white/5 border border-white/10 rounded-2xl py-7 px-6">
               <span className="text-[28px] mb-4 block">&#127919;</span>
               <div className="text-[17px] font-bold text-white mb-2.5">
-                Goals, not metrics
+                {t("philosophy.card1.title")}
               </div>
               <p className="text-sm text-[#bbb] leading-relaxed mb-3">
-                We don&apos;t ask what you want to optimize. We ask what you
-                want to do that your body isn&apos;t letting you.
+                {t("philosophy.card1.body")}
               </p>
               <div className="text-sm italic text-dr-red-mid leading-relaxed">
-                &ldquo;Hike with my grandkids.&rdquo; &ldquo;No more hot flashes
-                at 2am.&rdquo; &ldquo;Finish the day I planned.&rdquo;
+                {t("philosophy.card1.quote")}
               </div>
             </div>
             <div className="bg-white/5 border border-white/10 rounded-2xl py-7 px-6">
               <span className="text-[28px] mb-4 block">&#128246;</span>
               <div className="text-[17px] font-bold text-white mb-2.5">
-                We want you to close the app
+                {t("philosophy.card2.title")}
               </div>
               <p className="text-sm text-[#bbb] leading-relaxed mb-3">
-                Every month we ask: is this tracking helping you reach your
-                goal, or has it become the goal?
+                {t("philosophy.card2.body")}
               </p>
               <div className="text-sm italic text-dr-red-mid leading-relaxed">
-                &ldquo;Actually closed the app. Went outside. Felt like a
-                win.&rdquo;
+                {t("philosophy.card2.quote")}
               </div>
             </div>
             <div className="bg-white/5 border border-white/10 rounded-2xl py-7 px-6">
               <span className="text-[28px] mb-4 block">&#128300;</span>
               <div className="text-[17px] font-bold text-white mb-2.5">
-                Science you can name
+                {t("philosophy.card3.title")}
               </div>
               <p className="text-sm text-[#bbb] leading-relaxed mb-3">
-                Led by Charles Brenner, PhD — world&apos;s leading NAD+
-                researcher. Every claim traceable to published research.
+                {t("philosophy.card3.body")}
               </p>
               <div className="text-sm italic text-dr-red-mid leading-relaxed">
-                &ldquo;Reliable numbers, not great experiences with unreliable
-                data.&rdquo;
+                {t("philosophy.card3.quote")}
               </div>
             </div>
           </div>
@@ -182,47 +170,48 @@ export default function Home() {
         <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-16">
           <div className="flex-1">
             <div className="text-xs font-semibold tracking-[1.5px] uppercase text-dr-red mb-3">
-              Scientific Foundation
+              {t("trust.eyebrow")}
             </div>
             <h2 className="text-[clamp(24px,3vw,38px)] font-bold tracking-tight leading-[1.2] text-dr-fg mb-3.5">
-              No other consumer healthspan app has{" "}
-              <em className="italic text-dr-red">this.</em>
+              {t.rich("trust.title", {
+                em: (chunks) => (
+                  <em className="italic text-dr-red">{chunks}</em>
+                ),
+              })}
             </h2>
             <p className="text-base text-[#666] dark:text-[#9a9a9a] leading-relaxed max-w-[400px]">
-              Charles Brenner is the researcher who discovered NR as vitamin B3
-              — his work is the foundation of NAD+ biology. He&apos;s not an
-              advisor. He&apos;s co-building this with us.
+              {t("trust.body")}
             </p>
           </div>
           <div className="flex flex-col md:flex-row gap-3 flex-shrink-0">
             <div className="bg-dr-off border border-dr-border border-l-4 border-l-dr-red rounded-[10px] py-5 px-6 min-w-[220px]">
               <div className="text-[28px] font-bold tracking-tight text-dr-red leading-none mb-1">
-                NAD+
+                {t("trust.stat1.value")}
               </div>
               <div className="text-[13px] text-dr-muted leading-relaxed">
-                Charles Brenner, PhD
+                {t("trust.stat1.line1")}
                 <br />
-                Biochemist &middot; NAD+ Biology Pioneer
+                {t("trust.stat1.line2")}
               </div>
             </div>
             <div className="bg-dr-off border border-dr-border border-l-4 border-l-dr-red rounded-[10px] py-5 px-6 min-w-[220px]">
               <div className="text-[28px] font-bold tracking-tight text-dr-red leading-none mb-1">
-                N=1
+                {t("trust.stat2.value")}
               </div>
               <div className="text-[13px] text-dr-muted leading-relaxed">
-                Evidence-based
+                {t("trust.stat2.line1")}
                 <br />
-                user experiments
+                {t("trust.stat2.line2")}
               </div>
             </div>
             <div className="bg-dr-off border border-dr-border border-l-4 border-l-dr-red rounded-[10px] py-5 px-6 min-w-[220px]">
               <div className="text-[28px] font-bold tracking-tight text-dr-red leading-none mb-1">
-                Live
+                {t("trust.stat3.value")}
               </div>
               <div className="text-[13px] text-dr-muted leading-relaxed">
-                Clinic partnerships
+                {t("trust.stat3.line1")}
                 <br />
-                already active
+                {t("trust.stat3.line2")}
               </div>
             </div>
           </div>

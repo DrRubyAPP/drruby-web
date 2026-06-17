@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { type FormEvent, type ReactNode, useState } from "react";
 
 interface ConcernOption {
@@ -28,17 +29,12 @@ export default function WaitlistForm({
   showWinning,
   formId,
 }: WaitlistFormProps) {
+  const t = useTranslations("waitlistForm");
   const [status, setStatus] = useState<SubmitStatus>("idle");
   const [msg, setMsg] = useState("");
   const [selectedConcerns, setSelectedConcerns] = useState<string[]>([]);
 
-  const spendOptions = [
-    "Under $50",
-    "$50–$150",
-    "$150–$300",
-    "$300–$500",
-    "$500+",
-  ];
+  const spendOptions = t.raw("spendOptions") as string[];
 
   function toggleConcern(value: string) {
     setSelectedConcerns((prev) =>
@@ -80,14 +76,14 @@ export default function WaitlistForm({
       const result = await res.json();
       if (res.ok && !result.error) {
         setStatus("ok");
-        setMsg(result.message || "You're on the list!");
+        setMsg(result.message || t("successDefault"));
       } else {
         setStatus("err");
-        setMsg(result.error || "Something went wrong.");
+        setMsg(result.error || t("errorDefault"));
       }
     } catch {
       setStatus("err");
-      setMsg("Network error. Please try again.");
+      setMsg(t("networkError"));
     }
   }
 
@@ -95,7 +91,7 @@ export default function WaitlistForm({
     <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-start">
       <div>
         <div className="text-xs font-semibold tracking-[1.5px] uppercase text-dr-red mb-3">
-          Join the Waitlist
+          {t("eyebrow")}
         </div>
         <h2 className="text-[clamp(28px,4vw,42px)] font-bold tracking-tight leading-tight text-dr-fg mb-3">
           {title}
@@ -109,9 +105,7 @@ export default function WaitlistForm({
         <div className="bg-dr-off border border-dr-border rounded-[20px] p-9 shadow-[0_4px_40px_rgba(0,0,0,0.06)] text-center">
           <div className="text-2xl mb-3">&#10003;</div>
           <p className="text-lg font-semibold text-dr-fg mb-2">{msg}</p>
-          <p className="text-sm text-dr-muted">
-            We&apos;ll be in touch before launch.
-          </p>
+          <p className="text-sm text-dr-muted">{t("successFollowup")}</p>
         </div>
       ) : (
         <form
@@ -119,7 +113,7 @@ export default function WaitlistForm({
           onSubmit={onSubmit}
         >
           <h3 className="text-xl font-bold tracking-tight mb-1.5">
-            Get Early Access
+            {t("heading")}
           </h3>
           <p className="text-sm text-dr-muted mb-6">
             {subtitle.split(".")[0]}.
@@ -131,14 +125,14 @@ export default function WaitlistForm({
                 htmlFor="wf-fname"
                 className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555] dark:text-[#9a9a9a]"
               >
-                First Name
+                {t("firstNameLabel")}
               </label>
               <input
                 id="wf-fname"
                 className="p-3 border border-dr-border rounded-lg text-[15px] bg-dr-surface text-dr-fg outline-none focus:border-dr-red transition-colors"
                 type="text"
                 name="FNAME"
-                placeholder="Your name"
+                placeholder={t("firstNamePlaceholder")}
                 required
                 disabled={status === "loading"}
               />
@@ -148,14 +142,14 @@ export default function WaitlistForm({
                 htmlFor="wf-email"
                 className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555] dark:text-[#9a9a9a]"
               >
-                Email
+                {t("emailLabel")}
               </label>
               <input
                 id="wf-email"
                 className="p-3 border border-dr-border rounded-lg text-[15px] bg-dr-surface text-dr-fg outline-none focus:border-dr-red transition-colors"
                 type="email"
                 name="EMAIL"
-                placeholder="your@email.com"
+                placeholder={t("emailPlaceholder")}
                 required
                 disabled={status === "loading"}
               />
@@ -167,9 +161,9 @@ export default function WaitlistForm({
               htmlFor="wf-phone"
               className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555] dark:text-[#9a9a9a]"
             >
-              Phone{" "}
+              {t("phoneLabel")}{" "}
               <span className="font-normal text-[#aaa]">
-                (optional — for launch SMS)
+                {t("phoneOptional")}
               </span>
             </label>
             <input
@@ -177,7 +171,7 @@ export default function WaitlistForm({
               className="p-3 border border-dr-border rounded-lg text-[15px] bg-dr-surface text-dr-fg outline-none focus:border-dr-red transition-colors"
               type="tel"
               name="PHONE"
-              placeholder="+1 (___) ___-____"
+              placeholder={t("phonePlaceholder")}
               disabled={status === "loading"}
             />
           </div>
@@ -188,7 +182,7 @@ export default function WaitlistForm({
                 htmlFor="wf-age"
                 className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555] dark:text-[#9a9a9a]"
               >
-                Age range
+                {t("ageLabel")}
               </label>
               <select
                 id="wf-age"
@@ -197,7 +191,7 @@ export default function WaitlistForm({
                 defaultValue=""
               >
                 <option value="" disabled>
-                  Select your age
+                  {t("agePlaceholder")}
                 </option>
                 {ageOptions.map((opt) => (
                   <option key={opt}>{opt}</option>
@@ -209,8 +203,8 @@ export default function WaitlistForm({
           <div className="flex flex-col gap-1.5 mb-3.5">
             <span className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555] dark:text-[#9a9a9a]">
               {showWinning
-                ? "What are you experiencing? (pick all that apply)"
-                : "Main skin concern (pick all that apply)"}
+                ? t("concernsLabelHealthspan")
+                : t("concernsLabelSkin")}
             </span>
             <div className="flex flex-col gap-2.5">
               {concerns.map((c) => {
@@ -263,7 +257,7 @@ export default function WaitlistForm({
                 htmlFor="wf-spend"
                 className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555] dark:text-[#9a9a9a]"
               >
-                Monthly skincare spend
+                {t("spendLabel")}
               </label>
               <select
                 id="wf-spend"
@@ -272,7 +266,7 @@ export default function WaitlistForm({
                 defaultValue=""
               >
                 <option value="" disabled>
-                  Select range
+                  {t("spendPlaceholder")}
                 </option>
                 {spendOptions.map((opt) => (
                   <option key={opt}>{opt}</option>
@@ -287,14 +281,14 @@ export default function WaitlistForm({
                 htmlFor="wf-winning"
                 className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555] dark:text-[#9a9a9a]"
               >
-                What does &quot;winning&quot; look like for you?
+                {t("winningLabel")}
               </label>
               <input
                 id="wf-winning"
                 className="p-3 border border-dr-border rounded-lg text-[15px] bg-dr-surface text-dr-fg outline-none focus:border-dr-red transition-colors"
                 type="text"
                 name="WINNING"
-                placeholder="e.g. Hike with my kids, sleep through the night..."
+                placeholder={t("winningPlaceholder")}
                 disabled={status === "loading"}
               />
             </div>
@@ -305,14 +299,14 @@ export default function WaitlistForm({
           )}
 
           <p className="text-xs text-[#aaa] leading-relaxed mb-4">
-            No spam, ever. You can unsubscribe at any time.
+            {t("privacy")}
           </p>
           <button
             type="submit"
             disabled={status === "loading"}
             className="w-full bg-dr-red text-white border-none py-[15px] rounded-[10px] text-base font-bold cursor-pointer hover:opacity-85 transition-opacity disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {status === "loading" ? "Subscribing..." : "Join the Waitlist →"}
+            {status === "loading" ? t("submitting") : t("submit")}
           </button>
         </form>
       )}

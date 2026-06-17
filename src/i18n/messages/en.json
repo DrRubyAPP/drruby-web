@@ -1,0 +1,319 @@
+{
+  "nav": {
+    "pageLabel": "Page:",
+    "home": "Home",
+    "skin": "Skin",
+    "healthspan": "Healthspan",
+    "tagline": "Women's Healthspan Intelligence",
+    "getEarlyAccess": "Get Early Access",
+    "back": "← Back"
+  },
+  "home": {
+    "hero": {
+      "badge": "Early Access — Limited Spots",
+      "title": "Something is changing.<br></br><em>Understand it.</em>",
+      "subtitle": "DrRuby is a women's healthspan intelligence platform. We enter through skin — and connect it to everything else that's shifting in your body. Tell us where you're feeling it most."
+    },
+    "pathSkin": {
+      "eyebrow": "Path 01 · Skin",
+      "title": "“My skin changed and I don't know <em>why.</em>”",
+      "desc": "Inflammation, melasma, skin that aged faster than expected. DrRuby tracks three imaging biomarkers so you stop guessing and start seeing what's actually happening.",
+      "tags": ["Inflammation", "Melasma", "Hormonal skin", "Product efficacy"],
+      "cta": "I have skin concerns →"
+    },
+    "pathHealthspan": {
+      "eyebrow": "Path 02 · Healthspan",
+      "title": "“My body isn't keeping up with my <em>life.</em>”",
+      "desc": "Energy, sleep, recovery, hormones. Something shifted in the last few years and you can't quite name it. That's exactly what DrRuby is built for.",
+      "tags": [
+        "Sleep & recovery",
+        "Energy",
+        "Perimenopause",
+        "Hormonal resilience"
+      ],
+      "cta": "I want better healthspan →"
+    },
+    "philosophy": {
+      "eyebrow": "What We Believe",
+      "title": "Built for life goals.<br></br>Not lab dashboards.",
+      "subtitle": "Every other healthspan tool rewards you for checking in more, tracking more. We don't. We want you to close the app and go live your life.",
+      "card1": {
+        "title": "Goals, not metrics",
+        "body": "We don't ask what you want to optimize. We ask what you want to do that your body isn't letting you.",
+        "quote": "“Hike with my grandkids.” “No more hot flashes at 2am.” “Finish the day I planned.”"
+      },
+      "card2": {
+        "title": "We want you to close the app",
+        "body": "Every month we ask: is this tracking helping you reach your goal, or has it become the goal?",
+        "quote": "“Actually closed the app. Went outside. Felt like a win.”"
+      },
+      "card3": {
+        "title": "Science you can name",
+        "body": "Led by Charles Brenner, PhD — world's leading NAD+ researcher. Every claim traceable to published research.",
+        "quote": "“Reliable numbers, not great experiences with unreliable data.”"
+      }
+    },
+    "trust": {
+      "eyebrow": "Scientific Foundation",
+      "title": "No other consumer healthspan app has <em>this.</em>",
+      "body": "Charles Brenner is the researcher who discovered NR as vitamin B3 — his work is the foundation of NAD+ biology. He's not an advisor. He's co-building this with us.",
+      "stat1": {
+        "value": "NAD+",
+        "line1": "Charles Brenner, PhD",
+        "line2": "Biochemist · NAD+ Biology Pioneer"
+      },
+      "stat2": {
+        "value": "N=1",
+        "line1": "Evidence-based",
+        "line2": "user experiments"
+      },
+      "stat3": {
+        "value": "Live",
+        "line1": "Clinic partnerships",
+        "line2": "already active"
+      }
+    }
+  },
+  "captureForm": {
+    "eyebrow": "Early Access · Limited Spots",
+    "title": "Be first to know<br></br>when DrRuby <em>launches.</em>",
+    "subtitle": "Join the waitlist. Early members get 3 months Pro free and shape what we build.",
+    "firstName": "First name",
+    "email": "Email address",
+    "phone": "Phone (optional — for launch SMS)",
+    "submit": "Join the Waitlist →",
+    "submitting": "Subscribing...",
+    "footnote": "No spam, ever. Unsubscribe anytime.",
+    "successDefault": "You're on the list!",
+    "errorDefault": "Something went wrong.",
+    "networkError": "Network error. Please try again."
+  },
+  "waitlistForm": {
+    "eyebrow": "Join the Waitlist",
+    "heading": "Get Early Access",
+    "firstNameLabel": "First Name",
+    "firstNamePlaceholder": "Your name",
+    "emailLabel": "Email",
+    "emailPlaceholder": "your@email.com",
+    "phoneLabel": "Phone",
+    "phoneOptional": "(optional — for launch SMS)",
+    "phonePlaceholder": "+1 (___) ___-____",
+    "ageLabel": "Age range",
+    "agePlaceholder": "Select your age",
+    "concernsLabelSkin": "Main skin concern (pick all that apply)",
+    "concernsLabelHealthspan": "What are you experiencing? (pick all that apply)",
+    "spendLabel": "Monthly skincare spend",
+    "spendPlaceholder": "Select range",
+    "spendOptions": [
+      "Under $50",
+      "$50–$150",
+      "$150–$300",
+      "$300–$500",
+      "$500+"
+    ],
+    "winningLabel": "What does \"winning\" look like for you?",
+    "winningPlaceholder": "e.g. Hike with my kids, sleep through the night...",
+    "privacy": "No spam, ever. You can unsubscribe at any time.",
+    "submit": "Join the Waitlist →",
+    "submitting": "Subscribing...",
+    "successFollowup": "We'll be in touch before launch.",
+    "successDefault": "You're on the list!",
+    "errorDefault": "Something went wrong.",
+    "networkError": "Network error. Please try again."
+  },
+  "footer": {
+    "links": [
+      "Science",
+      "Privacy",
+      "For Clinics",
+      "Research Partners",
+      "Contact"
+    ],
+    "copyright": "© 2026 DrRuby.ai · Wellness device. Not intended to diagnose or treat any medical condition."
+  },
+  "skin": {
+    "hero": {
+      "badge": "Skin Intelligence · Path 01",
+      "title": "Your skin is telling you <em>something.</em>",
+      "subtitle": "Inflammation, melasma, skin that changed faster than expected. DrRuby measures three peer-reviewed imaging biomarkers — so you can see exactly what's happening, and what's actually working.",
+      "cta": "Join the Waitlist →"
+    },
+    "biomarker": {
+      "heading": "Your biomarker snapshot",
+      "inflammationName": "Inflammation Index",
+      "inflammationDesc": "Erythema · barrier disruption · immune response",
+      "collagenName": "Collagen Proxy",
+      "collagenDesc": "Dermal density · structural aging",
+      "pigmentName": "Pigment Kinetics",
+      "pigmentDesc": "Melanin velocity · melasma · hyperpigmentation",
+      "stable": "→ stable",
+      "quote": "“The retinol you started 6 weeks ago correlates with +8% Collagen Proxy. That $400 serum shows no detectable change.”"
+    },
+    "measure": {
+      "eyebrow": "What We Measure",
+      "title": "Three numbers. All <em>peer-reviewed.</em>",
+      "subtitle": "Not a beauty score. Three independently interpretable biomarkers — each grounded in published imaging research.",
+      "card1": {
+        "tag": "Inflammation",
+        "title": "Inflammation Index",
+        "desc": "Cross-polarized light reveals erythema and barrier disruption — your skin's real-time immune response.",
+        "tells": "Tells you: Is a new product causing a reaction? Is your barrier healthy?"
+      },
+      "card2": {
+        "tag": "Collagen",
+        "title": "Collagen Proxy",
+        "desc": "UV-A 405nm excitation reveals dermal collagen density via fluorescence — the structural architecture beneath your skin.",
+        "tells": "Tells you: Is your retinol or laser treatment actually working?"
+      },
+      "card3": {
+        "tag": "Pigmentation",
+        "title": "Pigment Kinetics",
+        "desc": "Multi-spectral analysis tracks melanin distribution and velocity — especially powerful for melasma and post-inflammatory hyperpigmentation.",
+        "tells": "Tells you: Is your melasma getting better or worse?"
+      }
+    },
+    "proof": {
+      "eyebrow": "Early Users",
+      "title": "What they found after <em>90 days.</em>",
+      "t1": {
+        "quote": "“I spent <strong>$600 on IPL</strong> and had no way to know if it worked. DrRuby showed my Pigment Kinetics dropped 18% in 6 weeks.”",
+        "author": "Jennifer C. · 47 · Melasma · Early Beta"
+      },
+      "t2": {
+        "quote": "“I stopped using a <strong>$300 serum</strong> after DrRuby showed zero change in Collagen Proxy after 8 weeks.”",
+        "author": "Rachel M. · 38 · Perimenopause Skin · Early Beta"
+      }
+    },
+    "form": {
+      "title": "Stop guessing what's <em>working.</em>",
+      "subtitle": "First 500 users get 3 months of Pro free. Tell us about your skin — we'll make sure DrRuby is built for you.",
+      "ageOptions": ["Under 30", "30–39", "40–49", "50–59", "60+"],
+      "concerns": [
+        {
+          "label": "Inflammation / redness / barrier issues",
+          "value": "inflammation"
+        },
+        { "label": "Melasma or hyperpigmentation", "value": "melasma" },
+        { "label": "Skin aging / collagen loss", "value": "aging" },
+        {
+          "label": "Hormonal skin changes (perimenopause)",
+          "value": "hormonal"
+        },
+        {
+          "label": "I want to know if my products are working",
+          "value": "products"
+        }
+      ]
+    }
+  },
+  "healthspan": {
+    "hero": {
+      "badge": "Healthspan Intelligence · Path 02",
+      "title": "Your body is in <em>transition.</em> Understand it.",
+      "subtitle": "Energy, sleep, recovery, hormones. Something shifted in the last few years and you can't quite name it. DrRuby gives you the language — backed by science, built for women.",
+      "goals": [
+        "Hike with my grandkids without running out of breath",
+        "Sleep through the night — actually restored",
+        "No more hot flashes keeping me up at 2am",
+        "Know which supplements are actually helping"
+      ],
+      "cta": "Join the Waitlist →"
+    },
+    "snapshot": {
+      "heading": "Your healthspan snapshot",
+      "hormonalName": "Hormonal Resilience",
+      "hormonalQuestion": "“Is my body still stable?”",
+      "hormonalStatus": "Transition",
+      "recoveryName": "Recovery Capacity",
+      "recoveryQuestion": "“Can I still recover?”",
+      "recoveryStatus": "Stable",
+      "inflammagingName": "Inflammaging Velocity",
+      "inflammagingQuestion": "“Am I chronically burning out?”",
+      "inflammagingStatus": "Elevated",
+      "sleepName": "Sleep Restoration",
+      "sleepQuestion": "“Did sleep actually restore me?”",
+      "sleepStatus": "Moderate",
+      "quote": "“Not testing your hormones — inferring their impact from skin, sleep, recovery, and the signals your body is already giving you.”"
+    },
+    "track": {
+      "eyebrow": "What We Track",
+      "title": "Seven questions your body is <em>asking.</em>",
+      "subtitle": "Not biomarker panels. Questions with emotional meaning — the ones you already feel but can't measure.",
+      "signalsLabel": "Signals:",
+      "card1": {
+        "question": "“Is my body still stable?”",
+        "name": "Hormonal Resilience Index™",
+        "body": "Not testing hormones — inferring their impact on your body. The most important index for women in perimenopause.",
+        "signals": "sleep fragmentation, facial flushing, skin dryness, mood variability"
+      },
+      "card2": {
+        "question": "“Can I still recover?”",
+        "name": "Recovery Capacity Score™",
+        "body": "How fast can your body return to baseline after stress, exertion, or a bad night?",
+        "signals": "exercise recovery, sleep restoration, stress recovery, skin repair speed"
+      },
+      "card3": {
+        "question": "“Am I chronically burning out?”",
+        "name": "Inflammaging Velocity™",
+        "body": "Inflammaging — inflammation + aging — is the mechanism behind most midlife health decline. We track its velocity.",
+        "signals": "skin redness, stress load, poor sleep, metabolic variability"
+      },
+      "card4": {
+        "question": "“Did sleep actually restore me?”",
+        "name": "Sleep Restoration Score™",
+        "body": "Not how many hours — whether sleep did its job. The question women in midlife are actually asking.",
+        "signals": "morning recovery pattern, skin hydration recovery, energy baseline on waking"
+      }
+    },
+    "strip": {
+      "card1": {
+        "title": "Goals, not metrics",
+        "body": "We start with what you want to do. Not what you want to optimize."
+      },
+      "card2": {
+        "title": "We want you to close the app",
+        "body": "Every month we ask: is this tracking bringing you closer to your life, or replacing it?"
+      },
+      "card3": {
+        "title": "Science led by Charles Brenner, PhD",
+        "body": "World's leading NAD+ researcher. Every index traceable to published research."
+      }
+    },
+    "proof": {
+      "eyebrow": "Early Users",
+      "title": "Real life wins. Not <em>dashboard wins.</em>",
+      "t1": {
+        "quote": "“I tracked my HRV and sleep for two years. None of it told me why I was exhausted. DrRuby was the first thing that <strong>asked what I actually wanted to do.</strong>”",
+        "author": "Sarah M. · 44 · Perimenopause · Early Beta"
+      },
+      "t2": {
+        "quote": "“I stopped taking <strong>4 supplements</strong> after DrRuby showed no measurable change after 8 weeks. That alone paid for the whole year.”",
+        "author": "Linda K. · 51 · Post-menopause · Early Beta"
+      }
+    },
+    "form": {
+      "title": "Give your body a <em>language.</em>",
+      "subtitle": "First 500 users get 3 months of Pro free. Tell us what you're experiencing — we'll make sure DrRuby is built for you.",
+      "ageOptions": ["30–39", "40–49", "50–59", "60+"],
+      "concerns": [
+        {
+          "label": "Fatigue or energy crashes during the day",
+          "value": "fatigue"
+        },
+        { "label": "Sleep that doesn't feel restorative", "value": "sleep" },
+        {
+          "label": "Perimenopause or menopause symptoms",
+          "value": "perimenopause"
+        },
+        {
+          "label": "Slower recovery from exercise or stress",
+          "value": "recovery"
+        },
+        {
+          "label": "I take supplements and want to know if they work",
+          "value": "supplements"
+        }
+      ]
+    }
+  }
+}
