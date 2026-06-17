@@ -10,18 +10,18 @@ export default function SkinPage() {
       <Navbar variant="sub" />
 
       {/* SUB-HERO */}
-      <div className="bg-[radial-gradient(ellipse_at_70%_0%,#fce8eb_0%,#f5f5f5_65%)] min-h-[80vh] flex items-center">
+      <div className="bg-[radial-gradient(ellipse_at_70%_0%,#fce8eb_0%,#f5f5f5_65%)] dark:bg-[radial-gradient(ellipse_at_70%_0%,#2a1419_0%,#0f0f0f_65%)] min-h-[80vh] flex items-center">
         <div className="max-w-[1100px] mx-auto py-20 px-5 md:px-10 grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
           <div>
             <div className="inline-flex items-center gap-2 bg-dr-red-lt border border-[#f5b8c0] text-[#a00015] text-[13px] font-medium py-[7px] px-4 rounded-[20px] mb-8">
               <span className="text-dr-red text-[8px]">&#9679;</span>
               Skin Intelligence &middot; Path 01
             </div>
-            <h1 className="text-[clamp(36px,4vw,56px)] font-bold tracking-[-1.5px] leading-[1.08] text-dr-black mb-[18px]">
+            <h1 className="text-[clamp(36px,4vw,56px)] font-bold tracking-[-1.5px] leading-[1.08] text-dr-fg mb-[18px]">
               Your skin is telling you{" "}
               <em className="italic text-dr-red">something.</em>
             </h1>
-            <p className="text-[18px] text-[#555] mb-8 leading-relaxed max-w-[460px]">
+            <p className="text-[18px] text-[#555] dark:text-[#9a9a9a] mb-8 leading-relaxed max-w-[460px]">
               Inflammation, melasma, skin that changed faster than expected.
               DrRuby measures three peer-reviewed imaging biomarkers — so you
               can see exactly what&apos;s happening, and what&apos;s actually
@@ -97,16 +97,16 @@ export default function SkinPage() {
       </div>
 
       {/* MEASURE */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-dr-surface">
         <div className="max-w-[1100px] mx-auto px-5 md:px-10">
           <div className="text-xs font-semibold tracking-[1.5px] uppercase text-dr-red mb-3">
             What We Measure
           </div>
-          <h2 className="text-[clamp(28px,4vw,42px)] font-bold tracking-tight leading-tight text-dr-black mb-3">
+          <h2 className="text-[clamp(28px,4vw,42px)] font-bold tracking-tight leading-tight text-dr-fg mb-3">
             Three numbers. All{" "}
             <em className="italic text-dr-red">peer-reviewed.</em>
           </h2>
-          <p className="text-[17px] text-[#666] max-w-[540px] leading-relaxed mb-12">
+          <p className="text-[17px] text-[#666] dark:text-[#9a9a9a] max-w-[540px] leading-relaxed mb-12">
             Not a beauty score. Three independently interpretable biomarkers —
             each grounded in published imaging research.
           </p>
@@ -115,10 +115,10 @@ export default function SkinPage() {
               <span className="inline-block text-[11px] font-bold tracking-[1px] uppercase py-1 px-2.5 rounded-md mb-4 bg-dr-red-lt text-dr-red">
                 Inflammation
               </span>
-              <div className="text-[22px] font-bold tracking-tight text-dr-black mb-2.5">
+              <div className="text-[22px] font-bold tracking-tight text-dr-fg mb-2.5">
                 Inflammation Index
               </div>
-              <p className="text-sm text-[#666] leading-relaxed mb-3.5">
+              <p className="text-sm text-[#666] dark:text-[#9a9a9a] leading-relaxed mb-3.5">
                 Cross-polarized light reveals erythema and barrier disruption —
                 your skin&apos;s real-time immune response.
               </p>
@@ -131,10 +131,10 @@ export default function SkinPage() {
               <span className="inline-block text-[11px] font-bold tracking-[1px] uppercase py-1 px-2.5 rounded-md mb-4 bg-dr-green-bg text-dr-green-text">
                 Collagen
               </span>
-              <div className="text-[22px] font-bold tracking-tight text-dr-black mb-2.5">
+              <div className="text-[22px] font-bold tracking-tight text-dr-fg mb-2.5">
                 Collagen Proxy
               </div>
-              <p className="text-sm text-[#666] leading-relaxed mb-3.5">
+              <p className="text-sm text-[#666] dark:text-[#9a9a9a] leading-relaxed mb-3.5">
                 UV-A 405nm excitation reveals dermal collagen density via
                 fluorescence — the structural architecture beneath your skin.
               </p>
@@ -146,10 +146,10 @@ export default function SkinPage() {
               <span className="inline-block text-[11px] font-bold tracking-[1px] uppercase py-1 px-2.5 rounded-md mb-4 bg-dr-amber-bg text-dr-amber-text">
                 Pigmentation
               </span>
-              <div className="text-[22px] font-bold tracking-tight text-dr-black mb-2.5">
+              <div className="text-[22px] font-bold tracking-tight text-dr-fg mb-2.5">
                 Pigment Kinetics
               </div>
-              <p className="text-sm text-[#666] leading-relaxed mb-3.5">
+              <p className="text-sm text-[#666] dark:text-[#9a9a9a] leading-relaxed mb-3.5">
                 Multi-spectral analysis tracks melanin distribution and velocity
                 — especially powerful for melasma and post-inflammatory
                 hyperpigmentation.
@@ -168,13 +168,13 @@ export default function SkinPage() {
           <div className="text-xs font-semibold tracking-[1.5px] uppercase text-dr-red mb-3">
             Early Users
           </div>
-          <h2 className="text-[clamp(28px,4vw,42px)] font-bold tracking-tight leading-tight text-dr-black mb-3">
+          <h2 className="text-[clamp(28px,4vw,42px)] font-bold tracking-tight leading-tight text-dr-fg mb-3">
             What they found after{" "}
             <em className="italic text-dr-red">90 days.</em>
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div className="bg-white border border-dr-border rounded-2xl py-7 px-7">
-              <p className="text-lg italic text-dr-black leading-relaxed mb-4">
+            <div className="bg-dr-surface border border-dr-border rounded-2xl py-7 px-7">
+              <p className="text-lg italic text-dr-fg leading-relaxed mb-4">
                 &ldquo;I spent{" "}
                 <strong className="not-italic text-dr-red">$600 on IPL</strong>{" "}
                 and had no way to know if it worked. DrRuby showed my Pigment
@@ -184,8 +184,8 @@ export default function SkinPage() {
                 Jennifer C. &middot; 47 &middot; Melasma &middot; Early Beta
               </div>
             </div>
-            <div className="bg-white border border-dr-border rounded-2xl py-7 px-7">
-              <p className="text-lg italic text-dr-black leading-relaxed mb-4">
+            <div className="bg-dr-surface border border-dr-border rounded-2xl py-7 px-7">
+              <p className="text-lg italic text-dr-fg leading-relaxed mb-4">
                 &ldquo;I stopped using a{" "}
                 <strong className="not-italic text-dr-red">$300 serum</strong>{" "}
                 after DrRuby showed zero change in Collagen Proxy after 8
@@ -202,7 +202,7 @@ export default function SkinPage() {
 
       {/* FORM */}
       <section
-        className="py-20 bg-white border-t border-dr-border"
+        className="py-20 bg-dr-surface border-t border-dr-border"
         id="join-skin"
       >
         <div className="max-w-[1100px] mx-auto px-5 md:px-10">

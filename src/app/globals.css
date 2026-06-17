@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --dr-black: #1a1a1a;
   --dr-white: #ffffff;
@@ -15,14 +17,38 @@
   --dr-amber-bg: #fff8e8;
   --dr-green-text: #1a7a45;
   --dr-amber-text: #b8740a;
+
+  /* Semantic surface/text tokens (theme-aware) */
+  --dr-bg: #f5f5f5; /* page background */
+  --dr-surface: #ffffff; /* cards, inputs, light sections */
+  --dr-fg: #1a1a1a; /* primary text */
+}
+
+/*
+ * Dark theme. Brand colours (--dr-red*, greens, ambers) are intentionally
+ * left untouched so the brand reads consistently. --dr-black stays dark on
+ * purpose: it backs the always-dark sections (bg-dr-black). Primary text uses
+ * the --dr-fg token so it can flip independently.
+ */
+.dark {
+  --dr-off: #161616;
+  --dr-border: #2c2c2c;
+  --dr-muted: #9a9a9a;
+
+  --dr-bg: #0f0f0f;
+  --dr-surface: #1b1b1b;
+  --dr-fg: #ececec;
 }
 
 @theme inline {
-  --color-background: var(--dr-white);
-  --color-foreground: var(--dr-black);
+  --color-background: var(--dr-bg);
+  --color-foreground: var(--dr-fg);
   --color-dr-black: var(--dr-black);
   --color-dr-white: var(--dr-white);
   --color-dr-off: var(--dr-off);
+  --color-dr-bg: var(--dr-bg);
+  --color-dr-surface: var(--dr-surface);
+  --color-dr-fg: var(--dr-fg);
   --color-dr-red: var(--dr-red);
   --color-dr-red-lt: var(--dr-red-lt);
   --color-dr-red-mid: var(--dr-red-mid);
@@ -46,8 +72,8 @@ body {
   font-family:
     var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI",
     "Helvetica Neue", Arial, sans-serif;
-  background: var(--dr-off);
-  color: var(--dr-black);
+  background: var(--dr-bg);
+  color: var(--dr-fg);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   font-size: 16px;

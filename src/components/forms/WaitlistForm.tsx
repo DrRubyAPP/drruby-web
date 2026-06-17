@@ -97,10 +97,10 @@ export default function WaitlistForm({
         <div className="text-xs font-semibold tracking-[1.5px] uppercase text-dr-red mb-3">
           Join the Waitlist
         </div>
-        <h2 className="text-[clamp(28px,4vw,42px)] font-bold tracking-tight leading-tight text-dr-black mb-3">
+        <h2 className="text-[clamp(28px,4vw,42px)] font-bold tracking-tight leading-tight text-dr-fg mb-3">
           {title}
         </h2>
-        <p className="text-[17px] text-[#666] max-w-[540px] leading-relaxed">
+        <p className="text-[17px] text-[#666] dark:text-[#9a9a9a] max-w-[540px] leading-relaxed">
           {subtitle}
         </p>
       </div>
@@ -108,7 +108,7 @@ export default function WaitlistForm({
       {status === "ok" ? (
         <div className="bg-dr-off border border-dr-border rounded-[20px] p-9 shadow-[0_4px_40px_rgba(0,0,0,0.06)] text-center">
           <div className="text-2xl mb-3">&#10003;</div>
-          <p className="text-lg font-semibold text-dr-black mb-2">{msg}</p>
+          <p className="text-lg font-semibold text-dr-fg mb-2">{msg}</p>
           <p className="text-sm text-dr-muted">
             We&apos;ll be in touch before launch.
           </p>
@@ -129,13 +129,13 @@ export default function WaitlistForm({
             <div className="flex flex-col gap-1.5">
               <label
                 htmlFor="wf-fname"
-                className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555]"
+                className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555] dark:text-[#9a9a9a]"
               >
                 First Name
               </label>
               <input
                 id="wf-fname"
-                className="p-3 border border-dr-border rounded-lg text-[15px] bg-white outline-none focus:border-dr-red transition-colors"
+                className="p-3 border border-dr-border rounded-lg text-[15px] bg-dr-surface text-dr-fg outline-none focus:border-dr-red transition-colors"
                 type="text"
                 name="FNAME"
                 placeholder="Your name"
@@ -146,13 +146,13 @@ export default function WaitlistForm({
             <div className="flex flex-col gap-1.5">
               <label
                 htmlFor="wf-email"
-                className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555]"
+                className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555] dark:text-[#9a9a9a]"
               >
                 Email
               </label>
               <input
                 id="wf-email"
-                className="p-3 border border-dr-border rounded-lg text-[15px] bg-white outline-none focus:border-dr-red transition-colors"
+                className="p-3 border border-dr-border rounded-lg text-[15px] bg-dr-surface text-dr-fg outline-none focus:border-dr-red transition-colors"
                 type="email"
                 name="EMAIL"
                 placeholder="your@email.com"
@@ -165,7 +165,7 @@ export default function WaitlistForm({
           <div className="flex flex-col gap-1.5 mb-3.5">
             <label
               htmlFor="wf-phone"
-              className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555]"
+              className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555] dark:text-[#9a9a9a]"
             >
               Phone{" "}
               <span className="font-normal text-[#aaa]">
@@ -174,7 +174,7 @@ export default function WaitlistForm({
             </label>
             <input
               id="wf-phone"
-              className="p-3 border border-dr-border rounded-lg text-[15px] bg-white outline-none focus:border-dr-red transition-colors"
+              className="p-3 border border-dr-border rounded-lg text-[15px] bg-dr-surface text-dr-fg outline-none focus:border-dr-red transition-colors"
               type="tel"
               name="PHONE"
               placeholder="+1 (___) ___-____"
@@ -186,14 +186,14 @@ export default function WaitlistForm({
             <div className="flex flex-col gap-1.5 mb-3.5">
               <label
                 htmlFor="wf-age"
-                className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555]"
+                className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555] dark:text-[#9a9a9a]"
               >
                 Age range
               </label>
               <select
                 id="wf-age"
                 name="AGE"
-                className="p-3 border border-dr-border rounded-lg text-[15px] bg-white outline-none focus:border-dr-red transition-colors text-dr-black appearance-none"
+                className="p-3 border border-dr-border rounded-lg text-[15px] bg-dr-surface outline-none focus:border-dr-red transition-colors text-dr-fg appearance-none"
                 defaultValue=""
               >
                 <option value="" disabled>
@@ -207,7 +207,7 @@ export default function WaitlistForm({
           )}
 
           <div className="flex flex-col gap-1.5 mb-3.5">
-            <span className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555]">
+            <span className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555] dark:text-[#9a9a9a]">
               {showWinning
                 ? "What are you experiencing? (pick all that apply)"
                 : "Main skin concern (pick all that apply)"}
@@ -250,7 +250,7 @@ export default function WaitlistForm({
                         </svg>
                       )}
                     </span>
-                    <span className="text-[15px] text-dr-black">{c.label}</span>
+                    <span className="text-[15px] text-dr-fg">{c.label}</span>
                   </label>
                 );
               })}
@@ -261,14 +261,14 @@ export default function WaitlistForm({
             <div className="flex flex-col gap-1.5 mb-3.5">
               <label
                 htmlFor="wf-spend"
-                className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555]"
+                className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555] dark:text-[#9a9a9a]"
               >
                 Monthly skincare spend
               </label>
               <select
                 id="wf-spend"
                 name="SPEND"
-                className="p-3 border border-dr-border rounded-lg text-[15px] bg-white outline-none focus:border-dr-red transition-colors text-dr-black appearance-none"
+                className="p-3 border border-dr-border rounded-lg text-[15px] bg-dr-surface outline-none focus:border-dr-red transition-colors text-dr-fg appearance-none"
                 defaultValue=""
               >
                 <option value="" disabled>
@@ -285,13 +285,13 @@ export default function WaitlistForm({
             <div className="flex flex-col gap-1.5 mb-3.5">
               <label
                 htmlFor="wf-winning"
-                className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555]"
+                className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555] dark:text-[#9a9a9a]"
               >
                 What does &quot;winning&quot; look like for you?
               </label>
               <input
                 id="wf-winning"
-                className="p-3 border border-dr-border rounded-lg text-[15px] bg-white outline-none focus:border-dr-red transition-colors"
+                className="p-3 border border-dr-border rounded-lg text-[15px] bg-dr-surface text-dr-fg outline-none focus:border-dr-red transition-colors"
                 type="text"
                 name="WINNING"
                 placeholder="e.g. Hike with my kids, sleep through the night..."

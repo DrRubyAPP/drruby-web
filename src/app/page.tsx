@@ -11,20 +11,20 @@ export default function Home() {
       <Navbar variant="home" />
 
       {/* HERO */}
-      <div className="bg-[radial-gradient(ellipse_at_60%_0%,#fce8eb_0%,#f5f5f5_65%)] min-h-screen flex items-center">
+      <div className="bg-[radial-gradient(ellipse_at_60%_0%,#fce8eb_0%,#f5f5f5_65%)] dark:bg-[radial-gradient(ellipse_at_60%_0%,#2a1419_0%,#0f0f0f_65%)] min-h-screen flex items-center">
         <div className="max-w-[1100px] mx-auto py-20 px-5 md:px-10 flex flex-col items-center text-center">
           <div className="inline-flex items-center gap-2 bg-dr-red-lt border border-[#f5b8c0] text-[#a00015] text-[13px] font-medium py-[7px] px-4 rounded-[20px] mb-8">
             <span className="text-dr-red text-[8px]">&#9679;</span>
             Early Access — Limited Spots
           </div>
 
-          <h1 className="text-[clamp(40px,5vw,68px)] font-bold tracking-[-2px] leading-[1.05] text-dr-black mb-5 max-w-[800px]">
+          <h1 className="text-[clamp(40px,5vw,68px)] font-bold tracking-[-2px] leading-[1.05] text-dr-fg mb-5 max-w-[800px]">
             Something is changing.
             <br />
             <em className="not-italic text-dr-red">Understand it.</em>
           </h1>
 
-          <p className="text-[19px] text-[#555] mb-14 leading-relaxed max-w-[580px]">
+          <p className="text-[19px] text-[#555] dark:text-[#9a9a9a] mb-14 leading-relaxed max-w-[580px]">
             DrRuby is a women&apos;s healthspan intelligence platform. We enter
             through skin — and connect it to everything else that&apos;s
             shifting in your body. Tell us where you&apos;re feeling it most.
@@ -34,17 +34,17 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-[880px] mb-12">
             <Link
               href="/skin"
-              className="bg-white border-2 border-dr-border rounded-[20px] py-9 px-8 no-underline text-inherit flex flex-col text-left hover:border-dr-red hover:shadow-[0_8px_40px_rgba(208,2,27,0.1)] hover:-translate-y-0.5 transition-all relative overflow-hidden group"
+              className="bg-dr-surface border-2 border-dr-border rounded-[20px] py-9 px-8 no-underline text-inherit flex flex-col text-left hover:border-dr-red hover:shadow-[0_8px_40px_rgba(208,2,27,0.1)] hover:-translate-y-0.5 transition-all relative overflow-hidden group"
             >
               <div className="absolute top-0 left-0 right-0 h-[3px] bg-dr-red opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="text-[13px] font-bold tracking-[1.5px] uppercase text-dr-red mb-4">
                 Path 01 &middot; Skin
               </div>
-              <h2 className="text-[clamp(20px,2vw,26px)] font-bold tracking-tight leading-[1.2] text-dr-black mb-3.5">
+              <h2 className="text-[clamp(20px,2vw,26px)] font-bold tracking-tight leading-[1.2] text-dr-fg mb-3.5">
                 &ldquo;My skin changed and I don&apos;t know{" "}
                 <em className="italic text-dr-red">why.</em>&rdquo;
               </h2>
-              <p className="text-[15px] text-[#666] leading-relaxed mb-6 flex-1">
+              <p className="text-[15px] text-[#666] dark:text-[#9a9a9a] leading-relaxed mb-6 flex-1">
                 Inflammation, melasma, skin that aged faster than expected.
                 DrRuby tracks three imaging biomarkers so you stop guessing and
                 start seeing what&apos;s actually happening.
@@ -58,7 +58,7 @@ export default function Home() {
                 ].map((t) => (
                   <span
                     key={t}
-                    className="text-xs font-medium bg-dr-off border border-dr-border py-1 px-3 rounded-[20px] text-[#555]"
+                    className="text-xs font-medium bg-dr-off border border-dr-border py-1 px-3 rounded-[20px] text-[#555] dark:text-[#9a9a9a]"
                   >
                     {t}
                   </span>
@@ -71,17 +71,17 @@ export default function Home() {
 
             <Link
               href="/healthspan"
-              className="bg-white border-2 border-dr-border rounded-[20px] py-9 px-8 no-underline text-inherit flex flex-col text-left hover:border-dr-red hover:shadow-[0_8px_40px_rgba(208,2,27,0.1)] hover:-translate-y-0.5 transition-all relative overflow-hidden group"
+              className="bg-dr-surface border-2 border-dr-border rounded-[20px] py-9 px-8 no-underline text-inherit flex flex-col text-left hover:border-dr-red hover:shadow-[0_8px_40px_rgba(208,2,27,0.1)] hover:-translate-y-0.5 transition-all relative overflow-hidden group"
             >
               <div className="absolute top-0 left-0 right-0 h-[3px] bg-dr-red opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="text-[13px] font-bold tracking-[1.5px] uppercase text-dr-red mb-4">
                 Path 02 &middot; Healthspan
               </div>
-              <h2 className="text-[clamp(20px,2vw,26px)] font-bold tracking-tight leading-[1.2] text-dr-black mb-3.5">
+              <h2 className="text-[clamp(20px,2vw,26px)] font-bold tracking-tight leading-[1.2] text-dr-fg mb-3.5">
                 &ldquo;My body isn&apos;t keeping up with my{" "}
                 <em className="italic text-dr-red">life.</em>&rdquo;
               </h2>
-              <p className="text-[15px] text-[#666] leading-relaxed mb-6 flex-1">
+              <p className="text-[15px] text-[#666] dark:text-[#9a9a9a] leading-relaxed mb-6 flex-1">
                 Energy, sleep, recovery, hormones. Something shifted in the last
                 few years and you can&apos;t quite name it. That&apos;s exactly
                 what DrRuby is built for.
@@ -95,7 +95,7 @@ export default function Home() {
                 ].map((t) => (
                   <span
                     key={t}
-                    className="text-xs font-medium bg-dr-off border border-dr-border py-1 px-3 rounded-[20px] text-[#555]"
+                    className="text-xs font-medium bg-dr-off border border-dr-border py-1 px-3 rounded-[20px] text-[#555] dark:text-[#9a9a9a]"
                   >
                     {t}
                   </span>
@@ -178,17 +178,17 @@ export default function Home() {
       </section>
 
       {/* TRUST */}
-      <section className="bg-white py-20 px-5 md:px-10 border-t border-dr-border">
+      <section className="bg-dr-surface py-20 px-5 md:px-10 border-t border-dr-border">
         <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row items-center gap-16">
           <div className="flex-1">
             <div className="text-xs font-semibold tracking-[1.5px] uppercase text-dr-red mb-3">
               Scientific Foundation
             </div>
-            <h2 className="text-[clamp(24px,3vw,38px)] font-bold tracking-tight leading-[1.2] text-dr-black mb-3.5">
+            <h2 className="text-[clamp(24px,3vw,38px)] font-bold tracking-tight leading-[1.2] text-dr-fg mb-3.5">
               No other consumer healthspan app has{" "}
               <em className="italic text-dr-red">this.</em>
             </h2>
-            <p className="text-base text-[#666] leading-relaxed max-w-[400px]">
+            <p className="text-base text-[#666] dark:text-[#9a9a9a] leading-relaxed max-w-[400px]">
               Charles Brenner is the researcher who discovered NR as vitamin B3
               — his work is the foundation of NAD+ biology. He&apos;s not an
               advisor. He&apos;s co-building this with us.

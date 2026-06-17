@@ -10,18 +10,18 @@ export default function HealthspanPage() {
       <Navbar variant="sub" />
 
       {/* SUB-HERO */}
-      <div className="bg-[radial-gradient(ellipse_at_30%_0%,#fce8eb_0%,#f5f5f5_65%)] min-h-[80vh] flex items-center">
+      <div className="bg-[radial-gradient(ellipse_at_30%_0%,#fce8eb_0%,#f5f5f5_65%)] dark:bg-[radial-gradient(ellipse_at_30%_0%,#2a1419_0%,#0f0f0f_65%)] min-h-[80vh] flex items-center">
         <div className="max-w-[1100px] mx-auto py-20 px-5 md:px-10 grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
           <div>
             <div className="inline-flex items-center gap-2 bg-dr-red-lt border border-[#f5b8c0] text-[#a00015] text-[13px] font-medium py-[7px] px-4 rounded-[20px] mb-8">
               <span className="text-dr-red text-[8px]">&#9679;</span>
               Healthspan Intelligence &middot; Path 02
             </div>
-            <h1 className="text-[clamp(36px,4vw,56px)] font-bold tracking-[-1.5px] leading-[1.08] text-dr-black mb-[18px]">
+            <h1 className="text-[clamp(36px,4vw,56px)] font-bold tracking-[-1.5px] leading-[1.08] text-dr-fg mb-[18px]">
               Your body is in{" "}
               <em className="italic text-dr-red">transition.</em> Understand it.
             </h1>
-            <p className="text-[18px] text-[#555] mb-8 leading-relaxed max-w-[460px]">
+            <p className="text-[18px] text-[#555] dark:text-[#9a9a9a] mb-8 leading-relaxed max-w-[460px]">
               Energy, sleep, recovery, hormones. Something shifted in the last
               few years and you can&apos;t quite name it. DrRuby gives you the
               language — backed by science, built for women.
@@ -37,7 +37,7 @@ export default function HealthspanPage() {
               ].map((goal) => (
                 <div
                   key={goal}
-                  className="flex items-center gap-3 py-3 border-b border-dr-border text-base italic text-[#555] last:border-b-0"
+                  className="flex items-center gap-3 py-3 border-b border-dr-border text-base italic text-[#555] dark:text-[#9a9a9a] last:border-b-0"
                 >
                   <span className="text-dr-red not-italic font-bold">
                     &rarr;
@@ -56,14 +56,14 @@ export default function HealthspanPage() {
           </div>
 
           {/* HEALTHSPAN INDEX CARD */}
-          <div className="hidden md:block bg-white border border-dr-border rounded-[20px] p-6 shadow-[0_4px_24px_rgba(0,0,0,0.06)]">
+          <div className="hidden md:block bg-dr-surface border border-dr-border rounded-[20px] p-6 shadow-[0_4px_24px_rgba(0,0,0,0.06)]">
             <div className="text-[11px] font-bold tracking-[1.5px] uppercase text-dr-red mb-4">
               Your healthspan snapshot
             </div>
             <div className="flex items-center gap-3.5 py-3.5 border-b border-dr-border">
               <span className="text-xl flex-shrink-0 w-7">&#8635;</span>
               <div className="flex-1">
-                <div className="text-sm font-bold text-dr-black mb-0.5">
+                <div className="text-sm font-bold text-dr-fg mb-0.5">
                   Hormonal Resilience
                 </div>
                 <div className="text-xs italic text-dr-muted">
@@ -77,7 +77,7 @@ export default function HealthspanPage() {
             <div className="flex items-center gap-3.5 py-3.5 border-b border-dr-border">
               <span className="text-xl flex-shrink-0 w-7">&#8593;</span>
               <div className="flex-1">
-                <div className="text-sm font-bold text-dr-black mb-0.5">
+                <div className="text-sm font-bold text-dr-fg mb-0.5">
                   Recovery Capacity
                 </div>
                 <div className="text-xs italic text-dr-muted">
@@ -91,7 +91,7 @@ export default function HealthspanPage() {
             <div className="flex items-center gap-3.5 py-3.5 border-b border-dr-border">
               <span className="text-xl flex-shrink-0 w-7">&#9672;</span>
               <div className="flex-1">
-                <div className="text-sm font-bold text-dr-black mb-0.5">
+                <div className="text-sm font-bold text-dr-fg mb-0.5">
                   Inflammaging Velocity
                 </div>
                 <div className="text-xs italic text-dr-muted">
@@ -105,7 +105,7 @@ export default function HealthspanPage() {
             <div className="flex items-center gap-3.5 py-3.5 mb-4">
               <span className="text-xl flex-shrink-0 w-7">&#9673;</span>
               <div className="flex-1">
-                <div className="text-sm font-bold text-dr-black mb-0.5">
+                <div className="text-sm font-bold text-dr-fg mb-0.5">
                   Sleep Restoration
                 </div>
                 <div className="text-xs italic text-dr-muted">
@@ -126,83 +126,91 @@ export default function HealthspanPage() {
       </div>
 
       {/* TRACK */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-dr-surface">
         <div className="max-w-[1100px] mx-auto px-5 md:px-10">
           <div className="text-xs font-semibold tracking-[1.5px] uppercase text-dr-red mb-3">
             What We Track
           </div>
-          <h2 className="text-[clamp(28px,4vw,42px)] font-bold tracking-tight leading-tight text-dr-black mb-3">
+          <h2 className="text-[clamp(28px,4vw,42px)] font-bold tracking-tight leading-tight text-dr-fg mb-3">
             Seven questions your body is{" "}
             <em className="italic text-dr-red">asking.</em>
           </h2>
-          <p className="text-[17px] text-[#666] max-w-[540px] leading-relaxed mb-12">
+          <p className="text-[17px] text-[#666] dark:text-[#9a9a9a] max-w-[540px] leading-relaxed mb-12">
             Not biomarker panels. Questions with emotional meaning — the ones
             you already feel but can&apos;t measure.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="bg-dr-off border border-dr-border rounded-2xl py-7 px-6 border-t-3 border-t-transparent hover:border-t-dr-red transition-colors">
-              <div className="text-xl italic font-semibold text-dr-black mb-2.5">
+              <div className="text-xl italic font-semibold text-dr-fg mb-2.5">
                 &ldquo;Is my body still stable?&rdquo;
               </div>
               <div className="text-[11px] font-bold tracking-[1px] uppercase text-dr-red mb-2.5">
                 Hormonal Resilience Index&trade;
               </div>
-              <p className="text-sm text-[#666] leading-relaxed mb-3">
+              <p className="text-sm text-[#666] dark:text-[#9a9a9a] leading-relaxed mb-3">
                 Not testing hormones — inferring their impact on your body. The
                 most important index for women in perimenopause.
               </p>
               <div className="text-[13px] text-dr-muted leading-relaxed">
-                <strong className="font-semibold text-[#555]">Signals:</strong>{" "}
+                <strong className="font-semibold text-[#555] dark:text-[#9a9a9a]">
+                  Signals:
+                </strong>{" "}
                 sleep fragmentation, facial flushing, skin dryness, mood
                 variability
               </div>
             </div>
             <div className="bg-dr-off border border-dr-border rounded-2xl py-7 px-6 border-t-3 border-t-transparent hover:border-t-dr-red transition-colors">
-              <div className="text-xl italic font-semibold text-dr-black mb-2.5">
+              <div className="text-xl italic font-semibold text-dr-fg mb-2.5">
                 &ldquo;Can I still recover?&rdquo;
               </div>
               <div className="text-[11px] font-bold tracking-[1px] uppercase text-dr-red mb-2.5">
                 Recovery Capacity Score&trade;
               </div>
-              <p className="text-sm text-[#666] leading-relaxed mb-3">
+              <p className="text-sm text-[#666] dark:text-[#9a9a9a] leading-relaxed mb-3">
                 How fast can your body return to baseline after stress,
                 exertion, or a bad night?
               </p>
               <div className="text-[13px] text-dr-muted leading-relaxed">
-                <strong className="font-semibold text-[#555]">Signals:</strong>{" "}
+                <strong className="font-semibold text-[#555] dark:text-[#9a9a9a]">
+                  Signals:
+                </strong>{" "}
                 exercise recovery, sleep restoration, stress recovery, skin
                 repair speed
               </div>
             </div>
             <div className="bg-dr-off border border-dr-border rounded-2xl py-7 px-6 border-t-3 border-t-transparent hover:border-t-dr-red transition-colors">
-              <div className="text-xl italic font-semibold text-dr-black mb-2.5">
+              <div className="text-xl italic font-semibold text-dr-fg mb-2.5">
                 &ldquo;Am I chronically burning out?&rdquo;
               </div>
               <div className="text-[11px] font-bold tracking-[1px] uppercase text-dr-red mb-2.5">
                 Inflammaging Velocity&trade;
               </div>
-              <p className="text-sm text-[#666] leading-relaxed mb-3">
+              <p className="text-sm text-[#666] dark:text-[#9a9a9a] leading-relaxed mb-3">
                 Inflammaging — inflammation + aging — is the mechanism behind
                 most midlife health decline. We track its velocity.
               </p>
               <div className="text-[13px] text-dr-muted leading-relaxed">
-                <strong className="font-semibold text-[#555]">Signals:</strong>{" "}
+                <strong className="font-semibold text-[#555] dark:text-[#9a9a9a]">
+                  Signals:
+                </strong>{" "}
                 skin redness, stress load, poor sleep, metabolic variability
               </div>
             </div>
             <div className="bg-dr-off border border-dr-border rounded-2xl py-7 px-6 border-t-3 border-t-transparent hover:border-t-dr-red transition-colors">
-              <div className="text-xl italic font-semibold text-dr-black mb-2.5">
+              <div className="text-xl italic font-semibold text-dr-fg mb-2.5">
                 &ldquo;Did sleep actually restore me?&rdquo;
               </div>
               <div className="text-[11px] font-bold tracking-[1px] uppercase text-dr-red mb-2.5">
                 Sleep Restoration Score&trade;
               </div>
-              <p className="text-sm text-[#666] leading-relaxed mb-3">
+              <p className="text-sm text-[#666] dark:text-[#9a9a9a] leading-relaxed mb-3">
                 Not how many hours — whether sleep did its job. The question
                 women in midlife are actually asking.
               </p>
               <div className="text-[13px] text-dr-muted leading-relaxed">
-                <strong className="font-semibold text-[#555]">Signals:</strong>{" "}
+                <strong className="font-semibold text-[#555] dark:text-[#9a9a9a]">
+                  Signals:
+                </strong>{" "}
                 morning recovery pattern, skin hydration recovery, energy
                 baseline on waking
               </div>
@@ -249,13 +257,13 @@ export default function HealthspanPage() {
           <div className="text-xs font-semibold tracking-[1.5px] uppercase text-dr-red mb-3">
             Early Users
           </div>
-          <h2 className="text-[clamp(28px,4vw,42px)] font-bold tracking-tight leading-tight text-dr-black mb-3">
+          <h2 className="text-[clamp(28px,4vw,42px)] font-bold tracking-tight leading-tight text-dr-fg mb-3">
             Real life wins. Not{" "}
             <em className="italic text-dr-red">dashboard wins.</em>
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div className="bg-white border border-dr-border rounded-2xl py-7 px-7">
-              <p className="text-lg italic text-dr-black leading-relaxed mb-4">
+            <div className="bg-dr-surface border border-dr-border rounded-2xl py-7 px-7">
+              <p className="text-lg italic text-dr-fg leading-relaxed mb-4">
                 &ldquo;I tracked my HRV and sleep for two years. None of it told
                 me why I was exhausted. DrRuby was the first thing that{" "}
                 <strong className="not-italic text-dr-red">
@@ -267,8 +275,8 @@ export default function HealthspanPage() {
                 Sarah M. &middot; 44 &middot; Perimenopause &middot; Early Beta
               </div>
             </div>
-            <div className="bg-white border border-dr-border rounded-2xl py-7 px-7">
-              <p className="text-lg italic text-dr-black leading-relaxed mb-4">
+            <div className="bg-dr-surface border border-dr-border rounded-2xl py-7 px-7">
+              <p className="text-lg italic text-dr-fg leading-relaxed mb-4">
                 &ldquo;I stopped taking{" "}
                 <strong className="not-italic text-dr-red">
                   4 supplements
@@ -286,7 +294,7 @@ export default function HealthspanPage() {
 
       {/* FORM */}
       <section
-        className="py-20 bg-white border-t border-dr-border"
+        className="py-20 bg-dr-surface border-t border-dr-border"
         id="join-healthspan"
       >
         <div className="max-w-[1100px] mx-auto px-5 md:px-10">
