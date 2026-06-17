@@ -1,7 +1,7 @@
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import WaitlistForm from "@/components/WaitlistForm";
-import PageSwitcher from "@/components/PageSwitcher";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import WaitlistForm from "@/components/forms/WaitlistForm";
+import PageSwitcher from "@/components/common/PageSwitcher";
 
 export default function HealthspanPage() {
   return (

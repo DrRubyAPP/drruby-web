@@ -1,8 +1,8 @@
 import Link from "next/link";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import HomeCaptureForm from "@/components/HomeCaptureForm";
-import PageSwitcher from "@/components/PageSwitcher";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import HomeCaptureForm from "@/components/forms/HomeCaptureForm";
+import PageSwitcher from "@/components/common/PageSwitcher";
 
 export default function Home() {
   return (

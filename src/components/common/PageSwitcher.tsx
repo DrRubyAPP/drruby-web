@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { NAV_PAGES } from "@/config/site";
 
-const pages = [
-  { name: "Home", href: "/" },
-  { name: "Skin", href: "/skin" },
-  { name: "Healthspan", href: "/healthspan" },
-];
+const PAGE_LABELS: Record<string, string> = {
+  home: "Home",
+  skin: "Skin",
+  healthspan: "Healthspan",
+};
 
 export default function PageSwitcher() {
   const pathname = usePathname();
@@ -17,7 +18,7 @@ export default function PageSwitcher() {
       <span className="text-[11px] text-[#555] tracking-[1px] uppercase mr-3">
         Page:
       </span>
-      {pages.map((page) => {
+      {NAV_PAGES.map((page) => {
         const isActive = pathname === page.href;
         return (
           <Link
@@ -29,7 +30,7 @@ export default function PageSwitcher() {
                 : "bg-transparent text-[#666] hover:text-white hover:bg-white/8"
             }`}
           >
-            {page.name}
+            {PAGE_LABELS[page.key]}
           </Link>
         );
       })}
