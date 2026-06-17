@@ -30,7 +30,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": [
-    "drruby-website/node_modules"
-  ]
+  "exclude": ["drruby-website/node_modules"]
 }
