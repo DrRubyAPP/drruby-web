@@ -9,7 +9,7 @@
   --dr-red-mid: #f47f8e;
   --dr-muted: #888;
   --dr-border: #e0e0e0;
-  --dr-green: #4DC98A;
+  --dr-green: #4dc98a;
   --dr-amber: #f5a623;
   --dr-green-bg: #e8f5ee;
   --dr-amber-bg: #fff8e8;
@@ -43,7 +43,9 @@ html {
 }
 
 body {
-  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-family:
+    var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Helvetica Neue", Arial, sans-serif;
   background: var(--dr-off);
   color: var(--dr-black);
   line-height: 1.6;

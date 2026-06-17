@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { type FormEvent, useState } from "react";
 
 type SubmitStatus = "idle" | "loading" | "ok" | "err";
 
@@ -17,7 +17,8 @@ export default function HomeCaptureForm() {
     const data = {
       email: (form.elements.namedItem("EMAIL") as HTMLInputElement).value,
       firstName: (form.elements.namedItem("FNAME") as HTMLInputElement).value,
-      phone: (form.elements.namedItem("PHONE") as HTMLInputElement)?.value || "",
+      phone:
+        (form.elements.namedItem("PHONE") as HTMLInputElement)?.value || "",
       formId: "home",
     };
 
@@ -57,10 +58,13 @@ export default function HomeCaptureForm() {
         Early Access &middot; Limited Spots
       </div>
       <h2 className="text-[clamp(26px,3.5vw,40px)] font-bold tracking-tight leading-[1.15] text-white mb-3">
-        Be first to know<br />when DrRuby <em className="italic text-dr-red-mid">launches.</em>
+        Be first to know
+        <br />
+        when DrRuby <em className="italic text-dr-red-mid">launches.</em>
       </h2>
       <p className="text-base text-[#aaa] mb-9 leading-relaxed">
-        Join the waitlist. Early members get 3 months Pro free and shape what we build.
+        Join the waitlist. Early members get 3 months Pro free and shape what we
+        build.
       </p>
       <form onSubmit={onSubmit} className="flex flex-col gap-3">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -88,9 +92,7 @@ export default function HomeCaptureForm() {
           placeholder="Phone (optional — for launch SMS)"
           disabled={status === "loading"}
         />
-        {status === "err" && (
-          <p className="text-red-400 text-sm">{msg}</p>
-        )}
+        {status === "err" && <p className="text-red-400 text-sm">{msg}</p>}
         <button
           type="submit"
           disabled={status === "loading"}
@@ -99,7 +101,9 @@ export default function HomeCaptureForm() {
           {status === "loading" ? "Subscribing..." : "Join the Waitlist →"}
         </button>
       </form>
-      <p className="text-[13px] text-[#555] mt-2">No spam, ever. Unsubscribe anytime.</p>
+      <p className="text-[13px] text-[#555] mt-2">
+        No spam, ever. Unsubscribe anytime.
+      </p>
     </div>
   );
 }

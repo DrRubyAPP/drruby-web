@@ -1,13 +1,12 @@
 import Link from "next/link";
 
-export default function Navbar({
-  variant,
-}: {
-  variant: "home" | "sub";
-}) {
+export default function Navbar({ variant }: { variant: "home" | "sub" }) {
   return (
     <nav className="sticky top-12 z-50 border-b border-dr-border bg-white/95 backdrop-blur-xl px-5 md:px-10 h-16 flex items-center justify-between">
-      <Link href="/" className="text-xl font-bold tracking-tight text-dr-black no-underline">
+      <Link
+        href="/"
+        className="text-xl font-bold tracking-tight text-dr-black no-underline"
+      >
         Dr<span className="text-dr-red">Ruby</span>.ai
       </Link>
 

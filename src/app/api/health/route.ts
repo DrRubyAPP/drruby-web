@@ -16,6 +16,6 @@ export async function GET() {
         audienceId: hasAudienceId ? "configured" : "missing",
       },
     },
-    { status: healthy ? 200 : 503 }
+    { status: healthy ? 200 : 503 },
   );
 }

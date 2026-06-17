@@ -1,5 +1,5 @@
-import mailchimp from "@mailchimp/mailchimp_marketing";
 import { createHash } from "node:crypto";
+import mailchimp from "@mailchimp/mailchimp_marketing";
 
 // ── Constants ───────────────────────────────────────────────────────
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -44,7 +44,7 @@ function extractMailchimpError(err: unknown): {
 
 // ── Subscribe ───────────────────────────────────────────────────────
 export async function subscribeMember(
-  input: SubscribeInput
+  input: SubscribeInput,
 ): Promise<SubscribeResult> {
   // Read env vars at request time (not module level) to avoid
   // serverless cold-start issues where env vars may not be available
@@ -55,7 +55,7 @@ export async function subscribeMember(
 
   if (!API_KEY || !SERVER_PREFIX || !AUDIENCE_ID) {
     console.error(
-      "[mailchimp] Missing required env vars: MAILCHIMP_API_KEY, MAILCHIMP_SERVER_PREFIX, MAILCHIMP_AUDIENCE_ID"
+      "[mailchimp] Missing required env vars: MAILCHIMP_API_KEY, MAILCHIMP_SERVER_PREFIX, MAILCHIMP_AUDIENCE_ID",
     );
     return {
       status: 503,
@@ -105,7 +105,7 @@ export async function subscribeMember(
     try {
       const existing = await mailchimp.lists.getListMember(
         AUDIENCE_ID,
-        emailHash
+        emailHash,
       );
 
       if (existing.status === "unsubscribed") {

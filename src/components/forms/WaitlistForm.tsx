@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode, type FormEvent } from "react";
+import { type FormEvent, type ReactNode, useState } from "react";
 
 interface ConcernOption {
   label: string;
@@ -42,7 +42,7 @@ export default function WaitlistForm({
 
   function toggleConcern(value: string) {
     setSelectedConcerns((prev) =>
-      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value],
     );
   }
 
@@ -55,7 +55,8 @@ export default function WaitlistForm({
     const data = {
       email: (form.elements.namedItem("EMAIL") as HTMLInputElement).value,
       firstName: (form.elements.namedItem("FNAME") as HTMLInputElement).value,
-      phone: (form.elements.namedItem("PHONE") as HTMLInputElement)?.value || "",
+      phone:
+        (form.elements.namedItem("PHONE") as HTMLInputElement)?.value || "",
       formId,
       // Extra fields for Mailchimp merge fields
       age: ageOptions
@@ -108,20 +109,32 @@ export default function WaitlistForm({
         <div className="bg-dr-off border border-dr-border rounded-[20px] p-9 shadow-[0_4px_40px_rgba(0,0,0,0.06)] text-center">
           <div className="text-2xl mb-3">&#10003;</div>
           <p className="text-lg font-semibold text-dr-black mb-2">{msg}</p>
-          <p className="text-sm text-dr-muted">We&apos;ll be in touch before launch.</p>
+          <p className="text-sm text-dr-muted">
+            We&apos;ll be in touch before launch.
+          </p>
         </div>
       ) : (
         <form
           className="bg-dr-off border border-dr-border rounded-[20px] p-9 shadow-[0_4px_40px_rgba(0,0,0,0.06)]"
           onSubmit={onSubmit}
         >
-          <h3 className="text-xl font-bold tracking-tight mb-1.5">Get Early Access</h3>
-          <p className="text-sm text-dr-muted mb-6">{subtitle.split(".")[0]}.</p>
+          <h3 className="text-xl font-bold tracking-tight mb-1.5">
+            Get Early Access
+          </h3>
+          <p className="text-sm text-dr-muted mb-6">
+            {subtitle.split(".")[0]}.
+          </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3.5">
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555]">First Name</label>
+              <label
+                htmlFor="wf-fname"
+                className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555]"
+              >
+                First Name
+              </label>
               <input
+                id="wf-fname"
                 className="p-3 border border-dr-border rounded-lg text-[15px] bg-white outline-none focus:border-dr-red transition-colors"
                 type="text"
                 name="FNAME"
@@ -131,8 +144,14 @@ export default function WaitlistForm({
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555]">Email</label>
+              <label
+                htmlFor="wf-email"
+                className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555]"
+              >
+                Email
+              </label>
               <input
+                id="wf-email"
                 className="p-3 border border-dr-border rounded-lg text-[15px] bg-white outline-none focus:border-dr-red transition-colors"
                 type="email"
                 name="EMAIL"
@@ -144,10 +163,17 @@ export default function WaitlistForm({
           </div>
 
           <div className="flex flex-col gap-1.5 mb-3.5">
-            <label className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555]">
-              Phone <span className="font-normal text-[#aaa]">(optional — for launch SMS)</span>
+            <label
+              htmlFor="wf-phone"
+              className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555]"
+            >
+              Phone{" "}
+              <span className="font-normal text-[#aaa]">
+                (optional — for launch SMS)
+              </span>
             </label>
             <input
+              id="wf-phone"
               className="p-3 border border-dr-border rounded-lg text-[15px] bg-white outline-none focus:border-dr-red transition-colors"
               type="tel"
               name="PHONE"
@@ -158,9 +184,21 @@ export default function WaitlistForm({
 
           {ageOptions && (
             <div className="flex flex-col gap-1.5 mb-3.5">
-              <label className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555]">Age range</label>
-              <select name="AGE" className="p-3 border border-dr-border rounded-lg text-[15px] bg-white outline-none focus:border-dr-red transition-colors text-dr-black appearance-none" defaultValue="">
-                <option value="" disabled>Select your age</option>
+              <label
+                htmlFor="wf-age"
+                className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555]"
+              >
+                Age range
+              </label>
+              <select
+                id="wf-age"
+                name="AGE"
+                className="p-3 border border-dr-border rounded-lg text-[15px] bg-white outline-none focus:border-dr-red transition-colors text-dr-black appearance-none"
+                defaultValue=""
+              >
+                <option value="" disabled>
+                  Select your age
+                </option>
                 {ageOptions.map((opt) => (
                   <option key={opt}>{opt}</option>
                 ))}
@@ -169,9 +207,11 @@ export default function WaitlistForm({
           )}
 
           <div className="flex flex-col gap-1.5 mb-3.5">
-            <label className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555]">
-              {showWinning ? "What are you experiencing? (pick all that apply)" : "Main skin concern (pick all that apply)"}
-            </label>
+            <span className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555]">
+              {showWinning
+                ? "What are you experiencing? (pick all that apply)"
+                : "Main skin concern (pick all that apply)"}
+            </span>
             <div className="flex flex-col gap-2.5">
               {concerns.map((c) => {
                 const checked = selectedConcerns.includes(c.value);
@@ -179,18 +219,34 @@ export default function WaitlistForm({
                   <label
                     key={c.value}
                     className="flex items-center gap-2.5 cursor-pointer"
-                    onClick={() => toggleConcern(c.value)}
                   >
+                    <input
+                      type="checkbox"
+                      className="sr-only"
+                      checked={checked}
+                      onChange={() => toggleConcern(c.value)}
+                    />
                     <span
+                      aria-hidden="true"
                       className={`w-[18px] h-[18px] border-[1.5px] rounded flex-shrink-0 flex items-center justify-center transition-colors ${
-                        checked
-                          ? "bg-dr-red border-dr-red"
-                          : "border-dr-border"
+                        checked ? "bg-dr-red border-dr-red" : "border-dr-border"
                       }`}
                     >
                       {checked && (
-                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                          <path d="M2.5 6L5 8.5L9.5 3.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <svg
+                          width="12"
+                          height="12"
+                          viewBox="0 0 12 12"
+                          fill="none"
+                          aria-hidden="true"
+                        >
+                          <path
+                            d="M2.5 6L5 8.5L9.5 3.5"
+                            stroke="white"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
                         </svg>
                       )}
                     </span>
@@ -203,9 +259,21 @@ export default function WaitlistForm({
 
           {showSpend && (
             <div className="flex flex-col gap-1.5 mb-3.5">
-              <label className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555]">Monthly skincare spend</label>
-              <select name="SPEND" className="p-3 border border-dr-border rounded-lg text-[15px] bg-white outline-none focus:border-dr-red transition-colors text-dr-black appearance-none" defaultValue="">
-                <option value="" disabled>Select range</option>
+              <label
+                htmlFor="wf-spend"
+                className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555]"
+              >
+                Monthly skincare spend
+              </label>
+              <select
+                id="wf-spend"
+                name="SPEND"
+                className="p-3 border border-dr-border rounded-lg text-[15px] bg-white outline-none focus:border-dr-red transition-colors text-dr-black appearance-none"
+                defaultValue=""
+              >
+                <option value="" disabled>
+                  Select range
+                </option>
                 {spendOptions.map((opt) => (
                   <option key={opt}>{opt}</option>
                 ))}
@@ -215,10 +283,14 @@ export default function WaitlistForm({
 
           {showWinning && (
             <div className="flex flex-col gap-1.5 mb-3.5">
-              <label className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555]">
+              <label
+                htmlFor="wf-winning"
+                className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555]"
+              >
                 What does &quot;winning&quot; look like for you?
               </label>
               <input
+                id="wf-winning"
                 className="p-3 border border-dr-border rounded-lg text-[15px] bg-white outline-none focus:border-dr-red transition-colors"
                 type="text"
                 name="WINNING"
