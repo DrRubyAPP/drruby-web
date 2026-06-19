@@ -3,37 +3,49 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --dr-black: #1a1a1a;
+  /* Brand colours (webiste-ui-spec.md §2.1) */
+  --dr-red: #c8102e;
+  --dr-red-lt: rgba(200, 16, 46, 0.08);
   --dr-white: #ffffff;
-  --dr-off: #f5f5f5;
-  --dr-red: #d0021b;
-  --dr-red-lt: #fdf0f2;
-  --dr-red-mid: #f47f8e;
-  --dr-muted: #888;
-  --dr-border: #e0e0e0;
-  --dr-green: #4dc98a;
-  --dr-amber: #f5a623;
-  --dr-green-bg: #e8f5ee;
-  --dr-amber-bg: #fff8e8;
-  --dr-green-text: #1a7a45;
-  --dr-amber-text: #b8740a;
+  --dr-off: #f8f7f5;
+  --dr-grey: #f0efed;
+  --dr-border: #e8e5e2;
+  --dr-mid: #888888;
+  --dr-ink: #1a1a1a;
+
+  /* Semantic colours (§2.2) */
+  --dr-success: #1f9e5a;
+  --dr-warn: #b86a00;
+  --dr-alert: #c8102e;
+
+  /* Insight Strip (§2.4) */
+  --dr-insight-p0: #e8c97a;
+  --dr-insight-p1: #4fc3f7;
+  --dr-insight-p2: #26d1a0;
+  --dr-insight-p3: #aaaaaa;
 
   /* Semantic surface/text tokens (theme-aware) */
-  --dr-bg: #f5f5f5; /* page background */
-  --dr-surface: #ffffff; /* cards, inputs, light sections */
-  --dr-fg: #1a1a1a; /* primary text */
+  --dr-bg: #f8f7f5;
+  --dr-surface: #ffffff;
+  --dr-fg: #1a1a1a;
+
+  /* Fonts injected by next/font */
+  --font-serif: "Cormorant Garamond", serif;
+  --font-sans: "Jost", sans-serif;
 }
 
 /*
- * Dark theme. Brand colours (--dr-red*, greens, ambers) are intentionally
- * left untouched so the brand reads consistently. --dr-black stays dark on
- * purpose: it backs the always-dark sections (bg-dr-black). Primary text uses
- * the --dr-fg token so it can flip independently.
+ * Dark theme. Brand colours (--dr-red*, success/warn/alert, insight strip)
+ * are intentionally left untouched so the brand reads consistently.
+ * --dr-ink stays dark on purpose: it backs the always-dark sections
+ * (bg-dr-ink). Primary text uses the --dr-fg token so it can flip
+ * independently.
  */
 .dark {
   --dr-off: #161616;
+  --dr-grey: #1c1c1c;
   --dr-border: #2c2c2c;
-  --dr-muted: #9a9a9a;
+  --dr-mid: #9a9a9a;
 
   --dr-bg: #0f0f0f;
   --dr-surface: #1b1b1b;
@@ -43,25 +55,26 @@
 @theme inline {
   --color-background: var(--dr-bg);
   --color-foreground: var(--dr-fg);
-  --color-dr-black: var(--dr-black);
+  --color-dr-red: var(--dr-red);
+  --color-dr-red-lt: var(--dr-red-lt);
   --color-dr-white: var(--dr-white);
   --color-dr-off: var(--dr-off);
+  --color-dr-grey: var(--dr-grey);
+  --color-dr-border: var(--dr-border);
+  --color-dr-mid: var(--dr-mid);
+  --color-dr-ink: var(--dr-ink);
   --color-dr-bg: var(--dr-bg);
   --color-dr-surface: var(--dr-surface);
   --color-dr-fg: var(--dr-fg);
-  --color-dr-red: var(--dr-red);
-  --color-dr-red-lt: var(--dr-red-lt);
-  --color-dr-red-mid: var(--dr-red-mid);
-  --color-dr-muted: var(--dr-muted);
-  --color-dr-border: var(--dr-border);
-  --color-dr-green: var(--dr-green);
-  --color-dr-amber: var(--dr-amber);
-  --color-dr-green-bg: var(--dr-green-bg);
-  --color-dr-amber-bg: var(--dr-amber-bg);
-  --color-dr-green-text: var(--dr-green-text);
-  --color-dr-amber-text: var(--dr-amber-text);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-dr-success: var(--dr-success);
+  --color-dr-warn: var(--dr-warn);
+  --color-dr-alert: var(--dr-alert);
+  --color-dr-insight-p0: var(--dr-insight-p0);
+  --color-dr-insight-p1: var(--dr-insight-p1);
+  --color-dr-insight-p2: var(--dr-insight-p2);
+  --color-dr-insight-p3: var(--dr-insight-p3);
+  --font-serif: var(--font-serif);
+  --font-sans: var(--font-sans);
 }
 
 html {
@@ -69,11 +82,11 @@ html {
 }
 
 body {
-  font-family:
-    var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI",
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI",
     "Helvetica Neue", Arial, sans-serif;
   background: var(--dr-bg);
   color: var(--dr-fg);
+  font-weight: 300;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   font-size: 16px;

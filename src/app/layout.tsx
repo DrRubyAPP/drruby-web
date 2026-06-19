@@ -1,18 +1,25 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Cormorant_Garamond, Jost } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale } from "next-intl/server";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const cormorant = Cormorant_Garamond({
+  variable: "--font-serif",
   subsets: ["latin"],
+  weight: ["300", "400"],
+  style: ["normal", "italic"],
+  display: "swap",
+  preload: true,
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const jost = Jost({
+  variable: "--font-sans",
   subsets: ["latin"],
+  weight: ["200", "300", "400", "500", "600"],
+  display: "swap",
+  preload: true,
 });
 
 export const metadata: Metadata = {
@@ -30,7 +37,7 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      className={`${geistSans.variable} ${geistMono.variable}`}
+      className={`${cormorant.variable} ${jost.variable}`}
       suppressHydrationWarning
     >
       <body>
