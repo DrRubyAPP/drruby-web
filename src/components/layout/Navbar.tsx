@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import MobileMenu from "@/components/layout/MobileMenu";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 export default async function Navbar() {
@@ -17,31 +18,31 @@ export default async function Navbar() {
       <div className="hidden md:flex items-center gap-8">
         <Link
           href="/"
-          className="text-[11px] font-normal tracking-[0.1em] text-dr-mid no-underline hover:text-dr-ink transition-colors"
+          className="text-[12px] font-normal tracking-[0.1em] text-dr-mid no-underline hover:text-dr-ink transition-colors"
         >
           {t("howItWorks")}
         </Link>
         <Link
           href="/skin"
-          className="text-[11px] font-normal tracking-[0.1em] text-dr-mid no-underline hover:text-dr-ink transition-colors"
+          className="text-[12px] font-normal tracking-[0.1em] text-dr-mid no-underline hover:text-dr-ink transition-colors"
         >
           {t("skin")}
         </Link>
         <Link
           href="/healthspan"
-          className="text-[11px] font-normal tracking-[0.1em] text-dr-mid no-underline hover:text-dr-ink transition-colors"
+          className="text-[12px] font-normal tracking-[0.1em] text-dr-mid no-underline hover:text-dr-ink transition-colors"
         >
           {t("healthspan")}
         </Link>
         <Link
           href="/architecture"
-          className="text-[11px] font-normal tracking-[0.1em] text-dr-mid no-underline hover:text-dr-ink transition-colors"
+          className="text-[12px] font-normal tracking-[0.1em] text-dr-mid no-underline hover:text-dr-ink transition-colors"
         >
           {t("science")}
         </Link>
         <Link
           href="/style-guide"
-          className="text-[11px] font-normal tracking-[0.1em] text-dr-mid no-underline hover:text-dr-ink transition-colors"
+          className="text-[12px] font-normal tracking-[0.1em] text-dr-mid no-underline hover:text-dr-ink transition-colors"
         >
           {t("styleGuide")}
         </Link>
@@ -51,16 +52,17 @@ export default async function Navbar() {
         <ThemeToggle />
         <Link
           href="/waitlist"
-          className="hidden md:inline-block text-[10px] font-medium tracking-[0.1em] text-dr-ink border border-dr-border px-[18px] py-2 no-underline hover:border-dr-ink transition-colors"
+          className="hidden md:inline-block text-[11px] font-medium tracking-[0.1em] text-dr-ink border border-dr-border px-[18px] py-2 no-underline hover:border-dr-ink transition-colors"
         >
           {t("login")}
         </Link>
         <Link
           href="/waitlist"
-          className="text-[10px] font-semibold tracking-[0.16em] uppercase bg-dr-red text-white px-5 py-2 no-underline hover:opacity-90 transition-opacity"
+          className="hidden sm:inline-block text-[11px] font-semibold tracking-[0.16em] uppercase bg-dr-red text-white px-5 py-2 no-underline hover:opacity-90 transition-opacity"
         >
           {t("getStarted")}
         </Link>
+        <MobileMenu />
       </div>
     </nav>
   );

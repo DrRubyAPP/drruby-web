@@ -61,7 +61,6 @@ export default function HomeCaptureForm() {
       </div>
       <h2 className="text-[clamp(26px,3.5vw,40px)] font-bold tracking-tight leading-[1.15] text-white mb-3">
         {t.rich("title", {
-          br: () => <br />,
           em: (chunks) => <em className="italic text-dr-red">{chunks}</em>,
         })}
       </h2>

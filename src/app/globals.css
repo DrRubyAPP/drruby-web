@@ -81,6 +81,35 @@ html {
   scroll-behavior: smooth;
 }
 
+/* ── Skin scan line animation ── */
+@keyframes scanline {
+  0% { top: 10%; opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { top: 90%; opacity: 0; }
+}
+
+.scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(200, 16, 46, 0.4), transparent);
+  animation: scanline 2.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scan-line { animation: none; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 body {
   font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI",
     "Helvetica Neue", Arial, sans-serif;

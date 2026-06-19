@@ -1,82 +1,661 @@
 {
   "nav": {
-    "pageLabel": "Page:",
-    "home": "Home",
+    "howItWorks": "How it works",
     "skin": "Skin",
     "healthspan": "Healthspan",
-    "tagline": "Women's Healthspan Intelligence",
-    "getEarlyAccess": "Get Early Access",
-    "back": "← Back"
+    "science": "Science",
+    "styleGuide": "Style Guide",
+    "login": "Log in",
+    "getStarted": "Get Started",
+    "menu": "Menu",
+    "close": "Close"
+  },
+  "footer": {
+    "ctaEyebrow": "Start Today — Free",
+    "ctaTitle": "Your personal health intelligence starts <em>with one scan.</em>",
+    "ctaPrimary": "Start Free Analysis",
+    "ctaGhost": "Already a member? Log in →",
+    "ctaFine": "No credit card required · Data stays on your device · Backed by science, not wellness trends",
+    "privacy": "Privacy",
+    "science": "Science",
+    "styleGuide": "Style Guide",
+    "copyright": "© 2026 DrRuby"
   },
   "home": {
     "hero": {
-      "badge": "Early Access — Limited Spots",
-      "title": "Something is changing.<br></br><em>Understand it.</em>",
-      "subtitle": "DrRuby is a women's healthspan intelligence platform. We enter through skin — and connect it to everything else that's shifting in your body. Tell us where you're feeling it most."
-    },
-    "pathSkin": {
-      "eyebrow": "Path 01 · Skin",
-      "title": "“My skin changed and I don't know <em>why.</em>”",
-      "desc": "Inflammation, melasma, skin that aged faster than expected. DrRuby tracks three imaging biomarkers so you stop guessing and start seeing what's actually happening.",
-      "tags": ["Inflammation", "Melasma", "Hormonal skin", "Product efficacy"],
-      "cta": "I have skin concerns →"
-    },
-    "pathHealthspan": {
-      "eyebrow": "Path 02 · Healthspan",
-      "title": "“My body isn't keeping up with my <em>life.</em>”",
-      "desc": "Energy, sleep, recovery, hormones. Something shifted in the last few years and you can't quite name it. That's exactly what DrRuby is built for.",
-      "tags": [
-        "Sleep & recovery",
-        "Energy",
-        "Perimenopause",
-        "Hormonal resilience"
+      "slides": [
+        {
+          "eyebrow": "Personal Health Intelligence",
+          "title": "Know your body. <em>Before it speaks.</em>",
+          "subtitle": "AI-powered skin and healthspan analysis — personalized to you alone, not population averages.",
+          "ctaPrimary": "Start Free Analysis",
+          "ctaGhost": "Start with Skin →"
+        },
+        {
+          "eyebrow": "The N=1 Principle",
+          "title": "Medicine studies populations. <em>We study you.</em>",
+          "subtitle": "Your data trains your personal health model — not shared, not averaged. Developed with leading skin scientists and women's health experts.",
+          "ctaPrimary": "Explore Healthspan →",
+          "ctaGhost": ""
+        },
+        {
+          "eyebrow": "Privacy by Design",
+          "title": "Your data stays <em>on your device.</em> Always.",
+          "subtitle": "We built DrRuby so your most personal health data never leaves your phone. Your AI model learns you — and only you.",
+          "ctaPrimary": "How It Works →",
+          "ctaGhost": ""
+        },
+        {
+          "eyebrow": "Built on Real Science",
+          "title": "Skin is a window <em>into your metabolic age.</em>",
+          "subtitle": "Developed with leading scientists in metabolic aging, skin biology, and women's health. Not wellness — science.",
+          "ctaPrimary": "Meet Our Scientists",
+          "ctaGhost": "See the Architecture"
+        }
       ],
-      "cta": "I want better healthspan →"
-    },
-    "philosophy": {
-      "eyebrow": "What We Believe",
-      "title": "Built for life goals.<br></br>Not lab dashboards.",
-      "subtitle": "Every other healthspan tool rewards you for checking in more, tracking more. We don't. We want you to close the app and go live your life.",
-      "card1": {
-        "title": "Goals, not metrics",
-        "body": "We don't ask what you want to optimize. We ask what you want to do that your body isn't letting you.",
-        "quote": "“Hike with my grandkids.” “No more hot flashes at 2am.” “Finish the day I planned.”"
-      },
-      "card2": {
-        "title": "We want you to close the app",
-        "body": "Every month we ask: is this tracking helping you reach your goal, or has it become the goal?",
-        "quote": "“Actually closed the app. Went outside. Felt like a win.”"
-      },
-      "card3": {
-        "title": "Science you can name",
-        "body": "Led by Charles Brenner, PhD — world's leading NAD+ researcher. Every claim traceable to published research.",
-        "quote": "“Reliable numbers, not great experiences with unreliable data.”"
-      }
+      "counterTotal": "04"
     },
     "trust": {
-      "eyebrow": "Scientific Foundation",
-      "title": "No other consumer healthspan app has <em>this.</em>",
-      "body": "Charles Brenner is the researcher who discovered NR as vitamin B3 — his work is the foundation of NAD+ biology. He's not an advisor. He's co-building this with us.",
-      "stat1": {
-        "value": "NAD+",
-        "line1": "Charles Brenner, PhD",
-        "line2": "Biochemist · NAD+ Biology Pioneer"
-      },
-      "stat2": {
-        "value": "N=1",
-        "line1": "Evidence-based",
-        "line2": "user experiments"
-      },
-      "stat3": {
-        "value": "Live",
-        "line1": "Clinic partnerships",
-        "line2": "already active"
-      }
+      "brennerName": "Charles Brenner",
+      "brennerRole": "Bioscientist · NAD Biology · Chief Scientific Advisor, DrRuby",
+      "gunterName": "Jennifer Gunter",
+      "gunterRole": "Women's Health Expert · N=1 Clinical Tester",
+      "boardName": "Skin Science Advisory Board",
+      "boardRole": "Dermatology · Metabolic Aging · Women's Hormonal Health",
+      "privacy": "Your data never leaves your device"
+    },
+    "choice": {
+      "eyebrow": "Where would you like to start?",
+      "title": "Two entry points. One profile. <em>Your biology.</em>",
+      "skinTag": "See it. Measure it. Track it.",
+      "skinTitle": "Skin Intelligence",
+      "skinDesc": "Your skin is the most visible biomarker you have. Scan once, and DrRuby gives you three Brenner indices — Inflammation, Pigment Load, Collagen Kinetics — calibrated to you alone.",
+      "skinFeed": "Feeds directly into your Healthspan profile →",
+      "skinCta": "Start with Skin →",
+      "healthTag": "Understand it. Optimize it. Own it.",
+      "healthTitle": "Healthspan Intelligence",
+      "healthDesc": "Evaluate your protocols, understand your biomarkers, and get intel you can bring to your own doctor. No prescriptions. No medical claims. Just the science to have better conversations.",
+      "healthFeed": "Powered by your skin data + Evaluate My Stack →",
+      "healthCta": "Start with Healthspan →",
+      "bridgeSkinLabel": "Skin data",
+      "bridgeSkinSub": "Brenner indices",
+      "bridgeProfileLabel": "Your DrRuby Profile",
+      "bridgeProfileSub": "One body. All data. N=1.",
+      "bridgeHealthLabel": "Healthspan data",
+      "bridgeHealthSub": "Stack · Biomarkers · Intel"
+    },
+    "n1": {
+      "eyebrow": "The DrRuby Principle",
+      "title": "Medicine has always studied populations. <em>DrRuby studies you.</em>",
+      "col1Num": "01",
+      "col1Title": "Your N=1 experiment",
+      "col1Desc": "Every person's skin ages differently. We don't compare you to a population average — we use your own historical data as the baseline. Each scan trains your personal model, not anyone else's.",
+      "col1Highlight": "In consultation with Jennifer Gunter, MD · N=1 clinical tester",
+      "col2Num": "02",
+      "col2Title": "Your data, on your device",
+      "col2Desc": "Your health data is yours alone. DrRuby is built so your most personal information — skin scans, biomarkers, hormonal patterns — never leaves your phone. Not shared. Not sold. Not aggregated.",
+      "col2Highlight": "Privacy by architecture, not policy",
+      "col3Num": "03",
+      "col3Title": "A model that learns you",
+      "col3Desc": "As you use DrRuby over time, the AI builds a personal health model specific to your biology. Recommendations get sharper. Patterns become clearer. The longer you use it, the more it knows you.",
+      "col3Highlight": "Powered by metabolic aging science · Charles Brenner"
+    },
+    "scroll": {
+      "label": "What DrRuby Does",
+      "title": "Everything your health needs, <em>nothing it doesn't</em>",
+      "items": [
+        {
+          "tag": "Personal Profile",
+          "name": "Your Health Baseline",
+          "desc": "Skin, metabolic, hormonal, and lifestyle markers — all analyzed against your own history, not a population average."
+        },
+        {
+          "tag": "Actionable Reports",
+          "name": "Know What to Act On",
+          "desc": "Clear findings — Good, Monitor, Action — written in plain language. Downloadable to share with your doctor."
+        },
+        {
+          "tag": "Personal AI Coach",
+          "name": "Always On. Always Private.",
+          "desc": "Chat with an AI that knows your data — stored only on your device. Ask anything. Get answers grounded in your biology."
+        },
+        {
+          "tag": "Clinical Connect",
+          "name": "Book a Partner Clinic",
+          "desc": "Browse partner clinics. Share your DrRuby report before arrival so your doctor already knows your history."
+        },
+        {
+          "tag": "Personalized Products",
+          "name": "Matched to Your Data",
+          "desc": "Treatments, supplements, and protocols scored by fit with your health profile. No generic lists."
+        }
+      ]
+    },
+    "quote": {
+      "eyebrow": "From Our N=1 Tester",
+      "text": "I''d actually use this for my own n=1 experimentation. And for my patients who keep asking — <em>''Is this actually working, doctor?''</em>",
+      "who": "Jennifer Gunter",
+      "title": "Women's Health Expert · DrRuby Clinical Advisor",
+      "n1Title": "Because your body is not an <em>average.</em>",
+      "n1Desc": "Most health apps compare you to population benchmarks. DrRuby's N=1 approach means your score, your trend, and your recommendations are calibrated entirely to your own baseline — the way real clinical science works.",
+      "stat1Val": "100%",
+      "stat1Label": "Personalized to you",
+      "stat2Val": "0",
+      "stat2Label": "Data shared externally",
+      "stat3Val": "∞",
+      "stat3Label": "Learns over time"
+    },
+    "science": {
+      "eyebrow": "Built on Real Science",
+      "title": "Skin is a window into your <em>metabolic age.</em>",
+      "desc": "DrRuby's biomarker scoring is developed with leading researchers in metabolic aging, skin biology, and women's hormonal health. We don't use wellness language — we use the science of how bodies actually change over time.",
+      "advisor1Name": "Charles Brenner",
+      "advisor1Role": "Bioscientist · NAD Biology · Chief Scientific Advisor, DrRuby",
+      "advisor1Quote": "DrRuby connects metabolic aging science to the consumer for the first time. We don't just analyze skin — we read the body's metabolic state through skin.",
+      "advisor2Name": "Jennifer Gunter",
+      "advisor2Role": "Women's Health Expert · Clinical Advisor · DrRuby N=1 Tester",
+      "advisor2Quote": "The combination of skin intelligence and hormonal health tracking fills a gap that no other platform has addressed for women in their 40s and beyond.",
+      "steps": [
+        {
+          "num": "01",
+          "title": "You upload data",
+          "desc": "Skin scan, bloodwork, wearable data, or manual inputs. Stored locally on your device."
+        },
+        {
+          "num": "02",
+          "title": "AI builds your baseline",
+          "desc": "Your personal model is initialized — calibrated to your biology, not a population average."
+        },
+        {
+          "num": "03",
+          "title": "Science scores your data",
+          "desc": "Brenner-lab metabolic aging indices score your skin, hormonal, and systemic markers."
+        },
+        {
+          "num": "04",
+          "title": "You get a clear report",
+          "desc": "Plain-language findings with specific actions — not generic lifestyle tips."
+        },
+        {
+          "num": "05",
+          "title": "Model improves with you",
+          "desc": "Every new data point sharpens your personal model. The longer you use it, the smarter it gets."
+        }
+      ]
     }
+  },
+  "skin": {
+    "pageNav": {
+      "breadcrumb": "Home",
+      "breadcrumbCurrent": "Skin Analysis",
+      "modePhone": "Phone Camera",
+      "modeScope": "SkinScope",
+      "modeUpload": "Upload"
+    },
+    "freqGate": {
+      "lastScan": "Last scan: Jun 8",
+      "nextScanPrefix": "Next scan recommended:",
+      "nextScanDate": "Jul 8",
+      "nextScanDays": "(22 days)",
+      "cycleNote": "Skin changes on a 28-day cycle. More frequent scans add noise, not signal.",
+      "trackingMode": "Tracking Mode",
+      "trackingOff": "OFF"
+    },
+    "scan": {
+      "title": "Your skin, <em>analyzed deeply.</em>",
+      "desc": "Position your face in the frame and capture. DrRuby will score your skin across three science-backed indices developed with Charles Brenner's metabolic aging research.",
+      "modeCheekL": "Cheek (Left)",
+      "modeCheekR": "Cheek (Right)",
+      "modeForehead": "Forehead",
+      "modeUnderEye": "Under Eye",
+      "scopeName": "Want dermatoscope-grade precision?",
+      "scopeCta": "Upgrade to SkinScope — $99 →",
+      "capture": "Capture Scan",
+      "captureHint": "Fix lighting issue to enable capture →",
+      "allPassed": "✓ ALL CHECKS PASSED",
+      "allPassedDesc": "Image quality confirmed. Tap Capture to save.",
+      "positionLabel": "Position your cheek in the frame",
+      "qualityCheck": "Image Quality Check",
+      "qualityFocus": "Focus & sharpness",
+      "qualityLightFail": "Too dark — move to better light",
+      "qualityCoverage": "Skin area coverage",
+      "qualitySteady": "Steady — no motion blur"
+    },
+    "indices": {
+      "sectionLabel": "The 3 Brenner Skin Indices · Latest Scan Jun 8",
+      "items": [
+        {
+          "eyebrow": "Index 01",
+          "name": "Inflammation Index",
+          "score": 72,
+          "max": 100,
+          "level": "good",
+          "desc": "Measures skin redness, reactive markers, and oxidative stress signals. Lower inflammation → slower aging.",
+          "trendDir": "up",
+          "trendText": "↑ +6 pts since last scan"
+        },
+        {
+          "eyebrow": "Index 02",
+          "name": "Pigment Load Index",
+          "score": 58,
+          "max": 100,
+          "level": "warn",
+          "desc": "Tracks uneven pigmentation, UV damage accumulation, and melanin distribution patterns over time.",
+          "trendDir": "dn",
+          "trendText": "↓ −3 pts — sun exposure detected"
+        },
+        {
+          "eyebrow": "Index 03",
+          "name": "Collagen Kinetics Index",
+          "score": 81,
+          "max": 100,
+          "level": "good",
+          "desc": "Assesses structural skin density, elasticity, and collagen turnover rate — requires SkinScope for full accuracy.",
+          "trendDir": "up",
+          "trendText": "↑ +9 pts this quarter"
+        }
+      ],
+      "scopeNote": "SkinScope unlocks full Collagen Kinetics accuracy. Currently estimated from phone camera.",
+      "scopeUpgrade": "Upgrade →"
+    },
+    "trend": {
+      "title": "Trend Over Time",
+      "period30d": "30d",
+      "period90d": "90d",
+      "period1yr": "1yr",
+      "legendInfl": "Inflammation",
+      "legendPigm": "Pigment Load",
+      "legendColl": "Collagen",
+      "overallTitle": "Overall trend: improving",
+      "overallDesc": "Inflammation and Collagen both up significantly over 90 days. Pigment needs attention.",
+      "dataPoints": [
+        { "date": "Mar 10", "infl": 48, "pigm": 52, "coll": 55 },
+        { "date": "Mar 25", "infl": 52, "pigm": 49, "coll": 58 },
+        { "date": "Apr 8", "infl": 55, "pigm": 50, "coll": 62 },
+        { "date": "Apr 22", "infl": 58, "pigm": 53, "coll": 65 },
+        { "date": "May 6", "infl": 60, "pigm": 55, "coll": 68 },
+        { "date": "May 20", "infl": 64, "pigm": 52, "coll": 72 },
+        { "date": "Jun 1", "infl": 66, "pigm": 54, "coll": 75 },
+        { "date": "Jun 8", "infl": 72, "pigm": 58, "coll": 81 }
+      ]
+    },
+    "aiReport": {
+      "title": "AI Analysis — Jun 8",
+      "findings": [
+        {
+          "level": "good",
+          "tag": "Positive",
+          "title": "Barrier function strengthening",
+          "desc": "Inflammation score up 6pts. Consistent with peptide serum introduction 4 weeks ago."
+        },
+        {
+          "level": "warn",
+          "tag": "Monitor",
+          "title": "UV pigmentation accumulation",
+          "desc": "Pigment Load down 3pts. Sunscreen compliance may have dropped — cross-referenced with weather data."
+        },
+        {
+          "level": "alert",
+          "tag": "Action",
+          "title": "Upgrade scan for Collagen accuracy",
+          "desc": "Collagen Kinetics Index is estimated. SkinScope attachment will give full cross-polarized reading."
+        }
+      ],
+      "basedOn": "Based on 8 scans over 90 days",
+      "fullReport": "Full PDF Report →"
+    },
+    "products": {
+      "title": "Recommended Based on Your Scan",
+      "items": [
+        {
+          "icon": "☀️",
+          "name": "SPF 50 Mineral Sunscreen",
+          "reason": "Addresses pigment drop",
+          "match": "Match 96"
+        },
+        {
+          "icon": "🧴",
+          "name": "Niacinamide Brightening Serum",
+          "reason": "Pigment Load correction",
+          "match": "Match 91"
+        },
+        {
+          "icon": "💊",
+          "name": "Collagen Peptide Complex",
+          "reason": "Supports collagen index",
+          "match": "Match 88"
+        },
+        {
+          "icon": "🔬",
+          "name": "SkinScope Attachment",
+          "reason": "Unlock full Collagen data",
+          "match": "$99 — Upgrade",
+          "highlight": true
+        }
+      ]
+    },
+    "clinicEntry": {
+      "eyebrow": "Clinical Care",
+      "title": "Want a dermatologist's eyes on your scan?",
+      "desc": "Share your DrRuby report with a partner clinic before your visit. Your doctor arrives prepared — no need to explain your history from scratch.",
+      "cta": "Book a Skin Clinic →"
+    }
+  },
+  "healthspan": {
+    "brennerQuote": {
+      "quote": "We can provide the intel that allows them to get what they want and need from their own doctor or medical systems. Without us getting into the medical business.",
+      "name": "Charles Brenner",
+      "role": "Bioscientist · NAD Biology · Chief Scientific Advisor, DrRuby"
+    },
+    "definitions": [
+      {
+        "eyebrow": "Not Longevity",
+        "title": "How well you function — not just how long you live",
+        "desc": "DrRuby tracks the biomarkers that actually affect your daily experience: energy, sleep quality, inflammation, skin biology, hormonal rhythm. No age-guessing. No longevity promises."
+      },
+      {
+        "eyebrow": "N=1 Science",
+        "title": "Your data is your baseline — not a population average",
+        "desc": "Brenner's NAD biology shows individual variation is enormous. What matters is your trend over time — not where you rank against strangers."
+      },
+      {
+        "eyebrow": "Doctor-Ready Intel",
+        "title": "Walk into your appointment knowing exactly what to ask",
+        "desc": "DrRuby summarizes your trends, flags changes worth discussing, and gives you the vocabulary to have a productive conversation — without us replacing your doctor."
+      }
+    ],
+    "evaluateStack": {
+      "eyebrow": "Key Feature",
+      "title": "Evaluate My Stack",
+      "desc": "Tell DrRuby what supplements, hormones, and protocols you're currently taking. Our AI cross-references your personal biomarkers, skin scores, and the latest research — then tells you what's working, what's redundant, and what's missing.",
+      "bullets": [
+        "Backed by NAD biology + Brenner research database",
+        "Personalised to your N=1 data, not generic recommendations",
+        "Output formatted as a summary you can share with your doctor",
+        "Never prescribes — always informs"
+      ],
+      "cta": "Evaluate My Stack →",
+      "panelTitle": "MY CURRENT STACK",
+      "panelEntries": [
+        {
+          "name": "NR (Nicotinamide Riboside)",
+          "dose": "300mg · Morning",
+          "status": "Supported",
+          "statusLevel": "good"
+        },
+        {
+          "name": "Collagen Peptides",
+          "dose": "10g · Daily",
+          "status": "Review dose",
+          "statusLevel": "warn"
+        },
+        {
+          "name": "Vitamin D3 + K2",
+          "dose": "5000 IU · With fat",
+          "status": "Supported",
+          "statusLevel": "good"
+        },
+        {
+          "name": "Generic Multivitamin",
+          "dose": "1 tab · Daily",
+          "status": "Redundant",
+          "statusLevel": "alert"
+        }
+      ],
+      "addEntry": "+ Add supplement or protocol",
+      "assessmentLabel": "DrRuby Assessment",
+      "assessment": "Your collagen score (58) suggests your current peptide dose may be insufficient given your scan data. Your NR intake aligns well with your inflammation trends. Share this summary with your dermatologist before your next visit.",
+      "exportBtn": "Export for Doctor",
+      "viewFullBtn": "View Full Analysis"
+    },
+    "advisors": {
+      "eyebrow": "Scientific Advisory",
+      "title": "The expertise behind your intel",
+      "items": [
+        {
+          "initials": "CB",
+          "tag": "NAD Biology",
+          "name": "Charles Brenner",
+          "role": "Bioscientist · Pioneer of NAD+ biology · Chief Scientific Advisor, DrRuby",
+          "advises": "Advises on: NR/NAD protocols, inflammation biology, supplement efficacy, the science behind Evaluate My Stack."
+        },
+        {
+          "initials": "MD",
+          "tag": "Dermatology",
+          "name": "Medical Advisor",
+          "role": "Board-certified dermatologist with specialty in functional skin aging, photoaging, and the skin-systemic health connection.",
+          "advises": "Advises on: Brenner Index clinical context, skin biomarker interpretation, when to refer to a specialist, SkinScope protocols."
+        },
+        {
+          "initials": "WH",
+          "tag": "Women's Health",
+          "name": "Medical Advisor",
+          "role": "Specialist in hormonal health, perimenopause, and the intersection of metabolic and skin biology in women over 35.",
+          "advises": "Advises on: hormonal rhythm tracking, HRT + supplement interactions, women-specific healthspan protocols and red flags."
+        }
+      ]
+    },
+    "tracking": {
+      "eyebrow": "What Healthspan Tracks",
+      "cols": [
+        {
+          "title": "Skin Biology",
+          "items": ["Brenner Inflammation Index", "Pigment Load Score", "Collagen Kinetics", "UV Damage Trend", "Barrier Function"]
+        },
+        {
+          "title": "Energy & Recovery",
+          "items": ["Self-reported energy trend", "Sleep quality (via wearable)", "HRV pattern", "Exercise recovery score", "NAD-relevant markers"]
+        },
+        {
+          "title": "Women's Health",
+          "items": ["Hormonal cycle rhythm", "Perimenopause signals", "Mood + cognition log", "Skin-hormone correlation", "Supplement timing"]
+        },
+        {
+          "title": "Protocol Intelligence",
+          "items": ["Stack evaluation", "Redundancy detection", "Gap identification", "Evidence strength rating", "Doctor-ready summaries"]
+        }
+      ]
+    },
+    "jennifer": {
+      "quote": "DrRuby gave me language I could bring into my doctor's office. Not a diagnosis — a conversation starter. That's exactly what was missing.",
+      "who": "Jennifer Gunter · DrRuby early tester · Los Angeles",
+      "dayLabel": "Testing since",
+      "dayValue": "Day 1",
+      "daySub": "N=1 · Own data · Own pace"
+    },
+    "cta": {
+      "title": "Your intel. Your doctor. Your decisions.",
+      "subtitle": "DrRuby Healthspan — included with every membership · $20/month",
+      "primary": "Go to My Dashboard →",
+      "ghost": "← View My Skin Data"
+    }
+  },
+  "architecture": {
+    "siteTitle": "Information <em>Architecture</em>",
+    "siteSub": "页面结构与用户流",
+    "siteStructureLabel": "Overall Site Structure — 整体页面结构",
+    "publicLabel": "PUBLIC — No Login Required",
+    "publicPages": ["Homepage", "Skin Information", "Healthspan Information", "For Clinics", "Science / About", "Pricing", "Login / Register"],
+    "userPortalLabel": "USER PORTAL — Logged In (Consumer)",
+    "userPortalItems": [
+      { "name": "Dashboard", "desc": "Scores, alerts, recent activity" },
+      { "name": "Health Profile", "desc": "Skin + Healthspan data, history" },
+      { "name": "AI Reports", "desc": "Analysis, findings, PDF export" },
+      { "name": "AI Coach · UI Layer", "desc": "Presents Insight Engine outputs in natural language. Proactive push + conversational logging. Not a chatbot — a UI for the data engine.", "highlight": true },
+      { "name": "Clinic + Shop", "desc": "Book, buy, track" }
+    ],
+    "clinicPortalLabel": "CLINIC PORTAL — Logged In (B2B)",
+    "clinicPortalItems": [
+      { "name": "Dashboard", "desc": "KPIs, today's schedule" },
+      { "name": "Patients", "desc": "List, records, DrRuby data" },
+      { "name": "Reports", "desc": "AI draft, review, send" },
+      { "name": "Appointments", "desc": "Calendar, manage, notify" },
+      { "name": "Finance", "desc": "Revenue, commissions, payouts" }
+    ],
+    "techLabel": "AI Technical Architecture — 五层系统架构",
+    "techIntro": "The product is the Insight Engine (Layer 3). The chatbot is the UI. RAG knowledge base is table stakes — not the moat.",
+    "layers": [
+      {
+        "num": "Layer 1",
+        "name": "Evidence Graph · RAG Knowledge Base",
+        "desc": "Structured scientific claims from Brenner (NAD+, metabolism), Gunter (women's health, pending), dermatology literature · evidence_level tiers: rct / clinical_guideline / expert_opinion / emerging · PostgreSQL + pgvector · Not the moat — table stakes",
+        "tag": "Table stakes"
+      },
+      {
+        "num": "Layer 2",
+        "name": "User Longitudinal Data · On-Device",
+        "desc": "Labs, wearables, skin photos, symptoms, interventions, outcomes — stored locally encrypted (Core Data / Room + SQLCipher) · Tiered consent: Tier 0 default on-device, Tier 1 opt-in encrypted upload, Tier 2 opt-in research contribution",
+        "tag": "Input to moat"
+      },
+      {
+        "num": "Layer 3",
+        "name": "DrRuby Insight Engine · N-of-1 Analytics",
+        "nameSuffix": "← THE MOAT",
+        "desc": "Change detection (moving average, z-score) · Intervention Graph (what worked for this user, with lag and confidence) · Proprietary scores: Skin Age Score, Metabolic Score, Recovery Score, Inflammation Score, Hormonal Stability Index · V1: rule-based + statistical · V2: Bayesian attribution · Patent candidates: scoring methodology + Intervention Graph structure",
+        "tag": "IP · File patent",
+        "moat": true
+      },
+      {
+        "num": "Layer 4",
+        "name": "Recommendation Engine",
+        "desc": "Combines Layer 3 insights + Layer 1 evidence → structured recommendation object · This runs before the LLM, not inside it · Output is structured data, not prose",
+        "tag": "Differentiator"
+      },
+      {
+        "num": "Layer 5",
+        "name": "Conversation Interface · UI Only",
+        "desc": "LLM API (Claude / GPT-4o) translates Layer 3+4 structured output into natural language + citations · Proactive push when Insight Engine detects change · Conversational data logging (\"I started NR today\" → writes to Intervention Graph) · Hybrid UI: score cards + chat · FDA guardrails embedded in system prompt",
+        "tag": "UI, not product"
+      }
+    ],
+    "moatNote": "Why this can't be replicated in 3 weeks: Layer 1 (RAG on PubMed) can. Layers 3–4 cannot — because they require months of a user's longitudinal data and the Intervention Graph that grows with it. The data is the moat. Brenner's role is Scientific Advisory Board — he defines scoring methodology, not claim validation.",
+    "flowLabel": "User Flow — 两个用户旅程",
+    "consumerFlow": {
+      "label": "Consumer Journey",
+      "steps": [
+        { "name": "Visit Homepage", "note": "首页" },
+        { "name": "Choose Skin or Healthspan", "note": "双入口选择" },
+        { "name": "Register / Onboard", "note": "注册", "highlight": true },
+        { "name": "Upload Data / Connect Devices", "note": "数据接入" },
+        { "name": "Receive AI Report", "note": "AI分析" },
+        { "name": "Chat with AI Coach", "note": "个人Coach" },
+        { "name": "Book Clinic / Buy Products", "note": "预约 + 购买" }
+      ]
+    },
+    "clinicFlow": {
+      "label": "Clinic Journey",
+      "steps": [
+        { "name": "Apply / Onboard as Clinic", "note": "合作申请" },
+        { "name": "Set Up Clinic Profile", "note": "诊所资料" },
+        { "name": "Patient Requests Appointment", "note": "患者预约", "highlight": true },
+        { "name": "Review Patient DrRuby Data", "note": "患者数据" },
+        { "name": "Conduct Appointment", "note": "就诊" },
+        { "name": "Generate AI Report for Patient", "note": "AI报告" },
+        { "name": "Track Revenue & Payouts", "note": "收益管理" }
+      ]
+    }
+  },
+  "styleGuide": {
+    "title": "Style <em>Guide</em>",
+    "sub": "颜色 · 字体 · 组件",
+    "paletteLabel": "Color Palette — 品牌颜色",
+    "palette": [
+      { "name": "Primary Red", "hex": "#C8102E" },
+      { "name": "Deep Ink", "hex": "#1A1A1A" },
+      { "name": "White", "hex": "#FFFFFF" },
+      { "name": "Off White", "hex": "#F8F7F5" },
+      { "name": "Light Grey", "hex": "#F0EFED" },
+      { "name": "Border Grey", "hex": "#E8E5E2" },
+      { "name": "Mid Grey", "hex": "#888888" },
+      { "name": "Success Green", "hex": "#1F9E5A" },
+      { "name": "Warning Amber", "hex": "#B86A00" }
+    ],
+    "typoLabel": "Typography — 字体系统",
+    "typoSamples": [
+      { "metaLine1": "Cormorant Garamond 300", "metaLine2": "Display / Hero", "text": "Know your body.", "variant": "xl" },
+      { "metaLine1": "Cormorant Garamond 300", "metaLine2": "Section Titles", "text": "Personal Health Intelligence", "variant": "lg" },
+      { "metaLine1": "Jost 400", "metaLine2": "Body / Cards", "text": "AI-powered analysis, personalized for you.", "variant": "md" },
+      { "metaLine1": "Jost 300", "metaLine2": "Body Text", "text": "Biomarker tracking and personalized protocols to help you live better — grounded in science.", "variant": "sm" },
+      { "metaLine1": "Jost 600 Uppercase", "metaLine2": "Labels / Tags", "text": "Skin Intelligence · AI Analysis · Healthspan", "variant": "cap" }
+    ],
+    "mobileLabel": "Mobile Preview — 移动端适配",
+    "mobilePreview": {
+      "heroTitle": "Know your body. Before it speaks.",
+      "choiceSkin": "Skin",
+      "choiceHealth": "Healthspan"
+    },
+    "mobileNotes": [
+      { "num": "1", "strong": "顶部导航", "text": " — 极简 hamburger 菜单，品牌 logo 居中或靠左。深色背景与品牌保持一致。" },
+      { "num": "2", "strong": "Hero 全宽", "text": " — 大图 + 斜体品牌语，滑动进入双入口卡片选择。" },
+      { "num": "3", "strong": "Skin / Healthspan 双卡", "text": " — 移动端横排，各占 50%，点击进入对应功能流程。" },
+      { "num": "4", "strong": "底部导航栏", "text": " — 5 个核心入口：Home · Dashboard · AI Coach · Clinics · Profile。固定在屏幕底部。" },
+      { "num": "5", "strong": "数据隐私", "text": " — AI Coach 数据存储在设备本地 (on-device)，在 Profile 页面展示隐私说明。" }
+    ]
+  },
+  "waitlist": {
+    "heroEyebrow": "Join the Waitlist",
+    "heroTitle": "Be first to know when DrRuby <em>launches.</em>",
+    "heroSubtitle": "Early members get 3 months Pro free and shape what we build.",
+    "heroCtaPrimary": "Join the Waitlist",
+    "heroCtaGhost": "See the science",
+    "valuePoints": [
+      {
+        "eyebrow": "N=1 Science",
+        "title": "Personalized to you alone",
+        "desc": "Your data trains your personal health model — not shared, not averaged."
+      },
+      {
+        "eyebrow": "Privacy by Design",
+        "title": "Your data stays on your device",
+        "desc": "We built DrRuby so your most personal health data never leaves your phone."
+      },
+      {
+        "eyebrow": "Built on Real Science",
+        "title": "Backed by Brenner + Gunter",
+        "desc": "Developed with leading scientists in metabolic aging and women's health."
+      }
+    ],
+    "privacyNote": "Your data never leaves your device",
+    "formIntroEyebrow": "Join the Waitlist",
+    "formIntroTitle": "Stop guessing what's <em>working.</em>",
+    "formIntroSub": "First 500 users get 3 months of Pro free. Tell us about your skin — we'll make sure DrRuby is built for you.",
+    "formHeading": "Get Early Access",
+    "formSubheading": "Join the waitlist — free skin preview included at launch.",
+    "ageOptions": ["Under 30", "30–39", "40–49", "50–59", "60+"],
+    "skinConcerns": [
+      { "value": "inflammation", "label": "Inflammation / redness / barrier issues" },
+      { "value": "melasma", "label": "Melasma or hyperpigmentation" },
+      { "value": "aging", "label": "Skin aging / collagen loss" },
+      { "value": "hormonal", "label": "Hormonal skin changes (perimenopause)" },
+      { "value": "products", "label": "I want to know if my products are working" }
+    ],
+    "faqEyebrow": "Questions, answered",
+    "faqTitle": "Before you <em>join.</em>",
+    "faqItems": [
+      {
+        "q": "When does DrRuby launch?",
+        "a": "We're targeting late 2026. Waitlist members get early access weeks before public launch."
+      },
+      {
+        "q": "What does the free skin preview include?",
+        "a": "A one-time SkinScope scan summary with your top three biomarker readings — no purchase required."
+      },
+      {
+        "q": "Is my data really private?",
+        "a": "Yes. Your health data is stored on-device by default. We never sell or share personal data."
+      },
+      {
+        "q": "Can I cancel anytime?",
+        "a": "Absolutely. Unsubscribe with one click — no questions asked."
+      }
+    ],
+    "finalCtaEyebrow": "Limited Spots · 500 Early Members",
+    "finalCtaTitle": "Your body is asking <em>questions.</em> Get the answers first.",
+    "finalCtaSub": "Join the waitlist today. Early members shape what we build — and get 3 months of Pro free at launch."
   },
   "captureForm": {
     "eyebrow": "Early Access · Limited Spots",
-    "title": "Be first to know<br></br>when DrRuby <em>launches.</em>",
+    "title": "Be first to know when DrRuby <em>launches.</em>",
     "subtitle": "Join the waitlist. Early members get 3 months Pro free and shape what we build.",
     "firstName": "First name",
     "email": "Email address",
@@ -120,200 +699,5 @@
     "successDefault": "You're on the list!",
     "errorDefault": "Something went wrong.",
     "networkError": "Network error. Please try again."
-  },
-  "footer": {
-    "links": [
-      "Science",
-      "Privacy",
-      "For Clinics",
-      "Research Partners",
-      "Contact"
-    ],
-    "copyright": "© 2026 DrRuby.ai · Wellness device. Not intended to diagnose or treat any medical condition."
-  },
-  "skin": {
-    "hero": {
-      "badge": "Skin Intelligence · Path 01",
-      "title": "Your skin is telling you <em>something.</em>",
-      "subtitle": "Inflammation, melasma, skin that changed faster than expected. DrRuby measures three peer-reviewed imaging biomarkers — so you can see exactly what's happening, and what's actually working.",
-      "cta": "Join the Waitlist →"
-    },
-    "biomarker": {
-      "heading": "Your biomarker snapshot",
-      "inflammationName": "Inflammation Index",
-      "inflammationDesc": "Erythema · barrier disruption · immune response",
-      "collagenName": "Collagen Proxy",
-      "collagenDesc": "Dermal density · structural aging",
-      "pigmentName": "Pigment Kinetics",
-      "pigmentDesc": "Melanin velocity · melasma · hyperpigmentation",
-      "stable": "→ stable",
-      "quote": "“The retinol you started 6 weeks ago correlates with +8% Collagen Proxy. That $400 serum shows no detectable change.”"
-    },
-    "measure": {
-      "eyebrow": "What We Measure",
-      "title": "Three numbers. All <em>peer-reviewed.</em>",
-      "subtitle": "Not a beauty score. Three independently interpretable biomarkers — each grounded in published imaging research.",
-      "card1": {
-        "tag": "Inflammation",
-        "title": "Inflammation Index",
-        "desc": "Cross-polarized light reveals erythema and barrier disruption — your skin's real-time immune response.",
-        "tells": "Tells you: Is a new product causing a reaction? Is your barrier healthy?"
-      },
-      "card2": {
-        "tag": "Collagen",
-        "title": "Collagen Proxy",
-        "desc": "UV-A 405nm excitation reveals dermal collagen density via fluorescence — the structural architecture beneath your skin.",
-        "tells": "Tells you: Is your retinol or laser treatment actually working?"
-      },
-      "card3": {
-        "tag": "Pigmentation",
-        "title": "Pigment Kinetics",
-        "desc": "Multi-spectral analysis tracks melanin distribution and velocity — especially powerful for melasma and post-inflammatory hyperpigmentation.",
-        "tells": "Tells you: Is your melasma getting better or worse?"
-      }
-    },
-    "proof": {
-      "eyebrow": "Early Users",
-      "title": "What they found after <em>90 days.</em>",
-      "t1": {
-        "quote": "“I spent <strong>$600 on IPL</strong> and had no way to know if it worked. DrRuby showed my Pigment Kinetics dropped 18% in 6 weeks.”",
-        "author": "Jennifer C. · 47 · Melasma · Early Beta"
-      },
-      "t2": {
-        "quote": "“I stopped using a <strong>$300 serum</strong> after DrRuby showed zero change in Collagen Proxy after 8 weeks.”",
-        "author": "Rachel M. · 38 · Perimenopause Skin · Early Beta"
-      }
-    },
-    "form": {
-      "title": "Stop guessing what's <em>working.</em>",
-      "subtitle": "First 500 users get 3 months of Pro free. Tell us about your skin — we'll make sure DrRuby is built for you.",
-      "ageOptions": ["Under 30", "30–39", "40–49", "50–59", "60+"],
-      "concerns": [
-        {
-          "label": "Inflammation / redness / barrier issues",
-          "value": "inflammation"
-        },
-        { "label": "Melasma or hyperpigmentation", "value": "melasma" },
-        { "label": "Skin aging / collagen loss", "value": "aging" },
-        {
-          "label": "Hormonal skin changes (perimenopause)",
-          "value": "hormonal"
-        },
-        {
-          "label": "I want to know if my products are working",
-          "value": "products"
-        }
-      ]
-    }
-  },
-  "healthspan": {
-    "hero": {
-      "badge": "Healthspan Intelligence · Path 02",
-      "title": "Your body is in <em>transition.</em> Understand it.",
-      "subtitle": "Energy, sleep, recovery, hormones. Something shifted in the last few years and you can't quite name it. DrRuby gives you the language — backed by science, built for women.",
-      "goals": [
-        "Hike with my grandkids without running out of breath",
-        "Sleep through the night — actually restored",
-        "No more hot flashes keeping me up at 2am",
-        "Know which supplements are actually helping"
-      ],
-      "cta": "Join the Waitlist →"
-    },
-    "snapshot": {
-      "heading": "Your healthspan snapshot",
-      "hormonalName": "Hormonal Resilience",
-      "hormonalQuestion": "“Is my body still stable?”",
-      "hormonalStatus": "Transition",
-      "recoveryName": "Recovery Capacity",
-      "recoveryQuestion": "“Can I still recover?”",
-      "recoveryStatus": "Stable",
-      "inflammagingName": "Inflammaging Velocity",
-      "inflammagingQuestion": "“Am I chronically burning out?”",
-      "inflammagingStatus": "Elevated",
-      "sleepName": "Sleep Restoration",
-      "sleepQuestion": "“Did sleep actually restore me?”",
-      "sleepStatus": "Moderate",
-      "quote": "“Not testing your hormones — inferring their impact from skin, sleep, recovery, and the signals your body is already giving you.”"
-    },
-    "track": {
-      "eyebrow": "What We Track",
-      "title": "Seven questions your body is <em>asking.</em>",
-      "subtitle": "Not biomarker panels. Questions with emotional meaning — the ones you already feel but can't measure.",
-      "signalsLabel": "Signals:",
-      "card1": {
-        "question": "“Is my body still stable?”",
-        "name": "Hormonal Resilience Index™",
-        "body": "Not testing hormones — inferring their impact on your body. The most important index for women in perimenopause.",
-        "signals": "sleep fragmentation, facial flushing, skin dryness, mood variability"
-      },
-      "card2": {
-        "question": "“Can I still recover?”",
-        "name": "Recovery Capacity Score™",
-        "body": "How fast can your body return to baseline after stress, exertion, or a bad night?",
-        "signals": "exercise recovery, sleep restoration, stress recovery, skin repair speed"
-      },
-      "card3": {
-        "question": "“Am I chronically burning out?”",
-        "name": "Inflammaging Velocity™",
-        "body": "Inflammaging — inflammation + aging — is the mechanism behind most midlife health decline. We track its velocity.",
-        "signals": "skin redness, stress load, poor sleep, metabolic variability"
-      },
-      "card4": {
-        "question": "“Did sleep actually restore me?”",
-        "name": "Sleep Restoration Score™",
-        "body": "Not how many hours — whether sleep did its job. The question women in midlife are actually asking.",
-        "signals": "morning recovery pattern, skin hydration recovery, energy baseline on waking"
-      }
-    },
-    "strip": {
-      "card1": {
-        "title": "Goals, not metrics",
-        "body": "We start with what you want to do. Not what you want to optimize."
-      },
-      "card2": {
-        "title": "We want you to close the app",
-        "body": "Every month we ask: is this tracking bringing you closer to your life, or replacing it?"
-      },
-      "card3": {
-        "title": "Science led by Charles Brenner, PhD",
-        "body": "World's leading NAD+ researcher. Every index traceable to published research."
-      }
-    },
-    "proof": {
-      "eyebrow": "Early Users",
-      "title": "Real life wins. Not <em>dashboard wins.</em>",
-      "t1": {
-        "quote": "“I tracked my HRV and sleep for two years. None of it told me why I was exhausted. DrRuby was the first thing that <strong>asked what I actually wanted to do.</strong>”",
-        "author": "Sarah M. · 44 · Perimenopause · Early Beta"
-      },
-      "t2": {
-        "quote": "“I stopped taking <strong>4 supplements</strong> after DrRuby showed no measurable change after 8 weeks. That alone paid for the whole year.”",
-        "author": "Linda K. · 51 · Post-menopause · Early Beta"
-      }
-    },
-    "form": {
-      "title": "Give your body a <em>language.</em>",
-      "subtitle": "First 500 users get 3 months of Pro free. Tell us what you're experiencing — we'll make sure DrRuby is built for you.",
-      "ageOptions": ["30–39", "40–49", "50–59", "60+"],
-      "concerns": [
-        {
-          "label": "Fatigue or energy crashes during the day",
-          "value": "fatigue"
-        },
-        { "label": "Sleep that doesn't feel restorative", "value": "sleep" },
-        {
-          "label": "Perimenopause or menopause symptoms",
-          "value": "perimenopause"
-        },
-        {
-          "label": "Slower recovery from exercise or stress",
-          "value": "recovery"
-        },
-        {
-          "label": "I take supplements and want to know if they work",
-          "value": "supplements"
-        }
-      ]
-    }
   }
 }
