@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import PageSwitcher from "@/components/common/PageSwitcher";
 import HomeCaptureForm from "@/components/forms/HomeCaptureForm";
 import Footer from "@/components/layout/Footer";
 import Navbar from "@/components/layout/Navbar";
@@ -12,8 +11,7 @@ export default async function Home() {
 
   return (
     <>
-      <PageSwitcher />
-      <Navbar variant="home" />
+      <Navbar />
 
       {/* HERO */}
       <div className="bg-[radial-gradient(ellipse_at_60%_0%,#fce8eb_0%,#f5f5f5_65%)] dark:bg-[radial-gradient(ellipse_at_60%_0%,#2a1419_0%,#0f0f0f_65%)] min-h-screen flex items-center">
@@ -218,7 +216,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <Footer variant="home" />
+      <Footer />
     </>
   );
 }

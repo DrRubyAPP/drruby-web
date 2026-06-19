@@ -47,7 +47,7 @@ export default function HomeCaptureForm() {
   if (status === "ok") {
     return (
       <div className="max-w-[560px] mx-auto text-center">
-        <div className="p-5 bg-[rgba(208,2,27,0.1)] border border-[rgba(208,2,27,0.3)] rounded-[10px] text-dr-red-mid text-[15px] leading-relaxed">
+        <div className="p-5 bg-dr-red-lt border border-dr-red/30 rounded-[10px] text-dr-red text-[15px] leading-relaxed">
           &#10003; {msg}
         </div>
       </div>
@@ -56,13 +56,13 @@ export default function HomeCaptureForm() {
 
   return (
     <div className="max-w-[560px] mx-auto text-center">
-      <div className="text-xs font-semibold tracking-[1.5px] uppercase text-dr-red-mid mb-3.5">
+      <div className="text-xs font-semibold tracking-[1.5px] uppercase text-dr-red mb-3.5">
         {t("eyebrow")}
       </div>
       <h2 className="text-[clamp(26px,3.5vw,40px)] font-bold tracking-tight leading-[1.15] text-white mb-3">
         {t.rich("title", {
           br: () => <br />,
-          em: (chunks) => <em className="italic text-dr-red-mid">{chunks}</em>,
+          em: (chunks) => <em className="italic text-dr-red">{chunks}</em>,
         })}
       </h2>
       <p className="text-base text-[#aaa] mb-9 leading-relaxed">
@@ -71,7 +71,7 @@ export default function HomeCaptureForm() {
       <form onSubmit={onSubmit} className="flex flex-col gap-3">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <input
-            className="w-full py-[14px] px-[18px] bg-white/7 border border-white/15 rounded-[10px] text-white text-[15px] outline-none focus:border-dr-red-mid transition-colors placeholder:text-[#666]"
+            className="w-full py-[14px] px-[18px] bg-white/7 border border-white/15 rounded-[10px] text-white text-[15px] outline-none focus:border-dr-red transition-colors placeholder:text-[#666]"
             type="text"
             name="FNAME"
             placeholder={t("firstName")}
@@ -79,7 +79,7 @@ export default function HomeCaptureForm() {
             disabled={status === "loading"}
           />
           <input
-            className="w-full py-[14px] px-[18px] bg-white/7 border border-white/15 rounded-[10px] text-white text-[15px] outline-none focus:border-dr-red-mid transition-colors placeholder:text-[#666]"
+            className="w-full py-[14px] px-[18px] bg-white/7 border border-white/15 rounded-[10px] text-white text-[15px] outline-none focus:border-dr-red transition-colors placeholder:text-[#666]"
             type="email"
             name="EMAIL"
             placeholder={t("email")}
@@ -88,7 +88,7 @@ export default function HomeCaptureForm() {
           />
         </div>
         <input
-          className="w-full py-[14px] px-[18px] bg-white/7 border border-white/15 rounded-[10px] text-white text-[15px] outline-none focus:border-dr-red-mid transition-colors placeholder:text-[#666]"
+          className="w-full py-[14px] px-[18px] bg-white/7 border border-white/15 rounded-[10px] text-white text-[15px] outline-none focus:border-dr-red transition-colors placeholder:text-[#666]"
           type="tel"
           name="PHONE"
           placeholder={t("phone")}

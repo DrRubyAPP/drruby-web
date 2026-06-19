@@ -2,43 +2,66 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
-export default async function Navbar({ variant }: { variant: "home" | "sub" }) {
+export default async function Navbar() {
   const t = await getTranslations("nav");
   return (
-    <nav className="sticky top-12 z-50 border-b border-dr-border bg-dr-surface/95 backdrop-blur-xl px-5 md:px-10 h-16 flex items-center justify-between">
+    <nav className="bg-dr-white border-b border-dr-border h-16 flex items-center justify-between px-6 md:px-12 sticky top-0 z-50">
       <Link
         href="/"
-        className="text-xl font-bold tracking-tight text-dr-fg no-underline"
+        className="font-serif text-[22px] text-dr-ink no-underline leading-none"
       >
         Dr<span className="text-dr-red">Ruby</span>.ai
       </Link>
 
-      {variant === "home" ? (
-        <>
-          <span className="hidden sm:inline text-[13px] text-dr-muted absolute left-1/2 -translate-x-1/2">
-            {t("tagline")}
-          </span>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <Link
-              href="/#join-home"
-              className="bg-dr-red text-white py-2 px-5 rounded-lg text-sm font-semibold no-underline hover:opacity-85 transition-opacity"
-            >
-              {t("getEarlyAccess")}
-            </Link>
-          </div>
-        </>
-      ) : (
-        <div className="flex items-center gap-2">
-          <ThemeToggle />
-          <Link
-            href="/"
-            className="text-sm font-medium text-dr-muted no-underline hover:text-dr-red transition-colors"
-          >
-            {t("back")}
-          </Link>
-        </div>
-      )}
+      {/* Desktop links */}
+      <div className="hidden md:flex items-center gap-8">
+        <Link
+          href="/"
+          className="text-[11px] font-normal tracking-[0.1em] text-dr-mid no-underline hover:text-dr-ink transition-colors"
+        >
+          {t("howItWorks")}
+        </Link>
+        <Link
+          href="/skin"
+          className="text-[11px] font-normal tracking-[0.1em] text-dr-mid no-underline hover:text-dr-ink transition-colors"
+        >
+          {t("skin")}
+        </Link>
+        <Link
+          href="/healthspan"
+          className="text-[11px] font-normal tracking-[0.1em] text-dr-mid no-underline hover:text-dr-ink transition-colors"
+        >
+          {t("healthspan")}
+        </Link>
+        <Link
+          href="/architecture"
+          className="text-[11px] font-normal tracking-[0.1em] text-dr-mid no-underline hover:text-dr-ink transition-colors"
+        >
+          {t("science")}
+        </Link>
+        <Link
+          href="/style-guide"
+          className="text-[11px] font-normal tracking-[0.1em] text-dr-mid no-underline hover:text-dr-ink transition-colors"
+        >
+          {t("styleGuide")}
+        </Link>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <ThemeToggle />
+        <Link
+          href="/waitlist"
+          className="hidden md:inline-block text-[10px] font-medium tracking-[0.1em] text-dr-ink border border-dr-border px-[18px] py-2 no-underline hover:border-dr-ink transition-colors"
+        >
+          {t("login")}
+        </Link>
+        <Link
+          href="/waitlist"
+          className="text-[10px] font-semibold tracking-[0.16em] uppercase bg-dr-red text-white px-5 py-2 no-underline hover:opacity-90 transition-opacity"
+        >
+          {t("getStarted")}
+        </Link>
+      </div>
     </nav>
   );
 }

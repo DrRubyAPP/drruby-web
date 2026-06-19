@@ -105,7 +105,7 @@ export default function WaitlistForm({
         <div className="bg-dr-off border border-dr-border rounded-[20px] p-9 shadow-[0_4px_40px_rgba(0,0,0,0.06)] text-center">
           <div className="text-2xl mb-3">&#10003;</div>
           <p className="text-lg font-semibold text-dr-fg mb-2">{msg}</p>
-          <p className="text-sm text-dr-muted">{t("successFollowup")}</p>
+          <p className="text-sm text-dr-mid">{t("successFollowup")}</p>
         </div>
       ) : (
         <form
@@ -115,7 +115,7 @@ export default function WaitlistForm({
           <h3 className="text-xl font-bold tracking-tight mb-1.5">
             {t("heading")}
           </h3>
-          <p className="text-sm text-dr-muted mb-6">
+          <p className="text-sm text-dr-mid mb-6">
             {subtitle.split(".")[0]}.
           </p>
 

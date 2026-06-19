@@ -1,5 +1,4 @@
 import { getTranslations } from "next-intl/server";
-import PageSwitcher from "@/components/common/PageSwitcher";
 import WaitlistForm from "@/components/forms/WaitlistForm";
 import Footer from "@/components/layout/Footer";
 import Navbar from "@/components/layout/Navbar";
@@ -17,8 +16,7 @@ export default async function HealthspanPage() {
 
   return (
     <>
-      <PageSwitcher />
-      <Navbar variant="sub" />
+      <Navbar />
 
       {/* SUB-HERO */}
       <div className="bg-[radial-gradient(ellipse_at_30%_0%,#fce8eb_0%,#f5f5f5_65%)] dark:bg-[radial-gradient(ellipse_at_30%_0%,#2a1419_0%,#0f0f0f_65%)] min-h-[80vh] flex items-center">
@@ -260,7 +258,7 @@ export default async function HealthspanPage() {
         </div>
       </section>
 
-      <Footer variant="sub" />
+      <Footer />
     </>
   );
 }
