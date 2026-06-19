@@ -17,7 +17,7 @@ export default async function AIReport() {
   const t = await getTranslations("skin.aiReport");
   return (
     <div className="bg-dr-white border border-dr-border p-5">
-      <div className="text-[10px] font-semibold tracking-[0.2em] uppercase text-dr-red mb-3.5 flex items-center gap-2">
+      <div className="text-[12px] font-semibold tracking-[0.2em] uppercase text-dr-red mb-3.5 flex items-center gap-2">
         <span className="block w-2.5 h-px bg-dr-red" />
         {t("title")}
       </div>
@@ -28,15 +28,15 @@ export default async function AIReport() {
             className={`flex gap-3 px-3 py-2.5 bg-dr-off border-l-2 ${LEVEL_BORDER[f.level]}`}
           >
             <div className="flex-1">
-              <div className="text-[12px] font-semibold text-dr-ink mb-0.5">
+              <div className="text-[14px] font-semibold text-dr-ink mb-0.5">
                 {f.title}
               </div>
-              <div className="text-[10px] text-dr-mid leading-[1.6]">
+              <div className="text-[12px] text-dr-mid leading-[1.6]">
                 {f.desc}
               </div>
             </div>
             <div
-              className={`text-[9px] font-bold tracking-[0.14em] uppercase px-1.5 py-0.5 h-fit flex-shrink-0 ${TAG_STYLE[f.level]}`}
+              className={`text-[11px] font-bold tracking-[0.14em] uppercase px-1.5 py-0.5 h-fit flex-shrink-0 ${TAG_STYLE[f.level]}`}
             >
               {f.tag}
             </div>
@@ -44,8 +44,8 @@ export default async function AIReport() {
         ))}
       </div>
       <div className="mt-3.5 pt-3 border-t border-dr-border flex justify-between items-center">
-        <span className="text-[10px] text-dr-mid">{t("basedOn")}</span>
-        <span className="text-[10px] font-semibold text-dr-red tracking-[0.12em] uppercase cursor-pointer">
+        <span className="text-[12px] text-dr-mid">{t("basedOn")}</span>
+        <span className="text-[12px] font-semibold text-dr-red tracking-[0.12em] uppercase cursor-pointer">
           {t("fullReport")}
         </span>
       </div>

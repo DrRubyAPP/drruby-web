@@ -4,13 +4,13 @@ import { getTranslations } from "next-intl/server";
 export default async function FinalCta() {
   const t = await getTranslations("waitlist");
   return (
-    <section className="relative bg-dr-ink overflow-hidden py-24 px-6 md:px-12">
+    <section className="relative bg-dr-wine overflow-hidden py-24 px-6 md:px-12">
       {/* Background gradient */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 70% 90% at 30% 60%, #1A1020 0%, #0D1520 50%, #0A0A0A 100%)",
+            "radial-gradient(ellipse 70% 90% at 30% 60%, #3D0A20 0%, #2A0815 50%, #2A050B 100%)",
         }}
       />
       {/* Decorative circles */}
@@ -38,7 +38,7 @@ export default async function FinalCta() {
       </div>
 
       <div className="relative z-3 max-w-[680px]">
-        <div className="text-[10px] font-semibold tracking-[0.32em] uppercase text-[rgba(200,16,46,0.65)] mb-[18px]">
+        <div className="text-[12px] font-semibold tracking-[0.32em] uppercase text-[rgba(200,16,46,0.65)] mb-[18px]">
           {t("finalCtaEyebrow")}
         </div>
         <h2 className="font-serif text-[40px] md:text-[52px] font-light text-white leading-[1.1] mb-5">
@@ -48,12 +48,12 @@ export default async function FinalCta() {
             ),
           })}
         </h2>
-        <p className="text-[13px] font-light text-white/55 leading-[1.9] max-w-[480px] mb-9">
+        <p className="text-[15px] font-light text-white/55 leading-[1.9] max-w-[480px] mb-9">
           {t("finalCtaSub")}
         </p>
         <Link
           href="#join"
-          className="inline-block text-[11px] font-semibold tracking-[0.18em] uppercase bg-dr-red text-white px-9 py-4 no-underline hover:opacity-90 transition-opacity"
+          className="inline-block text-[13px] font-semibold tracking-[0.18em] uppercase bg-dr-red text-white px-9 py-4 no-underline hover:opacity-90 transition-opacity"
         >
           {t("heroCtaPrimary")}
         </Link>

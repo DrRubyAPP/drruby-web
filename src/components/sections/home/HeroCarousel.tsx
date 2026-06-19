@@ -15,17 +15,17 @@ interface Slide {
 }
 
 const SLIDE_BGS = [
-  "radial-gradient(ellipse 80% 80% at 70% 50%, #2D0A12 0%, #1A1A1A 55%, #0D0D0D 100%)",
-  "radial-gradient(ellipse 70% 90% at 30% 60%, #1A1020 0%, #0D1520 50%, #0A0A0A 100%)",
-  "radial-gradient(ellipse 90% 70% at 60% 40%, #1F0808 0%, #1A1A1A 50%, #0A0A0A 100%)",
-  "radial-gradient(ellipse 60% 100% at 80% 50%, #0A1A12 0%, #111 50%, #0D0D0D 100%)",
+  "radial-gradient(ellipse 80% 80% at 70% 50%, #5E0E1C 0%, #3D0810 55%, #2A050B 100%)",
+  "radial-gradient(ellipse 70% 90% at 30% 60%, #3D0A20 0%, #2A0815 50%, #2A050B 100%)",
+  "radial-gradient(ellipse 90% 70% at 60% 40%, #4E0A0E 0%, #3D0810 50%, #2A050B 100%)",
+  "radial-gradient(ellipse 60% 100% at 80% 50%, #1A3A22 0%, #2A050B 50%, #2A050B 100%)",
 ];
 
 const SLIDE_OVERLAYS = [
-  "linear-gradient(to right, rgba(10,10,10,0.88) 0%, rgba(10,10,10,0.5) 45%, transparent 70%)",
-  "linear-gradient(to right, rgba(10,8,20,0.92) 0%, rgba(10,8,20,0.5) 45%, transparent 70%)",
-  "linear-gradient(to right, rgba(8,12,8,0.92) 0%, rgba(8,12,8,0.5) 45%, transparent 70%)",
-  "linear-gradient(to right, rgba(10,10,10,0.88) 0%, rgba(10,10,10,0.5) 45%, transparent 70%)",
+  "linear-gradient(to right, rgba(42,5,11,0.88) 0%, rgba(42,5,11,0.5) 45%, transparent 70%)",
+  "linear-gradient(to right, rgba(42,5,16,0.92) 0%, rgba(42,5,16,0.5) 45%, transparent 70%)",
+  "linear-gradient(to right, rgba(30,12,8,0.92) 0%, rgba(30,12,8,0.5) 45%, transparent 70%)",
+  "linear-gradient(to right, rgba(42,5,11,0.88) 0%, rgba(42,5,11,0.5) 45%, transparent 70%)",
 ];
 
 // Decorative art per slide: [circle1, circle2, optional extra]
@@ -103,7 +103,7 @@ export default function HeroCarousel() {
   }
 
   return (
-    <div className="relative h-[580px] overflow-hidden bg-dr-ink">
+    <div className="relative h-[580px] overflow-hidden bg-dr-wine">
       {/* Slides */}
       <div
         className="flex h-full transition-transform duration-800 ease-[cubic-bezier(0.77,0,0.175,1)]"
@@ -207,17 +207,17 @@ export default function HeroCarousel() {
                       background: "rgba(255,255,255,0.02)",
                     }}
                   >
-                    <div className="text-[10px] font-semibold tracking-[0.2em] uppercase text-[rgba(200,16,46,0.5)] mb-2">
+                    <div className="text-[12px] font-semibold tracking-[0.2em] uppercase text-[rgba(200,16,46,0.5)] mb-2">
                       Scientific Advisor
                     </div>
-                    <div className="font-serif italic text-[13px] text-white/50 leading-[1.7] mb-2.5">
+                    <div className="font-serif italic text-[15px] text-white/50 leading-[1.7] mb-2.5">
                       "DrRuby connects metabolic aging science to the consumer
                       for the first time."
                     </div>
-                    <div className="text-[10px] text-white/30 font-medium">
+                    <div className="text-[12px] text-white/30 font-medium">
                       Charles Brenner
                     </div>
-                    <div className="text-[10px] text-white/18">
+                    <div className="text-[12px] text-white/18">
                       Biochemist · NAD Biology
                     </div>
                   </div>
@@ -230,7 +230,7 @@ export default function HeroCarousel() {
               />
               {/* Content */}
               <div className="relative z-3 px-6 md:px-18 pb-12 md:pb-18 max-w-[640px]">
-                <div className="text-[10px] font-semibold tracking-[0.32em] uppercase text-[rgba(200,16,46,0.65)] mb-[18px]">
+                <div className="text-[12px] font-semibold tracking-[0.32em] uppercase text-[rgba(200,16,46,0.65)] mb-[18px]">
                   {slide.eyebrow}
                 </div>
                 <h2 className="font-serif text-[36px] md:text-[56px] font-light text-white leading-[1.08] mb-5">
@@ -240,20 +240,20 @@ export default function HeroCarousel() {
                     ),
                   })}
                 </h2>
-                <p className="text-[12px] font-light text-white/45 leading-[1.9] max-w-[420px] mb-8">
+                <p className="text-[14px] font-light text-white/45 leading-[1.9] max-w-[420px] mb-8">
                   {slide.subtitle}
                 </p>
                 <div className="flex gap-3 items-center">
                   <button
                     type="button"
-                    className="text-[11px] font-semibold tracking-[0.18em] uppercase bg-dr-red text-white px-7 py-3 border-none cursor-pointer hover:opacity-90 transition-opacity"
+                    className="text-[13px] font-semibold tracking-[0.18em] uppercase bg-dr-red text-white px-7 py-3 border-none cursor-pointer hover:opacity-90 transition-opacity"
                   >
                     {slide.ctaPrimary}
                   </button>
                   {slide.ctaGhost && (
                     <button
                       type="button"
-                      className="text-[11px] font-normal tracking-[0.1em] text-white/45 border border-white/12 px-6 py-3 bg-transparent cursor-pointer hover:text-white hover:border-white/30 transition-all"
+                      className="text-[13px] font-normal tracking-[0.1em] text-white/45 border border-white/12 px-6 py-3 bg-transparent cursor-pointer hover:text-white hover:border-white/30 transition-all"
                     >
                       {slide.ctaGhost}
                     </button>
@@ -301,7 +301,7 @@ export default function HeroCarousel() {
       </div>
 
       {/* Counter */}
-      <div className="absolute top-8 right-6 md:right-18 text-[10px] font-semibold tracking-[0.2em] text-white/20 z-10">
+      <div className="absolute top-8 right-6 md:right-18 text-[12px] font-semibold tracking-[0.2em] text-white/20 z-10">
         <span className="text-white/60">
           {String(current + 1).padStart(2, "0")}
         </span>{" "}

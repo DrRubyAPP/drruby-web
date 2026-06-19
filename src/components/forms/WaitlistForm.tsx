@@ -90,7 +90,7 @@ export default function WaitlistForm({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-start">
       <div>
-        <div className="text-xs font-semibold tracking-[1.5px] uppercase text-dr-red mb-3">
+        <div className="text-sm font-semibold tracking-[1.5px] uppercase text-dr-red mb-3">
           {t("eyebrow")}
         </div>
         <h2 className="text-[clamp(28px,4vw,42px)] font-bold tracking-tight leading-tight text-dr-fg mb-3">
@@ -123,7 +123,7 @@ export default function WaitlistForm({
             <div className="flex flex-col gap-1.5">
               <label
                 htmlFor="wf-fname"
-                className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555] dark:text-[#9a9a9a]"
+                className="text-sm font-semibold tracking-[0.5px] uppercase text-[#555] dark:text-[#9a9a9a]"
               >
                 {t("firstNameLabel")}
               </label>
@@ -140,7 +140,7 @@ export default function WaitlistForm({
             <div className="flex flex-col gap-1.5">
               <label
                 htmlFor="wf-email"
-                className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555] dark:text-[#9a9a9a]"
+                className="text-sm font-semibold tracking-[0.5px] uppercase text-[#555] dark:text-[#9a9a9a]"
               >
                 {t("emailLabel")}
               </label>
@@ -159,7 +159,7 @@ export default function WaitlistForm({
           <div className="flex flex-col gap-1.5 mb-3.5">
             <label
               htmlFor="wf-phone"
-              className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555] dark:text-[#9a9a9a]"
+              className="text-sm font-semibold tracking-[0.5px] uppercase text-[#555] dark:text-[#9a9a9a]"
             >
               {t("phoneLabel")}{" "}
               <span className="font-normal text-[#aaa]">
@@ -180,7 +180,7 @@ export default function WaitlistForm({
             <div className="flex flex-col gap-1.5 mb-3.5">
               <label
                 htmlFor="wf-age"
-                className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555] dark:text-[#9a9a9a]"
+                className="text-sm font-semibold tracking-[0.5px] uppercase text-[#555] dark:text-[#9a9a9a]"
               >
                 {t("ageLabel")}
               </label>
@@ -201,7 +201,7 @@ export default function WaitlistForm({
           )}
 
           <div className="flex flex-col gap-1.5 mb-3.5">
-            <span className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555] dark:text-[#9a9a9a]">
+            <span className="text-sm font-semibold tracking-[0.5px] uppercase text-[#555] dark:text-[#9a9a9a]">
               {showWinning
                 ? t("concernsLabelHealthspan")
                 : t("concernsLabelSkin")}
@@ -255,7 +255,7 @@ export default function WaitlistForm({
             <div className="flex flex-col gap-1.5 mb-3.5">
               <label
                 htmlFor="wf-spend"
-                className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555] dark:text-[#9a9a9a]"
+                className="text-sm font-semibold tracking-[0.5px] uppercase text-[#555] dark:text-[#9a9a9a]"
               >
                 {t("spendLabel")}
               </label>
@@ -279,7 +279,7 @@ export default function WaitlistForm({
             <div className="flex flex-col gap-1.5 mb-3.5">
               <label
                 htmlFor="wf-winning"
-                className="text-xs font-semibold tracking-[0.5px] uppercase text-[#555] dark:text-[#9a9a9a]"
+                className="text-sm font-semibold tracking-[0.5px] uppercase text-[#555] dark:text-[#9a9a9a]"
               >
                 {t("winningLabel")}
               </label>
@@ -298,7 +298,7 @@ export default function WaitlistForm({
             <p className="text-dr-red text-sm mb-3">{msg}</p>
           )}
 
-          <p className="text-xs text-[#aaa] leading-relaxed mb-4">
+          <p className="text-sm text-[#aaa] leading-relaxed mb-4">
             {t("privacy")}
           </p>
           <button

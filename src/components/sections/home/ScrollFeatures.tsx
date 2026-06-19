@@ -35,7 +35,7 @@ export default async function ScrollFeatures() {
   const items = t.raw("items") as ScrollItem[];
   return (
     <section className="bg-dr-off pt-14 pb-14 px-12 md:px-18 overflow-hidden">
-      <div className="text-[10px] font-semibold tracking-[0.24em] uppercase text-dr-red mb-2">
+      <div className="text-[12px] font-semibold tracking-[0.24em] uppercase text-dr-red mb-2">
         {t("label")}
       </div>
       <div className="font-serif text-[36px] font-light text-dr-ink mb-10">
@@ -60,7 +60,7 @@ export default async function ScrollFeatures() {
                 {IMG_LARGE_TEXT[i].text}
               </div>
               <div
-                className={`absolute bottom-3 left-4 text-[9px] font-semibold tracking-[0.2em] uppercase ${
+                className={`absolute bottom-3 left-4 text-[11px] font-semibold tracking-[0.2em] uppercase ${
                   IMG_LABELS[i].dark
                     ? "text-[rgba(0,0,0,0.25)]"
                     : "text-[rgba(255,255,255,0.3)]"
@@ -70,13 +70,13 @@ export default async function ScrollFeatures() {
               </div>
             </div>
             <div className="p-[22px] pb-6">
-              <div className="text-[10px] font-semibold tracking-[0.18em] uppercase text-dr-red mb-[7px]">
+              <div className="text-[12px] font-semibold tracking-[0.18em] uppercase text-dr-red mb-[7px]">
                 {item.tag}
               </div>
               <div className="font-serif text-[19px] font-normal text-dr-ink mb-[7px] leading-[1.2]">
                 {item.name}
               </div>
-              <div className="text-[11px] text-dr-mid font-light leading-[1.65]">
+              <div className="text-[13px] text-dr-mid font-light leading-[1.65]">
                 {item.desc}
               </div>
             </div>
@@ -84,7 +84,7 @@ export default async function ScrollFeatures() {
         ))}
         {/* SkinScope card */}
         <div className="flex-[0_0_300px] bg-dr-white border-r border-dr-border last:border-r-0">
-          <div className="h-[180px] bg-[#0A0A0A] p-0 overflow-hidden relative">
+          <div className="h-[180px] bg-dr-wine p-0 overflow-hidden relative">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/skinscope.jpg"
@@ -92,26 +92,26 @@ export default async function ScrollFeatures() {
               className="w-full h-full object-cover object-center"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
-            <div className="absolute top-2.5 right-3 text-[10px] font-bold tracking-[0.14em] bg-dr-red text-white py-[3px] px-2">
+            <div className="absolute top-2.5 right-3 text-[12px] font-bold tracking-[0.14em] bg-dr-red text-white py-[3px] px-2">
               $99
             </div>
-            <div className="absolute bottom-3 left-4 text-[9px] font-semibold tracking-[0.2em] uppercase text-[rgba(255,255,255,0.3)]">
+            <div className="absolute bottom-3 left-4 text-[11px] font-semibold tracking-[0.2em] uppercase text-[rgba(255,255,255,0.3)]">
               SkinScope Hardware
             </div>
           </div>
           <div className="p-[22px] pb-6">
-            <div className="text-[10px] font-semibold tracking-[0.18em] uppercase text-dr-red mb-[7px]">
+            <div className="text-[12px] font-semibold tracking-[0.18em] uppercase text-dr-red mb-[7px]">
               Go Deeper
             </div>
             <div className="font-serif text-[19px] font-normal text-dr-ink mb-[7px] leading-[1.2]">
               SkinScope Attachment
             </div>
-            <div className="text-[11px] text-dr-mid font-light leading-[1.65]">
+            <div className="text-[13px] text-dr-mid font-light leading-[1.65]">
               Unlock dermatoscope-grade precision. Polarized + multi-spectral
               analysis — DermLite quality at 1/20 the price. Clips onto any
               iPhone.
             </div>
-            <div className="mt-3 text-[10px] font-semibold tracking-[0.14em] uppercase text-dr-red cursor-pointer">
+            <div className="mt-3 text-[12px] font-semibold tracking-[0.14em] uppercase text-dr-red cursor-pointer">
               Learn More →
             </div>
           </div>

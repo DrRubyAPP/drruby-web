@@ -13,14 +13,14 @@ export default async function JenniferAnchor() {
         <div className="font-serif text-[20px] font-light text-dr-ink leading-[1.5] mb-2.5">
           &ldquo;{t("quote")}&rdquo;
         </div>
-        <div className="text-[10px] text-dr-mid">{t("who")}</div>
+        <div className="text-[12px] text-dr-mid">{t("who")}</div>
       </div>
       <div className="flex-shrink-0 text-left md:text-right">
-        <div className="text-[10px] text-dr-mid mb-1">{t("dayLabel")}</div>
+        <div className="text-[12px] text-dr-mid mb-1">{t("dayLabel")}</div>
         <div className="font-serif text-[22px] font-light text-dr-ink">
           {t("dayValue")}
         </div>
-        <div className="text-[10px] text-dr-mid">{t("daySub")}</div>
+        <div className="text-[12px] text-dr-mid">{t("daySub")}</div>
       </div>
     </div>
   );

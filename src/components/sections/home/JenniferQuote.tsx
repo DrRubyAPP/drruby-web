@@ -5,7 +5,7 @@ export default async function JenniferQuote() {
   return (
     <section className="bg-dr-white grid grid-cols-1 md:grid-cols-2 gap-0">
       <div className="p-16 md:px-18 border-r border-dr-border">
-        <div className="text-[10px] font-semibold tracking-[0.24em] uppercase text-dr-red mb-5">
+        <div className="text-[12px] font-semibold tracking-[0.24em] uppercase text-dr-red mb-5">
           {t("eyebrow")}
         </div>
         <div className="font-serif text-[80px] leading-[0.6] text-[rgba(200,16,46,0.12)] mb-3">
@@ -23,8 +23,8 @@ export default async function JenniferQuote() {
             J
           </div>
           <div>
-            <div className="text-[12px] font-medium text-dr-ink">{t("who")}</div>
-            <div className="text-[10px] text-dr-mid mt-0.5">{t("title")}</div>
+            <div className="text-[14px] font-medium text-dr-ink">{t("who")}</div>
+            <div className="text-[12px] text-dr-mid mt-0.5">{t("title")}</div>
           </div>
         </div>
       </div>
@@ -34,7 +34,7 @@ export default async function JenniferQuote() {
             em: (chunks) => <em className="italic text-dr-red">{chunks}</em>,
           })}
         </div>
-        <div className="text-[12px] font-light text-dr-mid leading-[1.9] mb-7">
+        <div className="text-[14px] font-light text-dr-mid leading-[1.9] mb-7">
           {t("n1Desc")}
         </div>
         <div className="flex gap-8 mt-2">
@@ -42,7 +42,7 @@ export default async function JenniferQuote() {
             <div className="font-serif text-[36px] font-light text-dr-ink">
               {t("stat1Val")}
             </div>
-            <div className="text-[10px] text-dr-mid mt-0.5 tracking-[0.06em]">
+            <div className="text-[12px] text-dr-mid mt-0.5 tracking-[0.06em]">
               {t("stat1Label")}
             </div>
           </div>
@@ -50,7 +50,7 @@ export default async function JenniferQuote() {
             <div className="font-serif text-[36px] font-light text-dr-ink">
               {t("stat2Val")}
             </div>
-            <div className="text-[10px] text-dr-mid mt-0.5 tracking-[0.06em]">
+            <div className="text-[12px] text-dr-mid mt-0.5 tracking-[0.06em]">
               {t("stat2Label")}
             </div>
           </div>
@@ -58,7 +58,7 @@ export default async function JenniferQuote() {
             <div className="font-serif text-[36px] font-light text-dr-ink">
               {t("stat3Val")}
             </div>
-            <div className="text-[10px] text-dr-mid mt-0.5 tracking-[0.06em]">
+            <div className="text-[12px] text-dr-mid mt-0.5 tracking-[0.06em]">
               {t("stat3Label")}
             </div>
           </div>

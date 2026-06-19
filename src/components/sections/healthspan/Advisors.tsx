@@ -13,7 +13,7 @@ export default async function Advisors() {
   const items = t.raw("items") as Advisor[];
   return (
     <section className="bg-dr-white py-9 px-10">
-      <div className="text-[10px] font-semibold tracking-[0.2em] uppercase text-dr-mid mb-1.5">
+      <div className="text-[12px] font-semibold tracking-[0.2em] uppercase text-dr-mid mb-1.5">
         {t("eyebrow")}
       </div>
       <div className="font-serif text-[22px] font-light text-dr-ink mb-6">
@@ -37,16 +37,16 @@ export default async function Advisors() {
                 {a.initials}
               </span>
             </div>
-            <div className="text-[10px] font-semibold tracking-[0.15em] uppercase text-dr-red mb-1">
+            <div className="text-[12px] font-semibold tracking-[0.15em] uppercase text-dr-red mb-1">
               {a.tag}
             </div>
             <div className="text-[14px] font-medium text-dr-ink mb-1">
               {a.name}
             </div>
-            <div className="text-[10px] text-dr-mid mb-3 leading-[1.5]">
+            <div className="text-[12px] text-dr-mid mb-3 leading-[1.5]">
               {a.role}
             </div>
-            <div className="text-[10px] text-dr-mid leading-[1.7] border-t border-dr-border pt-3">
+            <div className="text-[12px] text-dr-mid leading-[1.7] border-t border-dr-border pt-3">
               {a.advises}
             </div>
           </div>

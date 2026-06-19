@@ -56,7 +56,7 @@ export default function HomeCaptureForm() {
 
   return (
     <div className="max-w-[560px] mx-auto text-center">
-      <div className="text-xs font-semibold tracking-[1.5px] uppercase text-dr-red mb-3.5">
+      <div className="text-sm font-semibold tracking-[1.5px] uppercase text-dr-red mb-3.5">
         {t("eyebrow")}
       </div>
       <h2 className="text-[clamp(26px,3.5vw,40px)] font-bold tracking-tight leading-[1.15] text-white mb-3">
@@ -102,7 +102,7 @@ export default function HomeCaptureForm() {
           {status === "loading" ? t("submitting") : t("submit")}
         </button>
       </form>
-      <p className="text-[13px] text-[#555] mt-2">{t("footnote")}</p>
+      <p className="text-[15px] text-[#555] mt-2">{t("footnote")}</p>
     </div>
   );
 }

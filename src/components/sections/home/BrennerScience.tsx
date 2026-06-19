@@ -13,7 +13,7 @@ export default async function BrennerScience() {
     <section className="bg-dr-grey border-t border-dr-border">
       <div className="pt-14 px-12 md:px-18 grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
         <div>
-          <div className="text-[10px] font-semibold tracking-[0.28em] uppercase text-dr-red mb-3.5">
+          <div className="text-[12px] font-semibold tracking-[0.28em] uppercase text-dr-red mb-3.5">
             {t("eyebrow")}
           </div>
           <div className="font-serif text-[34px] font-light text-dr-ink leading-[1.2] mb-4">
@@ -21,7 +21,7 @@ export default async function BrennerScience() {
               em: (chunks) => <em className="italic">{chunks}</em>,
             })}
           </div>
-          <div className="text-[12px] font-light text-dr-mid leading-[1.9]">
+          <div className="text-[14px] font-light text-dr-mid leading-[1.9]">
             {t("desc")}
           </div>
         </div>
@@ -31,13 +31,13 @@ export default async function BrennerScience() {
               B
             </div>
             <div>
-              <div className="text-[12px] font-semibold text-dr-ink mb-0.5">
+              <div className="text-[14px] font-semibold text-dr-ink mb-0.5">
                 {t("advisor1Name")}
               </div>
-              <div className="text-[10px] text-dr-mid leading-[1.5] mb-2.5">
+              <div className="text-[12px] text-dr-mid leading-[1.5] mb-2.5">
                 {t("advisor1Role")}
               </div>
-              <div className="font-serif text-[13px] italic text-dr-mid leading-[1.7]">
+              <div className="font-serif text-[15px] italic text-dr-mid leading-[1.7]">
                 &ldquo;{t("advisor1Quote")}&rdquo;
               </div>
             </div>
@@ -47,13 +47,13 @@ export default async function BrennerScience() {
               J
             </div>
             <div>
-              <div className="text-[12px] font-semibold text-dr-ink mb-0.5">
+              <div className="text-[14px] font-semibold text-dr-ink mb-0.5">
                 {t("advisor2Name")}
               </div>
-              <div className="text-[10px] text-dr-mid leading-[1.5] mb-2.5">
+              <div className="text-[12px] text-dr-mid leading-[1.5] mb-2.5">
                 {t("advisor2Role")}
               </div>
-              <div className="font-serif text-[13px] italic text-dr-mid leading-[1.7]">
+              <div className="font-serif text-[15px] italic text-dr-mid leading-[1.7]">
                 &ldquo;{t("advisor2Quote")}&rdquo;
               </div>
             </div>
@@ -72,10 +72,10 @@ export default async function BrennerScience() {
             <div className="font-serif text-[32px] text-[rgba(200,16,46,0.15)] font-light mb-2 leading-none">
               {step.num}
             </div>
-            <div className="text-[12px] font-semibold text-dr-ink mb-1.5 tracking-[0.04em]">
+            <div className="text-[14px] font-semibold text-dr-ink mb-1.5 tracking-[0.04em]">
               {step.title}
             </div>
-            <div className="text-[11px] text-dr-mid leading-[1.65] font-light">
+            <div className="text-[13px] text-dr-mid leading-[1.65] font-light">
               {step.desc}
             </div>
             {i < steps.length - 1 && (

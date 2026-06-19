@@ -85,7 +85,7 @@ export default function MobileMenu() {
                   key={link.key}
                   href={link.href}
                   onClick={() => setOpen(false)}
-                  className="px-6 py-3.5 text-[13px] font-normal tracking-[0.08em] text-dr-ink no-underline hover:bg-dr-off transition-colors"
+                  className="px-6 py-3.5 text-[15px] font-normal tracking-[0.08em] text-dr-ink no-underline hover:bg-dr-off transition-colors"
                 >
                   {t(link.key)}
                 </Link>
@@ -95,14 +95,14 @@ export default function MobileMenu() {
               <Link
                 href="/waitlist"
                 onClick={() => setOpen(false)}
-                className="text-center text-[11px] font-semibold tracking-[0.16em] uppercase bg-dr-red text-white px-5 py-3 no-underline hover:opacity-90 transition-opacity"
+                className="text-center text-[13px] font-semibold tracking-[0.16em] uppercase bg-dr-red text-white px-5 py-3 no-underline hover:opacity-90 transition-opacity"
               >
                 {t("getStarted")}
               </Link>
               <Link
                 href="/waitlist"
                 onClick={() => setOpen(false)}
-                className="text-center text-[11px] font-medium tracking-[0.1em] text-dr-ink border border-dr-border px-5 py-3 no-underline hover:border-dr-ink transition-colors"
+                className="text-center text-[13px] font-medium tracking-[0.1em] text-dr-ink border border-dr-border px-5 py-3 no-underline hover:border-dr-ink transition-colors"
               >
                 {t("login")}
               </Link>

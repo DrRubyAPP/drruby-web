@@ -12,6 +12,8 @@
   --dr-border: #e8e5e2;
   --dr-mid: #888888;
   --dr-ink: #1a1a1a;
+  /* Deep wine: brand-tinted dark surface for hero/CTA sections (§2.1) */
+  --dr-wine: #3d0810;
 
   /* Semantic colours (§2.2) */
   --dr-success: #1f9e5a;
@@ -63,6 +65,7 @@
   --color-dr-border: var(--dr-border);
   --color-dr-mid: var(--dr-mid);
   --color-dr-ink: var(--dr-ink);
+  --color-dr-wine: var(--dr-wine);
   --color-dr-bg: var(--dr-bg);
   --color-dr-surface: var(--dr-surface);
   --color-dr-fg: var(--dr-fg);

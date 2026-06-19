@@ -12,10 +12,10 @@ export default async function BrennerQuote() {
         <div className="flex items-center gap-3.5">
           <div className="w-9 h-px bg-dr-red" />
           <div>
-            <div className="text-[11px] font-semibold text-white tracking-[0.15em] uppercase">
+            <div className="text-[13px] font-semibold text-white tracking-[0.15em] uppercase">
               {t("name")}
             </div>
-            <div className="text-[10px] text-white/35 mt-0.5">{t("role")}</div>
+            <div className="text-[12px] text-white/35 mt-0.5">{t("role")}</div>
           </div>
         </div>
       </div>

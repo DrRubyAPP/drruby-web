@@ -5,7 +5,7 @@ export default async function ProductRecs() {
   const t = await getTranslations("skin.products");
   return (
     <div className="bg-dr-white border border-dr-border p-5">
-      <div className="text-[10px] font-semibold tracking-[0.2em] uppercase text-dr-red mb-3.5 flex items-center gap-2">
+      <div className="text-[12px] font-semibold tracking-[0.2em] uppercase text-dr-red mb-3.5 flex items-center gap-2">
         <span className="block w-2.5 h-px bg-dr-red" />
         {t("title")}
       </div>
@@ -20,9 +20,9 @@ export default async function ProductRecs() {
             }`}
           >
             <div className="text-[18px] mb-2">{p.icon}</div>
-            <div className="text-[12px] font-medium text-dr-ink">{p.name}</div>
-            <div className="text-[10px] text-dr-mid my-1">{p.reason}</div>
-            <div className="text-[11px] font-bold text-dr-red">
+            <div className="text-[14px] font-medium text-dr-ink">{p.name}</div>
+            <div className="text-[12px] text-dr-mid my-1">{p.reason}</div>
+            <div className="text-[13px] font-bold text-dr-red">
               {p.match !== null ? `Match ${p.match}` : p.price}
             </div>
           </div>
