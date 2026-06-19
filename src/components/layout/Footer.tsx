@@ -13,7 +13,9 @@ export default async function Footer() {
           </div>
           <h2 className="font-serif text-[40px] font-light leading-[1.15] text-dr-white">
             {t.rich("ctaTitle", {
-              em: (chunks) => <em className="italic text-[#F0C0C8]">{chunks}</em>,
+              em: (chunks) => (
+                <em className="italic text-[#F0C0C8]">{chunks}</em>
+              ),
             })}
           </h2>
         </div>
@@ -47,18 +49,6 @@ export default async function Footer() {
             className="text-[10px] text-dr-white/18 tracking-[0.08em] no-underline hover:text-dr-white/40 transition-colors"
           >
             {t("privacy")}
-          </Link>
-          <Link
-            href="/architecture"
-            className="text-[10px] text-dr-white/18 tracking-[0.08em] no-underline hover:text-dr-white/40 transition-colors"
-          >
-            {t("science")}
-          </Link>
-          <Link
-            href="/style-guide"
-            className="text-[10px] text-dr-white/18 tracking-[0.08em] no-underline hover:text-dr-white/40 transition-colors"
-          >
-            {t("styleGuide")}
           </Link>
           <span className="text-[10px] text-dr-white/18 tracking-[0.08em]">
             {t("copyright")}

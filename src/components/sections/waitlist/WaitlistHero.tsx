@@ -63,9 +63,7 @@ export default async function WaitlistHero() {
         </div>
         <h1 className="font-serif text-[44px] md:text-[56px] font-light text-white leading-[1.08] mb-5">
           {t.rich("heroTitle", {
-            em: (chunks) => (
-              <em className="italic text-[#F0C0C8]">{chunks}</em>
-            ),
+            em: (chunks) => <em className="italic text-[#F0C0C8]">{chunks}</em>,
           })}
         </h1>
         <p className="text-[13px] font-light text-white/55 leading-[1.9] max-w-[440px] mb-9">
@@ -79,7 +77,7 @@ export default async function WaitlistHero() {
             {t("heroCtaPrimary")}
           </Link>
           <Link
-            href="/architecture"
+            href="/"
             className="text-[11px] font-normal tracking-[0.1em] text-white/55 border border-white/15 px-6 py-3 no-underline hover:text-white hover:border-white/30 transition-all"
           >
             {t("heroCtaGhost")}

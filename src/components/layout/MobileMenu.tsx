@@ -6,15 +6,13 @@ import { useEffect, useState } from "react";
 
 interface NavLink {
   href: string;
-  key: "howItWorks" | "skin" | "healthspan" | "science" | "styleGuide";
+  key: "howItWorks" | "skin" | "healthspan";
 }
 
 const LINKS: NavLink[] = [
   { href: "/", key: "howItWorks" },
   { href: "/skin", key: "skin" },
   { href: "/healthspan", key: "healthspan" },
-  { href: "/architecture", key: "science" },
-  { href: "/style-guide", key: "styleGuide" },
 ];
 
 export default function MobileMenu() {

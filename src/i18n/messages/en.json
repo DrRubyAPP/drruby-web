@@ -3,8 +3,6 @@
     "howItWorks": "How it works",
     "skin": "Skin",
     "healthspan": "Healthspan",
-    "science": "Science",
-    "styleGuide": "Style Guide",
     "login": "Log in",
     "getStarted": "Get Started",
     "menu": "Menu",
@@ -17,8 +15,6 @@
     "ctaGhost": "Already a member? Log in →",
     "ctaFine": "No credit card required · Data stays on your device · Backed by science, not wellness trends",
     "privacy": "Privacy",
-    "science": "Science",
-    "styleGuide": "Style Guide",
     "copyright": "© 2026 DrRuby"
   },
   "home": {
@@ -440,19 +436,43 @@
       "cols": [
         {
           "title": "Skin Biology",
-          "items": ["Brenner Inflammation Index", "Pigment Load Score", "Collagen Kinetics", "UV Damage Trend", "Barrier Function"]
+          "items": [
+            "Brenner Inflammation Index",
+            "Pigment Load Score",
+            "Collagen Kinetics",
+            "UV Damage Trend",
+            "Barrier Function"
+          ]
         },
         {
           "title": "Energy & Recovery",
-          "items": ["Self-reported energy trend", "Sleep quality (via wearable)", "HRV pattern", "Exercise recovery score", "NAD-relevant markers"]
+          "items": [
+            "Self-reported energy trend",
+            "Sleep quality (via wearable)",
+            "HRV pattern",
+            "Exercise recovery score",
+            "NAD-relevant markers"
+          ]
         },
         {
           "title": "Women's Health",
-          "items": ["Hormonal cycle rhythm", "Perimenopause signals", "Mood + cognition log", "Skin-hormone correlation", "Supplement timing"]
+          "items": [
+            "Hormonal cycle rhythm",
+            "Perimenopause signals",
+            "Mood + cognition log",
+            "Skin-hormone correlation",
+            "Supplement timing"
+          ]
         },
         {
           "title": "Protocol Intelligence",
-          "items": ["Stack evaluation", "Redundancy detection", "Gap identification", "Evidence strength rating", "Doctor-ready summaries"]
+          "items": [
+            "Stack evaluation",
+            "Redundancy detection",
+            "Gap identification",
+            "Evidence strength rating",
+            "Doctor-ready summaries"
+          ]
         }
       ]
     },
@@ -469,128 +489,6 @@
       "primary": "Go to My Dashboard →",
       "ghost": "← View My Skin Data"
     }
-  },
-  "architecture": {
-    "siteTitle": "Information <em>Architecture</em>",
-    "siteSub": "页面结构与用户流",
-    "siteStructureLabel": "Overall Site Structure — 整体页面结构",
-    "publicLabel": "PUBLIC — No Login Required",
-    "publicPages": ["Homepage", "Skin Information", "Healthspan Information", "For Clinics", "Science / About", "Pricing", "Login / Register"],
-    "userPortalLabel": "USER PORTAL — Logged In (Consumer)",
-    "userPortalItems": [
-      { "name": "Dashboard", "desc": "Scores, alerts, recent activity" },
-      { "name": "Health Profile", "desc": "Skin + Healthspan data, history" },
-      { "name": "AI Reports", "desc": "Analysis, findings, PDF export" },
-      { "name": "AI Coach · UI Layer", "desc": "Presents Insight Engine outputs in natural language. Proactive push + conversational logging. Not a chatbot — a UI for the data engine.", "highlight": true },
-      { "name": "Clinic + Shop", "desc": "Book, buy, track" }
-    ],
-    "clinicPortalLabel": "CLINIC PORTAL — Logged In (B2B)",
-    "clinicPortalItems": [
-      { "name": "Dashboard", "desc": "KPIs, today's schedule" },
-      { "name": "Patients", "desc": "List, records, DrRuby data" },
-      { "name": "Reports", "desc": "AI draft, review, send" },
-      { "name": "Appointments", "desc": "Calendar, manage, notify" },
-      { "name": "Finance", "desc": "Revenue, commissions, payouts" }
-    ],
-    "techLabel": "AI Technical Architecture — 五层系统架构",
-    "techIntro": "The product is the Insight Engine (Layer 3). The chatbot is the UI. RAG knowledge base is table stakes — not the moat.",
-    "layers": [
-      {
-        "num": "Layer 1",
-        "name": "Evidence Graph · RAG Knowledge Base",
-        "desc": "Structured scientific claims from Brenner (NAD+, metabolism), Gunter (women's health, pending), dermatology literature · evidence_level tiers: rct / clinical_guideline / expert_opinion / emerging · PostgreSQL + pgvector · Not the moat — table stakes",
-        "tag": "Table stakes"
-      },
-      {
-        "num": "Layer 2",
-        "name": "User Longitudinal Data · On-Device",
-        "desc": "Labs, wearables, skin photos, symptoms, interventions, outcomes — stored locally encrypted (Core Data / Room + SQLCipher) · Tiered consent: Tier 0 default on-device, Tier 1 opt-in encrypted upload, Tier 2 opt-in research contribution",
-        "tag": "Input to moat"
-      },
-      {
-        "num": "Layer 3",
-        "name": "DrRuby Insight Engine · N-of-1 Analytics",
-        "nameSuffix": "← THE MOAT",
-        "desc": "Change detection (moving average, z-score) · Intervention Graph (what worked for this user, with lag and confidence) · Proprietary scores: Skin Age Score, Metabolic Score, Recovery Score, Inflammation Score, Hormonal Stability Index · V1: rule-based + statistical · V2: Bayesian attribution · Patent candidates: scoring methodology + Intervention Graph structure",
-        "tag": "IP · File patent",
-        "moat": true
-      },
-      {
-        "num": "Layer 4",
-        "name": "Recommendation Engine",
-        "desc": "Combines Layer 3 insights + Layer 1 evidence → structured recommendation object · This runs before the LLM, not inside it · Output is structured data, not prose",
-        "tag": "Differentiator"
-      },
-      {
-        "num": "Layer 5",
-        "name": "Conversation Interface · UI Only",
-        "desc": "LLM API (Claude / GPT-4o) translates Layer 3+4 structured output into natural language + citations · Proactive push when Insight Engine detects change · Conversational data logging (\"I started NR today\" → writes to Intervention Graph) · Hybrid UI: score cards + chat · FDA guardrails embedded in system prompt",
-        "tag": "UI, not product"
-      }
-    ],
-    "moatNote": "Why this can't be replicated in 3 weeks: Layer 1 (RAG on PubMed) can. Layers 3–4 cannot — because they require months of a user's longitudinal data and the Intervention Graph that grows with it. The data is the moat. Brenner's role is Scientific Advisory Board — he defines scoring methodology, not claim validation.",
-    "flowLabel": "User Flow — 两个用户旅程",
-    "consumerFlow": {
-      "label": "Consumer Journey",
-      "steps": [
-        { "name": "Visit Homepage", "note": "首页" },
-        { "name": "Choose Skin or Healthspan", "note": "双入口选择" },
-        { "name": "Register / Onboard", "note": "注册", "highlight": true },
-        { "name": "Upload Data / Connect Devices", "note": "数据接入" },
-        { "name": "Receive AI Report", "note": "AI分析" },
-        { "name": "Chat with AI Coach", "note": "个人Coach" },
-        { "name": "Book Clinic / Buy Products", "note": "预约 + 购买" }
-      ]
-    },
-    "clinicFlow": {
-      "label": "Clinic Journey",
-      "steps": [
-        { "name": "Apply / Onboard as Clinic", "note": "合作申请" },
-        { "name": "Set Up Clinic Profile", "note": "诊所资料" },
-        { "name": "Patient Requests Appointment", "note": "患者预约", "highlight": true },
-        { "name": "Review Patient DrRuby Data", "note": "患者数据" },
-        { "name": "Conduct Appointment", "note": "就诊" },
-        { "name": "Generate AI Report for Patient", "note": "AI报告" },
-        { "name": "Track Revenue & Payouts", "note": "收益管理" }
-      ]
-    }
-  },
-  "styleGuide": {
-    "title": "Style <em>Guide</em>",
-    "sub": "颜色 · 字体 · 组件",
-    "paletteLabel": "Color Palette — 品牌颜色",
-    "palette": [
-      { "name": "Primary Red", "hex": "#C8102E" },
-      { "name": "Deep Ink", "hex": "#1A1A1A" },
-      { "name": "White", "hex": "#FFFFFF" },
-      { "name": "Off White", "hex": "#F8F7F5" },
-      { "name": "Light Grey", "hex": "#F0EFED" },
-      { "name": "Border Grey", "hex": "#E8E5E2" },
-      { "name": "Mid Grey", "hex": "#888888" },
-      { "name": "Success Green", "hex": "#1F9E5A" },
-      { "name": "Warning Amber", "hex": "#B86A00" }
-    ],
-    "typoLabel": "Typography — 字体系统",
-    "typoSamples": [
-      { "metaLine1": "Cormorant Garamond 300", "metaLine2": "Display / Hero", "text": "Know your body.", "variant": "xl" },
-      { "metaLine1": "Cormorant Garamond 300", "metaLine2": "Section Titles", "text": "Personal Health Intelligence", "variant": "lg" },
-      { "metaLine1": "Jost 400", "metaLine2": "Body / Cards", "text": "AI-powered analysis, personalized for you.", "variant": "md" },
-      { "metaLine1": "Jost 300", "metaLine2": "Body Text", "text": "Biomarker tracking and personalized protocols to help you live better — grounded in science.", "variant": "sm" },
-      { "metaLine1": "Jost 600 Uppercase", "metaLine2": "Labels / Tags", "text": "Skin Intelligence · AI Analysis · Healthspan", "variant": "cap" }
-    ],
-    "mobileLabel": "Mobile Preview — 移动端适配",
-    "mobilePreview": {
-      "heroTitle": "Know your body. Before it speaks.",
-      "choiceSkin": "Skin",
-      "choiceHealth": "Healthspan"
-    },
-    "mobileNotes": [
-      { "num": "1", "strong": "顶部导航", "text": " — 极简 hamburger 菜单，品牌 logo 居中或靠左。深色背景与品牌保持一致。" },
-      { "num": "2", "strong": "Hero 全宽", "text": " — 大图 + 斜体品牌语，滑动进入双入口卡片选择。" },
-      { "num": "3", "strong": "Skin / Healthspan 双卡", "text": " — 移动端横排，各占 50%，点击进入对应功能流程。" },
-      { "num": "4", "strong": "底部导航栏", "text": " — 5 个核心入口：Home · Dashboard · AI Coach · Clinics · Profile。固定在屏幕底部。" },
-      { "num": "5", "strong": "数据隐私", "text": " — AI Coach 数据存储在设备本地 (on-device)，在 Profile 页面展示隐私说明。" }
-    ]
   },
   "waitlist": {
     "heroEyebrow": "Join the Waitlist",
@@ -623,11 +521,17 @@
     "formSubheading": "Join the waitlist — free skin preview included at launch.",
     "ageOptions": ["Under 30", "30–39", "40–49", "50–59", "60+"],
     "skinConcerns": [
-      { "value": "inflammation", "label": "Inflammation / redness / barrier issues" },
+      {
+        "value": "inflammation",
+        "label": "Inflammation / redness / barrier issues"
+      },
       { "value": "melasma", "label": "Melasma or hyperpigmentation" },
       { "value": "aging", "label": "Skin aging / collagen loss" },
       { "value": "hormonal", "label": "Hormonal skin changes (perimenopause)" },
-      { "value": "products", "label": "I want to know if my products are working" }
+      {
+        "value": "products",
+        "label": "I want to know if my products are working"
+      }
     ],
     "faqEyebrow": "Questions, answered",
     "faqTitle": "Before you <em>join.</em>",

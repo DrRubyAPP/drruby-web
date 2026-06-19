@@ -5,8 +5,6 @@ export const NAV_PAGES = [
   { key: "home", href: "/" },
   { key: "skin", href: "/skin" },
   { key: "healthspan", href: "/healthspan" },
-  { key: "architecture", href: "/architecture" },
-  { key: "styleGuide", href: "/style-guide" },
   { key: "waitlist", href: "/waitlist" },
 ] as const;
 

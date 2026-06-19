@@ -34,18 +34,6 @@ export default async function Navbar() {
         >
           {t("healthspan")}
         </Link>
-        <Link
-          href="/architecture"
-          className="text-[12px] font-normal tracking-[0.1em] text-dr-mid no-underline hover:text-dr-ink transition-colors"
-        >
-          {t("science")}
-        </Link>
-        <Link
-          href="/style-guide"
-          className="text-[12px] font-normal tracking-[0.1em] text-dr-mid no-underline hover:text-dr-ink transition-colors"
-        >
-          {t("styleGuide")}
-        </Link>
       </div>
 
       <div className="flex items-center gap-3">
