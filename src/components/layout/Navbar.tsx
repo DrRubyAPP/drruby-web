@@ -40,6 +40,12 @@ export default async function Navbar() {
         >
           {t("portal")}
         </Link>
+        <Link
+          href="/clinic"
+          className="text-[14px] font-normal tracking-[0.1em] text-dr-mid no-underline hover:text-dr-ink transition-colors"
+        >
+          {t("clinic")}
+        </Link>
       </div>
 
       <div className="flex items-center gap-3">

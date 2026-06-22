@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 
 interface NavLink {
   href: string;
-  key: "howItWorks" | "skin" | "healthspan" | "portal";
+  key: "howItWorks" | "skin" | "healthspan" | "portal" | "clinic";
 }
 
 const LINKS: NavLink[] = [
@@ -14,6 +14,7 @@ const LINKS: NavLink[] = [
   { href: "/skin", key: "skin" },
   { href: "/healthspan", key: "healthspan" },
   { href: "/portal", key: "portal" },
+  { href: "/clinic", key: "clinic" },
 ];
 
 export default function MobileMenu() {

@@ -123,3 +123,84 @@ body {
   -webkit-font-smoothing: antialiased;
   font-size: 16px;
 }
+
+/* ── Clinic portal font scaling ──
+   Clinic portal pages define font sizes inline as arbitrary Tailwind
+   utilities (text-[Npx]). These scoped overrides multiply every size
+   by --clinic-fs-scale without touching the JSX. !important is needed
+   to reliably beat Tailwind v4's layered utilities in all build modes.
+   Adjust the variable to change the scale. Independent of user-portal. */
+.clinic-portal {
+  --clinic-fs-scale: 1.3;
+}
+
+.clinic-portal .text-\[7px\]  { font-size: calc(7px  * var(--clinic-fs-scale)) !important; }
+.clinic-portal .text-\[8px\]  { font-size: calc(8px  * var(--clinic-fs-scale)) !important; }
+.clinic-portal .text-\[9px\]  { font-size: calc(9px  * var(--clinic-fs-scale)) !important; }
+.clinic-portal .text-\[10px\] { font-size: calc(10px * var(--clinic-fs-scale)) !important; }
+.clinic-portal .text-\[11px\] { font-size: calc(11px * var(--clinic-fs-scale)) !important; }
+.clinic-portal .text-\[12px\] { font-size: calc(12px * var(--clinic-fs-scale)) !important; }
+.clinic-portal .text-\[14px\] { font-size: calc(14px * var(--clinic-fs-scale)) !important; }
+.clinic-portal .text-\[16px\] { font-size: calc(16px * var(--clinic-fs-scale)) !important; }
+.clinic-portal .text-\[17px\] { font-size: calc(17px * var(--clinic-fs-scale)) !important; }
+.clinic-portal .text-\[18px\] { font-size: calc(18px * var(--clinic-fs-scale)) !important; }
+.clinic-portal .text-\[20px\] { font-size: calc(20px * var(--clinic-fs-scale)) !important; }
+.clinic-portal .text-\[22px\] { font-size: calc(22px * var(--clinic-fs-scale)) !important; }
+.clinic-portal .text-\[24px\] { font-size: calc(24px * var(--clinic-fs-scale)) !important; }
+.clinic-portal .text-\[26px\] { font-size: calc(26px * var(--clinic-fs-scale)) !important; }
+.clinic-portal .text-\[28px\] { font-size: calc(28px * var(--clinic-fs-scale)) !important; }
+.clinic-portal .text-\[32px\] { font-size: calc(32px * var(--clinic-fs-scale)) !important; }
+.clinic-portal .text-\[36px\] { font-size: calc(36px * var(--clinic-fs-scale)) !important; }
+
+@media (min-width: 768px) {
+  .clinic-portal .md\:text-\[32px\] { font-size: calc(32px * var(--clinic-fs-scale)) !important; }
+}
+
+/* ── User portal font scaling ──
+   Same approach as clinic-portal but scoped to user-portal with its
+   own --user-fs-scale variable, so the two portals can be tuned
+   independently. */
+.user-portal {
+  --user-fs-scale: 1.1;
+}
+
+.user-portal .text-\[8px\]  { font-size: calc(8px  * var(--user-fs-scale)) !important; }
+.user-portal .text-\[9px\]  { font-size: calc(9px  * var(--user-fs-scale)) !important; }
+.user-portal .text-\[10px\] { font-size: calc(10px * var(--user-fs-scale)) !important; }
+.user-portal .text-\[11px\] { font-size: calc(11px * var(--user-fs-scale)) !important; }
+.user-portal .text-\[12px\] { font-size: calc(12px * var(--user-fs-scale)) !important; }
+.user-portal .text-\[13px\] { font-size: calc(13px * var(--user-fs-scale)) !important; }
+.user-portal .text-\[14px\] { font-size: calc(14px * var(--user-fs-scale)) !important; }
+.user-portal .text-\[16px\] { font-size: calc(16px * var(--user-fs-scale)) !important; }
+.user-portal .text-\[18px\] { font-size: calc(18px * var(--user-fs-scale)) !important; }
+.user-portal .text-\[19px\] { font-size: calc(19px * var(--user-fs-scale)) !important; }
+.user-portal .text-\[20px\] { font-size: calc(20px * var(--user-fs-scale)) !important; }
+.user-portal .text-\[22px\] { font-size: calc(22px * var(--user-fs-scale)) !important; }
+.user-portal .text-\[24px\] { font-size: calc(24px * var(--user-fs-scale)) !important; }
+.user-portal .text-\[26px\] { font-size: calc(26px * var(--user-fs-scale)) !important; }
+.user-portal .text-\[28px\] { font-size: calc(28px * var(--user-fs-scale)) !important; }
+.user-portal .text-\[32px\] { font-size: calc(32px * var(--user-fs-scale)) !important; }
+.user-portal .text-\[36px\] { font-size: calc(36px * var(--user-fs-scale)) !important; }
+.user-portal .text-\[40px\] { font-size: calc(40px * var(--user-fs-scale)) !important; }
+.user-portal .text-\[44px\] { font-size: calc(44px * var(--user-fs-scale)) !important; }
+
+@media (min-width: 768px) {
+  .user-portal .md\:text-\[32px\] { font-size: calc(32px * var(--user-fs-scale)) !important; }
+  .user-portal .md\:text-\[40px\] { font-size: calc(40px * var(--user-fs-scale)) !important; }
+  .user-portal .md\:text-\[44px\] { font-size: calc(44px * var(--user-fs-scale)) !important; }
+}
+
+/* ── Portal text contrast boost ──
+   Darken light-colored text in both portals for better readability.
+   --dr-mid (#888 → #5a5a5a) is the grey used for secondary text on
+   light surfaces; lifting it improves contrast everywhere text-dr-mid
+   appears (captions, table headers, subtitles, meta). Also bumps the
+   faintest white-opacity text on dark sidebar/hero sections. */
+.clinic-portal,
+.user-portal {
+  --dr-mid: #5a5a5a;
+}
+
+.clinic-portal .text-white\/15, .user-portal .text-white\/15 { color: #ffffff66 !important; }
+.clinic-portal .text-white\/20, .user-portal .text-white\/20 { color: #ffffff73 !important; }
+.clinic-portal .text-white\/35, .user-portal .text-white\/35 { color: #ffffff8c !important; }
