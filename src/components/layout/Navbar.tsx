@@ -34,6 +34,12 @@ export default async function Navbar() {
         >
           {t("healthspan")}
         </Link>
+        <Link
+          href="/portal"
+          className="text-[14px] font-normal tracking-[0.1em] text-dr-mid no-underline hover:text-dr-ink transition-colors"
+        >
+          {t("portal")}
+        </Link>
       </div>
 
       <div className="flex items-center gap-3">
