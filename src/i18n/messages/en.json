@@ -624,7 +624,8 @@
     },
     "topbar": {
       "sourcesConnected": "{count} sources connected",
-      "primaryAction": "Run New Analysis"
+      "primaryAction": "Run New Analysis",
+      "onboarding": "Onboarding"
     },
     "common": {
       "back": "← Back",
