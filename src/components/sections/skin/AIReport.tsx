@@ -16,7 +16,7 @@ const TAG_STYLE: Record<string, string> = {
 export default async function AIReport() {
   const t = await getTranslations("skin.aiReport");
   return (
-    <div className="bg-dr-white border border-dr-border p-5">
+    <div className="bg-dr-white border border-dr-border p-4 md:p-5">
       <div className="text-[12px] font-semibold tracking-[0.2em] uppercase text-dr-red mb-3.5 flex items-center gap-2">
         <span className="block w-2.5 h-px bg-dr-red" />
         {t("title")}

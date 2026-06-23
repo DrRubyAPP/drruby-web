@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Jost } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale } from "next-intl/server";
@@ -26,6 +26,12 @@ export const metadata: Metadata = {
   title: "DrRuby.ai — Women's Healthspan Intelligence",
   description:
     "DrRuby is a women's healthspan intelligence platform. We enter through skin — and connect it to everything else that's shifting in your body.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default async function RootLayout({

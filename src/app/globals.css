@@ -84,6 +84,15 @@ html {
   scroll-behavior: smooth;
 }
 
+/* ── Hide scrollbar for horizontal scroll rows (mobile mode switches, etc.) ── */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* ── Skin scan line animation ── */
 @keyframes scanline {
   0% { top: 10%; opacity: 0; }

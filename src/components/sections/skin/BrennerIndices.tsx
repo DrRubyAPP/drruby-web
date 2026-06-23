@@ -17,17 +17,17 @@ export default async function BrennerIndices() {
   const t = await getTranslations("skin.indices");
   return (
     <>
-      <div className="pt-5 px-7 bg-dr-off">
+      <div className="pt-5 px-4 md:px-7 bg-dr-off">
         <div className="text-[12px] font-semibold tracking-[0.2em] uppercase text-dr-red mb-3 flex items-center gap-2">
           <span className="block w-3 h-px bg-dr-red" />
           {t("sectionLabel")}
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-dr-border mx-7">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-dr-border mx-4 md:mx-7">
         {BRENNER_INDICES.map((idx, i) => (
           <div
             key={idx.id}
-            className={`p-7 ${i === 1 ? "bg-dr-off" : "bg-dr-white"}`}
+            className={`p-5 md:p-7 ${i === 1 ? "bg-dr-off" : "bg-dr-white"}`}
           >
             <div className="text-[12px] font-semibold tracking-[0.22em] uppercase text-dr-red mb-2.5">
               {idx.eyebrow}
@@ -62,7 +62,7 @@ export default async function BrennerIndices() {
           </div>
         ))}
       </div>
-      <div className="mx-7 mb-0 py-2.5 px-3.5 bg-[rgba(200,16,46,0.04)] border border-[rgba(200,16,46,0.1)] border-t-0">
+      <div className="mx-4 md:mx-7 mb-0 py-2.5 px-3.5 bg-[rgba(200,16,46,0.04)] border border-[rgba(200,16,46,0.1)] border-t-0">
         <span className="text-[12px] text-dr-mid">
           🔬{" "}
           <strong className="text-dr-ink">{t("scopeNote")}</strong>{" "}

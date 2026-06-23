@@ -4,7 +4,7 @@ import { PRODUCT_RECS } from "@/config/skin-mock";
 export default async function ProductRecs() {
   const t = await getTranslations("skin.products");
   return (
-    <div className="bg-dr-white border border-dr-border p-5">
+    <div className="bg-dr-white border border-dr-border p-4 md:p-5">
       <div className="text-[12px] font-semibold tracking-[0.2em] uppercase text-dr-red mb-3.5 flex items-center gap-2">
         <span className="block w-2.5 h-px bg-dr-red" />
         {t("title")}

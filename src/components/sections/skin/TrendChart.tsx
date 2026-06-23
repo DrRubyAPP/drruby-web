@@ -4,7 +4,7 @@ import { TREND_DATA } from "@/config/skin-mock";
 export default async function TrendChart() {
   const t = await getTranslations("skin.trend");
   return (
-    <div className="bg-dr-white border border-dr-border p-6">
+    <div className="bg-dr-white border border-dr-border p-4 md:p-6">
       <div className="flex items-center justify-between mb-5">
         <div className="text-[13px] font-semibold text-dr-ink">{t("title")}</div>
         <div className="flex gap-1">
@@ -67,7 +67,7 @@ export default async function TrendChart() {
           </div>
         ))}
       </div>
-      <div className="flex gap-4 mt-2.5">
+      <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-2.5">
         <div className="flex items-center gap-1.5">
           <div className="w-1.5 h-1.5 rounded-full bg-[rgba(200,16,46,0.5)]" />
           <span className="text-[12px] text-dr-mid">{t("legendInfl")}</span>

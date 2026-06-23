@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { useEffect, useRef, useState } from "react";
 
 const AUTO_PLAY_MS = 4800;
 const TOTAL_SLIDES = 4;
@@ -103,7 +103,7 @@ export default function HeroCarousel() {
   }
 
   return (
-    <div className="relative h-[580px] overflow-hidden bg-dr-wine">
+    <div className="relative h-[520px] md:h-[580px] overflow-hidden bg-dr-wine">
       {/* Slides */}
       <div
         className="flex h-full transition-transform duration-800 ease-[cubic-bezier(0.77,0,0.175,1)]"
@@ -112,17 +112,14 @@ export default function HeroCarousel() {
         {slides.map((slide, i) => {
           const art = SLIDE_ART[i];
           return (
-            <div
-              key={i}
-              className="min-w-full h-full relative flex items-end"
-            >
+            <div key={i} className="min-w-full h-full relative flex items-end">
               {/* Background */}
               <div
                 className="absolute inset-0"
                 style={{ background: SLIDE_BGS[i] }}
               />
-              {/* Decorative art */}
-              <div className="absolute right-0 top-0 w-[60%] h-full overflow-hidden pointer-events-none">
+              {/* Decorative art — hidden on mobile to keep content readable */}
+              <div className="hidden md:block absolute right-0 top-0 w-[60%] h-full overflow-hidden pointer-events-none">
                 {art.circles.map((c, ci) => (
                   <div
                     key={ci}
@@ -229,31 +226,31 @@ export default function HeroCarousel() {
                 style={{ background: SLIDE_OVERLAYS[i] }}
               />
               {/* Content */}
-              <div className="relative z-3 px-6 md:px-18 pb-12 md:pb-18 max-w-[640px]">
-                <div className="text-[12px] font-semibold tracking-[0.32em] uppercase text-[rgba(200,16,46,0.65)] mb-[18px]">
+              <div className="relative z-3 px-6 md:px-18 pb-10 md:pb-18 max-w-[640px]">
+                <div className="text-[11px] md:text-[12px] font-semibold tracking-[0.32em] uppercase text-[rgba(200,16,46,0.65)] mb-[14px] md:mb-[18px]">
                   {slide.eyebrow}
                 </div>
-                <h2 className="font-serif text-[36px] md:text-[56px] font-light text-white leading-[1.08] mb-5">
+                <h2 className="font-serif text-[30px] md:text-[56px] font-light text-white leading-[1.08] mb-4 md:mb-5">
                   {t.rich(`slides.${i}.title`, {
                     em: (chunks) => (
                       <em className="italic text-[#F0C0C8]">{chunks}</em>
                     ),
                   })}
                 </h2>
-                <p className="text-[14px] font-light text-white/45 leading-[1.9] max-w-[420px] mb-8">
+                <p className="text-[13px] md:text-[14px] font-light text-white/45 leading-[1.8] md:leading-[1.9] max-w-[420px] mb-6 md:mb-8">
                   {slide.subtitle}
                 </p>
                 <div className="flex gap-3 items-center">
                   <button
                     type="button"
-                    className="text-[13px] font-semibold tracking-[0.18em] uppercase bg-dr-red text-white px-7 py-3 border-none cursor-pointer hover:opacity-90 transition-opacity"
+                    className="text-[12px] md:text-[13px] font-semibold tracking-[0.18em] uppercase bg-dr-red text-white px-6 md:px-7 py-3 border-none cursor-pointer hover:opacity-90 transition-opacity"
                   >
                     {slide.ctaPrimary}
                   </button>
                   {slide.ctaGhost && (
                     <button
                       type="button"
-                      className="text-[13px] font-normal tracking-[0.1em] text-white/45 border border-white/12 px-6 py-3 bg-transparent cursor-pointer hover:text-white hover:border-white/30 transition-all"
+                      className="text-[12px] md:text-[13px] font-normal tracking-[0.1em] text-white/45 border border-white/12 px-5 md:px-6 py-3 bg-transparent cursor-pointer hover:text-white hover:border-white/30 transition-all"
                     >
                       {slide.ctaGhost}
                     </button>
@@ -266,7 +263,7 @@ export default function HeroCarousel() {
       </div>
 
       {/* Dots */}
-      <div className="absolute bottom-8 right-6 md:right-18 flex gap-2.5 z-10">
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 md:left-auto md:right-18 md:bottom-8 md:translate-x-0 flex gap-2.5 z-10">
         {slides.map((_, i) => (
           <button
             key={i}

@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 export default async function ClinicEntry() {
   const t = await getTranslations("skin.clinicEntry");
   return (
-    <div className="bg-dr-wine py-8 px-7 flex items-center justify-between gap-6 mx-7 mb-5">
+    <div className="bg-dr-wine py-6 md:py-8 px-5 md:px-7 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-6 mx-4 md:mx-7 mb-5">
       <div>
         <div className="text-[12px] font-semibold tracking-[0.2em] uppercase text-[rgba(200,16,46,0.5)] mb-2">
           {t("eyebrow")}
@@ -17,7 +17,7 @@ export default async function ClinicEntry() {
       </div>
       <button
         type="button"
-        className="text-[13px] font-semibold tracking-[0.16em] uppercase bg-dr-red text-white px-6 py-3 border-none cursor-pointer flex-shrink-0 hover:opacity-90 transition-opacity"
+        className="text-[13px] font-semibold tracking-[0.16em] uppercase bg-dr-red text-white px-6 py-3 border-none cursor-pointer flex-shrink-0 hover:opacity-90 transition-opacity w-full md:w-fit"
       >
         {t("cta")}
       </button>

@@ -11,7 +11,7 @@ export default async function Footer() {
           <div className="text-[12px] font-semibold tracking-[0.28em] uppercase text-dr-red/50 mb-4">
             {t("ctaEyebrow")}
           </div>
-          <h2 className="font-serif text-[40px] font-light leading-[1.15] text-dr-white">
+          <h2 className="font-serif text-[32px] md:text-[40px] font-light leading-[1.15] text-dr-white">
             {t.rich("ctaTitle", {
               em: (chunks) => (
                 <em className="italic text-[#F0C0C8]">{chunks}</em>

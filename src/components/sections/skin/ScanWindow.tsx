@@ -12,9 +12,9 @@ export default function ScanWindow() {
   const allPassed = IMAGE_QUALITY_CHECKS.every((c) => c.passed);
 
   return (
-    <div className="bg-dr-ink p-8 flex gap-7 items-start">
-      {/* Scan window 320×320 */}
-      <div className="flex-[0_0_320px] h-[320px] bg-[#0A0A0A] border border-white/8 relative flex items-center justify-center overflow-hidden">
+    <div className="bg-dr-ink p-5 md:p-8 flex flex-col md:flex-row gap-5 md:gap-7 items-start">
+      {/* Scan window — 320×320 on md+, full-width square on mobile */}
+      <div className="w-full md:flex-[0_0_320px] aspect-square md:h-[320px] bg-[#0A0A0A] border border-white/8 relative flex items-center justify-center overflow-hidden">
         {/* Decorative circle */}
         <div className="absolute w-[280px] h-[280px] rounded-full border border-[rgba(200,16,46,0.06)]" />
         {/* Scan frame 200×200 */}

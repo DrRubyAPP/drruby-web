@@ -19,11 +19,11 @@ export default async function SkinPage() {
       <FrequencyGate />
       <ScanWindow />
       <BrennerIndices />
-      <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4 p-5 bg-dr-off">
+      <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4 p-4 md:p-5 bg-dr-off">
         <TrendChart />
         <AIReport />
       </div>
-      <div className="px-7 pb-5 bg-dr-off">
+      <div className="px-4 md:px-7 pb-5 bg-dr-off">
         <ProductRecs />
       </div>
       <ClinicEntry />

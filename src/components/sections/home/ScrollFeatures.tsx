@@ -34,11 +34,11 @@ export default async function ScrollFeatures() {
   const t = await getTranslations("home.scroll");
   const items = t.raw("items") as ScrollItem[];
   return (
-    <section className="bg-dr-off pt-14 pb-14 px-12 md:px-18 overflow-hidden">
+    <section className="bg-dr-off pt-12 pb-12 md:pt-14 md:pb-14 px-6 md:px-18 overflow-hidden">
       <div className="text-[12px] font-semibold tracking-[0.24em] uppercase text-dr-red mb-2">
         {t("label")}
       </div>
-      <div className="font-serif text-[36px] font-light text-dr-ink mb-10">
+      <div className="font-serif text-[28px] md:text-[36px] font-light text-dr-ink mb-8 md:mb-10">
         {t.rich("title", {
           em: (chunks) => <em className="italic">{chunks}</em>,
         })}
