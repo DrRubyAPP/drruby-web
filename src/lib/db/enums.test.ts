@@ -339,12 +339,7 @@ describe("enum schemas - 无效值抛错", () => {
 
   for (const [schemaName, invalidValue, field] of invalidCases) {
     it(`${schemaName} 拒绝 ${JSON.stringify(invalidValue)}（${field}）`, () => {
-      const schemaMap: Record<
-        string,
-        ReturnType<
-          typeof import("@/lib/db/enums")["interventionCategorySchema"]
-        >
-      > = {
+      const schemaMap: Record<string, import("zod").ZodTypeAny> = {
         interventionCategorySchema,
         faceSideSchema,
         faceSideWithBothSchema,

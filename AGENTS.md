@@ -19,6 +19,7 @@ DrRuby.ai 官网——女性健康寿命（healthspan）智能平台。以皮肤
 - **主题**：next-themes v0.4（`attribute="class"`，`defaultTheme="light"`，`enableSystem={false}`）
 - **状态**：Zustand v5
 - **校验**：Zod v4
+- **数据库**：PostgreSQL 16 + Prisma ORM v6（`prisma-client-js` generator，schema 在 `prisma/schema.prisma`）
 - **邮件营销**：`@mailchimp/mailchimp_marketing`
 - **代码质量**：Biome 2.5（lint + format）、TypeScript 6（`strict: true`）
 - **测试**：Vitest 4 + @testing-library/react + jsdom
@@ -34,6 +35,13 @@ Mailchimp 相关（仅服务端，参见 `src/lib/mailchimp.ts`）：
 
 缺失时 `/api/health` 返回 503，订阅接口返回 503。
 
+数据库相关（参见 `src/lib/db/prisma.ts`、`prisma/schema.prisma`）：
+
+- `DATABASE_URL`：PostgreSQL 连接串（本地：`postgresql://drruby:drruby@localhost:5433/drruby?schema=public`）
+- `SHADOW_DATABASE_URL`：迁移 shadow database（仅 `prisma migrate dev` 需要）
+
+缺失时 PrismaClient 查询会抛连接错误。本地起库：`docker compose up -d`。
+
 # Commands
 
 ```bash
@@ -48,6 +56,13 @@ pnpm type-check   # tsc --noEmit
 
 pnpm test         # vitest run（单次）
 pnpm test:watch   # vitest watch
+
+pnpm db:migrate:dev    # 创建/应用迁移（开发，需 Docker Postgres 运行）
+pnpm db:migrate:deploy # 应用已有迁移（生产）
+pnpm db:migrate:status # 查看迁移状态
+pnpm db:generate       # 重新生成 Prisma Client
+pnpm db:studio         # Prisma Studio GUI
+pnpm db:push           # schema → DB 直接推送（不走迁移，慎用）
 ```
 
 # Code Spec
@@ -91,7 +106,21 @@ pnpm test:watch   # vitest watch
 
 - Vitest 配置：`vitest.config.ts`，环境 `jsdom`，setup 文件 `src/test/setup.ts`
 - 测试文件与被测文件同目录，命名 `*.test.ts(x)`
-- 参考 `src/lib/mailchimp.test.ts`
+- repository 测试（`src/lib/db/repositories/*.test.ts`）连真实 DB，`fileParallelism: false` 避免并行冲突
+- 参考 `src/lib/mailchimp.test.ts`、`src/lib/db/repositories/userAccount.repo.test.ts`
+
+## 数据库（Prisma）
+
+- Schema：`prisma/schema.prisma`，24 张消费者数据表（参考 `a_docs/drruby-docs/mvp2/data-model-2.md`）
+- 命名：model PascalCase、字段 camelCase，`@map`/`@@map` 映射到 snake_case 表名列名
+- 主键：普通实体表 `id String @id @default(cuid(2))`；`glucose_stream` 用 `BigInt @default(autoincrement())`
+- 枚举：一律 `String` + Zod 校验（`src/lib/db/enums.ts`），不使用 Prisma enum / Postgres 原生 ENUM
+- 迁移：`prisma/migrations/`，以 `prisma migrate dev` 为唯一真相源，**禁止 `prisma db pull` 覆盖 schema**（partial unique index 等 raw SQL 约束会丢失）
+- raw SQL 约束：`lower(email)` 唯一索引、`study_session` partial unique、`image_info` CHECK 在迁移 `20260624165538_add_raw_sql_constraints` 中
+- pgvector：`expert_source.embedding_ref` 本地暂用 `text`（Docker Hub 不可达未装 pgvector），生产切 `pgvector/pgvector:pg16` 镜像后 ALTER 为 `vector(1536)` + 建向量索引
+- 单例：`src/lib/db/prisma.ts` 导出 `prisma`（dev 挂 `globalThis` 避免 HMR 多实例）
+- repository 层：`src/lib/db/repositories/`，当前覆盖 6 张高频表（userAccount/userBaseline/studySession/imageInfo/sisHistory/interventionLog），写入前用 Zod 校验枚举
+- 软删除：`user_account` / `study_session` 带 `deletedAt`，Prisma 不自动过滤，调用方需显式 `where: { deletedAt: null }`
 
 # Architecture
 
@@ -118,7 +147,13 @@ src/
 │   └── theme/                # ThemeProvider
 ├── config/                   # site.ts（NAV_PAGES、LOCALES）+ 各门户 mock 数据
 ├── i18n/                     # request.ts + messages/en.json
-├── lib/                      # 业务库（当前：mailchimp.ts + 测试）
+├── lib/                      # 业务库
+│   ├── mailchimp.ts          # Mailchimp 订阅
+│   └── db/                   # Prisma + repository 层
+│       ├── prisma.ts         # PrismaClient 单例
+│       ├── enums.ts          # 枚举 Zod schema
+│       ├── index.ts          # 汇总 re-export
+│       └── repositories/     # 6 张高频表 repo（userAccount/userBaseline/studySession/imageInfo/sisHistory/interventionLog）
 ├── stores/                   # Zustand stores（按需新增）
 ├── hooks/                    # 自定义 hooks（按需新增）
 ├── test/                     # vitest setup
@@ -150,5 +185,7 @@ src/
 ## 部署
 
 - `pnpm build` 产出 standalone 包（`.next/standalone` + `.next/static`）
-- 运行时仅需 Node 环境 + 上述 Mailchimp 环境变量
+- `postinstall` 钩子自动跑 `prisma generate`，确保 Railway 部署时 Prisma Client 就绪
+- 运行时需 Node 环境 + Mailchimp 环境变量 + `DATABASE_URL`
+- 生产迁移：`pnpm db:migrate:deploy`（Railway release phase 或部署脚本）
 - `/api/health` 可作部署后健康探针

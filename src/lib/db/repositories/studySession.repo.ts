@@ -79,7 +79,8 @@ export async function transitionStatus(
   const session = await prisma.studySession.findUniqueOrThrow({
     where: { id },
   });
-  const allowed = TRANSITIONS[session.status] ?? [];
+  const currentStatus = session.status as StudySessionStatus;
+  const allowed = TRANSITIONS[currentStatus] ?? [];
   if (!allowed.includes(to)) {
     throw new Error(`非法状态转移：${session.status} → ${to}`);
   }
