@@ -50,6 +50,10 @@ model UserAccount {
   interventionLogs InterventionLog[]
   confounderLogs   ConfounderLog[]
   clinicRecords    ClinicRecord[]
+  healthJourney    HealthJourney?
+  healthMilestones HealthMilestone[]
+  lifestyleLogs    LifestyleLog[]
+  insightFeeds     InsightFeed[]
 
   @@index([status, deletedAt], map: "user_account_status_deleted_at_idx")
   @@map("user_account")
@@ -200,6 +204,9 @@ model StudySession {
   interventionLogs       InterventionLog[]
   confounderLogs         ConfounderLog[]
   clinicRecords          ClinicRecord[]
+  healthMilestones       HealthMilestone[]
+  lifestyleLogs          LifestyleLog[]
+  insightFeeds           InsightFeed[]
 
   @@index([userId, status], map: "study_session_user_status_idx")
   @@index([userId, deletedAt], map: "study_session_user_deleted_idx")
@@ -385,4 +392,95 @@ model ClinicRecord {
   @@index([userId, visitDate], map: "clinic_record_user_visit_idx")
   @@index([clinicId], map: "clinic_record_clinic_id_idx")
   @@map("clinic_record")
+}
+
+// =============================================================================
+// 4. 健康旅程域（health_journey / health_milestone / lifestyle_log / insight_feed）
+// =============================================================================
+
+/// 跨研究纵向汇总（每用户一行，1:1）　🟡 ✅
+/// 触发：① session.status=completed 全量重算 UPSERT；② 月度 cron 增量 UPSERT
+model HealthJourney {
+  id                  String   @id @default(cuid(2))
+  userId              String   @unique @map("user_id")
+  totalSession        Int?     @map("total_session")
+  firstSessionDate    DateTime? @map("first_session_date") @db.Date
+  latestSessionDate   DateTime? @map("latest_session_date") @db.Date
+  sleepBaselineTrend  String?  @map("sleep_baseline_trend")
+  hrvBaselineTrend    String?  @map("hrv_baseline_trend")
+  sisTrajectory       String?  @map("sis_trajectory")
+  bestSisScore        Decimal? @map("best_sis_score")
+  lastComputedAt      DateTime? @map("last_computed_at") @db.Timestamptz
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user                UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("health_journey")
+}
+
+/// 用户健康节点（幂等 INSERT）　🟡 ✅
+model HealthMilestone {
+  id            String   @id @default(cuid(2))
+  userId        String   @map("user_id")
+  sessionId     String   @map("session_id")
+  milestoneType String   @map("milestone_type")
+  milestoneValue Decimal? @map("milestone_value")
+  achievedAt    DateTime? @map("achieved_at") @db.Timestamptz
+  sharedAt      DateTime? @map("shared_at") @db.Timestamptz
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user          UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session       StudySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([userId, milestoneType], map: "health_milestone_user_type_idx")
+  @@index([sessionId], map: "health_milestone_session_id_idx")
+  @@map("health_milestone")
+}
+
+/// 生活方式改变记录（8 类 change_type）　🟡 ✅
+model LifestyleLog {
+  id          String   @id @default(cuid(2))
+  userId      String   @map("user_id")
+  sessionId   String?  @map("session_id")
+  recordDate  DateTime? @map("record_date") @db.Date
+  changeType  String   @map("change_type")
+  description String?
+  startedAt   DateTime? @map("started_at") @db.Date
+  endedAt     DateTime? @map("ended_at") @db.Date
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user        UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session     StudySession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+
+  @@index([userId, recordDate], map: "lifestyle_log_user_date_idx")
+  @@index([sessionId], map: "lifestyle_log_session_id_idx")
+  @@map("lifestyle_log")
+}
+
+/// 自动相关性洞察（5 类 insight_type）　🟡 ✅
+/// session_id 约束：skin_sleep/lifestyle_link/sis_drop 三类不可 NULL（应用层校验）
+model InsightFeed {
+  id            String   @id @default(cuid(2))
+  userId        String   @map("user_id")
+  sessionId     String?  @map("session_id")
+  insightDate   DateTime? @map("insight_date") @db.Date
+  insightType   String   @map("insight_type")
+  metricA       String?  @map("metric_a")
+  metricB       String?  @map("metric_b")
+  correlationR  Decimal? @map("correlation_r")
+  messageZh     String?  @map("message_zh")
+  deliveredAt   DateTime? @map("delivered_at") @db.Timestamptz
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user          UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session       StudySession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+
+  @@index([userId, insightDate], map: "insight_feed_user_date_idx")
+  @@index([sessionId], map: "insight_feed_session_id_idx")
+  @@index([insightType], map: "insight_feed_type_idx")
+  @@map("insight_feed")
 }
