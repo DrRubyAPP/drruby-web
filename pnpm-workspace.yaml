@@ -1,9 +1,15 @@
-packages: []
-allowBuilds:
-  '@parcel/watcher': false
-  '@swc/core': false
-  esbuild: true
-  sharp: false
+packages:
+  - "."
+onlyBuiltDependencies:
+  - esbuild
+  - "@prisma/engines"
+  - prisma
 ignoredBuiltDependencies:
   - sharp
   - unrs-resolver
+  - "@parcel/watcher"
+  - "@swc/core"
+allowBuilds:
+  '@prisma/client': set this to true or false
+  '@prisma/engines': set this to true or false
+  prisma: set this to true or false

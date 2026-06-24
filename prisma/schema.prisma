@@ -1,0 +1,13 @@
+// DrRuby Prisma schema
+// 数据模型参考：a_docs/drruby-docs/mvp2/data-model-2.md（24 张消费者数据表）
+// 命名约定：model PascalCase、字段 camelCase，@map/@@map 映射到 snake_case 表名列名
+
+generator client {
+  provider = "prisma-client-js"
+  // previewFeatures = ["postgresqlExtensions"] // v7 已弃用，pgvector 用 raw SQL 处理
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
