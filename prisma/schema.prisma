@@ -1,6 +1,9 @@
 // DrRuby Prisma schema
 // 数据模型参考：a_docs/drruby-docs/mvp2/data-model-2.md（24 张消费者数据表）
 // 命名约定：model PascalCase、字段 camelCase，@map/@@map 映射到 snake_case 表名列名
+// 主键：普通实体表 id String @id @default(cuid(2))；glucose_stream 用 BigInt @default(autoincrement())
+// 枚举：一律 String + Zod 校验（src/lib/db/enums.ts），不使用 Prisma enum / Postgres 原生 ENUM
+// 外键：所有 FK 列建二级索引（Postgres 不自动为 FK 建索引）
 
 generator client {
   provider = "prisma-client-js"
@@ -10,4 +13,65 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+// =============================================================================
+// 1. 账号域（user_account / user_baseline / hormonal_status_log）
+// =============================================================================
+
+/// 用户账号 + 身份 + 登录凭证　✅
+/// email 大小写不敏感唯一由迁移 raw SQL 补 lower(email) 唯一索引（Prisma @unique 仅作基础约束）
+model UserAccount {
+  id               String    @id @default(cuid(2))
+  email            String    @unique
+  emailVerified    Boolean   @default(false) @map("email_verified")
+  passwordHash     String?   @map("password_hash")
+  authProvider     String    @map("auth_provider")
+  googleSub        String?   @unique @map("google_sub")
+  role             String
+  subscriptionTier String    @default("free") @map("subscription_tier")
+  timezone         String    @default("UTC")
+  status           String    @default("active")
+  lastLoginAt      DateTime? @map("last_login_at") @db.Timestamptz
+  deletedAt        DateTime? @map("deleted_at") @db.Timestamptz
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  baseline         UserBaseline?
+  hormonalLogs     HormonalStatusLog[]
+
+  @@index([status, deletedAt], map: "user_account_status_deleted_at_idx")
+  @@map("user_account")
+}
+
+/// 皮肤基线档案（1:1 user_account）　✅
+model UserBaseline {
+  id                 String   @id @default(cuid(2))
+  userId             String   @unique @map("user_id")
+  skinType           String?  @map("skin_type")
+  fitzpatrickScale   String?  @map("fitzpatrick_scale")
+  hormonalStatus     String?  @map("hormonal_status")
+  menopauseYear      Int?     @map("menopause_year")
+  concernGoals       String[] @map("concern_goals")
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user               UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_baseline")
+}
+
+/// 激素状态变更历史（追加不覆盖，RAG 必须读完整历史）　✅
+model HormonalStatusLog {
+  id            String   @id @default(cuid(2))
+  userId        String   @map("user_id")
+  status        String
+  effectiveFrom DateTime @map("effective_from") @db.Date
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user          UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "hormonal_status_log_user_id_idx")
+  @@map("hormonal_status_log")
 }
