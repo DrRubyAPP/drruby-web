@@ -54,6 +54,9 @@ model UserAccount {
   healthMilestones HealthMilestone[]
   lifestyleLogs    LifestyleLog[]
   insightFeeds     InsightFeed[]
+  sisResponseLogs  SisResponseLog[]
+  userProtocolConfig UserProtocolConfig?
+  modelValidationLogs ModelValidationLog[]
 
   @@index([status, deletedAt], map: "user_account_status_deleted_at_idx")
   @@map("user_account")
@@ -207,6 +210,8 @@ model StudySession {
   healthMilestones       HealthMilestone[]
   lifestyleLogs          LifestyleLog[]
   insightFeeds           InsightFeed[]
+  sisResponseLogs        SisResponseLog[]
+  modelValidationLogs    ModelValidationLog[]
 
   @@index([userId, status], map: "study_session_user_status_idx")
   @@index([userId, deletedAt], map: "study_session_user_deleted_idx")
@@ -478,9 +483,139 @@ model InsightFeed {
 
   user          UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
   session       StudySession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+  ragLog        InsightRagLog?
 
   @@index([userId, insightDate], map: "insight_feed_user_date_idx")
   @@index([sessionId], map: "insight_feed_session_id_idx")
   @@index([insightType], map: "insight_feed_type_idx")
   @@map("insight_feed")
+}
+
+// =============================================================================
+// 5. 知识/Loop 域（expert_source / insight_rag_log / sis_response_log /
+//                  user_protocol_config / model_validation_log / cohort_insight）
+// =============================================================================
+
+/// 专家知识文档注册表　🟣 ✅
+/// embedding_ref: 生产用 pgvector vector(1536)，本地开发暂用 text（🔵 预留字段，MVP 不写入）
+/// TODO: 本地 Docker 切换到 pgvector/pgvector:pg16 镜像后，ALTER 列为 vector(1536) + 建向量索引
+model ExpertSource {
+  id           String   @id @default(cuid(2))
+  expertName   String   @map("expert_name")
+  contentType  String   @map("content_type")
+  title        String?
+  domain       String?
+  verdict      String?
+  // 生产：Unsupported("vector(1536)")? @map("embedding_ref")
+  // 本地：text 类型占位（pgvector 扩展未安装）
+  embeddingRef String?  @map("embedding_ref")
+  version      String?
+  licensedAt   DateTime? @map("licensed_at") @db.Date
+  isActive     Boolean?  @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([expertName], map: "expert_source_expert_idx")
+  @@index([domain], map: "expert_source_domain_idx")
+  @@index([isActive], map: "expert_source_active_idx")
+  @@map("expert_source")
+}
+
+/// RAG 审计日志（1:1 insight_feed）　🟣 ✅
+model InsightRagLog {
+  id                   String   @id @default(cuid(2))
+  insightId            String   @unique @map("insight_id")
+  queryEmbeddingRef    String?  @map("query_embedding_ref")
+  sourceIdsRetrieved   String[] @map("source_ids_retrieved")
+  llmModelVersion      String?  @map("llm_model_version")
+  promptVersion        String?  @map("prompt_version")
+  generatedAt          DateTime? @map("generated_at") @db.Timestamptz
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  insight              InsightFeed @relation(fields: [insightId], references: [id], onDelete: Cascade)
+
+  @@map("insight_rag_log")
+}
+
+/// SIS 行为反馈（Loop 1）　🟢 ✅
+/// 被动查看捕捉：SIS 页 onLoad 即写 action_taken=viewed
+model SisResponseLog {
+  id             String   @id @default(cuid(2))
+  userId         String   @map("user_id")
+  sessionId      String   @map("session_id")
+  studyWeek      Int?     @map("study_week")
+  sisDeltaShown  Decimal? @map("sis_delta_shown")
+  actionTaken    String   @map("action_taken")
+  newProductName String?  @map("new_product_name")
+  responseAt     DateTime? @map("response_at") @db.Timestamptz
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user           UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session        StudySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([userId, responseAt], map: "sis_response_log_user_response_idx")
+  @@index([sessionId, studyWeek], map: "sis_response_log_session_week_idx")
+  @@map("sis_response_log")
+}
+
+/// MCS 自适应配置（Loop 4，每用户一行 1:1）　🟢 ✅
+/// 聚合源是 sis_history.mcs_lowest（周级最低），不是 image_info.mcs_level
+model UserProtocolConfig {
+  id                       String   @id @default(cuid(2))
+  userId                   String   @unique @map("user_id")
+  avgMcsScore              Decimal? @map("avg_mcs_score")
+  consecutiveLowMcsCount   Int?     @map("consecutive_low_mcs_count")
+  protocolVersion          String?  @map("protocol_version")
+  lastAdaptedAt            DateTime? @map("last_adapted_at") @db.Timestamptz
+  createdAt                DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt                DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user                     UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_protocol_config")
+}
+
+/// 诊所误差（Loop 2）　🟢 ✅
+/// Gen 1：仅记 clinic_record 新增时的 model_version 与 retraining_flagged
+model ModelValidationLog {
+  id               String   @id @default(cuid(2))
+  userId           String   @map("user_id")
+  sessionId        String   @map("session_id")
+  visitDate        DateTime? @map("visit_date") @db.Date
+  modelVersion     String?  @map("model_version")
+  clinicR2         Decimal? @map("clinic_r2")
+  clinicR5         Decimal? @map("clinic_r5")
+  retrainingFlagged Boolean? @map("retraining_flagged")
+  note             String?
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user             UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+  session          StudySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, visitDate], map: "model_validation_log_session_visit_idx")
+  @@map("model_validation_log")
+}
+
+/// 跨用户聚合（Loop 3，月度批量 UPSERT）　🟢 ✅
+/// 复合唯一约束：(skin_type, fitzpatrick_scale, intervention_category)
+/// intervention_category 与 intervention_log.category 共用 schema（红线 §0.3.3）
+model CohortInsight {
+  id                    String   @id @default(cuid(2))
+  skinType              String   @map("skin_type")
+  fitzpatrickScale      String   @map("fitzpatrick_scale")
+  interventionCategory  String   @map("intervention_category")
+  sampleN               Int?     @map("sample_n")
+  sisDeltaMean          Decimal? @map("sis_delta_mean")
+  sisDeltaP25           Decimal? @map("sis_delta_p25")
+  sisDeltaP75           Decimal? @map("sis_delta_p75")
+  confidenceLevel       String?  @map("confidence_level")
+  computedAt            DateTime? @map("computed_at") @db.Timestamptz
+  createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt             DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@unique([skinType, fitzpatrickScale, interventionCategory], map: "cohort_insight_skin_fitz_cat_uniq")
+  @@map("cohort_insight")
 }

@@ -2,6 +2,9 @@
 # 启动：docker compose up -d
 # 停止：docker compose down
 # 清空数据：docker compose down -v
+#
+# 注：生产用 pgvector/pgvector:pg16（含 pgvector 扩展，expert_source.embedding_ref 用 vector(1536)）
+# 本地开发 embedding_ref 暂用 text 类型（🔵 预留字段，MVP 不写入）
 services:
   postgres:
     image: postgres:16-alpine
