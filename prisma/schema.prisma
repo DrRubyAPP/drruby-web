@@ -39,6 +39,9 @@ model UserAccount {
 
   baseline         UserBaseline?
   hormonalLogs     HormonalStatusLog[]
+  wearableConnections WearableConnection[]
+  wearableDailies  WearableDaily[]
+  glucoseStreams   GlucoseStream[]
 
   @@index([status, deletedAt], map: "user_account_status_deleted_at_idx")
   @@map("user_account")
@@ -74,4 +77,79 @@ model HormonalStatusLog {
 
   @@index([userId], map: "hormonal_status_log_user_id_idx")
   @@map("hormonal_status_log")
+}
+
+// =============================================================================
+// 2. Wearable 域（wearable_connection / wearable_daily / glucose_stream）
+// =============================================================================
+
+/// 第三方设备 + OAuth 授权（MVP 仅 HealthKit 真实写入）　✅
+/// access/refresh token 加密列：MVP 为 NULL，Phase 2 启用 AES-256
+model WearableConnection {
+  id                     String   @id @default(cuid(2))
+  userId                 String   @map("user_id")
+  provider               String
+  accessTokenEncrypted   Bytes?   @map("access_token_encrypted")
+  refreshTokenEncrypted  Bytes?   @map("refresh_token_encrypted")
+  connectedAt            DateTime @map("connected_at") @db.Timestamptz
+  lastSyncedAt           DateTime? @map("last_synced_at") @db.Timestamptz
+  isPrimary              Boolean  @default(false) @map("is_primary")
+  status                 String
+  createdAt              DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt              DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user                   UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "wearable_connection_user_id_idx")
+  @@index([provider], map: "wearable_connection_provider_idx")
+  @@map("wearable_connection")
+}
+
+/// 每日 Wearable 汇总（HealthKit 字段写入，其余 NULL）　🟡
+/// 防重唯一约束：(user_id, provider, record_date)
+/// record_date = 睡眠发生日期（非同步日期），避免 +1 天偏移
+model WearableDaily {
+  id                String   @id @default(cuid(2))
+  userId            String   @map("user_id")
+  // session_id 占位：任务6 study_session 建表后补 relation
+  sessionId         String?  @map("session_id")
+  recordDate        DateTime @map("record_date") @db.Date
+  provider          String
+  sleepScore        Decimal? @map("sleep_score")
+  deepSleepMin      Int?     @map("deep_sleep_min")
+  hrvAvg            Decimal? @map("hrv_avg")
+  restingHr         Int?     @map("resting_hr")
+  skinTempDelta     Decimal? @map("skin_temp_delta")
+  stepCount         Int?     @map("step_count")
+  glucoseMean       Decimal? @map("glucose_mean")
+  glucoseCv         Decimal? @map("glucose_cv")
+  glucoseSpikeCount Int?     @map("glucose_spike_count")
+  dataQuality       String?  @map("data_quality")
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user              UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider, recordDate], map: "wearable_daily_user_provider_date_uniq")
+  @@index([userId, recordDate], map: "wearable_daily_user_date_idx")
+  @@map("wearable_daily")
+}
+
+/// CGM 原始血糖流（5min/条）　🔵 预留（MVP 不写入）
+/// 规模：26周 × 1000 CGM 用户 ≈ 5200 万行
+/// 分区策略：(user_id, measured_at) 范围分区，以注释预留，本阶段单表
+model GlucoseStream {
+  id              BigInt   @id @default(autoincrement()) @db.BigInt
+  userId          String   @map("user_id")
+  measuredAt      DateTime @map("measured_at") @db.Timestamptz
+  glucoseMgdl     Decimal? @map("glucose_mgdl")
+  trendArrow      String?  @map("trend_arrow")
+  cgmDeviceSerial String?  @map("cgm_device_serial")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user            UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, measuredAt], map: "glucose_stream_user_measured_idx")
+  @@map("glucose_stream")
 }
