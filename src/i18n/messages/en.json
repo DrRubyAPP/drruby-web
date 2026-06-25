@@ -10,6 +10,31 @@
     "menu": "Menu",
     "close": "Close"
   },
+  "auth": {
+    "title": "Sign in to DrRuby",
+    "subtitle": "Enter your email and we'll send you a 6-digit verification code.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "you@example.com",
+    "sendCode": "Send code",
+    "sending": "Sending…",
+    "codeTitle": "Enter your code",
+    "codeSentTo": "We sent a 6-digit code to {email}.",
+    "codeLabel": "Verification code",
+    "codePlaceholder": "123456",
+    "verify": "Verify & continue",
+    "verifying": "Verifying…",
+    "resend": "Resend code",
+    "changeEmail": "Use a different email",
+    "or": "or",
+    "google": "Continue with Google",
+    "errors": {
+      "invalidEmail": "Enter a valid email address",
+      "invalidCode": "Invalid or expired code. Please try again.",
+      "codeLength": "Enter the 6-digit code",
+      "sendFailed": "Couldn't send the code. Please try again.",
+      "generic": "Something went wrong. Please try again."
+    }
+  },
   "footer": {
     "ctaEyebrow": "Start Today — Free",
     "ctaTitle": "Your personal health intelligence starts <em>with one scan.</em>",

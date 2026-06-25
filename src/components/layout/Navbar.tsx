@@ -51,7 +51,7 @@ export default async function Navbar() {
       <div className="flex items-center gap-3">
         <ThemeToggle />
         <Link
-          href="/waitlist"
+          href="/login"
           className="hidden md:inline-block text-[13px] font-medium tracking-[0.1em] text-dr-ink border border-dr-border px-[18px] py-2 no-underline hover:border-dr-ink transition-colors"
         >
           {t("login")}

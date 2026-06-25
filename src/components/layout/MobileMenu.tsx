@@ -102,7 +102,7 @@ export default function MobileMenu() {
                 {t("getStarted")}
               </Link>
               <Link
-                href="/waitlist"
+                href="/login"
                 onClick={() => setOpen(false)}
                 className="text-center text-[13px] font-medium tracking-[0.1em] text-dr-ink border border-dr-border px-5 py-3 no-underline hover:border-dr-ink transition-colors"
               >
