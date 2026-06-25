@@ -1,8 +1,8 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { emailOTP } from "better-auth/plugins";
-import { getAuthEnv } from "@/lib/auth/env";
 import { sendOtpEmail } from "@/lib/auth/email";
+import { getAuthEnv } from "@/lib/auth/env";
 import { prisma } from "@/lib/db/prisma";
 
 /**
@@ -40,7 +40,12 @@ export const auth = betterAuth({
   user: {
     modelName: "UserAccount",
     additionalFields: {
-      role: { type: "string", required: true, defaultValue: "user", input: false },
+      role: {
+        type: "string",
+        required: true,
+        defaultValue: "user",
+        input: false,
+      },
       authProvider: {
         type: "string",
         required: true,

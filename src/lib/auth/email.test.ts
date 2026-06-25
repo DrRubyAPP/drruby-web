@@ -49,7 +49,10 @@ describe("sendOtpEmail", () => {
   });
 
   it("throws a readable error when resend returns an error", async () => {
-    sendMock.mockResolvedValue({ data: null, error: { message: "rate limited" } });
+    sendMock.mockResolvedValue({
+      data: null,
+      error: { message: "rate limited" },
+    });
     const { sendOtpEmail } = await import("@/lib/auth/email");
 
     await expect(sendOtpEmail("jane@example.com", "123456")).rejects.toThrow(
