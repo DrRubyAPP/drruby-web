@@ -219,40 +219,28 @@
       "qualityCoverage": "Skin area coverage",
       "qualitySteady": "Steady — no motion blur"
     },
+    "engNotes": {
+      "title": "⚙ Engineering Notes — Skin Scan UX Rules",
+      "freqTitle": "Frequency Gate (hard rules)",
+      "freqRules": [
+        "Hard cooldown: 72h minimum between any scans (cannot be overridden)",
+        "Default mode: monthly cadence (30-day soft prompt)",
+        "Tracking Mode: user-initiated, enables weekly scans, max 12 weeks, auto-expires",
+        "If user attempts 3+ scans in 7 days → show gentle prompt directing to dermatologist",
+        "Rationale: prevent health anxiety loops; protect Insight Engine data quality"
+      ],
+      "qualityTitle": "Image Quality Gate (technical)",
+      "qualityRules": [
+        "Run on-device, real-time (target <200ms per frame)",
+        "V1 (MVP): Laplacian variance (blur), histogram (exposure), bounding-box ratio (coverage), inter-frame delta (motion) — all rule-based, Core Image / CameraX",
+        "V2: lightweight MobileNet on-device classifier — after V1 baseline",
+        "Capture button DISABLED until all 4 checks pass",
+        "Error messages must be specific: not \"bad photo\" — \"Too dark, move to better light\" / \"Too blurry, hold still\" / \"Frame the skin closer\"",
+        "Only high-quality images enter Insight Engine; bad images rejected, not stored"
+      ]
+    },
     "indices": {
       "sectionLabel": "The 3 Brenner Skin Indices · Latest Scan Jun 8",
-      "items": [
-        {
-          "eyebrow": "Index 01",
-          "name": "Inflammation Index",
-          "score": 72,
-          "max": 100,
-          "level": "good",
-          "desc": "Measures skin redness, reactive markers, and oxidative stress signals. Lower inflammation → slower aging.",
-          "trendDir": "up",
-          "trendText": "↑ +6 pts since last scan"
-        },
-        {
-          "eyebrow": "Index 02",
-          "name": "Pigment Load Index",
-          "score": 58,
-          "max": 100,
-          "level": "warn",
-          "desc": "Tracks uneven pigmentation, UV damage accumulation, and melanin distribution patterns over time.",
-          "trendDir": "dn",
-          "trendText": "↓ −3 pts — sun exposure detected"
-        },
-        {
-          "eyebrow": "Index 03",
-          "name": "Collagen Kinetics Index",
-          "score": 81,
-          "max": 100,
-          "level": "good",
-          "desc": "Assesses structural skin density, elasticity, and collagen turnover rate — requires SkinScope for full accuracy.",
-          "trendDir": "up",
-          "trendText": "↑ +9 pts this quarter"
-        }
-      ],
       "scopeNote": "Weekly SIS Score",
       "scopeUpgrade": "— computed from all four biomarkers after each scan. Tracks your skin improvement trajectory over the 26-week study window."
     },
@@ -265,72 +253,15 @@
       "legendPigm": "Pigmentation",
       "legendColl": "Texture & Pore",
       "overallTitle": "Overall trend: improving · SIS ↑",
-      "overallDesc": "Erythema and Texture both improving over 90 days. Pigmentation needs attention.",
-      "dataPoints": [
-        { "date": "Mar 10", "infl": 48, "pigm": 52, "coll": 55 },
-        { "date": "Mar 25", "infl": 52, "pigm": 49, "coll": 58 },
-        { "date": "Apr 8", "infl": 55, "pigm": 50, "coll": 62 },
-        { "date": "Apr 22", "infl": 58, "pigm": 53, "coll": 65 },
-        { "date": "May 6", "infl": 60, "pigm": 55, "coll": 68 },
-        { "date": "May 20", "infl": 64, "pigm": 52, "coll": 72 },
-        { "date": "Jun 1", "infl": 66, "pigm": 54, "coll": 75 },
-        { "date": "Jun 8", "infl": 72, "pigm": 58, "coll": 81 }
-      ]
+      "overallDesc": "Erythema and Texture both improving over 90 days. Pigmentation needs attention."
     },
     "aiReport": {
       "title": "AI Analysis — Jun 8",
-      "findings": [
-        {
-          "level": "good",
-          "tag": "Positive",
-          "title": "Barrier function strengthening",
-          "desc": "Inflammation score up 6pts. Consistent with peptide serum introduction 4 weeks ago."
-        },
-        {
-          "level": "warn",
-          "tag": "Monitor",
-          "title": "UV pigmentation accumulation",
-          "desc": "Pigment Load down 3pts. Sunscreen compliance may have dropped — cross-referenced with weather data."
-        },
-        {
-          "level": "alert",
-          "tag": "Action",
-          "title": "Upgrade scan for Collagen accuracy",
-          "desc": "Collagen Kinetics Index is estimated. SkinScope attachment will give full cross-polarized reading."
-        }
-      ],
       "basedOn": "Based on 8 scans over 90 days",
       "fullReport": "Full PDF Report →"
     },
     "products": {
-      "title": "Recommended Based on Your Scan",
-      "items": [
-        {
-          "icon": "☀️",
-          "name": "SPF 50 Mineral Sunscreen",
-          "reason": "Addresses pigment drop",
-          "match": "Match 96"
-        },
-        {
-          "icon": "🧴",
-          "name": "Niacinamide Brightening Serum",
-          "reason": "Pigment Load correction",
-          "match": "Match 91"
-        },
-        {
-          "icon": "💊",
-          "name": "Collagen Peptide Complex",
-          "reason": "Supports collagen index",
-          "match": "Match 88"
-        },
-        {
-          "icon": "🔬",
-          "name": "SkinScope Attachment",
-          "reason": "Unlock full Collagen data",
-          "match": "$99 — Upgrade",
-          "highlight": true
-        }
-      ]
+      "title": "Recommended Based on Your Scan"
     },
     "clinicEntry": {
       "eyebrow": "Clinical Care",

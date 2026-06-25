@@ -4,6 +4,7 @@ import Navbar from "@/components/layout/Navbar";
 import AIReport from "@/components/sections/skin/AIReport";
 import BrennerIndices from "@/components/sections/skin/BrennerIndices";
 import ClinicEntry from "@/components/sections/skin/ClinicEntry";
+import EngineeringNotes from "@/components/sections/skin/EngineeringNotes";
 import FrequencyGate from "@/components/sections/skin/FrequencyGate";
 import ProductRecs from "@/components/sections/skin/ProductRecs";
 import ScanWindow from "@/components/sections/skin/ScanWindow";
@@ -18,6 +19,7 @@ export default async function SkinPage() {
       <SkinPageNav />
       <FrequencyGate />
       <ScanWindow />
+      <EngineeringNotes />
       <BrennerIndices />
       <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4 p-4 md:p-5 bg-dr-off">
         <TrendChart />

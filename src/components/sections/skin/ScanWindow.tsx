@@ -12,11 +12,11 @@ export default function ScanWindow() {
   const allPassed = IMAGE_QUALITY_CHECKS.every((c) => c.passed);
 
   return (
-    <div className="bg-dr-ink p-5 md:p-8 flex flex-col md:flex-row gap-5 md:gap-7 items-start">
-      {/* Scan window — 320×320 on md+, full-width square on mobile */}
-      <div className="w-full md:flex-[0_0_320px] aspect-square md:h-[320px] bg-[#0A0A0A] border border-white/8 relative flex items-center justify-center overflow-hidden">
+    <div className="bg-[#F0EEEB] p-5 md:p-8 flex flex-col md:flex-row gap-5 md:gap-7 items-start border-b border-dr-border">
+      {/* Camera box — dark 320×320 on md+, full-width square on mobile */}
+      <div className="w-full md:flex-[0_0_320px] aspect-square md:h-[320px] bg-dr-ink border border-[#333] relative flex items-center justify-center overflow-hidden">
         {/* Decorative circle */}
-        <div className="absolute w-[280px] h-[280px] rounded-full border border-[rgba(200,16,46,0.06)]" />
+        <div className="absolute w-[280px] h-[280px] rounded-full border border-[rgba(200,16,46,0.1)]" />
         {/* Scan frame 200×200 */}
         <div className="w-[200px] h-[200px] relative">
           {/* 4 corner markers */}
@@ -32,7 +32,7 @@ export default function ScanWindow() {
           <div className="scan-line" />
         </div>
         {/* Bottom label */}
-        <div className="absolute bottom-3 left-0 right-0 text-center text-[14px] font-semibold tracking-[0.2em] uppercase text-white/20">
+        <div className="absolute bottom-3 left-0 right-0 text-center text-[14px] font-semibold tracking-[0.2em] uppercase text-white/30">
           {t("positionLabel")}
         </div>
         {/* Image Quality Gate overlay */}
@@ -71,14 +71,14 @@ export default function ScanWindow() {
         </div>
       </div>
 
-      {/* Right info */}
+      {/* Right info — dark text on light wrap */}
       <div className="flex-1 flex flex-col gap-4 pt-1">
-        <h2 className="font-serif text-[28px] font-light text-white leading-[1.2]">
+        <h2 className="font-serif text-[28px] font-medium text-dr-ink leading-[1.2]">
           {t.rich("title", {
-            em: (c) => <em className="italic text-[#F0C0C8]">{c}</em>,
+            em: (c) => <em className="italic text-dr-red">{c}</em>,
           })}
         </h2>
-        <p className="text-[14px] font-light text-white/38 leading-[1.9] max-w-[340px]">
+        <p className="text-[14px] text-dr-ink leading-[1.9] max-w-[340px]">
           {t("desc")}
         </p>
         {/* Scan mode buttons */}
@@ -91,7 +91,7 @@ export default function ScanWindow() {
               className={`text-[14px] font-semibold tracking-[0.14em] uppercase px-4 py-2 cursor-pointer border transition-all ${
                 i === activeMode
                   ? "bg-dr-red text-white border-dr-red"
-                  : "border-white/10 text-white/30 bg-transparent hover:border-[rgba(200,16,46,0.4)] hover:text-white/70"
+                  : "bg-dr-white border-dr-border text-dr-ink hover:border-[rgba(200,16,46,0.4)]"
               }`}
             >
               {t(mode)}
@@ -99,7 +99,7 @@ export default function ScanWindow() {
           ))}
         </div>
         {/* SkinScope upgrade card */}
-        <div className="bg-white/4 border border-white/7 p-3.5 flex gap-3 items-center max-w-[340px]">
+        <div className="bg-dr-white border border-dr-border p-3.5 flex gap-3 items-center max-w-[340px]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/skinscope.webp"
@@ -107,10 +107,10 @@ export default function ScanWindow() {
             className="w-11 h-11 object-contain opacity-70 flex-shrink-0"
           />
           <div>
-            <div className="text-[15px] font-medium text-white/55 mb-0.5">
+            <div className="text-[15px] font-medium text-dr-ink mb-0.5">
               {t("scopeName")}
             </div>
-            <div className="text-[14px] text-[rgba(200,16,46,0.6)] font-semibold tracking-[0.1em] cursor-pointer">
+            <div className="text-[14px] text-dr-red font-semibold tracking-[0.1em] cursor-pointer">
               {t("scopeCta")}
             </div>
           </div>
@@ -120,9 +120,9 @@ export default function ScanWindow() {
           <button
             type="button"
             disabled={!allPassed}
-            className={`text-[14px] font-semibold tracking-[0.16em] uppercase text-white px-6 py-3 border-none w-fit ${
+            className={`text-[15px] font-semibold tracking-[0.16em] uppercase text-white px-6 py-3 border-none w-fit ${
               allPassed
-                ? "bg-dr-red cursor-pointer"
+                ? "bg-dr-red cursor-pointer hover:opacity-90 transition-opacity"
                 : "bg-dr-red opacity-35 cursor-not-allowed"
             }`}
           >

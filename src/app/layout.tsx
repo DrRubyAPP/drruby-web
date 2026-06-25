@@ -44,6 +44,7 @@ export default async function RootLayout({
     <html
       lang={locale}
       className={`${cormorant.variable} ${jost.variable}`}
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <body>

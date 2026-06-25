@@ -27,32 +27,25 @@ export default async function TrendChart() {
             key={i}
             className="flex-1 flex flex-col items-center gap-[3px]"
           >
-            <div className="flex gap-0.5 items-end w-full justify-center">
+            <div className="flex gap-0.5 items-end w-full">
               <div
-                className="w-1.5"
-                style={{
-                  height: d.infl,
-                  background: d.highlight
-                    ? "rgba(200,16,46,0.75)"
-                    : "rgba(200,16,46,0.4)",
-                }}
+                className="flex-1 min-h-[4px] rounded-t-[1px]"
+                style={{ height: d.infl, background: "#C8102E" }}
               />
               <div
-                className="w-1.5"
+                className="flex-1 min-h-[4px] rounded-t-[1px]"
                 style={{
                   height: d.pigm,
-                  background: d.highlight
-                    ? "rgba(176,176,176,0.85)"
-                    : "rgba(176,176,176,0.5)",
+                  background: d.highlight ? "#888888" : "#B0B0B0",
                 }}
               />
               <div
-                className="w-1.5"
+                className="flex-1 min-h-[4px] rounded-t-[1px]"
                 style={{
                   height: d.coll,
                   background: d.highlight
                     ? "rgba(200,16,46,0.45)"
-                    : "rgba(200,16,46,0.25)",
+                    : "rgba(200,16,46,0.3)",
                 }}
               />
             </div>
@@ -71,15 +64,15 @@ export default async function TrendChart() {
       </div>
       <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-2.5">
         <div className="flex items-center gap-1.5">
-          <div className="w-1.5 h-1.5 rounded-full bg-[rgba(200,16,46,0.5)]" />
+          <div className="w-2 h-2 rounded-[2px] bg-[#C8102E]" />
           <span className="text-[14px] text-dr-mid">{t("legendInfl")}</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-1.5 h-1.5 rounded-full bg-[rgba(176,176,176,0.7)]" />
+          <div className="w-2 h-2 rounded-[2px] bg-[#B0B0B0]" />
           <span className="text-[14px] text-dr-mid">{t("legendPigm")}</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-1.5 h-1.5 rounded-full bg-[rgba(200,16,46,0.3)]" />
+          <div className="w-2 h-2 rounded-[2px] bg-[rgba(200,16,46,0.35)]" />
           <span className="text-[14px] text-dr-mid">{t("legendColl")}</span>
         </div>
       </div>
