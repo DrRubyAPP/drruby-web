@@ -38,7 +38,6 @@ Mailchimp 相关（仅服务端，参见 `src/lib/mailchimp.ts`）：
 数据库相关（参见 `src/lib/db/prisma.ts`、`prisma/schema.prisma`）：
 
 - `DATABASE_URL`：PostgreSQL 连接串（本地：`postgresql://drruby:drruby@localhost:5433/drruby?schema=public`）
-- `SHADOW_DATABASE_URL`：迁移 shadow database（仅 `prisma migrate dev` 需要）
 
 缺失时 PrismaClient 查询会抛连接错误。本地起库：`docker compose up -d`。
 

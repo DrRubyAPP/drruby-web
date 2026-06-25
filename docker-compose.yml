@@ -14,13 +14,10 @@ services:
       POSTGRES_USER: drruby
       POSTGRES_PASSWORD: drruby
       POSTGRES_DB: drruby
-      # shadow database（prisma migrate dev 需要）
-      POSTGRES_MULTIPLE_DATABASES: drruby_shadow
     ports:
       - "5433:5432"
     volumes:
       - drruby-postgres-data:/var/lib/postgresql/data
-      - ./docker/postgres/init-multiple-dbs.sh:/docker-entrypoint-initdb.d/init-multiple-dbs.sh:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U drruby -d drruby"]
       interval: 5s
