@@ -271,6 +271,10 @@
     }
   },
   "healthspan": {
+    "header": {
+      "title": "Healthspan — <em>Your Intel. Your Doctor. Your Decisions.</em>",
+      "sub": "DrRuby gives you the science to have better conversations with your own medical team — without us becoming a medical practice."
+    },
     "brennerQuote": {
       "quote": "We can provide the intel that allows them to get what they want and need from their own doctor or medical systems. Without us getting into the medical business.",
       "name": "Charles Brenner",
@@ -420,7 +424,9 @@
       "title": "Your intel. Your doctor. Your decisions.",
       "subtitle": "DrRuby Healthspan — included with every membership · $20/month",
       "primary": "Go to My Dashboard →",
-      "ghost": "← View My Skin Data"
+      "ghost": "← View My Skin Data",
+      "bridgeText": "Ready to talk to a specialist about what you've found?",
+      "bridgeCta": "Find a Partner Clinic →"
     }
   },
   "waitlist": {
