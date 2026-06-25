@@ -32,6 +32,8 @@ model UserAccount {
   subscriptionTier String    @default("free") @map("subscription_tier")
   timezone         String    @default("UTC")
   status           String    @default("active")
+  name             String?
+  image            String?
   lastLoginAt      DateTime? @map("last_login_at") @db.Timestamptz
   deletedAt        DateTime? @map("deleted_at") @db.Timestamptz
   createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz
@@ -57,9 +59,65 @@ model UserAccount {
   sisResponseLogs  SisResponseLog[]
   userProtocolConfig UserProtocolConfig?
   modelValidationLogs ModelValidationLog[]
+  sessions         Session[]
+  accounts         Account[]
 
   @@index([status, deletedAt], map: "user_account_status_deleted_at_idx")
   @@map("user_account")
+}
+
+// =============================================================================
+// 认证域（Better Auth：session / account / verification）
+// =============================================================================
+
+/// Better Auth 会话（DB session）
+model Session {
+  id        String      @id
+  token     String      @unique
+  expiresAt DateTime    @map("expires_at") @db.Timestamptz
+  ipAddress String?     @map("ip_address")
+  userAgent String?     @map("user_agent")
+  userId    String      @map("user_id")
+  createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime    @updatedAt @map("updated_at") @db.Timestamptz
+  user      UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "session_user_id_idx")
+  @@map("session")
+}
+
+/// Better Auth 账号（OAuth / 凭证；承载 Google 绑定与 provider 信息）
+model Account {
+  id                    String      @id
+  accountId             String      @map("account_id")
+  providerId            String      @map("provider_id")
+  userId                String      @map("user_id")
+  accessToken           String?     @map("access_token")
+  refreshToken          String?     @map("refresh_token")
+  idToken               String?     @map("id_token")
+  accessTokenExpiresAt  DateTime?   @map("access_token_expires_at") @db.Timestamptz
+  refreshTokenExpiresAt DateTime?   @map("refresh_token_expires_at") @db.Timestamptz
+  scope                 String?
+  password              String?
+  createdAt             DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt             DateTime    @updatedAt @map("updated_at") @db.Timestamptz
+  user                  UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "account_user_id_idx")
+  @@map("account")
+}
+
+/// Better Auth 验证记录（OTP / 邮箱验证）
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime @map("expires_at") @db.Timestamptz
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([identifier], map: "verification_identifier_idx")
+  @@map("verification")
 }
 
 /// 皮肤基线档案（1:1 user_account）　✅
