@@ -27,6 +27,7 @@
     "changeEmail": "Use a different email",
     "or": "or",
     "google": "Continue with Google",
+    "logout": "Log out",
     "errors": {
       "invalidEmail": "Enter a valid email address",
       "invalidCode": "Invalid or expired code. Please try again.",

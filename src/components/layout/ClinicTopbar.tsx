@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import LogoutButton from "@/components/auth/LogoutButton";
 import { CLINIC_PROFILE, CLINIC_USER } from "@/config/clinic-portal-mock";
 
 interface ClinicTopbarProps {
@@ -45,6 +46,7 @@ export default function ClinicTopbar({
             {primaryAction.label}
           </a>
         )}
+        <LogoutButton />
       </div>
     </div>
   );
