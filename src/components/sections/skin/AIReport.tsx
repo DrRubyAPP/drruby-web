@@ -2,14 +2,14 @@ import { getTranslations } from "next-intl/server";
 import { AI_FINDINGS } from "@/config/skin-mock";
 
 const LEVEL_BORDER: Record<string, string> = {
-  good: "border-l-dr-success",
-  warn: "border-l-dr-warn",
+  good: "border-l-dr-red",
+  warn: "border-l-dr-mid",
   alert: "border-l-dr-red",
 };
 
 const TAG_STYLE: Record<string, string> = {
-  good: "bg-[rgba(31,158,90,0.1)] text-dr-success",
-  warn: "bg-[rgba(184,106,0,0.1)] text-dr-warn",
+  good: "bg-[rgba(200,16,46,0.1)] text-dr-red",
+  warn: "bg-[rgba(136,136,136,0.1)] text-dr-mid",
   alert: "bg-[rgba(200,16,46,0.08)] text-dr-red",
 };
 
@@ -17,7 +17,7 @@ export default async function AIReport() {
   const t = await getTranslations("skin.aiReport");
   return (
     <div className="bg-dr-white border border-dr-border p-4 md:p-5">
-      <div className="text-[12px] font-semibold tracking-[0.2em] uppercase text-dr-red mb-3.5 flex items-center gap-2">
+      <div className="text-[14px] font-semibold tracking-[0.2em] uppercase text-dr-red mb-3.5 flex items-center gap-2">
         <span className="block w-2.5 h-px bg-dr-red" />
         {t("title")}
       </div>
@@ -28,15 +28,15 @@ export default async function AIReport() {
             className={`flex gap-3 px-3 py-2.5 bg-dr-off border-l-2 ${LEVEL_BORDER[f.level]}`}
           >
             <div className="flex-1">
-              <div className="text-[14px] font-semibold text-dr-ink mb-0.5">
+              <div className="text-[15px] font-semibold text-dr-ink mb-0.5">
                 {f.title}
               </div>
-              <div className="text-[12px] text-dr-mid leading-[1.6]">
+              <div className="text-[14px] text-dr-mid leading-[1.6]">
                 {f.desc}
               </div>
             </div>
             <div
-              className={`text-[11px] font-bold tracking-[0.14em] uppercase px-1.5 py-0.5 h-fit flex-shrink-0 ${TAG_STYLE[f.level]}`}
+              className={`text-[14px] font-bold tracking-[0.14em] uppercase px-1.5 py-0.5 h-fit flex-shrink-0 ${TAG_STYLE[f.level]}`}
             >
               {f.tag}
             </div>
@@ -44,8 +44,8 @@ export default async function AIReport() {
         ))}
       </div>
       <div className="mt-3.5 pt-3 border-t border-dr-border flex justify-between items-center">
-        <span className="text-[12px] text-dr-mid">{t("basedOn")}</span>
-        <span className="text-[12px] font-semibold text-dr-red tracking-[0.12em] uppercase cursor-pointer">
+        <span className="text-[14px] text-dr-mid">{t("basedOn")}</span>
+        <span className="text-[14px] font-semibold text-dr-red tracking-[0.12em] uppercase cursor-pointer">
           {t("fullReport")}
         </span>
       </div>

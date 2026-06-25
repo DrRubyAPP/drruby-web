@@ -253,19 +253,19 @@
           "trendText": "↑ +9 pts this quarter"
         }
       ],
-      "scopeNote": "SkinScope unlocks full Collagen Kinetics accuracy. Currently estimated from phone camera.",
-      "scopeUpgrade": "Upgrade →"
+      "scopeNote": "Weekly SIS Score",
+      "scopeUpgrade": "— computed from all four biomarkers after each scan. Tracks your skin improvement trajectory over the 26-week study window."
     },
     "trend": {
       "title": "Trend Over Time",
       "period30d": "30d",
       "period90d": "90d",
       "period1yr": "1yr",
-      "legendInfl": "Inflammation",
-      "legendPigm": "Pigment Load",
-      "legendColl": "Collagen",
-      "overallTitle": "Overall trend: improving",
-      "overallDesc": "Inflammation and Collagen both up significantly over 90 days. Pigment needs attention.",
+      "legendInfl": "Erythema",
+      "legendPigm": "Pigmentation",
+      "legendColl": "Texture & Pore",
+      "overallTitle": "Overall trend: improving · SIS ↑",
+      "overallDesc": "Erythema and Texture both improving over 90 days. Pigmentation needs attention.",
       "dataPoints": [
         { "date": "Mar 10", "infl": 48, "pigm": 52, "coll": 55 },
         { "date": "Mar 25", "infl": 52, "pigm": 49, "coll": 58 },

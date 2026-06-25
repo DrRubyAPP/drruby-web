@@ -3,19 +3,19 @@
 
 export const BRENNER_INDICES = [
   {
-    id: "inflammation",
-    eyebrow: "Index 01",
-    name: "Inflammation Index",
+    id: "erythema",
+    eyebrow: "Biomarker 01",
+    name: "Erythema Score",
     score: 72,
     max: 100,
     level: "good" as const,
-    desc: "Measures skin redness, reactive markers, and oxidative stress signals. Lower inflammation → slower aging.",
+    desc: "Measures skin redness and erythema density — an early signal of inflammation, hormonal shifts, and barrier stress.",
     trend: { dir: "up" as const, text: "↑ +6 pts since last scan" },
   },
   {
     id: "pigment",
-    eyebrow: "Index 02",
-    name: "Pigment Load Index",
+    eyebrow: "Biomarker 02",
+    name: "Pigmentation Index",
     score: 58,
     max: 100,
     level: "warn" as const,
@@ -23,13 +23,13 @@ export const BRENNER_INDICES = [
     trend: { dir: "dn" as const, text: "↓ −3 pts — sun exposure detected" },
   },
   {
-    id: "collagen",
-    eyebrow: "Index 03",
-    name: "Collagen Kinetics Index",
+    id: "texture",
+    eyebrow: "Biomarker 03",
+    name: "Texture & Pore Score",
     score: 81,
     max: 100,
     level: "good" as const,
-    desc: "Assesses structural skin density, elasticity, and collagen turnover rate — requires SkinScope for full accuracy.",
+    desc: "Assesses pore size distribution and surface texture uniformity — reflects skin structure and barrier function over time.",
     trend: { dir: "up" as const, text: "↑ +9 pts this quarter" },
   },
 ];
@@ -56,13 +56,13 @@ export const AI_FINDINGS = [
   {
     level: "warn" as const,
     title: "UV pigmentation accumulation",
-    desc: "Pigment Load down 3pts. Sunscreen compliance may have dropped — cross-referenced with weather data.",
+    desc: "Pigmentation Index down 3pts. Sunscreen compliance may have dropped — cross-referenced with UV exposure log.",
     tag: "Monitor",
   },
   {
     level: "alert" as const,
-    title: "Upgrade scan for Collagen accuracy",
-    desc: "Collagen Kinetics Index is estimated. SkinScope attachment will give full cross-polarized reading.",
+    title: "Upgrade scan for Texture accuracy",
+    desc: "Texture & Pore Score is estimated from phone camera. SkinScope attachment will give full dermatoscope-grade reading.",
     tag: "Action",
   },
 ];

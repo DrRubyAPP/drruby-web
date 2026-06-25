@@ -32,12 +32,12 @@ export default function ScanWindow() {
           <div className="scan-line" />
         </div>
         {/* Bottom label */}
-        <div className="absolute bottom-3 left-0 right-0 text-center text-[12px] font-semibold tracking-[0.2em] uppercase text-white/20">
+        <div className="absolute bottom-3 left-0 right-0 text-center text-[14px] font-semibold tracking-[0.2em] uppercase text-white/20">
           {t("positionLabel")}
         </div>
         {/* Image Quality Gate overlay */}
         <div className="absolute bottom-0 left-0 right-0 bg-black/82 px-3.5 py-2.5">
-          <div className="text-[12px] font-semibold tracking-[0.16em] uppercase text-white/40 mb-2">
+          <div className="text-[14px] font-semibold tracking-[0.16em] uppercase text-white/40 mb-2">
             {t("qualityCheck")}
           </div>
           <div className="flex flex-col gap-1.5">
@@ -46,20 +46,20 @@ export default function ScanWindow() {
                 <div
                   className={`w-3.5 h-3.5 rounded-full flex items-center justify-center flex-shrink-0 ${
                     check.passed
-                      ? "bg-[rgba(31,158,90,0.2)] border border-[rgba(31,158,90,0.5)]"
+                      ? "bg-[rgba(200,16,46,0.2)] border border-[rgba(200,16,46,0.5)]"
                       : "bg-[rgba(200,16,46,0.15)] border border-[rgba(200,16,46,0.5)]"
                   }`}
                 >
                   <span
-                    className={`text-[12px] ${
-                      check.passed ? "text-[rgba(31,158,90,0.9)]" : "text-dr-red"
+                    className={`text-[13px] ${
+                      check.passed ? "text-[rgba(200,16,46,0.9)]" : "text-dr-red"
                     }`}
                   >
                     {check.passed ? "✓" : "✗"}
                   </span>
                 </div>
                 <span
-                  className={`text-[12px] ${
+                  className={`text-[13px] ${
                     check.passed ? "text-white/55" : "text-[rgba(200,16,46,0.9)]"
                   }`}
                 >
@@ -88,7 +88,7 @@ export default function ScanWindow() {
               key={mode}
               type="button"
               onClick={() => setActiveMode(i)}
-              className={`text-[12px] font-semibold tracking-[0.14em] uppercase px-4 py-2 cursor-pointer border transition-all ${
+              className={`text-[14px] font-semibold tracking-[0.14em] uppercase px-4 py-2 cursor-pointer border transition-all ${
                 i === activeMode
                   ? "bg-dr-red text-white border-dr-red"
                   : "border-white/10 text-white/30 bg-transparent hover:border-[rgba(200,16,46,0.4)] hover:text-white/70"
@@ -107,10 +107,10 @@ export default function ScanWindow() {
             className="w-11 h-11 object-contain opacity-70 flex-shrink-0"
           />
           <div>
-            <div className="text-[13px] font-medium text-white/55 mb-0.5">
+            <div className="text-[15px] font-medium text-white/55 mb-0.5">
               {t("scopeName")}
             </div>
-            <div className="text-[12px] text-[rgba(200,16,46,0.6)] font-semibold tracking-[0.1em] cursor-pointer">
+            <div className="text-[14px] text-[rgba(200,16,46,0.6)] font-semibold tracking-[0.1em] cursor-pointer">
               {t("scopeCta")}
             </div>
           </div>
@@ -120,7 +120,7 @@ export default function ScanWindow() {
           <button
             type="button"
             disabled={!allPassed}
-            className={`text-[13px] font-semibold tracking-[0.16em] uppercase text-white px-6 py-3 border-none w-fit ${
+            className={`text-[14px] font-semibold tracking-[0.16em] uppercase text-white px-6 py-3 border-none w-fit ${
               allPassed
                 ? "bg-dr-red cursor-pointer"
                 : "bg-dr-red opacity-35 cursor-not-allowed"
@@ -129,18 +129,18 @@ export default function ScanWindow() {
             {t("capture")}
           </button>
           {!allPassed && (
-            <div className="text-[12px] text-[rgba(200,16,46,0.7)] pl-0.5">
+            <div className="text-[13px] text-[rgba(200,16,46,0.7)] pl-0.5">
               {t("captureHint")}
             </div>
           )}
         </div>
         {/* All-passed state annotation */}
         {allPassed && (
-          <div className="mt-1 px-3.5 py-2.5 bg-[rgba(31,158,90,0.07)] border border-[rgba(31,158,90,0.2)]">
-            <div className="text-[12px] font-bold text-[rgba(31,158,90,0.9)] tracking-[0.1em] mb-[3px]">
+          <div className="mt-1 px-3.5 py-2.5 bg-[rgba(200,16,46,0.07)] border border-[rgba(200,16,46,0.2)]">
+            <div className="text-[14px] font-bold text-[rgba(200,16,46,0.9)] tracking-[0.1em] mb-[3px]">
               {t("allPassed")}
             </div>
-            <div className="text-[12px] text-[rgba(31,158,90,0.65)]">
+            <div className="text-[13px] text-[rgba(200,16,46,0.65)]">
               {t("allPassedDesc")}
             </div>
           </div>
