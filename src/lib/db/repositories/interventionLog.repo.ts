@@ -1,4 +1,4 @@
-import type { InterventionLog } from "@prisma/client";
+import type { InterventionLog } from "~prisma/client";
 import {
   type FaceSideWithBoth,
   faceSideWithBothSchema,

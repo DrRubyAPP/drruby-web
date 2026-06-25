@@ -2,6 +2,7 @@
   "name": "drruby-website",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "engines": {
     "node": ">=20.0.0"
   },
@@ -15,6 +16,7 @@
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "db:validate": "prisma validate",
     "db:generate": "prisma generate",
     "db:migrate:dev": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
@@ -57,7 +59,6 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "@prisma/client",
-      "@prisma/engines",
       "prisma",
       "esbuild"
     ]

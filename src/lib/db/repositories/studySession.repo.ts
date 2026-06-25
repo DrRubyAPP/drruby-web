@@ -1,4 +1,4 @@
-import type { StudySession } from "@prisma/client";
+import type { StudySession } from "~prisma/client";
 import {
   type CaptureWindow,
   captureWindowSchema,

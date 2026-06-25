@@ -6,13 +6,13 @@
 // 外键：所有 FK 列建二级索引（Postgres 不自动为 FK 建索引）
 
 generator client {
-  provider = "prisma-client-js"
-  // previewFeatures = ["postgresqlExtensions"] // v7 已弃用，pgvector 用 raw SQL 处理
+  provider = "prisma-client"
+  output   = "generated"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  // url 迁移至 prisma.config.ts（Prisma 7 CLI 不再自动读 .env）
 }
 
 // =============================================================================

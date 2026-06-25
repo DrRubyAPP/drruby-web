@@ -1,4 +1,4 @@
-import type { UserBaseline } from "@prisma/client";
+import type { UserBaseline } from "~prisma/client";
 import { type HormonalStatus, hormonalStatusSchema } from "@/lib/db/enums";
 import { prisma } from "@/lib/db/prisma";
 

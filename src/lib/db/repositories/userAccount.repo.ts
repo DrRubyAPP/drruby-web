@@ -1,4 +1,4 @@
-import type { UserAccount } from "@prisma/client";
+import type { UserAccount } from "~prisma/client";
 import {
   type AuthProvider,
   authProviderSchema,

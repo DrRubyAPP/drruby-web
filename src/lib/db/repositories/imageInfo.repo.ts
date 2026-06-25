@@ -1,4 +1,4 @@
-import type { ImageInfo } from "@prisma/client";
+import type { ImageInfo } from "~prisma/client";
 import {
   type CaptureDevice,
   captureDeviceSchema,

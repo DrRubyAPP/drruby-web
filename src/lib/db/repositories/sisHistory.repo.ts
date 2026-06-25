@@ -1,4 +1,4 @@
-import type { SisHistory } from "@prisma/client";
+import type { SisHistory } from "~prisma/client";
 import {
   type McsLevel,
   mcsLevelSchema,
