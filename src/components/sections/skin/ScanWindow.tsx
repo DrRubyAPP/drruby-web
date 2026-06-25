@@ -102,7 +102,7 @@ export default function ScanWindow() {
         <div className="bg-white/4 border border-white/7 p-3.5 flex gap-3 items-center max-w-[340px]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/skinscope.jpg"
+            src="/skinscope.webp"
             alt="SkinScope"
             className="w-11 h-11 object-contain opacity-70 flex-shrink-0"
           />

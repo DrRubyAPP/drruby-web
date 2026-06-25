@@ -14,52 +14,28 @@ interface Slide {
   ctaGhost?: string;
 }
 
+// Warm light backgrounds — text reads as dark ink (per tech-index reference)
 const SLIDE_BGS = [
-  "radial-gradient(ellipse 80% 80% at 70% 50%, #5E0E1C 0%, #3D0810 55%, #2A050B 100%)",
-  "radial-gradient(ellipse 70% 90% at 30% 60%, #3D0A20 0%, #2A0815 50%, #2A050B 100%)",
-  "radial-gradient(ellipse 90% 70% at 60% 40%, #4E0A0E 0%, #3D0810 50%, #2A050B 100%)",
-  "radial-gradient(ellipse 60% 100% at 80% 50%, #1A3A22 0%, #2A050B 50%, #2A050B 100%)",
+  "radial-gradient(ellipse 80% 80% at 70% 50%, #F0E8E5 0%, #F5F0EE 55%, #EDE8E5 100%)",
+  "radial-gradient(ellipse 70% 90% at 30% 60%, #EEECEA 0%, #F5F3F0 50%, #EDE9E6 100%)",
+  "radial-gradient(ellipse 90% 70% at 60% 40%, #F2EDEB 0%, #F5F2EF 50%, #EEECEA 100%)",
+  "radial-gradient(ellipse 60% 100% at 80% 50%, #EDE8E6 0%, #F3EEEC 50%, #EEECEA 100%)",
 ];
 
+// Hero photography (webp) overlaid on the warm gradient
+const SLIDE_IMAGES: Array<{ src: string; opacity: number }> = [
+  { src: "/hero-slide3332.webp", opacity: 0.65 },
+  { src: "/hero-slide11.webp", opacity: 0.65 },
+  { src: "/hero-slide111.webp", opacity: 0.45 },
+  { src: "/hero-slide44.webp", opacity: 0.65 },
+];
+
+// Left-side gradient overlay keeps the headline legible over the photo
 const SLIDE_OVERLAYS = [
-  "linear-gradient(to right, rgba(42,5,11,0.88) 0%, rgba(42,5,11,0.5) 45%, transparent 70%)",
-  "linear-gradient(to right, rgba(42,5,16,0.92) 0%, rgba(42,5,16,0.5) 45%, transparent 70%)",
-  "linear-gradient(to right, rgba(30,12,8,0.92) 0%, rgba(30,12,8,0.5) 45%, transparent 70%)",
-  "linear-gradient(to right, rgba(42,5,11,0.88) 0%, rgba(42,5,11,0.5) 45%, transparent 70%)",
-];
-
-// Decorative art per slide: [circle1, circle2, optional extra]
-const SLIDE_ART: Array<{
-  circles: Array<{ size: number; right: number; top: number; border: string }>;
-  extra?: "skinscope" | "n1" | "lock" | "brenner";
-}> = [
-  {
-    circles: [
-      { size: 500, right: -80, top: -60, border: "rgba(200,16,46,0.12)" },
-      { size: 320, right: 40, top: 80, border: "rgba(200,16,46,0.06)" },
-    ],
-    extra: "skinscope",
-  },
-  {
-    circles: [
-      { size: 600, right: -150, top: -100, border: "rgba(91,63,160,0.15)" },
-      { size: 350, right: 60, top: 80, border: "rgba(91,63,160,0.08)" },
-    ],
-    extra: "n1",
-  },
-  {
-    circles: [
-      { size: 400, right: 20, top: 40, border: "rgba(31,158,90,0.12)" },
-      { size: 240, right: 100, top: 120, border: "rgba(31,158,90,0.07)" },
-    ],
-    extra: "lock",
-  },
-  {
-    circles: [
-      { size: 480, right: -60, top: 20, border: "rgba(200,16,46,0.1)" },
-    ],
-    extra: "brenner",
-  },
+  "linear-gradient(to right, rgba(245,240,238,0.55) 0%, rgba(245,240,238,0.2) 50%, transparent 70%)",
+  "linear-gradient(to right, rgba(238,233,230,0.55) 0%, rgba(238,233,230,0.2) 50%, transparent 70%)",
+  "linear-gradient(to right, rgba(238,233,230,0.55) 0%, rgba(238,233,230,0.2) 50%, transparent 70%)",
+  "linear-gradient(to right, rgba(245,240,238,0.55) 0%, rgba(245,240,238,0.2) 50%, transparent 70%)",
 ];
 
 export default function HeroCarousel() {
@@ -103,163 +79,67 @@ export default function HeroCarousel() {
   }
 
   return (
-    <div className="relative h-[520px] md:h-[580px] overflow-hidden bg-dr-wine">
+    <div className="relative h-[540px] md:h-[640px] overflow-hidden bg-[#EDE8E5]">
       {/* Slides */}
       <div
         className="flex h-full transition-transform duration-800 ease-[cubic-bezier(0.77,0,0.175,1)]"
         style={{ transform: `translateX(-${current * 100}%)` }}
       >
-        {slides.map((slide, i) => {
-          const art = SLIDE_ART[i];
-          return (
-            <div key={i} className="min-w-full h-full relative flex items-end">
-              {/* Background */}
-              <div
-                className="absolute inset-0"
-                style={{ background: SLIDE_BGS[i] }}
-              />
-              {/* Decorative art — hidden on mobile to keep content readable */}
-              <div className="hidden md:block absolute right-0 top-0 w-[60%] h-full overflow-hidden pointer-events-none">
-                {art.circles.map((c, ci) => (
-                  <div
-                    key={ci}
-                    className="absolute rounded-full"
-                    style={{
-                      width: c.size,
-                      height: c.size,
-                      right: c.right,
-                      top: c.top,
-                      border: `1px solid ${c.border}`,
-                    }}
-                  />
-                ))}
-                {art.extra === "skinscope" && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src="/skinscope.jpg"
-                    alt="SkinScope"
-                    className="absolute right-10 top-1/2 -translate-y-1/2 h-[75%] w-auto object-contain opacity-55 mix-blend-lighten"
-                    style={{ filter: "contrast(1.1)" }}
-                  />
-                )}
-                {art.extra === "n1" && (
-                  <div
-                    className="absolute font-serif italic font-light select-none"
-                    style={{
-                      right: 80,
-                      top: 120,
-                      fontSize: 220,
-                      lineHeight: 1,
-                      color: "rgba(255,255,255,0.025)",
-                    }}
-                  >
-                    N=1
-                  </div>
-                )}
-                {art.extra === "lock" && (
-                  <>
-                    <div
-                      className="absolute select-none"
-                      style={{
-                        right: 100,
-                        top: 150,
-                        fontSize: 100,
-                        opacity: 0.04,
-                        color: "white",
-                        lineHeight: 1,
-                      }}
-                    >
-                      🔒
-                    </div>
-                    <div
-                      className="absolute rounded-full flex items-center justify-center"
-                      style={{
-                        right: 160,
-                        top: 220,
-                        width: 80,
-                        height: 80,
-                        border: "1px solid rgba(255,255,255,0.06)",
-                      }}
-                    >
-                      <div
-                        className="rounded-full"
-                        style={{
-                          width: 30,
-                          height: 30,
-                          border: "1px solid rgba(255,255,255,0.15)",
-                        }}
-                      />
-                    </div>
-                  </>
-                )}
-                {art.extra === "brenner" && (
-                  <div
-                    className="absolute"
-                    style={{
-                      right: 72,
-                      bottom: 80,
-                      maxWidth: 300,
-                      padding: 24,
-                      border: "1px solid rgba(255,255,255,0.06)",
-                      background: "rgba(255,255,255,0.02)",
-                    }}
-                  >
-                    <div className="text-[12px] font-semibold tracking-[0.2em] uppercase text-[rgba(200,16,46,0.5)] mb-2">
-                      Scientific Advisor
-                    </div>
-                    <div className="font-serif italic text-[15px] text-white/50 leading-[1.7] mb-2.5">
-                      "DrRuby connects metabolic aging science to the consumer
-                      for the first time."
-                    </div>
-                    <div className="text-[12px] text-white/30 font-medium">
-                      Charles Brenner
-                    </div>
-                    <div className="text-[12px] text-white/18">
-                      Biochemist · NAD Biology
-                    </div>
-                  </div>
-                )}
+        {slides.map((slide, i) => (
+          <div key={i} className="min-w-full h-full relative flex items-end">
+            {/* Warm gradient background */}
+            <div
+              className="absolute inset-0"
+              style={{ background: SLIDE_BGS[i] }}
+            />
+            {/* Hero photo */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={SLIDE_IMAGES[i].src}
+              alt=""
+              aria-hidden="true"
+              className="absolute inset-0 w-full h-full object-cover object-center"
+              style={{ opacity: SLIDE_IMAGES[i].opacity }}
+            />
+            {/* Left readability overlay */}
+            <div
+              className="absolute inset-0 z-2"
+              style={{ background: SLIDE_OVERLAYS[i] }}
+            />
+            {/* Content */}
+            <div className="relative z-3 px-6 md:px-18 pb-12 md:pb-20 max-w-[680px]">
+              <div className="text-[12px] md:text-[13px] font-bold tracking-[0.32em] md:tracking-[0.38em] uppercase text-dr-red mb-4 md:mb-5">
+                {slide.eyebrow}
               </div>
-              {/* Gradient overlay */}
-              <div
-                className="absolute inset-0 z-2"
-                style={{ background: SLIDE_OVERLAYS[i] }}
-              />
-              {/* Content */}
-              <div className="relative z-3 px-6 md:px-18 pb-10 md:pb-18 max-w-[640px]">
-                <div className="text-[11px] md:text-[12px] font-semibold tracking-[0.32em] uppercase text-[rgba(200,16,46,0.65)] mb-[14px] md:mb-[18px]">
-                  {slide.eyebrow}
-                </div>
-                <h2 className="font-serif text-[30px] md:text-[56px] font-light text-white leading-[1.08] mb-4 md:mb-5">
-                  {t.rich(`slides.${i}.title`, {
-                    em: (chunks) => (
-                      <em className="italic text-[#F0C0C8]">{chunks}</em>
-                    ),
-                  })}
-                </h2>
-                <p className="text-[13px] md:text-[14px] font-light text-white/45 leading-[1.8] md:leading-[1.9] max-w-[420px] mb-6 md:mb-8">
-                  {slide.subtitle}
-                </p>
-                <div className="flex gap-3 items-center">
+              <h2 className="font-serif text-[34px] md:text-[72px] font-semibold text-dr-ink leading-[1.05] mb-4 md:mb-[22px]">
+                {t.rich(`slides.${i}.title`, {
+                  em: (chunks) => (
+                    <em className="italic text-dr-red">{chunks}</em>
+                  ),
+                })}
+              </h2>
+              <p className="text-[15px] md:text-[18px] font-normal text-dr-ink/80 leading-[1.7] md:leading-[1.8] max-w-[480px] mb-7 md:mb-9">
+                {slide.subtitle}
+              </p>
+              <div className="flex gap-3.5 items-center flex-wrap">
+                <button
+                  type="button"
+                  className="text-[13px] md:text-[14px] font-bold tracking-[0.18em] md:tracking-[0.2em] uppercase bg-dr-red text-white px-7 md:px-8 py-3.5 md:py-4 border-none cursor-pointer hover:bg-[#A50D25] hover:-translate-y-0.5 transition-all"
+                >
+                  {slide.ctaPrimary}
+                </button>
+                {slide.ctaGhost && (
                   <button
                     type="button"
-                    className="text-[12px] md:text-[13px] font-semibold tracking-[0.18em] uppercase bg-dr-red text-white px-6 md:px-7 py-3 border-none cursor-pointer hover:opacity-90 transition-opacity"
+                    className="text-[13px] md:text-[14px] font-semibold tracking-[0.12em] text-dr-ink border-2 border-dr-ink px-6 md:px-6 py-3 md:py-3.5 bg-transparent cursor-pointer hover:bg-dr-ink hover:text-white transition-all"
                   >
-                    {slide.ctaPrimary}
+                    {slide.ctaGhost}
                   </button>
-                  {slide.ctaGhost && (
-                    <button
-                      type="button"
-                      className="text-[12px] md:text-[13px] font-normal tracking-[0.1em] text-white/45 border border-white/12 px-5 md:px-6 py-3 bg-transparent cursor-pointer hover:text-white hover:border-white/30 transition-all"
-                    >
-                      {slide.ctaGhost}
-                    </button>
-                  )}
-                </div>
+                )}
               </div>
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
 
       {/* Dots */}
@@ -270,7 +150,7 @@ export default function HeroCarousel() {
             type="button"
             onClick={() => goTo(i)}
             className={`h-0.5 transition-all duration-300 cursor-pointer ${
-              i === current ? "w-10 bg-dr-red" : "w-6 bg-white/18"
+              i === current ? "w-10 bg-dr-red" : "w-6 bg-black/15"
             }`}
             aria-label={`Slide ${i + 1}`}
           />
@@ -282,7 +162,7 @@ export default function HeroCarousel() {
         <button
           type="button"
           onClick={() => goTo(current - 1)}
-          className="w-9 h-9 border border-white/15 flex items-center justify-center text-white/40 hover:border-dr-red hover:text-white transition-all cursor-pointer"
+          className="w-9 h-9 border border-black/15 flex items-center justify-center text-black/35 hover:border-dr-red hover:text-dr-red transition-all cursor-pointer"
           aria-label="Previous slide"
         >
           ↑
@@ -290,7 +170,7 @@ export default function HeroCarousel() {
         <button
           type="button"
           onClick={() => goTo(current + 1)}
-          className="w-9 h-9 border border-white/15 flex items-center justify-center text-white/40 hover:border-dr-red hover:text-white transition-all cursor-pointer"
+          className="w-9 h-9 border border-black/15 flex items-center justify-center text-black/35 hover:border-dr-red hover:text-dr-red transition-all cursor-pointer"
           aria-label="Next slide"
         >
           ↓
@@ -298,11 +178,11 @@ export default function HeroCarousel() {
       </div>
 
       {/* Counter */}
-      <div className="absolute top-8 right-6 md:right-18 text-[12px] font-semibold tracking-[0.2em] text-white/20 z-10">
-        <span className="text-white/60">
+      <div className="absolute top-8 right-6 md:right-18 text-[12px] md:text-[14px] font-semibold tracking-[0.2em] text-black/20 z-10">
+        <span className="text-black/50">
           {String(current + 1).padStart(2, "0")}
         </span>{" "}
-        / 04
+        / {t("counterTotal")}
       </div>
 
       {/* Progress bar */}
