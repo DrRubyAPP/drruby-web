@@ -23,7 +23,11 @@ describe("sendOtpEmail", () => {
     sendMock.mockReset();
     for (const k of ENV_KEYS) {
       saved[k] = process.env[k];
-      process.env[k] = k === "EMAIL_FROM" ? "onboarding@resend.dev" : `v-${k}`;
+      // Values must satisfy the unified env schema (BETTER_AUTH_URL is a URL,
+      // EMAIL_FROM an email); other keys are plain non-empty strings.
+      if (k === "EMAIL_FROM") process.env[k] = "onboarding@resend.dev";
+      else if (k === "BETTER_AUTH_URL") process.env[k] = "http://localhost:3000";
+      else process.env[k] = `v-${k}`;
     }
   });
 

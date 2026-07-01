@@ -1,26 +1,28 @@
 /**
- * 认证相关环境变量的集中读取与校验。
+ * 认证相关环境变量的读取。
  *
- * Better Auth / Google OAuth / Resend 所需变量在此统一校验，缺失时尽早抛出
- * 可读错误，避免在请求链路深处静默失败。
+ * 现委托 `src/config/env.ts` 的统一 Zod 校验；保留 `getAuthEnv` 同名同形导出，
+ * 调用点无需改动。
  */
-const REQUIRED = [
-  "BETTER_AUTH_SECRET",
-  "BETTER_AUTH_URL",
-  "GOOGLE_CLIENT_ID",
-  "GOOGLE_CLIENT_SECRET",
-  "RESEND_API_KEY",
-  "EMAIL_FROM",
-] as const;
+import { serverEnv } from "@/config/env";
 
-export type AuthEnv = Record<(typeof REQUIRED)[number], string>;
+export type AuthEnv = {
+  BETTER_AUTH_SECRET: string;
+  BETTER_AUTH_URL: string;
+  GOOGLE_CLIENT_ID: string;
+  GOOGLE_CLIENT_SECRET: string;
+  RESEND_API_KEY: string;
+  EMAIL_FROM: string;
+};
 
 export function getAuthEnv(): AuthEnv {
-  const out = {} as AuthEnv;
-  for (const key of REQUIRED) {
-    const v = process.env[key];
-    if (!v) throw new Error(`Missing required auth env: ${key}`);
-    out[key] = v;
-  }
-  return out;
+  const e = serverEnv();
+  return {
+    BETTER_AUTH_SECRET: e.BETTER_AUTH_SECRET,
+    BETTER_AUTH_URL: e.BETTER_AUTH_URL,
+    GOOGLE_CLIENT_ID: e.GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET: e.GOOGLE_CLIENT_SECRET,
+    RESEND_API_KEY: e.RESEND_API_KEY,
+    EMAIL_FROM: e.EMAIL_FROM,
+  };
 }
