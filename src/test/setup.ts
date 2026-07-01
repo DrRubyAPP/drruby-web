@@ -2,7 +2,7 @@ import "dotenv/config";
 import "@testing-library/jest-dom/vitest";
 import { vi } from "vitest";
 
-// jsdom has no matchMedia; next-themes relies on it for system theme detection.
+// jsdom has no matchMedia; stub it so components relying on it don't crash.
 if (!window.matchMedia) {
   window.matchMedia = vi.fn().mockImplementation((query: string) => ({
     matches: false,

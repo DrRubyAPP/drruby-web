@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 :root {
   /* Brand colours (webiste-ui-spec.md §2.1) */
@@ -43,7 +43,7 @@
  * (bg-dr-ink). Primary text uses the --dr-fg token so it can flip
  * independently.
  */
-.dark {
+[data-theme="dark"] {
   --dr-off: #161616;
   --dr-grey: #1c1c1c;
   --dr-border: #2c2c2c;

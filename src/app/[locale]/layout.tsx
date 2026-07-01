@@ -1,10 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Jost } from "next/font/google";
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
-import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { routing } from "@/i18n/routing";
+import { normalizeTheme, THEME_COOKIE } from "@/lib/theme";
 import "../globals.css";
 
 const cormorant = Cormorant_Garamond({
@@ -53,17 +54,20 @@ export default async function LocaleLayout({
   // Enable static rendering for this locale.
   setRequestLocale(locale);
 
+  // Read the theme preference server-side and render <html data-theme> directly
+  // — first paint is correct with no FOUC and no inline anti-flash script.
+  const theme = normalizeTheme((await cookies()).get(THEME_COOKIE)?.value);
+
   return (
     <html
       lang={locale}
+      data-theme={theme}
       className={`${cormorant.variable} ${jost.variable}`}
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <body>
-        <NextIntlClientProvider>
-          <ThemeProvider>{children}</ThemeProvider>
-        </NextIntlClientProvider>
+        <NextIntlClientProvider>{children}</NextIntlClientProvider>
       </body>
     </html>
   );
