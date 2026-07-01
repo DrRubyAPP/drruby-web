@@ -1,25 +1,44 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import UserAvatar from "@/components/auth/UserAvatar";
 import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 import { Link } from "@/i18n/navigation";
+import { authClient } from "@/lib/auth/client";
+import { homeHrefForRole } from "@/lib/auth/roles";
 
 interface NavLink {
   href: string;
   key: "howItWorks" | "skin" | "healthspan" | "portal" | "clinic";
 }
 
-const LINKS: NavLink[] = [
+// 始终可见的公开链接。
+const PUBLIC_LINKS: NavLink[] = [
   { href: "/", key: "howItWorks" },
   { href: "/skin", key: "skin" },
   { href: "/healthspan", key: "healthspan" },
-  { href: "/portal", key: "portal" },
-  { href: "/clinic", key: "clinic" },
 ];
 
-export default function MobileMenu() {
+interface MobileMenuProps {
+  isAuthed: boolean;
+  role: string | null;
+  image?: string | null;
+  name?: string | null;
+  email?: string | null;
+}
+
+export default function MobileMenu({
+  isAuthed,
+  role,
+  image,
+  name,
+  email,
+}: MobileMenuProps) {
   const t = useTranslations("nav");
+  const tAuth = useTranslations("auth");
+  const router = useRouter();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -40,6 +59,22 @@ export default function MobileMenu() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+
+  async function onLogout() {
+    await authClient.signOut();
+    setOpen(false);
+    router.push("/");
+    router.refresh();
+  }
+
+  // 未登录不显示 portal/clinic；登录后按角色只显示对应的一项。
+  const links: NavLink[] = [...PUBLIC_LINKS];
+  if (isAuthed && role === "user") {
+    links.push({ href: "/portal", key: "portal" });
+  }
+  if (isAuthed && role === "clinic") {
+    links.push({ href: "/clinic", key: "clinic" });
+  }
 
   return (
     <>
@@ -83,7 +118,7 @@ export default function MobileMenu() {
               </button>
             </div>
             <nav className="flex flex-col py-4">
-              {LINKS.map((link) => (
+              {links.map((link) => (
                 <Link
                   key={link.key}
                   href={link.href}
@@ -101,20 +136,49 @@ export default function MobileMenu() {
                 </span>
                 <LocaleSwitcher />
               </div>
-              <Link
-                href="/waitlist"
-                onClick={() => setOpen(false)}
-                className="text-center text-[13px] font-semibold tracking-[0.16em] uppercase bg-dr-red text-white px-5 py-3 no-underline hover:opacity-90 transition-opacity"
-              >
-                {t("getStarted")}
-              </Link>
-              <Link
-                href="/login"
-                onClick={() => setOpen(false)}
-                className="text-center text-[13px] font-medium tracking-[0.1em] text-dr-ink border border-dr-border px-5 py-3 no-underline hover:border-dr-ink transition-colors"
-              >
-                {t("login")}
-              </Link>
+              {isAuthed ? (
+                <>
+                  <Link
+                    href={homeHrefForRole(role)}
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-3 no-underline"
+                  >
+                    <UserAvatar
+                      image={image}
+                      name={name}
+                      email={email}
+                      label={t("account")}
+                    />
+                    <span className="text-[14px] font-medium text-dr-ink truncate">
+                      {name || email}
+                    </span>
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={onLogout}
+                    className="text-center text-[13px] font-medium tracking-[0.1em] text-dr-mid border border-dr-border px-5 py-3 hover:border-dr-ink hover:text-dr-ink transition-colors"
+                  >
+                    {tAuth("logout")}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/waitlist"
+                    onClick={() => setOpen(false)}
+                    className="text-center text-[13px] font-semibold tracking-[0.16em] uppercase bg-dr-red text-white px-5 py-3 no-underline hover:opacity-90 transition-opacity"
+                  >
+                    {t("getStarted")}
+                  </Link>
+                  <Link
+                    href="/login"
+                    onClick={() => setOpen(false)}
+                    className="text-center text-[13px] font-medium tracking-[0.1em] text-dr-ink border border-dr-border px-5 py-3 no-underline hover:border-dr-ink transition-colors"
+                  >
+                    {t("login")}
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

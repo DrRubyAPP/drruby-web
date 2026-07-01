@@ -9,7 +9,8 @@
     "getStarted": "Get Started",
     "menu": "Menu",
     "close": "Close",
-    "language": "Switch language"
+    "language": "Switch language",
+    "account": "Account"
   },
   "auth": {
     "title": "Sign in to DrRuby",

@@ -104,7 +104,7 @@ describe("AuthForm", () => {
     fireEvent.click(screen.getByRole("button", { name: "google" }));
     expect(signInSocial).toHaveBeenCalledWith({
       provider: "google",
-      callbackURL: "/portal",
+      callbackURL: "/",
     });
   });
 });

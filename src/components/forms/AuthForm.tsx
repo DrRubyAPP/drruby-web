@@ -21,7 +21,9 @@ export default function AuthForm() {
   const t = useTranslations("auth");
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirect") || "/portal";
+  // 登录后默认停留在首页（由 Navbar 根据角色展示 portal/clinic 入口）；
+  // 若来自受保护页的回跳（?redirect=…），仍回到原页面。
+  const redirectTo = searchParams.get("redirect") || "/";
 
   const [step, setStep] = useState<Step>("email");
   const [status, setStatus] = useState<Status>("idle");

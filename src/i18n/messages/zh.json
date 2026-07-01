@@ -9,7 +9,8 @@
     "getStarted": "立即开始",
     "menu": "菜单",
     "close": "关闭",
-    "language": "切换语言"
+    "language": "切换语言",
+    "account": "我的账户"
   },
   "auth": {
     "title": "登录 DrRuby",
