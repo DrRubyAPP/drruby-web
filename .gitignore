@@ -44,3 +44,6 @@ next-env.d.ts
 
 # Prisma 7 generated client（output = prisma/generated）
 /prisma/generated
+
+# next-openapi-gen 生成器缓存
+.openapi-gen/
