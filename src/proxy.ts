@@ -4,7 +4,7 @@ import { type NextRequest, NextResponse } from "next/server";
 // 受保护前缀：未登录访问时重定向到登录页（带 redirect 回跳）。
 const PROTECTED = ["/portal", "/clinic"];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   if (!PROTECTED.some((p) => pathname.startsWith(p))) {
     return NextResponse.next();

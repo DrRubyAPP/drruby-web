@@ -68,6 +68,10 @@ export const auth = betterAuth({
       otpLength: 6,
       expiresIn: 300,
       async sendVerificationOTP({ email, otp }) {
+        // 开发环境将验证码打印到控制台，免去真实邮件投递即可本地登录。
+        if (process.env.NODE_ENV !== "production") {
+          console.log(`[auth] OTP for ${email}: ${otp}`);
+        }
         await sendOtpEmail(email, otp);
       },
     }),
