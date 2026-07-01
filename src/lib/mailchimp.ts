@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import mailchimp from "@mailchimp/mailchimp_marketing";
+import { logger } from "@/lib/logger";
 
 // ── Constants ───────────────────────────────────────────────────────
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -54,7 +55,7 @@ export async function subscribeMember(
   const AUDIENCE_ID = process.env.MAILCHIMP_AUDIENCE_ID;
 
   if (!API_KEY || !SERVER_PREFIX || !AUDIENCE_ID) {
-    console.error(
+    logger.error(
       "[mailchimp] Missing required env vars: MAILCHIMP_API_KEY, MAILCHIMP_SERVER_PREFIX, MAILCHIMP_AUDIENCE_ID",
     );
     return {
@@ -133,7 +134,7 @@ export async function subscribeMember(
       const mcErr = extractMailchimpError(e);
       // 404 = member doesn't exist, proceed to add
       if (mcErr.status !== 404) {
-        console.error("[mailchimp] Lookup error:", mcErr);
+        logger.error({ mcErr }, "[mailchimp] Lookup error");
         return {
           status: 500,
           body: { error: "Something went wrong. Please try again." },
@@ -161,7 +162,7 @@ export async function subscribeMember(
       };
     }
 
-    console.error("[mailchimp] Subscribe error:", mcErr);
+    logger.error({ mcErr }, "[mailchimp] Subscribe error");
     return {
       status: 500,
       body: { error: "Something went wrong. Please try again." },
