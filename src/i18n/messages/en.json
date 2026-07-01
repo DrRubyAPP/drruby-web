@@ -8,7 +8,8 @@
     "login": "Log in",
     "getStarted": "Get Started",
     "menu": "Menu",
-    "close": "Close"
+    "close": "Close",
+    "language": "Switch language"
   },
   "auth": {
     "title": "Sign in to DrRuby",

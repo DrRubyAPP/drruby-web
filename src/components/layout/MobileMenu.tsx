@@ -1,8 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
+import { Link } from "@/i18n/navigation";
 
 interface NavLink {
   href: string;
@@ -94,6 +95,12 @@ export default function MobileMenu() {
               ))}
             </nav>
             <div className="mt-auto p-6 border-t border-dr-border flex flex-col gap-3">
+              <div className="flex items-center justify-between pb-1">
+                <span className="text-[13px] tracking-[0.08em] text-dr-mid">
+                  {t("language")}
+                </span>
+                <LocaleSwitcher />
+              </div>
               <Link
                 href="/waitlist"
                 onClick={() => setOpen(false)}

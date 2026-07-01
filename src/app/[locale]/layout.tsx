@@ -1,9 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Jost } from "next/font/google";
-import { NextIntlClientProvider } from "next-intl";
-import { getLocale } from "next-intl/server";
+import { notFound } from "next/navigation";
+import { hasLocale, NextIntlClientProvider } from "next-intl";
+import { setRequestLocale } from "next-intl/server";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
-import "./globals.css";
+import { routing } from "@/i18n/routing";
+import "../globals.css";
 
 const cormorant = Cormorant_Garamond({
   variable: "--font-serif",
@@ -34,12 +36,23 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default async function RootLayout({
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
+
+export default async function LocaleLayout({
   children,
+  params,
 }: Readonly<{
   children: React.ReactNode;
+  params: Promise<{ locale: string }>;
 }>) {
-  const locale = await getLocale();
+  const { locale } = await params;
+  if (!hasLocale(routing.locales, locale)) notFound();
+
+  // Enable static rendering for this locale.
+  setRequestLocale(locale);
+
   return (
     <html
       lang={locale}

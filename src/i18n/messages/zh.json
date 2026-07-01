@@ -1,0 +1,1065 @@
+{
+  "nav": {
+    "howItWorks": "工作原理",
+    "skin": "肌肤",
+    "healthspan": "健康寿命",
+    "portal": "我的门户",
+    "clinic": "诊所",
+    "login": "登录",
+    "getStarted": "立即开始",
+    "menu": "菜单",
+    "close": "关闭",
+    "language": "切换语言"
+  },
+  "auth": {
+    "title": "登录 DrRuby",
+    "subtitle": "输入你的邮箱，我们将向你发送一个 6 位验证码。",
+    "emailLabel": "邮箱",
+    "emailPlaceholder": "you@example.com",
+    "sendCode": "发送验证码",
+    "sending": "发送中…",
+    "codeTitle": "输入验证码",
+    "codeSentTo": "我们已向 {email} 发送了一个 6 位验证码。",
+    "codeLabel": "验证码",
+    "codePlaceholder": "123456",
+    "verify": "验证并继续",
+    "verifying": "验证中…",
+    "resend": "重新发送验证码",
+    "changeEmail": "使用其他邮箱",
+    "or": "或",
+    "google": "使用 Google 继续",
+    "logout": "退出登录",
+    "errors": {
+      "invalidEmail": "请输入有效的邮箱地址",
+      "invalidCode": "验证码无效或已过期，请重试。",
+      "codeLength": "请输入 6 位验证码",
+      "sendFailed": "验证码发送失败，请重试。",
+      "generic": "出现了一些问题，请重试。"
+    }
+  },
+  "footer": {
+    "ctaEyebrow": "今日开启 — 免费",
+    "ctaTitle": "你的个人健康智能，<em>始于一次扫描。</em>",
+    "ctaPrimary": "开始免费分析",
+    "ctaGhost": "已是会员？登录 →",
+    "ctaFine": "无需信用卡 · 数据保留在你的设备上 · 以科学为本，而非追随健康潮流",
+    "privacy": "隐私政策",
+    "copyright": "© 2026 DrRuby"
+  },
+  "home": {
+    "hero": {
+      "slides": [
+        {
+          "eyebrow": "个人健康智能",
+          "title": "了解你的身体。<em>在它发出信号之前。</em>",
+          "subtitle": "由 AI 驱动的肌肤与健康寿命分析 — 只为你个人量身定制，而非群体平均值。",
+          "ctaPrimary": "开始免费分析",
+          "ctaGhost": "从肌肤开始 →"
+        },
+        {
+          "eyebrow": "N=1 原则",
+          "title": "医学研究的是群体。<em>我们研究的是你。</em>",
+          "subtitle": "你的数据训练的是你专属的健康模型 — 不共享，不做平均。与顶尖肌肤科学家和女性健康专家共同开发。",
+          "ctaPrimary": "探索健康寿命 →",
+          "ctaGhost": ""
+        },
+        {
+          "eyebrow": "隐私为先的设计",
+          "title": "你的数据始终<em>保留在你的设备上。</em>",
+          "subtitle": "我们打造 DrRuby，让你最私密的健康数据永不离开你的手机。你的 AI 模型只了解你 — 并且仅仅是你。",
+          "ctaPrimary": "工作原理 →",
+          "ctaGhost": ""
+        },
+        {
+          "eyebrow": "建立于真正的科学之上",
+          "title": "肌肤是通向<em>你代谢年龄的一扇窗。</em>",
+          "subtitle": "与代谢衰老、肌肤生物学和女性健康领域的顶尖科学家共同开发。不是健康潮流 — 而是科学。",
+          "ctaPrimary": "认识我们的科学家",
+          "ctaGhost": "查看技术架构"
+        }
+      ],
+      "counterTotal": "04"
+    },
+    "trust": {
+      "brennerName": "Charles Brenner",
+      "brennerRole": "生物科学家 · NAD 生物学 · DrRuby 首席科学顾问",
+      "gunterName": "Jennifer Gunter",
+      "gunterRole": "女性健康专家 · N=1 临床测试者",
+      "boardName": "肌肤科学顾问委员会",
+      "boardRole": "皮肤科学 · 代谢衰老 · 女性激素健康",
+      "privacy": "你的数据永不离开你的设备"
+    },
+    "choice": {
+      "eyebrow": "你想从哪里开始？",
+      "title": "两个入口。一份档案。<em>你的生物特征。</em>",
+      "skinTag": "看见它。测量它。追踪它。",
+      "skinTitle": "肌肤智能",
+      "skinDesc": "肌肤是你最直观可见的生物标志物。扫描一次，DrRuby 便为你提供三项 Brenner 指数 — 炎症、色素负荷、胶原动力学 — 仅针对你个人校准。",
+      "skinFeed": "直接汇入你的健康寿命档案 →",
+      "skinCta": "从肌肤开始 →",
+      "healthTag": "理解它。优化它。掌握它。",
+      "healthTitle": "健康寿命智能",
+      "healthDesc": "评估你的方案，理解你的生物标志物，获得可以带给你自己医生的洞见。不开处方。不作医疗判断。只提供让对话更有价值的科学依据。",
+      "healthFeed": "由你的肌肤数据 + 评估我的方案驱动 →",
+      "healthCta": "从健康寿命开始 →",
+      "bridgeSkinLabel": "肌肤数据",
+      "bridgeSkinSub": "Brenner 指数",
+      "bridgeProfileLabel": "你的 DrRuby 档案",
+      "bridgeProfileSub": "一个身体。全部数据。N=1。",
+      "bridgeHealthLabel": "健康寿命数据",
+      "bridgeHealthSub": "方案 · 生物标志物 · 洞见"
+    },
+    "n1": {
+      "eyebrow": "DrRuby 原则",
+      "title": "医学始终研究的是群体。<em>DrRuby 研究的是你。</em>",
+      "col1Num": "01",
+      "col1Title": "你的 N=1 实验",
+      "col1Desc": "每个人的肌肤衰老方式各不相同。我们不会拿你与群体平均值作比较 — 而是以你自己的历史数据作为基线。每一次扫描训练的都是你专属的模型，而非他人的。",
+      "col1Highlight": "在 Jennifer Gunter 医学博士的指导下 · N=1 临床测试者",
+      "col2Num": "02",
+      "col2Title": "你的数据，留在你的设备上",
+      "col2Desc": "你的健康数据只属于你。DrRuby 的设计确保你最私密的信息 — 肌肤扫描、生物标志物、激素模式 — 永不离开你的手机。不共享。不出售。不汇总。",
+      "col2Highlight": "隐私源于架构，而非政策",
+      "col3Num": "03",
+      "col3Title": "一个会了解你的模型",
+      "col3Desc": "随着你持续使用 DrRuby，AI 会构建一个针对你生物特征的专属健康模型。建议越来越精准。规律越来越清晰。你使用得越久，它就越了解你。",
+      "col3Highlight": "由代谢衰老科学驱动 · Charles Brenner"
+    },
+    "scroll": {
+      "label": "DrRuby 能做什么",
+      "title": "你的健康所需的一切，<em>不多不少</em>",
+      "items": [
+        {
+          "tag": "个人档案",
+          "name": "你的健康基线",
+          "desc": "肌肤、代谢、激素与生活方式指标 — 全部对照你自己的历史进行分析，而非群体平均值。"
+        },
+        {
+          "tag": "可执行的报告",
+          "name": "知道该采取什么行动",
+          "desc": "清晰的发现 — 良好、关注、行动 — 以通俗语言呈现。可下载并与你的医生分享。"
+        },
+        {
+          "tag": "个人 AI 教练",
+          "name": "始终在线。始终私密。",
+          "desc": "与了解你数据的 AI 对话 — 数据仅存储于你的设备上。随时提问。获得立足于你生物特征的答案。"
+        },
+        {
+          "tag": "临床连接",
+          "name": "预约合作诊所",
+          "desc": "浏览合作诊所。到诊前分享你的 DrRuby 报告，让你的医生提前了解你的病史。"
+        },
+        {
+          "tag": "个性化产品",
+          "name": "与你的数据匹配",
+          "desc": "根据与你健康档案的契合度对护理、补剂和方案进行评分。没有千篇一律的清单。"
+        }
+      ]
+    },
+    "quote": {
+      "eyebrow": "来自我们的 N=1 测试者",
+      "text": "我真的会把它用于自己的 n=1 实验。也会用于那些不断追问的患者 — <em>“医生，这真的有效吗？”</em>",
+      "who": "Jennifer Gunter",
+      "title": "女性健康专家 · DrRuby 临床顾问",
+      "n1Title": "因为你的身体不是一个<em>平均值。</em>",
+      "n1Desc": "大多数健康应用拿你与群体基准作比较。DrRuby 的 N=1 方法意味着你的评分、趋势和建议完全依据你自己的基线校准 — 这才是真正的临床科学运作方式。",
+      "stat1Val": "100%",
+      "stat1Label": "只为你个人定制",
+      "stat2Val": "0",
+      "stat2Label": "对外共享的数据",
+      "stat3Val": "∞",
+      "stat3Label": "随时间不断学习"
+    },
+    "science": {
+      "eyebrow": "建立于真正的科学之上",
+      "title": "肌肤是通向你<em>代谢年龄的一扇窗。</em>",
+      "desc": "DrRuby 的生物标志物评分与代谢衰老、肌肤生物学和女性激素健康领域的顶尖研究者共同开发。我们不使用健康潮流的语言 — 我们运用的是身体随时间真实变化的科学。",
+      "advisor1Name": "Charles Brenner",
+      "advisor1Role": "生物科学家 · NAD 生物学 · DrRuby 首席科学顾问",
+      "advisor1Quote": "DrRuby 首次将代谢衰老科学带给普通消费者。我们不只是分析肌肤 — 我们透过肌肤解读身体的代谢状态。",
+      "advisor2Name": "Jennifer Gunter",
+      "advisor2Role": "女性健康专家 · 临床顾问 · DrRuby N=1 测试者",
+      "advisor2Quote": "肌肤智能与激素健康追踪的结合，填补了其他平台从未为 40 岁及以上女性解决的空白。",
+      "steps": [
+        {
+          "num": "01",
+          "title": "你上传数据",
+          "desc": "肌肤扫描、血液检查、可穿戴设备数据或手动录入。均本地存储于你的设备上。"
+        },
+        {
+          "num": "02",
+          "title": "AI 构建你的基线",
+          "desc": "你的专属模型完成初始化 — 依据你的生物特征校准，而非群体平均值。"
+        },
+        {
+          "num": "03",
+          "title": "科学为你的数据评分",
+          "desc": "Brenner 实验室的代谢衰老指数为你的肌肤、激素和全身指标评分。"
+        },
+        {
+          "num": "04",
+          "title": "你获得一份清晰的报告",
+          "desc": "以通俗语言呈现的发现，附具体行动建议 — 而非千篇一律的生活方式贴士。"
+        },
+        {
+          "num": "05",
+          "title": "模型随你不断改进",
+          "desc": "每一个新的数据点都让你的专属模型更加精准。你使用得越久，它就越聪明。"
+        }
+      ]
+    }
+  },
+  "skin": {
+    "pageNav": {
+      "breadcrumb": "首页",
+      "breadcrumbCurrent": "肌肤分析",
+      "modePhone": "手机相机",
+      "modeScope": "SkinScope",
+      "modeUpload": "上传"
+    },
+    "freqGate": {
+      "lastScan": "上次扫描：6 月 8 日",
+      "nextScanPrefix": "建议下次扫描：",
+      "nextScanDate": "7 月 8 日",
+      "nextScanDays": "（22 天后）",
+      "cycleNote": "肌肤以 28 天为周期变化。过于频繁的扫描只会增加噪声，而非有效信号。",
+      "trackingMode": "追踪模式",
+      "trackingOff": "关闭"
+    },
+    "scan": {
+      "title": "你的肌肤，<em>深度解析。</em>",
+      "desc": "将面部对准取景框并拍摄。DrRuby 将依据 Charles Brenner 的代谢衰老研究开发的三项科学指数为你的肌肤评分。",
+      "modeCheekL": "脸颊（左）",
+      "modeCheekR": "脸颊（右）",
+      "modeForehead": "额头",
+      "modeUnderEye": "眼下",
+      "scopeName": "想要皮肤镜级别的精度？",
+      "scopeCta": "升级至 SkinScope — $99 →",
+      "capture": "拍摄扫描",
+      "captureHint": "解决光线问题以启用拍摄 →",
+      "allPassed": "✓ 所有检查已通过",
+      "allPassedDesc": "图像质量已确认。点击拍摄以保存。",
+      "positionLabel": "将脸颊对准取景框",
+      "qualityCheck": "图像质量检查",
+      "qualityFocus": "对焦与清晰度",
+      "qualityLightFail": "太暗 — 请移至光线更好的位置",
+      "qualityCoverage": "肌肤区域覆盖",
+      "qualitySteady": "稳定 — 无运动模糊"
+    },
+    "engNotes": {
+      "title": "⚙ 工程说明 — 肌肤扫描 UX 规则",
+      "freqTitle": "频率闸门（硬性规则）",
+      "freqRules": [
+        "硬性冷却：任意两次扫描之间至少间隔 72 小时（不可覆盖）",
+        "默认模式：每月节奏（30 天软提示）",
+        "追踪模式：由用户主动开启，支持每周扫描，最长 12 周，自动过期",
+        "若用户在 7 天内尝试扫描 3 次及以上 → 显示温和提示，引导其咨询皮肤科医生",
+        "理由：防止健康焦虑循环；保护洞见引擎的数据质量"
+      ],
+      "qualityTitle": "图像质量闸门（技术）",
+      "qualityRules": [
+        "在设备上实时运行（目标每帧 <200ms）",
+        "V1（MVP）：拉普拉斯方差（模糊）、直方图（曝光）、边界框比例（覆盖）、帧间差值（运动）— 全部基于规则，Core Image / CameraX",
+        "V2：设备端轻量级 MobileNet 分类器 — 在 V1 基线之后",
+        "在全部 4 项检查通过前，拍摄按钮保持禁用",
+        "错误提示必须具体：不是“照片不佳” — 而是“太暗，请移至光线更好处” / “太模糊，请保持稳定” / “请更靠近拍摄肌肤”",
+        "只有高质量图像才进入洞见引擎；不佳的图像被拒绝，不予存储"
+      ]
+    },
+    "indices": {
+      "sectionLabel": "3 项 Brenner 肌肤指数 · 最新扫描 6 月 8 日",
+      "scopeNote": "每周 SIS 评分",
+      "scopeUpgrade": "— 每次扫描后由全部四项生物标志物计算得出。在 26 周研究窗口内追踪你的肌肤改善轨迹。"
+    },
+    "trend": {
+      "title": "随时间的趋势",
+      "period30d": "30 天",
+      "period90d": "90 天",
+      "period1yr": "1 年",
+      "legendInfl": "红斑",
+      "legendPigm": "色素沉着",
+      "legendColl": "肤质与毛孔",
+      "overallTitle": "总体趋势：改善中 · SIS ↑",
+      "overallDesc": "红斑与肤质在过去 90 天均有改善。色素沉着需要关注。"
+    },
+    "aiReport": {
+      "title": "AI 分析 — 6 月 8 日",
+      "basedOn": "基于 90 天内的 8 次扫描",
+      "fullReport": "完整 PDF 报告 →"
+    },
+    "products": {
+      "title": "根据你的扫描推荐"
+    },
+    "clinicEntry": {
+      "eyebrow": "临床护理",
+      "title": "想让皮肤科医生审视你的扫描结果？",
+      "desc": "到诊前将你的 DrRuby 报告分享给合作诊所。你的医生将有备而来 — 无需从头解释你的病史。",
+      "cta": "预约肌肤诊所 →"
+    }
+  },
+  "healthspan": {
+    "header": {
+      "title": "健康寿命 — <em>你的洞见。你的医生。你的决定。</em>",
+      "sub": "DrRuby 为你提供科学依据，让你与自己的医疗团队展开更有价值的对话 — 而我们不必成为一家医疗机构。"
+    },
+    "brennerQuote": {
+      "quote": "我们可以提供洞见，让人们从自己的医生或医疗系统获得他们想要和需要的东西。而我们无需涉足医疗业务。",
+      "name": "Charles Brenner",
+      "role": "生物科学家 · NAD 生物学 · DrRuby 首席科学顾问"
+    },
+    "definitions": [
+      {
+        "eyebrow": "不是长寿",
+        "title": "你活得多好 — 而不仅仅是活得多久",
+        "desc": "DrRuby 追踪真正影响你日常体验的生物标志物：精力、睡眠质量、炎症、肌肤生物学、激素节律。不猜测年龄。不承诺长寿。"
+      },
+      {
+        "eyebrow": "N=1 科学",
+        "title": "你的数据就是你的基线 — 而非群体平均值",
+        "desc": "Brenner 的 NAD 生物学表明，个体差异极其巨大。真正重要的是你随时间的趋势 — 而不是你在陌生人中的排名。"
+      },
+      {
+        "eyebrow": "可带给医生的洞见",
+        "title": "走进诊室时，清楚知道该问什么",
+        "desc": "DrRuby 汇总你的趋势，标记出值得讨论的变化，并为你提供词汇，让你展开一次高效的对话 — 而我们不会取代你的医生。"
+      }
+    ],
+    "evaluateStack": {
+      "eyebrow": "核心功能",
+      "title": "评估我的方案",
+      "desc": "告诉 DrRuby 你目前正在服用的补剂、激素和方案。我们的 AI 会交叉比对你个人的生物标志物、肌肤评分和最新研究 — 然后告诉你哪些有效、哪些多余、哪些缺失。",
+      "bullets": [
+        "以 NAD 生物学 + Brenner 研究数据库为支撑",
+        "针对你的 N=1 数据个性化定制，而非通用建议",
+        "输出格式为可与医生分享的摘要",
+        "从不开具处方 — 始终只作告知"
+      ],
+      "cta": "评估我的方案 →",
+      "panelTitle": "我当前的方案",
+      "panelEntries": [
+        {
+          "name": "NR（烟酰胺核糖）",
+          "dose": "300mg · 早晨",
+          "status": "支持",
+          "statusLevel": "good"
+        },
+        {
+          "name": "胶原蛋白肽",
+          "dose": "10g · 每日",
+          "status": "复查剂量",
+          "statusLevel": "warn"
+        },
+        {
+          "name": "维生素 D3 + K2",
+          "dose": "5000 IU · 随脂肪服用",
+          "status": "支持",
+          "statusLevel": "good"
+        },
+        {
+          "name": "普通复合维生素",
+          "dose": "1 片 · 每日",
+          "status": "多余",
+          "statusLevel": "alert"
+        }
+      ],
+      "addEntry": "+ 添加补剂或方案",
+      "assessmentLabel": "DrRuby 评估",
+      "assessment": "你的胶原评分（58）表明，鉴于你的扫描数据，当前的肽类剂量可能不足。你的 NR 摄入与你的炎症趋势匹配良好。请在下次就诊前将此摘要分享给你的皮肤科医生。",
+      "exportBtn": "导出给医生",
+      "viewFullBtn": "查看完整分析"
+    },
+    "advisors": {
+      "eyebrow": "科学顾问",
+      "title": "你洞见背后的专业力量",
+      "items": [
+        {
+          "initials": "CB",
+          "tag": "NAD 生物学",
+          "name": "Charles Brenner",
+          "role": "生物科学家 · NAD+ 生物学先驱 · DrRuby 首席科学顾问",
+          "advises": "顾问领域：NR/NAD 方案、炎症生物学、补剂功效、评估我的方案背后的科学。"
+        },
+        {
+          "initials": "MD",
+          "tag": "皮肤科学",
+          "name": "医学顾问",
+          "role": "拥有委员会认证的皮肤科医生，专长于功能性肌肤衰老、光老化以及肌肤与全身健康的关联。",
+          "advises": "顾问领域：Brenner 指数的临床背景、肌肤生物标志物解读、何时转诊专科医生、SkinScope 方案。"
+        },
+        {
+          "initials": "WH",
+          "tag": "女性健康",
+          "name": "医学顾问",
+          "role": "激素健康、围绝经期以及 35 岁以上女性代谢与肌肤生物学交叉领域的专家。",
+          "advises": "顾问领域：激素节律追踪、HRT + 补剂相互作用、女性专属的健康寿命方案与警示信号。"
+        }
+      ]
+    },
+    "tracking": {
+      "eyebrow": "健康寿命追踪的内容",
+      "cols": [
+        {
+          "title": "肌肤生物学",
+          "items": [
+            "Brenner 炎症指数",
+            "色素负荷评分",
+            "胶原动力学",
+            "紫外线损伤趋势",
+            "屏障功能"
+          ]
+        },
+        {
+          "title": "精力与恢复",
+          "items": [
+            "自我报告的精力趋势",
+            "睡眠质量（通过可穿戴设备）",
+            "HRV 模式",
+            "运动恢复评分",
+            "NAD 相关指标"
+          ]
+        },
+        {
+          "title": "女性健康",
+          "items": [
+            "激素周期节律",
+            "围绝经期信号",
+            "情绪 + 认知记录",
+            "肌肤与激素的相关性",
+            "补剂服用时机"
+          ]
+        },
+        {
+          "title": "方案智能",
+          "items": [
+            "方案评估",
+            "冗余检测",
+            "缺口识别",
+            "证据强度评级",
+            "可带给医生的摘要"
+          ]
+        }
+      ]
+    },
+    "jennifer": {
+      "quote": "DrRuby 给了我可以带进医生诊室的语言。不是诊断 — 而是对话的起点。这正是过去所欠缺的。",
+      "who": "Jennifer Gunter · DrRuby 早期测试者 · 洛杉矶",
+      "dayLabel": "测试始于",
+      "dayValue": "第 1 天",
+      "daySub": "N=1 · 自己的数据 · 自己的节奏"
+    },
+    "cta": {
+      "title": "你的洞见。你的医生。你的决定。",
+      "subtitle": "DrRuby 健康寿命 — 每份会员均包含 · $20/月",
+      "primary": "前往我的仪表盘 →",
+      "ghost": "← 查看我的肌肤数据",
+      "bridgeText": "准备好就你的发现与专科医生交流了吗？",
+      "bridgeCta": "寻找合作诊所 →"
+    }
+  },
+  "waitlist": {
+    "heroEyebrow": "加入候补名单",
+    "heroTitle": "第一时间获知 DrRuby <em>正式上线。</em>",
+    "heroSubtitle": "早期会员可免费获得 3 个月 Pro 权益，并参与塑造我们的产品。",
+    "heroCtaPrimary": "加入候补名单",
+    "heroCtaGhost": "了解背后的科学",
+    "valuePoints": [
+      {
+        "eyebrow": "N=1 科学",
+        "title": "只为你个人量身定制",
+        "desc": "你的数据训练的是你专属的健康模型 — 不共享，不做平均。"
+      },
+      {
+        "eyebrow": "隐私为先的设计",
+        "title": "你的数据留在你的设备上",
+        "desc": "我们打造 DrRuby，让你最私密的健康数据永不离开你的手机。"
+      },
+      {
+        "eyebrow": "建立于真正的科学之上",
+        "title": "由 Brenner + Gunter 提供支撑",
+        "desc": "与代谢衰老和女性健康领域的顶尖科学家共同开发。"
+      }
+    ],
+    "privacyNote": "你的数据永不离开你的设备",
+    "formIntroEyebrow": "加入候补名单",
+    "formIntroTitle": "别再猜测什么<em>真正有效。</em>",
+    "formIntroSub": "前 500 名用户可免费获得 3 个月 Pro 权益。告诉我们你的肌肤状况 — 我们会确保 DrRuby 为你而打造。",
+    "formHeading": "获取抢先体验",
+    "formSubheading": "加入候补名单 — 上线时附赠免费肌肤预览。",
+    "ageOptions": ["30 岁以下", "30–39 岁", "40–49 岁", "50–59 岁", "60 岁以上"],
+    "skinConcerns": [
+      {
+        "value": "inflammation",
+        "label": "炎症 / 泛红 / 屏障问题"
+      },
+      { "value": "melasma", "label": "黄褐斑或色素沉着" },
+      { "value": "aging", "label": "肌肤衰老 / 胶原流失" },
+      { "value": "hormonal", "label": "激素引起的肌肤变化（围绝经期）" },
+      {
+        "value": "products",
+        "label": "我想知道我的产品是否有效"
+      }
+    ],
+    "faqEyebrow": "问题，一一解答",
+    "faqTitle": "在你<em>加入之前。</em>",
+    "faqItems": [
+      {
+        "q": "DrRuby 何时上线？",
+        "a": "我们的目标是 2026 年底。候补名单会员可在公开上线前数周获得抢先体验。"
+      },
+      {
+        "q": "免费肌肤预览包含什么？",
+        "a": "一次性的 SkinScope 扫描摘要，包含你排名前三的生物标志物读数 — 无需购买。"
+      },
+      {
+        "q": "我的数据真的私密吗？",
+        "a": "是的。你的健康数据默认存储于设备上。我们绝不出售或共享个人数据。"
+      },
+      {
+        "q": "我可以随时取消吗？",
+        "a": "当然。一键退订 — 无需任何理由。"
+      }
+    ],
+    "finalCtaEyebrow": "名额有限 · 500 名早期会员",
+    "finalCtaTitle": "你的身体正在提出<em>问题。</em>抢先获得答案。",
+    "finalCtaSub": "今日加入候补名单。早期会员参与塑造我们的产品 — 并在上线时获得 3 个月免费 Pro 权益。"
+  },
+  "captureForm": {
+    "eyebrow": "抢先体验 · 名额有限",
+    "title": "第一时间获知 DrRuby <em>正式上线。</em>",
+    "subtitle": "加入候补名单。早期会员可免费获得 3 个月 Pro 权益，并参与塑造我们的产品。",
+    "firstName": "名字",
+    "email": "邮箱地址",
+    "phone": "电话（可选 — 用于上线短信通知）",
+    "submit": "加入候补名单 →",
+    "submitting": "订阅中...",
+    "footnote": "绝无垃圾信息。可随时退订。",
+    "successDefault": "你已成功加入名单！",
+    "errorDefault": "出现了一些问题。",
+    "networkError": "网络错误，请重试。"
+  },
+  "waitlistForm": {
+    "eyebrow": "加入候补名单",
+    "heading": "获取抢先体验",
+    "firstNameLabel": "名字",
+    "firstNamePlaceholder": "你的名字",
+    "emailLabel": "邮箱",
+    "emailPlaceholder": "your@email.com",
+    "phoneLabel": "电话",
+    "phoneOptional": "（可选 — 用于上线短信通知）",
+    "phonePlaceholder": "+1 (___) ___-____",
+    "ageLabel": "年龄范围",
+    "agePlaceholder": "选择你的年龄",
+    "concernsLabelSkin": "主要肌肤困扰（可多选）",
+    "concernsLabelHealthspan": "你正在经历什么？（可多选）",
+    "spendLabel": "每月护肤支出",
+    "spendPlaceholder": "选择范围",
+    "spendOptions": [
+      "$50 以下",
+      "$50–$150",
+      "$150–$300",
+      "$300–$500",
+      "$500 以上"
+    ],
+    "winningLabel": "对你而言，“成功”是什么样子？",
+    "winningPlaceholder": "例如：和孩子一起徒步、睡个整觉……",
+    "privacy": "绝无垃圾信息。你可以随时退订。",
+    "submit": "加入候补名单 →",
+    "submitting": "订阅中...",
+    "successFollowup": "我们会在上线前与你联系。",
+    "successDefault": "你已成功加入名单！",
+    "errorDefault": "出现了一些问题。",
+    "networkError": "网络错误，请重试。"
+  },
+  "portal": {
+    "brand": "DrRuby",
+    "brandSub": "健康智能",
+    "nav": {
+      "myHealth": "我的健康",
+      "aiTools": "AI 工具",
+      "care": "护理",
+      "dashboard": "仪表盘",
+      "skinAnalysis": "肌肤分析",
+      "healthspan": "健康寿命",
+      "healthProfile": "我的健康档案",
+      "aiReports": "AI 报告",
+      "personalCoach": "个人教练",
+      "bookClinic": "预约诊所",
+      "products": "产品与套餐",
+      "appointments": "预约"
+    },
+    "topbar": {
+      "sourcesConnected": "已连接 {count} 个数据源",
+      "primaryAction": "运行新分析",
+      "onboarding": "引导设置"
+    },
+    "common": {
+      "back": "← 返回",
+      "backToHome": "← 返回首页",
+      "open": "打开 →",
+      "view": "查看",
+      "edit": "编辑",
+      "editSettings": "编辑设置 →",
+      "connect": "连接 →",
+      "revoke": "撤销访问权限",
+      "book": "预约就诊 →",
+      "reschedule": "改期",
+      "cancel": "取消",
+      "download": "下载 PDF →",
+      "share": "分享给诊所 →",
+      "upgrade": "升级 →",
+      "saveMoney": "省下你的钱",
+      "basedOn": "基于"
+    },
+    "disclaimer": {
+      "short": "DrRuby 基于你的个人数据提供健康洞见，而非医疗诊断。如有医疗方面的疑虑，请务必咨询合格的医疗服务提供者。",
+      "seeFull": "查看完整免责声明 →"
+    },
+    "home": {
+      "pageTitle": "早上好，Ruby",
+      "pageSub": "仪表盘概览",
+      "greetingMorning": "早上好",
+      "greetingAfternoon": "下午好",
+      "greetingEvening": "晚上好",
+      "headline": "<em>今天</em>我能帮你做些什么？",
+      "trigger1Index": "01",
+      "trigger1Title": "我的肌肤变了",
+      "trigger1Sub": "最近看起来或感觉有些不同",
+      "trigger1Cta": "开始",
+      "trigger2Index": "02",
+      "trigger2Title": "这值得吗？",
+      "trigger2Sub": "检查某款补剂或产品是否对你有帮助",
+      "trigger2Cta": "开始",
+      "trigger3Index": "03",
+      "trigger3Title": "我感觉不一样了",
+      "trigger3Sub": "精力、睡眠、情绪、激素变化",
+      "trigger3Cta": "通知我",
+      "comingSoon": "即将推出"
+    },
+    "onboarding": {
+      "step1Eyebrow": "DrRuby 引导设置 · 第 1 步，共 3 步",
+      "step1Title": "最近最让你<em>困扰</em>的一件事是什么？",
+      "step1Sub": "选择一项。你之后可以更改 — DrRuby 会随你的使用而调整。",
+      "step1Footnote": "暂时无需注册账户 — 先回答，如果有用再注册。",
+      "step2Eyebrow": "DrRuby 引导设置 · 第 2 步，共 3 步",
+      "step2Title": "连接你的健康数据，获得<em>个性化洞见。</em>",
+      "step2Sub": "你随时可以稍后再做。跳过不会锁定任何功能 — 在你连接之前，DrRuby 将使用群体基线。",
+      "step2Connect": "连接 Apple 健康",
+      "step2Skip": "暂时跳过",
+      "step2Privacy": "你的数据留在你的设备上。绝不共享，绝不出售。",
+      "step3Eyebrow": "DrRuby 引导设置 · 第 3 步，共 3 步 · 你的第一个答案",
+      "step3Cta": "创建免费账户 →",
+      "step3CtaTitle": "保存你的洞见",
+      "step3CtaSub": "创建免费账户，追踪你的进展并获得主动洞见。"
+    },
+    "moment1": {
+      "pageTitle": "我的肌肤变了",
+      "pageSub": "时刻 1 · 肌肤分析",
+      "eyebrow": "时刻 1 · 我的肌肤变了",
+      "title": "你最先注意到了什么？<em>选择所有适用项。</em>",
+      "sub": "多选 — 想选多少就选多少。DrRuby 会与你近期的数据交叉比对。",
+      "cta": "深入了解 →",
+      "loadingEyebrow": "分析中",
+      "loadingTitle": "正在查看你近期的规律…",
+      "loadingSub": "正在与你 6 个月前的基线作比较",
+      "loadingFootnote": "这特意需要几秒钟 — 我们正在交叉比对 6 周的数据，而不只是今天的。"
+    },
+    "moment2": {
+      "pageTitle": "这值得吗？",
+      "pageSub": "时刻 2 · 补剂评估",
+      "eyebrow": "时刻 2 · 这值得吗？",
+      "title": "让我们看看它是否<em>真的有效。</em>",
+      "q1": "1 · 你要评估什么？",
+      "q2": "2 · 你服用它多久了？",
+      "targets": "针对：",
+      "secondary": "次要",
+      "expectedOnset": "预期起效时间 {weeks} 周",
+      "cta": "分析我的数据 →",
+      "loadingEyebrow": "分析中",
+      "loadingTitle": "正在检查你的生物标志物…",
+      "loadingSub": "对比你开始服用前后的情况",
+      "verdictLabel": "结论"
+    },
+    "moment3": {
+      "pageTitle": "我感觉不一样了",
+      "pageSub": "时刻 3 · 精力 · 睡眠 · 情绪 · 激素",
+      "eyebrow": "时刻 3 · 即将推出",
+      "title": "精力、睡眠、情绪、<em>激素变化</em> — 一处即可理清它们。",
+      "sub": "我们正将时刻 3 打造为一次缓慢、审慎的评估 — 而非快速检查。它会像时刻 1 和 2 那样交叉比对你的可穿戴设备数据、激素周期和自我报告的规律，但专为那些不会在肌肤扫描中显现的信号而调校。",
+      "whatYouGet": "你将获得",
+      "shippingIn": "将在第二阶段发布",
+      "shippingDesc": "时刻 3 将在时刻 1 和 2 稳定后进入私密测试。我们刻意不去仓促推进 — 激素与情绪信号容易被误读，我们宁愿慢而准确，也不愿快而杂乱。",
+      "tryMoment1": "改为尝试时刻 1 →"
+    },
+    "coach": {
+      "pageTitle": "个人教练",
+      "pageSub": "AI 工具 · 由你的数据驱动",
+      "title": "向 DrRuby 提问。<em>它已经了解你。</em>",
+      "sub": "这不是一个通用聊天机器人。每一条回复都立足于你自己的纵向数据 — 扫描、可穿戴设备、干预记录 — 由洞见引擎转化为通俗语言。对话也是你的记录方式：说“我开始服用镁了”，它就会被追踪。",
+      "headerTitle": "DrRuby AI",
+      "headerSub": "由你的数据驱动 · 不是聊天机器人",
+      "live": "● 在线",
+      "placeholder": "提出问题或记录某事（补剂、症状、化验…）",
+      "send": "发送",
+      "footnote": "DrRuby 提供健康信息，而非医疗建议 · 请务必咨询你的医生"
+    },
+    "profile": {
+      "pageTitle": "我的健康档案",
+      "pageSub": "我的健康 · 个人背景",
+      "identityHeading": "档案",
+      "sourcesHeading": "已连接的数据源",
+      "sourcesFootnote": "你的数据留在你的设备上。共享始终需按数据源、按诊所逐项主动授权。",
+      "trackingHeading": "DrRuby 正在为你追踪的内容",
+      "trackingFootnote": "DrRuby 不作诊断。这些是你的数据和自我报告所呈现的规律 — 是你与自己医生对话时的背景参考。",
+      "timelineHeading": "你的 DrRuby 时间线",
+      "statusMonitor": "关注",
+      "statusImproving": "改善中",
+      "statusAlert": "警示"
+    },
+    "reports": {
+      "listPageTitle": "AI 报告",
+      "listPageSub": "AI 工具 · 通俗语言的发现",
+      "listTitle": "<em>由你的数据</em>生成的报告。",
+      "listSub": "每份报告将你近期的扫描、可穿戴设备和自我报告归入三类 — 正面、关注、行动。不执着于评分。只告诉你下一步该做什么。",
+      "findingPositive": "正面",
+      "findingMonitor": "关注",
+      "findingAction": "行动",
+      "statusNew": "新",
+      "statusViewed": "已查看",
+      "detailPageSub": "AI 报告 · {date}",
+      "backToList": "← 所有报告",
+      "summaryHeading": "可带给医生的摘要",
+      "summaryDesc": "请在下次就诊前将此报告分享给你的医生。DrRuby 不作诊断 — 它为你的医生提供进行高效对话所需的纵向背景。",
+      "shareCta": "分享给诊所 →"
+    },
+    "clinic": {
+      "pageTitle": "预约诊所",
+      "pageSub": "护理 · 合作皮肤科与女性健康",
+      "title": "有备而来。<em>无需从头开始。</em>",
+      "sub": "在你明确授权下，DrRuby 合作诊所会在就诊前收到你纵向数据的摘要。你的医生一进门便已了解你的病史。你可以随时撤销访问权限。",
+      "beforeYouBook": "预约前",
+      "beforeYouBookDesc": "选择要分享哪些数据。诊所只能看到你授权的内容 — 绝不包括你的完整病史。",
+      "manageSharing": "管理共享 →",
+      "nextAvailable": "最近可预约",
+      "viewProfile": "查看诊所资料",
+      "sharingSupported": "支持 DrRuby 数据共享",
+      "alreadyBooked": "已经预约了？",
+      "alreadyBookedDesc": "在一处管理即将到来和过往的预约。",
+      "goToAppointments": "前往预约 →"
+    },
+    "products": {
+      "pageTitle": "产品与套餐",
+      "pageSub": "护理 · 由 AI 匹配你的数据",
+      "title": "与<em>你的数据</em>匹配。而非千篇一律的清单。",
+      "sub": "产品按与你特定规律的契合度评分 — 而非推广费用。我们在这里同样会说“省下你的钱”：如果某样东西不值得添加，我们会直说。",
+      "inStack": "当前方案中",
+      "worthConsidering": "值得考虑",
+      "plansHeading": "订阅套餐",
+      "match": "匹配度",
+      "currentPlan": "你当前的套餐",
+      "saveMoneyDesc": "在已经覆盖基础的方案之上再添加补剂，往往帮助不大。添加前请用教练评估一下 — 大多数方案都有 1–2 项多余项目。",
+      "evaluateStack": "评估我的方案 →"
+    },
+    "appointments": {
+      "pageTitle": "预约",
+      "pageSub": "护理 · 即将到来与过往就诊",
+      "title": "你的就诊，<em>尽在一处。</em>",
+      "sub": "合作诊所的诊后记录会同步回 DrRuby — 让你的时间线保持完整，无需重新录入任何内容。",
+      "bookClinic": "预约诊所 →",
+      "upcoming": "即将到来",
+      "past": "过往就诊",
+      "emptyUpcoming": "暂无即将到来的预约。",
+      "statusUpcoming": "即将到来",
+      "statusCompleted": "已完成",
+      "statusCancelled": "已取消"
+    },
+    "settings": {
+      "pageTitle": "设置",
+      "pageSub": "隐私 · 数据所有权 · 免责声明",
+      "title": "你的数据。<em>你说了算。</em>",
+      "sub": "DrRuby 以本地为先。健康数据存于你的设备上；共享按诊所、按数据源进行，并可随时撤销。在下方导出或删除全部数据 — 无需提交任何工单。",
+      "accountHeading": "账户",
+      "editProfile": "编辑资料",
+      "sharingHeading": "诊所共享",
+      "sharingFootnote": "诊所只能看到你明确授权的内容。撤销即时生效。",
+      "preferencesHeading": "偏好设置",
+      "dataOwnershipHeading": "数据所有权",
+      "exportData": "导出我的全部数据",
+      "exportDataDesc": "下载一份可移植的 JSON 档案，包含每一次扫描、记录和报告。含完整历史。",
+      "deleteAccount": "删除我的账户及全部数据",
+      "deleteAccountDesc": "永久抹除 DrRuby 保存的关于你的一切。此操作无法撤销。",
+      "disclaimerHeading": "完整法律免责声明",
+      "footer": "DrRuby 健康智能 · 以 N=1 原则打造 · © 2026 DrRuby"
+    }
+  },
+  "clinic": {
+    "brandSub": "诊所门户",
+    "topbar": {
+      "authNotice": "仅在授权范围内显示患者数据",
+      "authNoticeTooltip": "依据 HIPAA / BAA — 诊所只能看到每位患者明确授权的数据。患者可随时从其 DrRuby 应用中撤销访问权限。",
+      "generateReport": "生成报告"
+    },
+    "dataPrivacy": {
+      "tableFootnote": "数据隐私：你所看到的仅为每位患者明确授权与本诊所共享的数据。患者可随时从其 DrRuby 应用中撤销访问权限。完整的患者档案始终保留在 DrRuby 平台上。",
+      "referralFootnote": "仅显示已授权的数据 · 患者掌控完整访问权限"
+    },
+    "clinicNav": {
+      "today": "今日",
+      "clinical": "临床",
+      "operations": "运营",
+      "platform": "平台",
+      "account": "账户",
+      "workbench": "工作台",
+      "aiReports": "AI 报告",
+      "skinArchive": "肌肤档案",
+      "patients": "患者",
+      "appointments": "预约",
+      "treatments": "治疗与账单",
+      "crm": "CRM 与随访",
+      "referrals": "DrRuby 转诊",
+      "finance": "财务与费用",
+      "compliance": "合规",
+      "modules": "模块与账单",
+      "settings": "诊所设置"
+    },
+    "common": {
+      "review": "审核",
+      "accept": "接受",
+      "viewProfile": "查看资料",
+      "start": "开始",
+      "view": "查看",
+      "send": "发送给患者",
+      "saveDraft": "保存草稿",
+      "reject": "拒绝",
+      "subscribe": "订阅",
+      "backToWorkbench": "← 返回工作台",
+      "backToQueue": "← 所有待处理报告",
+      "backToPatients": "← 所有患者",
+      "backToArchive": "← 肌肤档案",
+      "authorized": "● 已授权",
+      "new": "新"
+    },
+    "workbench": {
+      "pageTitle": "早上好，Williams 医生",
+      "pageSub": "6 月 10 日 星期三 · Clarity Skin Clinic",
+      "priorityBannerEyebrow": "等待你审核的 AI 报告",
+      "priorityBannerSub": "患者正在等待 — 审核、如有需要则修改，然后发送。报告始终保留在 DrRuby 平台上。",
+      "reviewReportsCta": "审核报告 →",
+      "pendingReportsTitle": "待处理的 AI 报告",
+      "pendingReportsMeta": "AI 草稿已就绪 · 发送前需医生审核",
+      "todaysAppointmentsTitle": "今日预约",
+      "todaysAppointmentsMeta": "共 {total} 项 · 剩余 {remaining} 项",
+      "newReferralsTitle": "新的 DrRuby 转诊",
+      "newReferralsBadge": "{count} 项新增",
+      "financeKpiRevenue": "本月收入",
+      "financeKpiReferral": "DrRuby 转诊收入",
+      "financeKpiFee": "平台模块费用",
+      "financeKpiNet": "来自 DrRuby 的净收入",
+      "financeKpiNetFootnote": "转诊收入减去平台费用",
+      "colPatient": "患者",
+      "colScanDate": "扫描日期",
+      "colInflammation": "炎症",
+      "colPigment": "色素",
+      "colCollagen": "胶原",
+      "colDataAuth": "数据授权",
+      "colNextAppt": "下次预约",
+      "colStatus": "状态",
+      "colAction": "操作"
+    },
+    "reports": {
+      "queuePageTitle": "AI 报告",
+      "queuePageSub": "临床 · 待医生审核",
+      "queueTitle": "<em>等待你审核的</em>报告。",
+      "queueSub": "AI 根据每次扫描生成草稿。如有需要则修改，然后发送。报告始终保留在 DrRuby 平台上 — 患者在应用中查看，绝不通过邮件。",
+      "reviewPageTitle": "报告审核",
+      "reviewPageSub": "临床 · AI 草稿 + 医生修改",
+      "patientHeading": "患者",
+      "indicesHeading": "Brenner 指数",
+      "aiDraftHeading": "AI 草稿",
+      "aiDraftSummaryLabel": "摘要",
+      "findingsLabel": "发现",
+      "authorizedDataHeading": "已授权数据",
+      "editHeading": "医生备注（可选）",
+      "editPlaceholder": "添加备注、修改行动方案，或注明发送前患者应知晓的任何事项…",
+      "findingPositive": "正面",
+      "findingMonitor": "关注",
+      "findingAction": "行动",
+      "authStatus": "由患者授权 · 可随时撤销"
+    },
+    "skinArchive": {
+      "pageTitle": "肌肤档案",
+      "pageSub": "临床 · 前后对比 · AI 评分",
+      "title": "扫描档案 — <em>前后对比，</em>并排呈现。",
+      "sub": "每次扫描都会同步到患者的 DrRuby 档案。三项 Brenner 指数自动附加。患者授权你所看到的内容 — 可随时撤销。",
+      "uploadCta": "上传新扫描 →",
+      "uploadPageTitle": "上传扫描",
+      "uploadPageSub": "临床 · 拍摄一致性指南",
+      "uploadTitle": "拍摄一次<em>一致</em>的扫描。",
+      "uploadSub": "每次采用相同的光线、距离和区域。一致性正是让前后对比有意义的关键。",
+      "guidanceLight": "光线",
+      "guidanceLightDesc": "自然光或均匀的室内白光。关闭闪光灯。",
+      "guidanceDistance": "距离",
+      "guidanceDistanceDesc": "将镜头距肌肤 10–15 厘米。使用屏幕上的参考环。",
+      "guidanceZone": "区域",
+      "guidanceZoneDesc": "为每位患者选择一个身体区域（左脸颊 / 额头 / 下巴）并固定复用。",
+      "guidanceFrequency": "频率",
+      "guidanceFrequencyDesc": "每 2–4 周一次。满 30 天后我们会提醒患者回访。",
+      "uploadZone": "将 JPEG / RAW 拖放至此，或点击浏览。最低 1080×1080 像素。",
+      "uploadSubmit": "拍摄扫描",
+      "colPatient": "患者",
+      "colDate": "扫描日期",
+      "colZone": "身体区域",
+      "colIndices": "Brenner 指数",
+      "colNote": "备注"
+    },
+    "patients": {
+      "pageTitle": "患者",
+      "pageSub": "临床 · 已授权的患者数据",
+      "title": "你<em>诊所的患者。</em>",
+      "sub": "只有授权本诊所的患者才会显示于此。完整档案始终保留在 DrRuby 平台上 — 你看到的是由患者掌控的一份快照。",
+      "filterAll": "全部",
+      "filterActive": "活跃",
+      "filterPending": "待处理",
+      "filterNew": "新增",
+      "colPatient": "患者",
+      "colAgeRange": "年龄",
+      "colLastScan": "上次扫描",
+      "colIndices": "Brenner 指数",
+      "colAuth": "授权",
+      "colStatus": "状态",
+      "colNextAppt": "下次预约",
+      "detailPageTitle": "患者资料",
+      "detailPageSub": "临床 · 已授权快照",
+      "basicInfoHeading": "基本信息",
+      "scanHistoryHeading": "扫描历史",
+      "reportHistoryHeading": "AI 报告历史",
+      "treatmentHistoryHeading": "治疗记录",
+      "appointmentHistoryHeading": "预约历史",
+      "authManagementHeading": "授权",
+      "authCurrentScope": "当前授权范围",
+      "authRevocable": "患者可随时从 DrRuby 应用中撤销访问权限。",
+      "noTimeline": "该患者暂无可用历史记录。",
+      "timelineScan": "扫描",
+      "timelineReport": "报告",
+      "timelineTreatment": "治疗",
+      "timelineAppointment": "预约"
+    },
+    "appointments": {
+      "pageTitle": "预约",
+      "pageSub": "运营 · 今日排程",
+      "title": "今日<em>排程。</em>",
+      "sub": "DrRuby 转诊会自动录入。按医生和设备进行多维度排程。患者通过短信和应用推送获得提醒。",
+      "calendarCta": "日历视图 →",
+      "now": "当前",
+      "done": "已完成",
+      "drRubyReferral": "DrRuby 转诊",
+      "todayMeta": "共 {total} 项 · 剩余 {remaining} 项"
+    },
+    "referrals": {
+      "pageTitle": "DrRuby 转诊",
+      "pageSub": "平台 · 来自 DrRuby 应用的自动导入",
+      "title": "新的 <em>DrRuby 转诊。</em>",
+      "sub": "当患者从 DrRuby 应用预约你的诊所时，转诊连同其已授权快照会出现在此。接受即可创建预约 — 转诊费用会在就诊后自动计算。",
+      "acceptedHeading": "已接受的转诊",
+      "noAccepted": "暂无已接受的转诊。",
+      "indicesLabel": "指数",
+      "patientNotesLabel": "患者备注"
+    },
+    "treatments": {
+      "pageTitle": "治疗与账单",
+      "pageSub": "运营 · 套餐 · 发票",
+      "title": "治疗套餐<em>与发票。</em>",
+      "sub": "多疗程套餐，自动抵扣。每次就诊后生成发票。CRM 随访在治疗后第 3 天和第 7 天触发。",
+      "packagesHeading": "生效中的治疗套餐",
+      "invoicesHeading": "近期发票",
+      "colPatient": "患者",
+      "colPackage": "套餐",
+      "colSessions": "疗程",
+      "colPrice": "价格",
+      "colValid": "有效期",
+      "colDate": "日期",
+      "colItem": "项目",
+      "colAmount": "金额",
+      "colStatus": "状态",
+      "statusPaid": "已付款",
+      "statusPending": "待付款",
+      "statusOverdue": "逾期",
+      "referralFee": "适用 DrRuby 转诊费"
+    },
+    "crm": {
+      "pageTitle": "CRM 与随访",
+      "pageSub": "运营 · 自动化触点",
+      "title": "随访<em>自动运行。</em>",
+      "sub": "第 3 天关怀信息、第 7 天效果对比请求、末次疗程套餐提醒以及 30 天重新激活 — 全部自动完成。",
+      "upcomingHeading": "即将进行的随访",
+      "noUpcoming": "暂无已排定的随访。",
+      "day3": "第 3 天 · 关怀信息",
+      "day7": "第 7 天 · 效果对比请求",
+      "lastSession": "末次疗程 · 续费提醒",
+      "reactivation": "30 天重新激活"
+    },
+    "finance": {
+      "pageTitle": "财务与费用",
+      "pageSub": "平台 · 收入 · 模块费用",
+      "title": "收入、费用，<em>以及 DrRuby 投资回报。</em>",
+      "sub": "月度收入、DrRuby 转诊收入和平台模块费用并排呈现。转诊费用按每次完成的就诊自动计算。",
+      "monthlyHeading": "月度明细",
+      "funnelHeading": "DrRuby 转化漏斗",
+      "colMonth": "月份",
+      "colRevenue": "收入",
+      "colReferral": "转诊收入",
+      "colFee": "模块费用"
+    },
+    "compliance": {
+      "pageTitle": "合规",
+      "pageSub": "平台 · 电子知情同意 · 审计",
+      "title": "知情同意<em>与审计轨迹。</em>",
+      "sub": "电子知情同意书在签到时于平板上签署，归档至患者的 DrRuby 档案，并同步以确保合规。MVP 阶段提供纸质备选方案。",
+      "docsHeading": "知情同意文件",
+      "colType": "类型",
+      "colPatient": "患者",
+      "colSigned": "签署时间",
+      "colStatus": "状态",
+      "statusArchived": "已归档",
+      "statusPending": "待处理",
+      "auditNotice": "所有患者数据的访问均被记录。何人、何时、何事 — 全程可审计。"
+    },
+    "modules": {
+      "pageTitle": "模块与账单",
+      "pageSub": "账户 · 套餐 · 使用情况",
+      "title": "你的 <em>Pro 套餐。</em>4 个模块已启用。",
+      "sub": "模块化定价 — 从基础起步，随成长而扩展。基础套装 $200–300/月（2 个模块）· 全套件 $500–700/月（5 个模块）。",
+      "currentPlanHeading": "当前套餐",
+      "modulesHeading": "模块",
+      "usageHeading": "本月使用情况",
+      "usageAiReports": "已生成的 AI 报告",
+      "usageReferrals": "已收到的转诊",
+      "usageAppointments": "已完成的预约",
+      "colModule": "模块",
+      "colStatus": "状态",
+      "colDescription": "描述",
+      "colAction": "操作",
+      "statusActive": "已启用",
+      "statusInactive": "未启用"
+    },
+    "settings": {
+      "pageTitle": "诊所设置",
+      "pageSub": "账户 · 资料 · 团队 · 设备",
+      "title": "诊所<em>设置。</em>",
+      "sub": "资料、团队、设备和通知。团队成员的访问权限按角色划分 — 首席皮肤科医生、医生、前台、管理员。",
+      "profileHeading": "诊所资料",
+      "teamHeading": "团队",
+      "machinesHeading": "设备",
+      "notificationsHeading": "通知",
+      "colMember": "成员",
+      "colRole": "角色",
+      "colEmail": "邮箱",
+      "colMachine": "设备",
+      "colPurchased": "购买时间",
+      "colLastService": "上次维护",
+      "notifyReferrals": "新的 DrRuby 转诊",
+      "notifyReports": "待审核的 AI 报告",
+      "notifyAppointments": "预约提醒",
+      "notifyChannels": "邮件 · SMS · 应用推送"
+    }
+  }
+}

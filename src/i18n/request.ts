@@ -1,11 +1,14 @@
+import { hasLocale } from "next-intl";
 import { getRequestConfig } from "next-intl/server";
-import { DEFAULT_LOCALE } from "@/config/site";
+import { routing } from "./routing";
 
-// No-routing mode: a single locale is served without a URL prefix. To add
-// more languages later, resolve the locale per request (e.g. from a cookie or
-// header) and load the matching message file.
-export default getRequestConfig(async () => {
-  const locale = DEFAULT_LOCALE;
+// Official routing mode: the locale comes from the `[locale]` segment (resolved
+// by middleware). Fall back to the default locale for unknown values.
+export default getRequestConfig(async ({ requestLocale }) => {
+  const requested = await requestLocale;
+  const locale = hasLocale(routing.locales, requested)
+    ? requested
+    : routing.defaultLocale;
   return {
     locale,
     messages: (await import(`./messages/${locale}.json`)).default,

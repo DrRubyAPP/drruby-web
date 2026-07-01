@@ -1,7 +1,8 @@
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 import MobileMenu from "@/components/layout/MobileMenu";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { Link } from "@/i18n/navigation";
 
 export default async function Navbar() {
   const t = await getTranslations("nav");
@@ -49,6 +50,7 @@ export default async function Navbar() {
       </div>
 
       <div className="flex items-center gap-3">
+        <LocaleSwitcher />
         <ThemeToggle />
         <Link
           href="/login"
