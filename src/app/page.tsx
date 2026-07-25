@@ -7,6 +7,13 @@ import PageSwitcher from "@/components/PageSwitcher";
 export default function Home() {
   return (
     <>
+      {/* TEMP: 建站遮罩层 —— 上线前需移除 */}
+      <div className="fixed inset-0 z-[9999] bg-white flex items-center justify-center">
+        <span className="text-dr-black text-[clamp(20px,4vw,32px)] font-bold tracking-tight">
+          website is building
+        </span>
+      </div>
+
       <PageSwitcher />
       <Navbar variant="home" />
 
