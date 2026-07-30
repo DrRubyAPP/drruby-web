@@ -55,7 +55,7 @@ export default function Home() {
             <a href="#skin">Skin</a>
             <a href="#healthspan">Age well</a>
             <a href="#">For Clinics</a>
-            <a href="#">Collaborate</a>
+            <a href="/collaborate">Collaborate</a>
             <a href="#science">Trust</a>
             <a href="/pricing">Pricing</a>
           </div>
@@ -561,7 +561,7 @@ export default function Home() {
                   </svg>
                   For Clinics
                 </a>
-                <a className="ft-ic" href="#">
+                <a className="ft-ic" href="/collaborate">
                   <svg viewBox="0 0 24 24">
                     <circle cx="9" cy="8" r="3" />
                     <circle cx="17" cy="9" r="2.4" />
