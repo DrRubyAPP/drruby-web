@@ -1,6 +1,9 @@
 .idea/
 a_docs/
 temp/
+.codegraph/
+.playwright-mcp/
+.openapi-gen/
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
