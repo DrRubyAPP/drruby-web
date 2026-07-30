@@ -9,6 +9,7 @@ export const TAG_MAP: Record<string, string> = {
   home: "home-page",
   skin: "skin-page",
   healthspan: "healthspan-page",
+  download: "app-download-waitlist",
 };
 
 // ── Types ───────────────────────────────────────────────────────────
