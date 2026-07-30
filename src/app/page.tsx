@@ -54,7 +54,7 @@ export default function Home() {
             <a href="#how">How It Works</a>
             <a href="#skin">Skin</a>
             <a href="#healthspan">Age well</a>
-            <a href="#">For Clinics</a>
+            <a href="/clinic">For Clinics</a>
             <a href="/collaborate">Collaborate</a>
             <a href="#science">Trust</a>
             <a href="/pricing">Pricing</a>
