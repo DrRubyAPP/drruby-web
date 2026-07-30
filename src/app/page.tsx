@@ -57,7 +57,7 @@ export default function Home() {
             <a href="#">For Clinics</a>
             <a href="#">Collaborate</a>
             <a href="#science">Trust</a>
-            <a href="#">Pricing</a>
+            <a href="/pricing">Pricing</a>
           </div>
           <div className="actions">
             <a className="btn ghost" href="#">
@@ -542,7 +542,7 @@ export default function Home() {
                 <a href="#how">How It Works</a>
                 <a href="#skin">Skin</a>
                 <a href="#science">Trust</a>
-                <a href="#">Pricing</a>
+                <a href="/pricing">Pricing</a>
               </div>
               <div className="ft-col">
                 <h4>Company</h4>
