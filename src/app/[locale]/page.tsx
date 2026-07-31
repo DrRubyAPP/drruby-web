@@ -6,7 +6,7 @@ import HomeNav from "@/components/layout/HomeNav";
 export default function Home() {
   return (
     <div className="dr-v5">
-      <HomeNav />
+      <HomeNav authAware />
 
       <main>
         {/* HERO */}

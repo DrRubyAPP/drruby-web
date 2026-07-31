@@ -18,6 +18,13 @@ interface HomeNavProps {
    * static marketing header (Log in + Download).
    */
   appControls?: boolean;
+  /**
+   * When true, the header reads the session and swaps the "Log in" button for
+   * the signed-in user's avatar + dropdown menu — without the `appControls`
+   * toggles/role links. Used by the marketing homepage. Implied by
+   * `appControls`. Reading the session opts the page into dynamic rendering.
+   */
+  authAware?: boolean;
 }
 
 /**
@@ -29,10 +36,13 @@ interface HomeNavProps {
 export default async function HomeNav({
   sectionPrefix = "",
   appControls = false,
+  authAware = false,
 }: HomeNavProps) {
-  // Only touch the session when the caller opts into session-aware controls,
-  // so the static homepage/login render stays free of the auth lookup.
-  const session = appControls ? await getServerSession() : null;
+  // Read the session whenever the header needs to reflect login state — either
+  // the full app controls or just the homepage avatar. The plain login page
+  // opts out of both, so its render stays static (no auth lookup).
+  const sessionAware = appControls || authAware;
+  const session = sessionAware ? await getServerSession() : null;
   const user = session?.user ?? null;
   const role = (user as { role?: string } | null)?.role ?? null;
 
@@ -40,7 +50,11 @@ export default async function HomeNav({
     <nav>
       <div
         className="wrap"
-        style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
       >
         <a className="logo" href="/">
           Dr<span>Ruby</span>.ai
@@ -53,22 +67,35 @@ export default async function HomeNav({
           <a href="/collaborate">Collaborate</a>
           <a href={`${sectionPrefix}#science`}>Trust</a>
           <a href="/pricing">Pricing</a>
-          {appControls && user && role === "user" && <a href="/portal">Portal</a>}
-          {appControls && user && role === "clinic" && <a href="/clinic">Clinic</a>}
+          {appControls && user && role === "user" && (
+            <a href="/portal">Portal</a>
+          )}
+          {appControls && user && role === "clinic" && (
+            <a href="/clinic">Clinic</a>
+          )}
         </div>
         <div className="actions">
           {appControls && <LocaleSwitcher />}
           {appControls && <ThemeToggle />}
-          {appControls && user ? (
-            <UserMenu
-              role={role}
-              image={user.image}
-              name={user.name}
-              email={user.email}
-            />
+          {sessionAware && user ? (
+            <>
+              {/* Signed in: avatar sits leftmost in the actions cluster and
+                  opens the account dropdown. The homepage keeps its Download
+                  CTA alongside; the app-control pages don't carry one. */}
+              <UserMenu
+                role={role}
+                image={user.image}
+                name={user.name}
+                email={user.email}
+              />
+              {!appControls && <NavDownloadButton />}
+            </>
           ) : (
             <>
-              <a className="btn ghost" href={appControls ? "/login" : "/portal"}>
+              <a
+                className="btn ghost"
+                href={sessionAware ? "/login" : "/portal"}
+              >
                 Log in
               </a>
               <NavDownloadButton />
