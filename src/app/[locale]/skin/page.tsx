@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
+import { DownloadModal } from "@/components/DownloadWaitlist";
 import Footer from "@/components/layout/Footer";
-import Navbar from "@/components/layout/Navbar";
+import HomeNav from "@/components/layout/HomeNav";
 import AIReport from "@/components/sections/skin/AIReport";
 import BrennerIndices from "@/components/sections/skin/BrennerIndices";
 import ClinicEntry from "@/components/sections/skin/ClinicEntry";
@@ -10,12 +11,17 @@ import ProductRecs from "@/components/sections/skin/ProductRecs";
 import ScanWindow from "@/components/sections/skin/ScanWindow";
 import SkinPageNav from "@/components/sections/skin/SkinPageNav";
 import TrendChart from "@/components/sections/skin/TrendChart";
+import "../home-v5.css";
 
 export default async function SkinPage() {
   await getTranslations("skin");
   return (
     <>
-      <Navbar />
+      {/* Shared homepage header; `display:contents` keeps the sticky nav
+          sticking across the page without leaking `.dr-v5` into the body. */}
+      <div className="dr-v5" style={{ display: "contents" }}>
+        <HomeNav sectionPrefix="/" appControls />
+      </div>
       <SkinPageNav />
       <FrequencyGate />
       <ScanWindow />
@@ -30,6 +36,7 @@ export default async function SkinPage() {
       </div>
       <ClinicEntry />
       <Footer />
+      <DownloadModal />
     </>
   );
 }

@@ -1,35 +1,12 @@
 import FooterSubscribe from "@/components/FooterSubscribe";
 import "./home-v5.css";
-import { StoreRow, NavDownloadButton, DownloadModal } from "@/components/DownloadWaitlist";
+import { StoreRow, DownloadModal } from "@/components/DownloadWaitlist";
+import HomeNav from "@/components/layout/HomeNav";
 
 export default function Home() {
   return (
     <div className="dr-v5">
-      <nav>
-        <div
-          className="wrap"
-          style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}
-        >
-          <div className="logo">
-            Dr<span>Ruby</span>.ai
-          </div>
-          <div className="navlinks">
-            <a href="#how">How It Works</a>
-            <a href="#skin">Skin</a>
-            <a href="#healthspan">Age well</a>
-            <a href="/clinic">For Clinics</a>
-            <a href="/collaborate">Collaborate</a>
-            <a href="#science">Trust</a>
-            <a href="/pricing">Pricing</a>
-          </div>
-          <div className="actions">
-            <a className="btn ghost" href="/portal">
-              Log in
-            </a>
-            <NavDownloadButton />
-          </div>
-        </div>
-      </nav>
+      <HomeNav />
 
       <main>
         {/* HERO */}
