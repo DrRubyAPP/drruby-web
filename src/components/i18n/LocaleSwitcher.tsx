@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { SUPPORTED_LOCALES } from "@/config/site";
+import { LOCALE_SWITCH_ENABLED, SUPPORTED_LOCALES } from "@/config/site";
 import { usePathname, useRouter } from "@/i18n/navigation";
 
 // Short display label for each locale's switch target.
@@ -12,6 +12,9 @@ export function LocaleSwitcher() {
   const t = useTranslations("nav");
   const pathname = usePathname();
   const router = useRouter();
+
+  // 语言切换默认关闭（全站英文）；由 .env 的 NEXT_PUBLIC_ENABLE_LOCALE_SWITCH 控制。
+  if (!LOCALE_SWITCH_ENABLED) return null;
 
   // Two-locale toggle: pick the other supported locale.
   const next = SUPPORTED_LOCALES.find((l) => l !== locale) ?? locale;
