@@ -63,6 +63,23 @@ model UserAccount {
   photos           Photo[]
   subscription     Subscription?
 
+  // P2（sub-plan-2 §4）
+  journeys            Journey[]        @relation("JourneyAuthor")
+  communityPosts      CommunityPost[]  @relation("CommunityPostAuthor")
+  communityReplies    CommunityReply[] @relation("CommunityReplyAuthor")
+  notifications       Notification[]
+  followUpTasks       FollowUpTask[]
+
+  // P3（B 端多关系需命名，与各 model 的 @relation 名一一对应）
+  clinicStaff         ClinicStaff[]         @relation("ClinicStaffUser")
+  authorizations      Authorization[]       @relation("AuthorizationPatient")
+  skinArchives        SkinArchive[]         @relation("SkinArchivePatient")
+  appointments        Appointment[]         @relation("AppointmentPatient")
+  clinicReports       ClinicReport[]        @relation("ClinicReportPatient")
+  referrals           Referral[]            @relation("ReferralFromUser")
+  invoices            Invoice[]             @relation("InvoicePatient")
+  collaboratorProfile CollaboratorProfile?  @relation("CollaboratorProfileUser")
+
   @@index([status, deletedAt], map: "user_account_status_deleted_at_idx")
   @@map("user_account")
 }
@@ -503,4 +520,371 @@ model Subscription {
 
   @@index([userId], map: "subscription_user_id_idx")
   @@map("subscription")
+}
+
+// =============================================================================
+// P2 — Library / 社区 / 通知（schema only 本轮）— backend_v5 §2.4
+// =============================================================================
+
+/// 经验库 journey（匿名 + 已同意 + 可撤回）
+model Journey {
+  id            String    @id @default(cuid(2))
+  authorUserId  String?   @map("author_user_id") // 匿名化：可空/脱敏
+  decisionType  String?   @map("decision_type")
+  goal          String?
+  concern       String?
+  timingContext String?   @map("timing_context")
+  summary       String
+  outcome       String?
+  sourceType    String    @map("source_type") // founder_interview|verified_member|partner_clinic|research_study
+  shared        Boolean   @default(true)
+  withdrawnAt   DateTime? @map("withdrawn_at") @db.Timestamptz
+  version       Int       @default(1)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  author        UserAccount? @relation("JourneyAuthor", fields: [authorUserId], references: [id], onDelete: SetNull)
+  updates       JourneyUpdate[]
+
+  @@index([decisionType], map: "journey_decision_type_idx")
+  @@index([sourceType], map: "journey_source_type_idx")
+  @@map("journey")
+}
+
+/// living journey 版本更新
+model JourneyUpdate {
+  id        String   @id @default(cuid(2))
+  journeyId String   @map("journey_id")
+  version   Int
+  note      String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  journey   Journey  @relation(fields: [journeyId], references: [id], onDelete: Cascade)
+
+  @@index([journeyId, version], map: "journey_update_journey_version_idx")
+  @@map("journey_update")
+}
+
+/// 社区帖（可选 Q&A）
+model CommunityPost {
+  id           String   @id @default(cuid(2))
+  authorUserId String?  @map("author_user_id")
+  title        String
+  body         String
+  isExpert     Boolean  @default(false) @map("is_expert")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  author       UserAccount? @relation("CommunityPostAuthor", fields: [authorUserId], references: [id], onDelete: SetNull)
+  replies      CommunityReply[]
+
+  @@index([authorUserId], map: "community_post_author_idx")
+  @@map("community_post")
+}
+
+/// 社区回复
+model CommunityReply {
+  id           String   @id @default(cuid(2))
+  postId       String   @map("post_id")
+  authorUserId String?  @map("author_user_id")
+  body         String
+  isExpert     Boolean  @default(false) @map("is_expert")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  post         CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author       UserAccount?  @relation("CommunityReplyAuthor", fields: [authorUserId], references: [id], onDelete: SetNull)
+
+  @@index([postId], map: "community_reply_post_id_idx")
+  @@map("community_reply")
+}
+
+/// 通知 — backend_v5 §3 Notification
+model Notification {
+  id        String    @id @default(cuid(2))
+  userId    String    @map("user_id")
+  kind      String
+  title     String
+  body      String?
+  readAt    DateTime? @map("read_at") @db.Timestamptz
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  user      UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt], map: "notification_user_read_idx")
+  @@map("notification")
+}
+
+/// 有意义待办（meaningful follow-ups）— backend_v5 §2.3e / §3 FollowUpTask
+model FollowUpTask {
+  id         String    @id @default(cuid(2))
+  userId     String    @map("user_id")
+  decisionId String?   @map("decision_id")
+  title      String
+  dueAt      DateTime? @map("due_at") @db.Timestamptz
+  status     String    @default("open") // open|done|dismissed
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  user       UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status], map: "follow_up_task_user_status_idx")
+  @@map("follow_up_task")
+}
+
+// =============================================================================
+// P3 — 诊所门户（schema only 本轮）— backend_v5 §2.7
+// =============================================================================
+
+/// 诊所 / 机构（模块化订阅）
+model Clinic {
+  id             String   @id @default(cuid(2))
+  name           String
+  planTier       String?  @map("plan_tier")        // basic|full
+  enabledModules String[] @map("enabled_modules")  // skin_archive|review_queue|...
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  staff          ClinicStaff[]
+  authorizations Authorization[]
+  skinArchives   SkinArchive[]
+  appointments   Appointment[]
+  reports        ClinicReport[]
+  referrals      Referral[]
+  invoices       Invoice[]
+
+  @@map("clinic")
+}
+
+/// 诊所员工（关联 user_account role=clinic）
+model ClinicStaff {
+  id        String   @id @default(cuid(2))
+  clinicId  String   @map("clinic_id")
+  userId    String   @map("user_id")
+  title     String?  // doctor|nurse|admin
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  clinic    Clinic      @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  user      UserAccount @relation("ClinicStaffUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([clinicId, userId], map: "clinic_staff_clinic_user_uniq")
+  @@index([userId], map: "clinic_staff_user_id_idx")
+  @@map("clinic_staff")
+}
+
+/// 跨端授权（consumer → clinic，可随时撤销）— backend_v5 §2.7 核心
+model Authorization {
+  id        String    @id @default(cuid(2))
+  userId    String    @map("user_id")   // consumer（患者）
+  clinicId  String    @map("clinic_id")
+  scopes    String[]  // 授权的数据范围
+  status    String    // active|revoked
+  grantedAt DateTime  @map("granted_at") @db.Timestamptz
+  revokedAt DateTime? @map("revoked_at") @db.Timestamptz
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  user      UserAccount @relation("AuthorizationPatient", fields: [userId], references: [id], onDelete: Cascade)
+  clinic    Clinic      @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  audits    AuthorizationAudit[]
+
+  @@unique([userId, clinicId], map: "authorization_user_clinic_uniq")
+  @@index([clinicId], map: "authorization_clinic_id_idx")
+  @@map("authorization")
+}
+
+/// 授权审计日志（append-only）
+model AuthorizationAudit {
+  id              String   @id @default(cuid(2))
+  authorizationId String   @map("authorization_id")
+  action          String   // granted|revoked|scope_changed|accessed
+  actorUserId     String?  @map("actor_user_id")
+  detail          Json?
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  authorization   Authorization @relation(fields: [authorizationId], references: [id], onDelete: Cascade)
+
+  @@index([authorizationId, createdAt], map: "authorization_audit_auth_created_idx")
+  @@map("authorization_audit")
+}
+
+/// Skin Archive（诊所侧照片 + AI 皮肤分析三指标 + 趋势）
+model SkinArchive {
+  id                String   @id @default(cuid(2))
+  clinicId          String   @map("clinic_id")
+  patientUserId     String   @map("patient_user_id")
+  objectKey         String   @map("object_key")
+  inflammatoryScore Decimal? @map("inflammatory_score")
+  pigmentationScore Decimal? @map("pigmentation_score")
+  textureScore      Decimal? @map("texture_score")
+  trend             String?  // improving|stable|declining
+  capturedAt        DateTime @map("captured_at") @db.Timestamptz
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  clinic            Clinic      @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  patient           UserAccount @relation("SkinArchivePatient", fields: [patientUserId], references: [id], onDelete: Cascade)
+
+  @@index([clinicId, patientUserId], map: "skin_archive_clinic_patient_idx")
+  @@map("skin_archive")
+}
+
+/// 预约（医生+设备排期，DrRuby 转介联动）
+model Appointment {
+  id            String   @id @default(cuid(2))
+  clinicId      String   @map("clinic_id")
+  patientUserId String   @map("patient_user_id")
+  staffUserId   String?  @map("staff_user_id")
+  referralId    String?  @map("referral_id")
+  scheduledAt   DateTime @map("scheduled_at") @db.Timestamptz
+  status        String   // scheduled|done|report_review|consultation|canceled
+  note          String?
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  clinic        Clinic      @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  patient       UserAccount @relation("AppointmentPatient", fields: [patientUserId], references: [id], onDelete: Cascade)
+
+  @@index([clinicId, scheduledAt], map: "appointment_clinic_scheduled_idx")
+  @@index([patientUserId], map: "appointment_patient_id_idx")
+  @@map("appointment")
+}
+
+/// Review Queue：AI 起草 → 医生审阅 → 发送（状态机）
+model ClinicReport {
+  id             String    @id @default(cuid(2))
+  clinicId       String    @map("clinic_id")
+  patientUserId  String    @map("patient_user_id")
+  reviewerUserId String?   @map("reviewer_user_id")
+  status         String    // ai_drafted|in_review|approved|sent
+  draftContent   Json?     @map("draft_content")
+  finalContent   Json?     @map("final_content")
+  sentAt         DateTime? @map("sent_at") @db.Timestamptz
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  clinic         Clinic      @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  patient        UserAccount @relation("ClinicReportPatient", fields: [patientUserId], references: [id], onDelete: Cascade)
+
+  @@index([clinicId, status], map: "clinic_report_clinic_status_idx")
+  @@index([patientUserId], map: "clinic_report_patient_id_idx")
+  @@map("clinic_report")
+}
+
+/// DrRuby Referrals（consumer → clinic，转介 + 分佣）
+model Referral {
+  id               String    @id @default(cuid(2))
+  fromUserId       String    @map("from_user_id")   // consumer
+  clinicId         String    @map("clinic_id")
+  flaggedMetrics   Json?     @map("flagged_metrics")
+  note             String?
+  requestedService String?   @map("requested_service")
+  status           String    // pending|accepted|declined|completed
+  commissionAmount Decimal?  @map("commission_amount")
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  fromUser         UserAccount @relation("ReferralFromUser", fields: [fromUserId], references: [id], onDelete: Cascade)
+  clinic           Clinic      @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+
+  @@index([clinicId, status], map: "referral_clinic_status_idx")
+  @@index([fromUserId], map: "referral_from_user_id_idx")
+  @@map("referral")
+}
+
+/// 发票（Treatments & Billing）
+model Invoice {
+  id            String    @id @default(cuid(2))
+  clinicId      String    @map("clinic_id")
+  patientUserId String    @map("patient_user_id")
+  amount        Decimal
+  currency      String    @default("USD")
+  status        String    // draft|sent|paid|void
+  issuedAt      DateTime? @map("issued_at") @db.Timestamptz
+  paidAt        DateTime? @map("paid_at") @db.Timestamptz
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  clinic        Clinic      @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  patient       UserAccount @relation("InvoicePatient", fields: [patientUserId], references: [id], onDelete: Cascade)
+
+  @@index([clinicId, status], map: "invoice_clinic_status_idx")
+  @@index([patientUserId], map: "invoice_patient_id_idx")
+  @@map("invoice")
+}
+
+// =============================================================================
+// P3 — 科研协作站（schema only 本轮）— backend_v5 §2.8
+// =============================================================================
+
+/// 协作者档案（verified collaborator）
+model CollaboratorProfile {
+  id           String    @id @default(cuid(2))
+  userId       String    @unique @map("user_id")
+  verified     Boolean   @default(false)
+  institution  String?
+  title        String?
+  verifiedAt   DateTime? @map("verified_at") @db.Timestamptz
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  user         UserAccount @relation("CollaboratorProfileUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("collaborator_profile")
+}
+
+/// 研究项目（Active projects）
+model ResearchProject {
+  id                    String   @id @default(cuid(2))
+  name                  String
+  principalInvestigator String?  @map("principal_investigator")
+  irbNumber             String?  @map("irb_number")
+  recruitmentStatus     String?  @map("recruitment_status")
+  createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt             DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  protocols             Protocol[]
+
+  @@map("research_project")
+}
+
+/// 参与机构（DUA 状态）
+model Institution {
+  id        String   @id @default(cuid(2))
+  name      String
+  duaStatus String?  @map("dua_status") // pending|signed|expired
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("institution")
+}
+
+/// 协议文档（PDF，受控下载）
+model Protocol {
+  id        String   @id @default(cuid(2))
+  projectId String?  @map("project_id")
+  title     String
+  objectKey String   @map("object_key")
+  version   String?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  project   ResearchProject? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([projectId], map: "protocol_project_id_idx")
+  @@map("protocol")
+}
+
+/// 治理文档（治理政策 / 去标识标准 / DUA 模板 / IRB 概要）
+model GovernanceDoc {
+  id        String   @id @default(cuid(2))
+  category  String   // governance_policy|deidentification|dua_template|irb_summary
+  title     String
+  objectKey String   @map("object_key")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([category], map: "governance_doc_category_idx")
+  @@map("governance_doc")
 }
