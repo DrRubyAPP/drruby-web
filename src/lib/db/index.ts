@@ -2,7 +2,7 @@
  * DrRuby DB 层汇总入口
  *
  * 用法：
- *   import { prisma, userAccountRepo, studySessionRepo } from "@/lib/db";
+ *   import { prisma, userAccountRepo, userBaselineRepo } from "@/lib/db";
  *
  * 注意：
  * - prisma 单例只能在 server 端使用（server 组件 / route handler / server actions）
@@ -12,9 +12,5 @@
 
 export * from "./enums";
 export { prisma } from "./prisma";
-export * as imageInfoRepo from "./repositories/imageInfo.repo";
-export * as interventionLogRepo from "./repositories/interventionLog.repo";
-export * as sisHistoryRepo from "./repositories/sisHistory.repo";
-export * as studySessionRepo from "./repositories/studySession.repo";
 export * as userAccountRepo from "./repositories/userAccount.repo";
 export * as userBaselineRepo from "./repositories/userBaseline.repo";
