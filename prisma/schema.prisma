@@ -1,7 +1,8 @@
 // DrRuby Prisma schema
-// 数据模型参考：a_docs/drruby-docs/mvp2/data-model-2.md（24 张消费者数据表）
+// 数据模型主线：a_docs/design/backend_v5.md §3（消费决策域 + App types.ts 契约）
+//   既有 mvp2 研究域（SIS/皮肤镜/RAG/cohort 等 19 表）已裁减，详见 a_docs/task/task-9。
 // 命名约定：model PascalCase、字段 camelCase，@map/@@map 映射到 snake_case 表名列名
-// 主键：普通实体表 id String @id @default(cuid(2))；glucose_stream 用 BigInt @default(autoincrement())
+// 主键：普通实体表 id String @id @default(cuid(2))
 // 枚举：一律 String + Zod 校验（src/lib/db/enums.ts），不使用 Prisma enum / Postgres 原生 ENUM
 // 外键：所有 FK 列建二级索引（Postgres 不自动为 FK 建索引）
 
@@ -43,24 +44,24 @@ model UserAccount {
   hormonalLogs     HormonalStatusLog[]
   wearableConnections WearableConnection[]
   wearableDailies  WearableDaily[]
-  glucoseStreams   GlucoseStream[]
-  studySessions    StudySession[]
-  imageInfos       ImageInfo[]
-  deviceCaptures   DeviceCapture[]
-  featureVectors   FeatureVector[]
-  sisHistories     SisHistory[]
-  interventionLogs InterventionLog[]
-  confounderLogs   ConfounderLog[]
-  clinicRecords    ClinicRecord[]
-  healthJourney    HealthJourney?
-  healthMilestones HealthMilestone[]
-  lifestyleLogs    LifestyleLog[]
-  insightFeeds     InsightFeed[]
-  sisResponseLogs  SisResponseLog[]
-  userProtocolConfig UserProtocolConfig?
-  modelValidationLogs ModelValidationLog[]
   sessions         Session[]
   accounts         Account[]
+
+  // 消费决策域反向 relation（P1，sub-plan-1 §2）
+  timelineEvents   TimelineEvent[]
+  signals          Signal[]
+  decisions        Decision[]
+  decisionEntries  DecisionEntry[]
+  studyEnrollments StudyEnrollment[]
+  consentSettings  ConsentSetting[]
+  bodyInsights     BodyInsight[]
+  skinScans        SkinScan[]
+  experiments      Experiment[]
+  hormoneReadings  HormoneReading[]
+  contributions    Contribution[]
+  healthRecords    HealthRecord[]
+  photos           Photo[]
+  subscription     Subscription?
 
   @@index([status, deletedAt], map: "user_account_status_deleted_at_idx")
   @@map("user_account")
@@ -153,7 +154,7 @@ model HormonalStatusLog {
 }
 
 // =============================================================================
-// 2. Wearable 域（wearable_connection / wearable_daily / glucose_stream）
+// 2. Wearable 域（wearable_connection / wearable_daily）
 // =============================================================================
 
 /// 第三方设备 + OAuth 授权（MVP 仅 HealthKit 真实写入）　✅
@@ -184,7 +185,6 @@ model WearableConnection {
 model WearableDaily {
   id                String   @id @default(cuid(2))
   userId            String   @map("user_id")
-  sessionId         String?  @map("session_id")
   recordDate        DateTime @map("record_date") @db.Date
   provider          String
   sleepScore        Decimal? @map("sleep_score")
@@ -201,479 +201,306 @@ model WearableDaily {
   updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   user              UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
-  session           StudySession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
 
   @@unique([userId, provider, recordDate], map: "wearable_daily_user_provider_date_uniq")
   @@index([userId, recordDate], map: "wearable_daily_user_date_idx")
-  @@index([sessionId], map: "wearable_daily_session_id_idx")
   @@map("wearable_daily")
 }
 
-/// CGM 原始血糖流（5min/条）　🔵 预留（MVP 不写入）
-/// 规模：26周 × 1000 CGM 用户 ≈ 5200 万行
-/// 分区策略：(user_id, measured_at) 范围分区，以注释预留，本阶段单表
-model GlucoseStream {
-  id              BigInt   @id @default(autoincrement()) @db.BigInt
-  userId          String   @map("user_id")
-  measuredAt      DateTime @map("measured_at") @db.Timestamptz
-  glucoseMgdl     Decimal? @map("glucose_mgdl")
-  trendArrow      String?  @map("trend_arrow")
-  cgmDeviceSerial String?  @map("cgm_device_serial")
-  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz
-
-  user            UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, measuredAt], map: "glucose_stream_user_measured_idx")
-  @@map("glucose_stream")
-}
-
 // =============================================================================
-// 3. 研究域（study_session / image_info / device_capture / feature_vector /
-//            sis_history / intervention_log / confounder_log / clinic_record）
+// 3. 消费决策域（App types.ts 契约 + backend_v5 §2.3/2.4/2.5）
+//    12 张配 repo（sub-plan-5）+ 3 张 schema-only（HealthRecord/Photo/Subscription）
 // =============================================================================
 
-/// 26 周研究注册记录　✅
-/// 状态机：pending_first_capture → active → (paused ⇄ active) → completed/abandoned
-/// 唯一约束：每 user_id 仅一条 status=active（由任务9 partial unique index 兜底）
-model StudySession {
-  id                     String   @id @default(cuid(2))
-  userId                 String   @map("user_id")
-  startDate              DateTime? @map("start_date") @db.Date
-  questionnaireAt        DateTime @map("questionnaire_at") @db.Timestamptz
-  currentWeek            Int      @default(0) @map("current_week")
-  status                 String
-  pausedAt               DateTime? @map("paused_at") @db.Timestamptz
-  resumedAt              DateTime? @map("resumed_at") @db.Timestamptz
-  totalPausedDay         Int      @default(0) @map("total_paused_day")
-  preferredCaptureWindow String?  @map("preferred_capture_window")
-  interventionSide       String   @map("intervention_side")
-  controlSide            String   @map("control_side")
-  consentAt              DateTime @map("consent_at") @db.Timestamptz
-  washoutStatus          String   @map("washout_status")
-  baselineAsymmetryFlag  Boolean  @default(false) @map("baseline_asymmetry_flag")
-  deletedAt              DateTime? @map("deleted_at") @db.Timestamptz
-  createdAt              DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt              DateTime @updatedAt @map("updated_at") @db.Timestamptz
+/// 身体时间线事件（快速记录 / 上传 / 决策快照）— App getTimeline
+model TimelineEvent {
+  id         String    @id @default(cuid(2))
+  userId     String    @map("user_id")
+  decisionId String?   @map("decision_id")
+  kind       String    // note|treatment|photo|lab|decision|outcome
+  title      String
+  detail     String?
+  source     String?   // you|wearable|your doctor
+  occurredAt DateTime  @map("occurred_at") @db.Timestamptz
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz
 
-  user                   UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
-  wearableDailies        WearableDaily[]
-  imageInfos             ImageInfo[]
-  deviceCaptures         DeviceCapture[]
-  featureVectors         FeatureVector[]
-  sisHistories           SisHistory[]
-  interventionLogs       InterventionLog[]
-  confounderLogs         ConfounderLog[]
-  clinicRecords          ClinicRecord[]
-  healthMilestones       HealthMilestone[]
-  lifestyleLogs          LifestyleLog[]
-  insightFeeds           InsightFeed[]
-  sisResponseLogs        SisResponseLog[]
-  modelValidationLogs    ModelValidationLog[]
+  user       UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+  decision   Decision?   @relation(fields: [decisionId], references: [id], onDelete: SetNull)
 
-  @@index([userId, status], map: "study_session_user_status_idx")
-  @@index([userId, deletedAt], map: "study_session_user_deleted_idx")
-  @@map("study_session")
+  @@index([userId, occurredAt], map: "timeline_event_user_occurred_idx")
+  @@index([decisionId], map: "timeline_event_decision_id_idx")
+  @@map("timeline_event")
 }
 
-/// 原始图像引用 + metadata　✅
-/// 频率：每周 2 次 × 2 侧 = 4 张/周
-/// 条件必填：capture_device='dermoscope' → device_id NOT NULL（任务9 CHECK 补）
-model ImageInfo {
-  id            String   @id @default(cuid(2))
-  userId        String   @map("user_id")
-  sessionId     String   @map("session_id")
-  studyWeek     Int      @map("study_week")
-  s3ObjectKey   String   @map("s3_object_key")
-  capturedAt    DateTime @map("captured_at") @db.Timestamptz
-  mcsLevel      String?  @map("mcs_level")
-  lightingScore String?  @map("lighting_score")
-  anatomicalSite String? @map("anatomical_site")
-  faceSide      String   @map("face_side")
-  deviceId      String?  @map("device_id")
-  captureDevice String   @map("capture_device")
-  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz
+/// 设备/化验原始信号（带来源 + 置信度）— App getSignals
+model Signal {
+  id         String    @id @default(cuid(2))
+  userId     String    @map("user_id")
+  label      String
+  value      String
+  unit       String?
+  source     String
+  confidence String    // observed|possible|not-assessable
+  trend      String?   // up|down|flat
+  measuredAt DateTime  @map("measured_at") @db.Timestamptz
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz
 
-  user          UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
-  session       StudySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  device        DeviceCapture? @relation(fields: [deviceId], references: [id])
-  featureVector FeatureVector?
+  user       UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([sessionId, studyWeek], map: "image_info_session_week_idx")
-  @@index([userId, capturedAt], map: "image_info_user_captured_idx")
-  @@index([deviceId], map: "image_info_device_id_idx")
-  @@map("image_info")
+  @@index([userId, measuredAt], map: "signal_user_measured_idx")
+  @@map("signal")
 }
 
-/// 皮肤镜采集元数据　🟡（表结构 + 门控，BLE 视设备到位）
-/// 门控：仅 subscription_tier ∈ {paid, premium, vip} 可写
-model DeviceCapture {
+/// 决策（My Decisions）— App getDecisions/getDecision
+/// brief（三源快照）存 JSON：{ yourHistory[], similarJourneys{summary,note},
+///   evidence{known[],uncertain[]}, questionsForClinician[] }。P1 快照，P2 由引擎回填。
+model Decision {
+  id        String    @id @default(cuid(2))
+  userId    String    @map("user_id")
+  question  String
+  type      String?   // thermage|ultherapy|botox|laser|filler|hrt|skincare|clinic|not_sure
+  status    String    // considering|in-progress|decided|paused
+  brief     Json?
+  decidedAt DateTime? @map("decided_at") @db.Timestamptz
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  user           UserAccount     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entries        DecisionEntry[]
+  timelineEvents TimelineEvent[]
+
+  @@index([userId, status], map: "decision_user_status_idx")
+  @@map("decision")
+}
+
+/// 决策时间线条目（append-only，原始记录永不覆盖）— backend_v5 §2.3b
+/// 无 updatedAt：只增不改
+model DecisionEntry {
+  id             String   @id @default(cuid(2))
+  decisionId     String   @map("decision_id")
+  userId         String   @map("user_id")
+  text           String
+  statusSnapshot String   @map("status_snapshot") // 记录当时决策状态
+  occurredAt     DateTime @map("occurred_at") @db.Timestamptz
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  decision       Decision    @relation(fields: [decisionId], references: [id], onDelete: Cascade)
+  user           UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([decisionId, occurredAt], map: "decision_entry_decision_occurred_idx")
+  @@index([userId], map: "decision_entry_user_id_idx")
+  @@map("decision_entry")
+}
+
+/// 研究目录（消费者可见的招募）— backend_v5 §2.5
+model ResearchStudy {
   id                String   @id @default(cuid(2))
-  userId            String   @map("user_id")
-  sessionId         String   @map("session_id")
-  studyWeek         Int?     @map("study_week")
-  faceSide          String   @map("face_side")
-  deviceSerial      String?  @map("device_serial")
-  s3RawPath         String?  @map("s3_raw_path")
-  dermMagnification String?  @map("derm_magnification")
-  captureQuality    String?  @map("capture_quality")
-  bluetoothRssi     Int?     @map("bluetooth_rssi")
-  capturedAt        DateTime? @map("captured_at") @db.Timestamptz
+  name              String
+  description       String?
+  irbNumber         String?  @map("irb_number")
+  recruitmentStatus String   @map("recruitment_status") // recruiting|closed|completed
+  fields            String[] // 采集字段
   createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
-  user              UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
-  session           StudySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  imageInfos        ImageInfo[]
+  enrollments       StudyEnrollment[]
 
-  @@index([sessionId, studyWeek], map: "device_capture_session_week_idx")
-  @@index([userId], map: "device_capture_user_id_idx")
-  @@map("device_capture")
+  @@index([recruitmentStatus], map: "research_study_recruitment_idx")
+  @@map("research_study")
 }
 
-/// AI 提取的图像特征（Haut.AI 预留，mock/手动填）　🟡
-/// 一图一特征向量（1:1 image_info）
-model FeatureVector {
-  id                 String   @id @default(cuid(2))
-  imageId            String   @unique @map("image_id")
-  userId             String   @map("user_id")
-  sessionId          String   @map("session_id")
-  studyWeek          Int      @map("study_week")
-  faceSide           String   @map("face_side")
-  pigmentationIndex  Decimal? @map("pigmentation_index")
-  erythemaScore      Decimal? @map("erythema_score")
-  poreDensity        Decimal? @map("pore_density")
-  textureUniformity  Decimal? @map("texture_uniformity")
-  modelVersion       String?  @map("model_version")
-  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamptz
+/// 入组（逐项知情同意，可退出）— App getStudies（Study.status/arm/consentGiven）
+model StudyEnrollment {
+  id           String    @id @default(cuid(2))
+  studyId      String    @map("study_id")
+  userId       String    @map("user_id")
+  status       String    // enrolled|invited|completed
+  arm          String?
+  consentGiven Boolean   @default(false) @map("consent_given")
+  consentAt    DateTime? @map("consent_at") @db.Timestamptz
+  withdrawnAt  DateTime? @map("withdrawn_at") @db.Timestamptz
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz
 
-  image              ImageInfo @relation(fields: [imageId], references: [id], onDelete: Cascade)
-  user               UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
-  session            StudySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  study        ResearchStudy @relation(fields: [studyId], references: [id], onDelete: Cascade)
+  user         UserAccount   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([sessionId, studyWeek, faceSide], map: "feature_vector_session_week_side_idx")
-  @@index([userId], map: "feature_vector_user_id_idx")
-  @@map("feature_vector")
+  @@unique([studyId, userId], map: "study_enrollment_study_user_uniq")
+  @@index([userId], map: "study_enrollment_user_id_idx")
+  @@map("study_enrollment")
 }
 
-/// 每周 SIS 分数　✅
-/// 防重唯一约束：(session_id, study_week)，重算走 UPSERT
-/// 漏采降级：2次→computed；1次→degraded；0次→skipped
-model SisHistory {
-  id               String   @id @default(cuid(2))
-  userId           String   @map("user_id")
-  sessionId        String   @map("session_id")
-  studyWeek        Int      @map("study_week")
-  sisIntervention  Decimal? @map("sis_intervention")
-  sisControl       Decimal? @map("sis_control")
-  sisDelta         Decimal? @map("sis_delta")
-  mcsLowest        String?  @map("mcs_lowest")
-  captureCount     Int?     @map("capture_count")
-  status           String
-  computedAt       DateTime? @map("computed_at") @db.Timestamptz
-  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz
-
-  user             UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
-  session          StudySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-
-  @@unique([sessionId, studyWeek], map: "sis_history_session_week_uniq")
-  @@index([userId, computedAt], map: "sis_history_user_computed_idx")
-  @@map("sis_history")
-}
-
-/// 产品使用周期（按 regime）　✅
-/// category 与 cohort_insight.intervention_category 共用 schema（红线 §0.3.3）
-/// face_side 含 both（基础护肤，不计入 cohort）
-model InterventionLog {
-  id              String   @id @default(cuid(2))
-  userId          String   @map("user_id")
-  sessionId       String   @map("session_id")
-  faceSide        String   @map("face_side")
-  productName     String?  @map("product_name")
-  category        String
-  dose            String?
-  regimeStartDate DateTime @map("regime_start_date") @db.Date
-  regimeEndDate   DateTime? @map("regime_end_date") @db.Date
-  frequency       String?
-  note            String?
-  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz
-
-  user            UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
-  session         StudySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-
-  @@index([sessionId, faceSide], map: "intervention_log_session_side_idx")
-  @@index([category], map: "intervention_log_category_idx")
-  @@map("intervention_log")
-}
-
-/// 混淆因素（月经/UV/睡眠）　✅
-/// 防重唯一约束：(session_id, record_date)
-/// study_week 与 record_date 双字段一致性由后端统一函数保证
-model ConfounderLog {
-  id                String   @id @default(cuid(2))
-  userId            String   @map("user_id")
-  sessionId         String   @map("session_id")
-  studyWeek         Int      @map("study_week")
-  recordDate        DateTime @map("record_date") @db.Date
-  menstrualDay      Int?     @map("menstrual_day")
-  sleepScoreManual  Decimal? @map("sleep_score_manual")
-  uvExposureHour    Decimal? @map("uv_exposure_hour")
-  hydrationLevel    Decimal? @map("hydration_level")
-  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz
-
-  user              UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
-  session           StudySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-
-  @@unique([sessionId, recordDate], map: "confounder_log_session_date_uniq")
-  @@index([sessionId, studyWeek], map: "confounder_log_session_week_idx")
-  @@map("confounder_log")
-}
-
-/// 诊所生物物理 Ground Truth　✅（P2）
-/// 写入触发 Loop 2（model_validation_log）
-model ClinicRecord {
-  id            String   @id @default(cuid(2))
-  userId        String   @map("user_id")
-  sessionId     String   @map("session_id")
-  visitDate     DateTime @map("visit_date") @db.Date
-  studyWeek     Int?     @map("study_week")
-  faceSide      String   @map("face_side")
-  elastometryR2 Decimal? @map("elastometry_r2")
-  elastometryR5 Decimal? @map("elastometry_r5")
-  clinicId      String   @map("clinic_id")
-  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz
-
-  user          UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
-  session       StudySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-
-  @@index([userId, visitDate], map: "clinic_record_user_visit_idx")
-  @@index([clinicId], map: "clinic_record_clinic_id_idx")
-  @@map("clinic_record")
-}
-
-// =============================================================================
-// 4. 健康旅程域（health_journey / health_milestone / lifestyle_log / insight_feed）
-// =============================================================================
-
-/// 跨研究纵向汇总（每用户一行，1:1）　🟡 ✅
-/// 触发：① session.status=completed 全量重算 UPSERT；② 月度 cron 增量 UPSERT
-model HealthJourney {
-  id                  String   @id @default(cuid(2))
-  userId              String   @unique @map("user_id")
-  totalSession        Int?     @map("total_session")
-  firstSessionDate    DateTime? @map("first_session_date") @db.Date
-  latestSessionDate   DateTime? @map("latest_session_date") @db.Date
-  sleepBaselineTrend  String?  @map("sleep_baseline_trend")
-  hrvBaselineTrend    String?  @map("hrv_baseline_trend")
-  sisTrajectory       String?  @map("sis_trajectory")
-  bestSisScore        Decimal? @map("best_sis_score")
-  lastComputedAt      DateTime? @map("last_computed_at") @db.Timestamptz
-  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz
-
-  user                UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("health_journey")
-}
-
-/// 用户健康节点（幂等 INSERT）　🟡 ✅
-model HealthMilestone {
-  id            String   @id @default(cuid(2))
-  userId        String   @map("user_id")
-  sessionId     String   @map("session_id")
-  milestoneType String   @map("milestone_type")
-  milestoneValue Decimal? @map("milestone_value")
-  achievedAt    DateTime? @map("achieved_at") @db.Timestamptz
-  sharedAt      DateTime? @map("shared_at") @db.Timestamptz
-  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz
-
-  user          UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
-  session       StudySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-
-  @@index([userId, milestoneType], map: "health_milestone_user_type_idx")
-  @@index([sessionId], map: "health_milestone_session_id_idx")
-  @@map("health_milestone")
-}
-
-/// 生活方式改变记录（8 类 change_type）　🟡 ✅
-model LifestyleLog {
+/// 隐私开关（三档）— App getConsent
+/// self 档 locked=true 永开不可切；(userId,key) 唯一
+model ConsentSetting {
   id          String   @id @default(cuid(2))
   userId      String   @map("user_id")
-  sessionId   String?  @map("session_id")
-  recordDate  DateTime? @map("record_date") @db.Date
-  changeType  String   @map("change_type")
-  description String?
-  startedAt   DateTime? @map("started_at") @db.Date
-  endedAt     DateTime? @map("ended_at") @db.Date
+  key         String   // self|deidentified_contribution|identified_research
+  title       String
+  description String
+  value       Boolean  @default(false)
+  locked      Boolean  @default(false)
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
   user        UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
-  session     StudySession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
 
-  @@index([userId, recordDate], map: "lifestyle_log_user_date_idx")
-  @@index([sessionId], map: "lifestyle_log_session_id_idx")
-  @@map("lifestyle_log")
+  @@unique([userId, key], map: "consent_setting_user_key_uniq")
+  @@map("consent_setting")
 }
 
-/// 自动相关性洞察（5 类 insight_type）　🟡 ✅
-/// session_id 约束：skin_sleep/lifestyle_link/sis_drop 三类不可 NULL（应用层校验）
-model InsightFeed {
-  id            String   @id @default(cuid(2))
-  userId        String   @map("user_id")
-  sessionId     String?  @map("session_id")
-  insightDate   DateTime? @map("insight_date") @db.Date
-  insightType   String   @map("insight_type")
-  metricA       String?  @map("metric_a")
-  metricB       String?  @map("metric_b")
-  correlationR  Decimal? @map("correlation_r")
-  messageZh     String?  @map("message_zh")
-  deliveredAt   DateTime? @map("delivered_at") @db.Timestamptz
-  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz
+/// 身体洞察（首页 Attention 卡 + Aging Velocity + 模式）— App getAttention/getAgingVelocity
+/// P1 规则/占位，P2 洞察引擎回填
+model BodyInsight {
+  id        String   @id @default(cuid(2))
+  userId    String   @map("user_id")
+  kind      String   // attention|aging_velocity|pattern|change
+  tag       String?  // attention 卡
+  title     String
+  body      String?  // attention 卡
+  accent    String?  // attention: red|amber|purple
+  label     String?  // aging: 指标名
+  value     String?  // aging: 值/文案
+  caption   String?  // aging: 说明
+  tone      String?  // aging: green|amber|purple
+  meta      Json?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
-  user          UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
-  session       StudySession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
-  ragLog        InsightRagLog?
+  user      UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId, insightDate], map: "insight_feed_user_date_idx")
-  @@index([sessionId], map: "insight_feed_session_id_idx")
-  @@index([insightType], map: "insight_feed_type_idx")
-  @@map("insight_feed")
+  @@index([userId, kind], map: "body_insight_user_kind_idx")
+  @@map("body_insight")
 }
 
-// =============================================================================
-// 5. 知识/Loop 域（expert_source / insight_rag_log / sis_response_log /
-//                  user_protocol_config / model_validation_log / cohort_insight）
-// =============================================================================
+/// 皮肤扫描结果 — App getSkinScan；zones 存 JSON（[{name,status}]）
+model SkinScan {
+  id        String   @id @default(cuid(2))
+  userId    String   @map("user_id")
+  scannedAt DateTime @map("scanned_at") @db.Timestamptz
+  headline  String
+  zones     Json     // [{name, status}]
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
-/// 专家知识文档注册表　🟣 ✅
-/// embedding_ref: 生产用 pgvector vector(1536)，本地开发暂用 text（🔵 预留字段，MVP 不写入）
-/// TODO: 本地 Docker 切换到 pgvector/pgvector:pg16 镜像后，ALTER 列为 vector(1536) + 建向量索引
-model ExpertSource {
+  user      UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, scannedAt], map: "skin_scan_user_scanned_idx")
+  @@map("skin_scan")
+}
+
+/// N-of-1 实验 — App getExperiments
+model Experiment {
+  id         String   @id @default(cuid(2))
+  userId     String   @map("user_id")
+  title      String
+  hypothesis String
+  status     String   // running|planned|done
+  window     String
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user       UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status], map: "experiment_user_status_idx")
+  @@map("experiment")
+}
+
+/// 激素层读数（周期上下文）— App getHormoneLayer
+model HormoneReading {
+  id         String    @id @default(cuid(2))
+  userId     String    @map("user_id")
+  marker     String
+  value      String
+  phase      String
+  note       String?
+  measuredAt DateTime? @map("measured_at") @db.Timestamptz
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  user       UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "hormone_reading_user_id_idx")
+  @@map("hormone_reading")
+}
+
+/// 数据贡献（opt-in，可撤回）— App getDataContribution
+model Contribution {
+  id          String    @id @default(cuid(2))
+  userId      String    @map("user_id")
+  title       String
+  description String
+  shared      Boolean   @default(false)
+  sharedAt    DateTime? @map("shared_at") @db.Timestamptz
+  withdrawnAt DateTime? @map("withdrawn_at") @db.Timestamptz
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  user        UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "contribution_user_id_idx")
+  @@map("contribution")
+}
+
+// --- 以下 3 张：P1 消费域但本轮 schema only（无 repo） ---
+
+/// 健康记录/报告上传（lab/imaging/checkup/vitals）— backend_v5 §2.3a
+model HealthRecord {
   id           String   @id @default(cuid(2))
-  expertName   String   @map("expert_name")
-  contentType  String   @map("content_type")
-  title        String?
-  domain       String?
-  verdict      String?
-  // 生产：Unsupported("vector(1536)")? @map("embedding_ref")
-  // 本地：text 类型占位（pgvector 扩展未安装）
-  embeddingRef String?  @map("embedding_ref")
-  version      String?
-  licensedAt   DateTime? @map("licensed_at") @db.Date
-  isActive     Boolean?  @map("is_active")
+  userId       String   @map("user_id")
+  kind         String   // lab|imaging|checkup|vitals
+  title        String
+  source       String?  // you|your doctor|clinic
+  objectKey    String?  @map("object_key")   // 对象存储 key（PDF/照片）
+  ocrStatus    String   @default("pending") @map("ocr_status") // pending|processing|done|manual
+  parsedValues Json?    @map("parsed_values")
+  recordedAt   DateTime @map("recorded_at") @db.Timestamptz
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
-  @@index([expertName], map: "expert_source_expert_idx")
-  @@index([domain], map: "expert_source_domain_idx")
-  @@index([isActive], map: "expert_source_active_idx")
-  @@map("expert_source")
+  user         UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+  photos       Photo[]
+
+  @@index([userId, recordedAt], map: "health_record_user_recorded_idx")
+  @@map("health_record")
 }
 
-/// RAG 审计日志（1:1 insight_feed）　🟣 ✅
-model InsightRagLog {
-  id                   String   @id @default(cuid(2))
-  insightId            String   @unique @map("insight_id")
-  queryEmbeddingRef    String?  @map("query_embedding_ref")
-  sourceIdsRetrieved   String[] @map("source_ids_retrieved")
-  llmModelVersion      String?  @map("llm_model_version")
-  promptVersion        String?  @map("prompt_version")
-  generatedAt          DateTime? @map("generated_at") @db.Timestamptz
-  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt            DateTime @updatedAt @map("updated_at") @db.Timestamptz
+/// 照片（before/after，绑定 report/独立）— backend_v5 §2.3a
+model Photo {
+  id             String    @id @default(cuid(2))
+  userId         String    @map("user_id")
+  healthRecordId String?   @map("health_record_id")
+  objectKey      String    @map("object_key")
+  caption        String?
+  takenAt        DateTime? @map("taken_at") @db.Timestamptz
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz
 
-  insight              InsightFeed @relation(fields: [insightId], references: [id], onDelete: Cascade)
+  user           UserAccount   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  healthRecord   HealthRecord? @relation(fields: [healthRecordId], references: [id], onDelete: SetNull)
 
-  @@map("insight_rag_log")
+  @@index([userId], map: "photo_user_id_idx")
+  @@index([healthRecordId], map: "photo_health_record_id_idx")
+  @@map("photo")
 }
 
-/// SIS 行为反馈（Loop 1）　🟢 ✅
-/// 被动查看捕捉：SIS 页 onLoad 即写 action_taken=viewed
-model SisResponseLog {
-  id             String   @id @default(cuid(2))
-  userId         String   @map("user_id")
-  sessionId      String   @map("session_id")
-  studyWeek      Int?     @map("study_week")
-  sisDeltaShown  Decimal? @map("sis_delta_shown")
-  actionTaken    String   @map("action_taken")
-  newProductName String?  @map("new_product_name")
-  responseAt     DateTime? @map("response_at") @db.Timestamptz
-  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+/// 订阅（Stripe 骨架）— backend_v5 §2.6
+model Subscription {
+  id                   String    @id @default(cuid(2))
+  userId               String    @unique @map("user_id")
+  tier                 String    // free|decision
+  status               String    // active|canceled|past_due|trialing
+  stripeCustomerId     String?   @map("stripe_customer_id")
+  stripeSubscriptionId String?   @unique @map("stripe_subscription_id")
+  currentPeriodEnd     DateTime? @map("current_period_end") @db.Timestamptz
+  canceledAt           DateTime? @map("canceled_at") @db.Timestamptz
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime  @updatedAt @map("updated_at") @db.Timestamptz
 
-  user           UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
-  session        StudySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user                 UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId, responseAt], map: "sis_response_log_user_response_idx")
-  @@index([sessionId, studyWeek], map: "sis_response_log_session_week_idx")
-  @@map("sis_response_log")
-}
-
-/// MCS 自适应配置（Loop 4，每用户一行 1:1）　🟢 ✅
-/// 聚合源是 sis_history.mcs_lowest（周级最低），不是 image_info.mcs_level
-model UserProtocolConfig {
-  id                       String   @id @default(cuid(2))
-  userId                   String   @unique @map("user_id")
-  avgMcsScore              Decimal? @map("avg_mcs_score")
-  consecutiveLowMcsCount   Int?     @map("consecutive_low_mcs_count")
-  protocolVersion          String?  @map("protocol_version")
-  lastAdaptedAt            DateTime? @map("last_adapted_at") @db.Timestamptz
-  createdAt                DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt                DateTime @updatedAt @map("updated_at") @db.Timestamptz
-
-  user                     UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("user_protocol_config")
-}
-
-/// 诊所误差（Loop 2）　🟢 ✅
-/// Gen 1：仅记 clinic_record 新增时的 model_version 与 retraining_flagged
-model ModelValidationLog {
-  id               String   @id @default(cuid(2))
-  userId           String   @map("user_id")
-  sessionId        String   @map("session_id")
-  visitDate        DateTime? @map("visit_date") @db.Date
-  modelVersion     String?  @map("model_version")
-  clinicR2         Decimal? @map("clinic_r2")
-  clinicR5         Decimal? @map("clinic_r5")
-  retrainingFlagged Boolean? @map("retraining_flagged")
-  note             String?
-  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz
-
-  user             UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
-  session          StudySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-
-  @@index([sessionId, visitDate], map: "model_validation_log_session_visit_idx")
-  @@map("model_validation_log")
-}
-
-/// 跨用户聚合（Loop 3，月度批量 UPSERT）　🟢 ✅
-/// 复合唯一约束：(skin_type, fitzpatrick_scale, intervention_category)
-/// intervention_category 与 intervention_log.category 共用 schema（红线 §0.3.3）
-model CohortInsight {
-  id                    String   @id @default(cuid(2))
-  skinType              String   @map("skin_type")
-  fitzpatrickScale      String   @map("fitzpatrick_scale")
-  interventionCategory  String   @map("intervention_category")
-  sampleN               Int?     @map("sample_n")
-  sisDeltaMean          Decimal? @map("sis_delta_mean")
-  sisDeltaP25           Decimal? @map("sis_delta_p25")
-  sisDeltaP75           Decimal? @map("sis_delta_p75")
-  confidenceLevel       String?  @map("confidence_level")
-  computedAt            DateTime? @map("computed_at") @db.Timestamptz
-  createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt             DateTime @updatedAt @map("updated_at") @db.Timestamptz
-
-  @@unique([skinType, fitzpatrickScale, interventionCategory], map: "cohort_insight_skin_fitz_cat_uniq")
-  @@map("cohort_insight")
+  @@index([userId], map: "subscription_user_id_idx")
+  @@map("subscription")
 }
