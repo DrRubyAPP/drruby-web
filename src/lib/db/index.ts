@@ -12,5 +12,17 @@
 
 export * from "./enums";
 export { prisma } from "./prisma";
+export * as bodyInsightRepo from "./repositories/bodyInsight.repo";
+export * as consentSettingRepo from "./repositories/consentSetting.repo";
+export * as contributionRepo from "./repositories/contribution.repo";
+export * as decisionRepo from "./repositories/decision.repo";
+export * as decisionEntryRepo from "./repositories/decisionEntry.repo";
+export * as experimentRepo from "./repositories/experiment.repo";
+export * as hormoneReadingRepo from "./repositories/hormoneReading.repo";
+export * as researchStudyRepo from "./repositories/researchStudy.repo";
+export * as signalRepo from "./repositories/signal.repo";
+export * as skinScanRepo from "./repositories/skinScan.repo";
+export * as studyEnrollmentRepo from "./repositories/studyEnrollment.repo";
+export * as timelineEventRepo from "./repositories/timelineEvent.repo";
 export * as userAccountRepo from "./repositories/userAccount.repo";
 export * as userBaselineRepo from "./repositories/userBaseline.repo";
