@@ -122,12 +122,12 @@ describe("userAccount.repo", () => {
     it("成功更新字段", async () => {
       const created = await create(VALID_INPUT);
       const updated = await update(created.id, {
-        subscriptionTier: "premium",
+        subscriptionTier: "decision",
         timezone: "Asia/Shanghai",
         lastLoginAt: new Date("2026-06-24T10:00:00Z"),
       });
 
-      expect(updated.subscriptionTier).toBe("premium");
+      expect(updated.subscriptionTier).toBe("decision");
       expect(updated.timezone).toBe("Asia/Shanghai");
       expect(updated.lastLoginAt).toEqual(new Date("2026-06-24T10:00:00Z"));
     });

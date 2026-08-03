@@ -3,10 +3,11 @@ import { z } from "zod";
 /**
  * DrRuby 数据模型枚举集中定义
  *
- * 数据模型参考：a_docs/drruby-docs/mvp2/data-model-2.md
- * 红线 §0.3.6：所有枚举一律用 String + Zod 校验，不使用 Postgres 原生 ENUM
- * 红线 §0.3.3：intervention_log.category ⟺ cohort_insight.intervention_category 共用同一 schema
- * 红线 §0.3.2：face_side 统一 left/right（intervention_log 额外含 both）
+ * 数据模型主线：a_docs/drruby-docs/backend_v5.md §3（消费域主干 + P2/P3）
+ * 研究域枚举已随 task-9 sub-plan-1/3 裁减（study_session / image_info / sis_history /
+ * intervention_log / glucose_stream / 健康旅程域 / 知识 Loop 域）。
+ *
+ * 约定：所有枚举一律用 String + Zod 校验，不使用 Postgres 原生 ENUM。
  */
 
 // =============================================================================
@@ -17,17 +18,12 @@ import { z } from "zod";
 export const authProviderSchema = z.enum(["email", "google"]);
 export type AuthProvider = z.infer<typeof authProviderSchema>;
 
-/** user_account.role：数据隔离 */
-export const userRoleSchema = z.enum(["user", "clinic"]);
+/** user_account.role：user（消费者）| clinic（诊所员工）| collaborator（科研协作者，verified） */
+export const userRoleSchema = z.enum(["user", "clinic", "collaborator"]);
 export type UserRole = z.infer<typeof userRoleSchema>;
 
-/** user_account.subscription_tier */
-export const subscriptionTierSchema = z.enum([
-  "free",
-  "paid",
-  "premium",
-  "vip",
-]);
+/** user_account.subscription_tier / subscription.tier：backend_v5 §2.6 两档 */
+export const subscriptionTierSchema = z.enum(["free", "decision"]);
 export type SubscriptionTier = z.infer<typeof subscriptionTierSchema>;
 
 /** user_account.status：登录时校验，非 active 拒绝 */
@@ -40,7 +36,7 @@ export type UserStatus = z.infer<typeof userStatusSchema>;
 
 /**
  * user_baseline.hormonal_status / hormonal_status_log.status 共用 7 值
- * RAG 生成 insight 时必须读 hormonal_status_log 完整历史
+ * 生成 insight 时须读 hormonal_status_log 完整历史
  */
 export const hormonalStatusSchema = z.enum([
   "cycling",
@@ -52,107 +48,6 @@ export const hormonalStatusSchema = z.enum([
   "on_contraceptive",
 ]);
 export type HormonalStatus = z.infer<typeof hormonalStatusSchema>;
-
-// =============================================================================
-// 研究域 - study_session
-// =============================================================================
-
-/** study_session.status：状态机 pending_first_capture → active → (paused ⇄ active) → completed/abandoned */
-export const studySessionStatusSchema = z.enum([
-  "pending_first_capture",
-  "active",
-  "paused",
-  "completed",
-  "abandoned",
-]);
-export type StudySessionStatus = z.infer<typeof studySessionStatusSchema>;
-
-/** study_session.washout_status */
-export const washoutStatusSchema = z.enum([
-  "not_started",
-  "in_progress",
-  "completed",
-]);
-export type WashoutStatus = z.infer<typeof washoutStatusSchema>;
-
-/** study_session.preferred_capture_window */
-export const captureWindowSchema = z.enum(["morning", "midday", "evening"]);
-export type CaptureWindow = z.infer<typeof captureWindowSchema>;
-
-// =============================================================================
-// 研究域 - face_side（红线 §0.3.2）
-// =============================================================================
-
-/** face_side 统一 left/right：image_info / feature_vector / clinic_record / study_session.intervention_side/control_side */
-export const faceSideSchema = z.enum(["left", "right"]);
-export type FaceSide = z.infer<typeof faceSideSchema>;
-
-/**
- * intervention_log.face_side 额外含 both（基础护肤，不计入 cohort）
- * 注意：与 image_info/feature_vector/clinic_record 的 face_side 不共用——后者严格 left/right
- */
-export const faceSideWithBothSchema = z.enum(["left", "right", "both"]);
-export type FaceSideWithBoth = z.infer<typeof faceSideWithBothSchema>;
-
-// =============================================================================
-// 研究域 - image_info / device_capture / feature_vector
-// =============================================================================
-
-/** image_info.capture_device */
-export const captureDeviceSchema = z.enum([
-  "phone_front",
-  "phone_rear",
-  "dermoscope",
-]);
-export type CaptureDevice = z.infer<typeof captureDeviceSchema>;
-
-/** image_info.mcs_level / sis_history.mcs_lowest：采集即时评分（大小写敏感） */
-export const mcsLevelSchema = z.enum(["High", "Medium", "Low"]);
-export type McsLevel = z.infer<typeof mcsLevelSchema>;
-
-/** image_info.lighting_score：fail 不允许提交 */
-export const lightingScoreSchema = z.enum(["pass", "fail"]);
-export type LightingScore = z.infer<typeof lightingScoreSchema>;
-
-/** device_capture.derm_magnification */
-export const dermMagnificationSchema = z.enum(["10x", "20x", "50x"]);
-export type DermMagnification = z.infer<typeof dermMagnificationSchema>;
-
-/** device_capture.capture_quality */
-export const captureQualitySchema = z.enum(["good", "fair", "poor"]);
-export type CaptureQuality = z.infer<typeof captureQualitySchema>;
-
-// =============================================================================
-// 研究域 - sis_history
-// =============================================================================
-
-/** sis_history.status：2次→computed；1次→degraded；0次→skipped */
-export const sisStatusSchema = z.enum(["computed", "degraded", "skipped"]);
-export type SisStatus = z.infer<typeof sisStatusSchema>;
-
-// =============================================================================
-// 研究域 - intervention_log（红线 §0.3.3）
-// =============================================================================
-
-/**
- * intervention_log.category 与 cohort_insight.intervention_category 共用此 schema
- * 11 类：retinoid / moisturizer / sunscreen / serum_vitamin_c / serum_niacinamide /
- *       serum_peptide / eye_cream / exfoliant / supplement / procedure / other
- */
-export const interventionCategorySchema = z.enum([
-  "retinoid",
-  "moisturizer",
-  "sunscreen",
-  "serum_vitamin_c",
-  "serum_niacinamide",
-  "serum_peptide",
-  "eye_cream",
-  "exfoliant",
-  "supplement",
-  "procedure",
-  "other",
-]);
-export type InterventionCategory = z.infer<typeof interventionCategorySchema>;
 
 // =============================================================================
 // Wearable 域
@@ -178,129 +73,216 @@ export type ConnectionStatus = z.infer<typeof connectionStatusSchema>;
 export const dataQualitySchema = z.enum(["complete", "partial", "missing"]);
 export type DataQuality = z.infer<typeof dataQualitySchema>;
 
-/** glucose_stream.trend_arrow：Dexcom 对齐 7 级不可合并（↑↑ 是 AGE 风险关键信号） */
-export const glucoseTrendSchema = z.enum([
-  "double_up",
-  "single_up",
-  "forty_five_up",
-  "flat",
-  "forty_five_down",
-  "single_down",
-  "double_down",
-]);
-export type GlucoseTrend = z.infer<typeof glucoseTrendSchema>;
-
-// =============================================================================
-// 健康旅程域
-// =============================================================================
-
-/** health_journey.{sleep_baseline_trend, hrv_baseline_trend, sis_trajectory} */
+/** 通用趋势：health_journey 基线趋势 / skin_archive.trend（P3）共用 */
 export const trendSchema = z.enum(["improving", "stable", "declining"]);
 export type Trend = z.infer<typeof trendSchema>;
 
-/** health_milestone.milestone_type
- * TODO(task-?): §27-4 待 Brenner 定周数，sustained_?wk 占位值需替换 */
-export const milestoneTypeSchema = z.enum([
-  "first_positive_sis",
-  "sustained_?wk",
-  "clinic_elastometry_validated",
-  "best_sis_ever",
-  "sleep_improved",
-  "lifestyle_correlated",
-]);
-export type MilestoneType = z.infer<typeof milestoneTypeSchema>;
-
-/** lifestyle_log.change_type：8 类 */
-export const changeTypeSchema = z.enum([
-  "sleep_habit",
-  "diet",
-  "exercise",
-  "stress_mgmt",
-  "alcohol",
-  "skincare_routine",
-  "supplement",
-  "medication",
-]);
-export type ChangeType = z.infer<typeof changeTypeSchema>;
-
-/** insight_feed.insight_type：5 类 */
-export const insightTypeSchema = z.enum([
-  "skin_sleep_correlation",
-  "sis_drop_explained",
-  "lifestyle_skin_link",
-  "milestone_approaching",
-  "cohort_recommendation",
-]);
-export type InsightType = z.infer<typeof insightTypeSchema>;
-
 // =============================================================================
-// 知识/Loop 域
-// =============================================================================
-
-/** expert_source.expert_name */
-export const expertNameSchema = z.enum([
-  "brenner",
-  "gunter",
-  "skin_specialist",
-]);
-export type ExpertName = z.infer<typeof expertNameSchema>;
-
-/** expert_source.content_type */
-export const contentTypeSchema = z.enum([
-  "paper",
-  "protocol",
-  "guideline",
-  "annotation",
-]);
-export type ContentType = z.infer<typeof contentTypeSchema>;
-
-/** expert_source.domain */
-export const expertDomainSchema = z.enum([
-  "hormone_skin",
-  "barrier_function",
-  "glycation",
-  "photoaging",
-  "elasticity",
-  "formulation",
-]);
-export type ExpertDomain = z.infer<typeof expertDomainSchema>;
-
-/** expert_source.verdict：仅 content_type=annotation，EvaluateMyStack 四色 */
-export const verdictSchema = z.enum(["keep", "stop", "review", "caution"]);
-export type Verdict = z.infer<typeof verdictSchema>;
-
-/** cohort_insight.confidence_level */
-export const confidenceLevelSchema = z.enum(["high", "medium", "low"]);
-export type ConfidenceLevel = z.infer<typeof confidenceLevelSchema>;
-
-// =============================================================================
-// Loop 域 - sis_response_log
-// =============================================================================
-
-/** sis_response_log.action_taken：SIS 页 onLoad 即写 viewed（被动查看捕捉） */
-export const sisActionSchema = z.enum([
-  "viewed",
-  "changed_product",
-  "continued",
-  "paused",
-  "skipped",
-]);
-export type SisAction = z.infer<typeof sisActionSchema>;
-
-// =============================================================================
-// 占位枚举（待 §27 确认后收紧）
+// 占位枚举（基线仍用，待确认后收紧）
 // =============================================================================
 
 /**
- * user_baseline.skin_type / cohort_insight.skin_type
- * TODO: data-model-2.md 未列具体值，待 §27 确认后改为 z.enum([...])
+ * user_baseline.skin_type
+ * TODO: 未列具体值，待确认后改为 z.enum([...])
  */
 export const skinTypeSchema = z.string();
 export type SkinType = z.infer<typeof skinTypeSchema>;
 
 /**
- * user_baseline.fitzpatrick_scale / cohort_insight.fitzpatrick_scale
- * TODO: data-model-2.md 未列具体值，待 §27 确认后改为 z.enum(["I","II","III","IV","V","VI"])
+ * user_baseline.fitzpatrick_scale
+ * TODO: 未列具体值，待确认后改为 z.enum(["I","II","III","IV","V","VI"])
  */
 export const fitzpatrickScaleSchema = z.string();
 export type FitzpatrickScale = z.infer<typeof fitzpatrickScaleSchema>;
+
+// =============================================================================
+// 消费决策域（App types.ts 契约）
+// =============================================================================
+
+/** timeline_event.kind */
+export const timelineKindSchema = z.enum([
+  "note",
+  "treatment",
+  "photo",
+  "lab",
+  "decision",
+  "outcome",
+]);
+export type TimelineKind = z.infer<typeof timelineKindSchema>;
+
+/** signal.confidence — App ConfidenceLevel（注意连字符 not-assessable） */
+export const signalConfidenceSchema = z.enum([
+  "observed",
+  "possible",
+  "not-assessable",
+]);
+export type SignalConfidence = z.infer<typeof signalConfidenceSchema>;
+
+/** signal.trend — App Signal.trend */
+export const signalTrendSchema = z.enum(["up", "down", "flat"]);
+export type SignalTrend = z.infer<typeof signalTrendSchema>;
+
+/** decision.status — App Decision.status（注意连字符 in-progress） */
+export const decisionStatusSchema = z.enum([
+  "considering",
+  "in-progress",
+  "decided",
+  "paused",
+]);
+export type DecisionStatus = z.infer<typeof decisionStatusSchema>;
+
+/** decision.type — 预设决策类型 chips（可空） */
+export const decisionTypeSchema = z.enum([
+  "thermage",
+  "ultherapy",
+  "botox",
+  "laser",
+  "filler",
+  "hrt",
+  "skincare",
+  "clinic",
+  "not_sure",
+]);
+export type DecisionType = z.infer<typeof decisionTypeSchema>;
+
+/** research_study.recruitment_status */
+export const studyRecruitmentStatusSchema = z.enum([
+  "recruiting",
+  "closed",
+  "completed",
+]);
+export type StudyRecruitmentStatus = z.infer<
+  typeof studyRecruitmentStatusSchema
+>;
+
+/** study_enrollment.status — App Study.status */
+export const studyEnrollmentStatusSchema = z.enum([
+  "enrolled",
+  "invited",
+  "completed",
+]);
+export type StudyEnrollmentStatus = z.infer<
+  typeof studyEnrollmentStatusSchema
+>;
+
+/** consent_setting.key — 三档隐私开关 */
+export const consentKeySchema = z.enum([
+  "self",
+  "deidentified_contribution",
+  "identified_research",
+]);
+export type ConsentKey = z.infer<typeof consentKeySchema>;
+
+/** body_insight.kind */
+export const bodyInsightKindSchema = z.enum([
+  "attention",
+  "aging_velocity",
+  "pattern",
+  "change",
+]);
+export type BodyInsightKind = z.infer<typeof bodyInsightKindSchema>;
+
+/** body_insight.accent（attention 卡）— App attention.accent */
+export const insightAccentSchema = z.enum(["red", "amber", "purple"]);
+export type InsightAccent = z.infer<typeof insightAccentSchema>;
+
+/** body_insight.tone（aging）— App AgingMetric.tone */
+export const insightToneSchema = z.enum(["green", "amber", "purple"]);
+export type InsightTone = z.infer<typeof insightToneSchema>;
+
+/** experiment.status — App Experiment.status */
+export const experimentStatusSchema = z.enum(["running", "planned", "done"]);
+export type ExperimentStatus = z.infer<typeof experimentStatusSchema>;
+
+/** health_record.kind */
+export const healthRecordKindSchema = z.enum([
+  "lab",
+  "imaging",
+  "checkup",
+  "vitals",
+]);
+export type HealthRecordKind = z.infer<typeof healthRecordKindSchema>;
+
+/** health_record.ocr_status */
+export const ocrStatusSchema = z.enum([
+  "pending",
+  "processing",
+  "done",
+  "manual",
+]);
+export type OcrStatus = z.infer<typeof ocrStatusSchema>;
+
+/** subscription.status */
+export const subscriptionStatusSchema = z.enum([
+  "active",
+  "canceled",
+  "past_due",
+  "trialing",
+]);
+export type SubscriptionStatus = z.infer<typeof subscriptionStatusSchema>;
+
+// =============================================================================
+// P2 / P3（B 端）— schema only 本轮，枚举先建齐供后续 repo 用
+// =============================================================================
+
+/** journey.source_type */
+export const journeySourceTypeSchema = z.enum([
+  "founder_interview",
+  "verified_member",
+  "partner_clinic",
+  "research_study",
+]);
+export type JourneySourceType = z.infer<typeof journeySourceTypeSchema>;
+
+/** follow_up_task.status */
+export const followUpStatusSchema = z.enum(["open", "done", "dismissed"]);
+export type FollowUpStatus = z.infer<typeof followUpStatusSchema>;
+
+/** clinic.plan_tier */
+export const clinicPlanTierSchema = z.enum(["basic", "full"]);
+export type ClinicPlanTier = z.infer<typeof clinicPlanTierSchema>;
+
+/** authorization.status */
+export const authorizationStatusSchema = z.enum(["active", "revoked"]);
+export type AuthorizationStatus = z.infer<typeof authorizationStatusSchema>;
+
+/** authorization_audit.action */
+export const authorizationActionSchema = z.enum([
+  "granted",
+  "revoked",
+  "scope_changed",
+  "accessed",
+]);
+export type AuthorizationAction = z.infer<typeof authorizationActionSchema>;
+
+/** appointment.status */
+export const appointmentStatusSchema = z.enum([
+  "scheduled",
+  "done",
+  "report_review",
+  "consultation",
+  "canceled",
+]);
+export type AppointmentStatus = z.infer<typeof appointmentStatusSchema>;
+
+/** clinic_report.status（Review Queue 状态机） */
+export const reviewStatusSchema = z.enum([
+  "ai_drafted",
+  "in_review",
+  "approved",
+  "sent",
+]);
+export type ReviewStatus = z.infer<typeof reviewStatusSchema>;
+
+/** referral.status */
+export const referralStatusSchema = z.enum([
+  "pending",
+  "accepted",
+  "declined",
+  "completed",
+]);
+export type ReferralStatus = z.infer<typeof referralStatusSchema>;
+
+/** invoice.status */
+export const invoiceStatusSchema = z.enum(["draft", "sent", "paid", "void"]);
+export type InvoiceStatus = z.infer<typeof invoiceStatusSchema>;

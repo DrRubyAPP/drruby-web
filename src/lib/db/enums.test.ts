@@ -1,80 +1,56 @@
 import { describe, expect, it } from "vitest";
 import {
+  appointmentStatusSchema,
   authProviderSchema,
-  captureDeviceSchema,
-  captureQualitySchema,
-  captureWindowSchema,
-  changeTypeSchema,
-  confidenceLevelSchema,
+  authorizationActionSchema,
+  authorizationStatusSchema,
+  bodyInsightKindSchema,
+  clinicPlanTierSchema,
   connectionStatusSchema,
-  contentTypeSchema,
+  consentKeySchema,
   dataQualitySchema,
-  dermMagnificationSchema,
-  expertDomainSchema,
-  expertNameSchema,
-  faceSideSchema,
-  faceSideWithBothSchema,
+  decisionStatusSchema,
+  decisionTypeSchema,
+  experimentStatusSchema,
   fitzpatrickScaleSchema,
-  glucoseTrendSchema,
+  followUpStatusSchema,
+  healthRecordKindSchema,
   hormonalStatusSchema,
-  insightTypeSchema,
-  interventionCategorySchema,
-  lightingScoreSchema,
-  mcsLevelSchema,
-  milestoneTypeSchema,
-  sisActionSchema,
-  sisStatusSchema,
+  insightAccentSchema,
+  insightToneSchema,
+  invoiceStatusSchema,
+  journeySourceTypeSchema,
+  ocrStatusSchema,
+  referralStatusSchema,
+  reviewStatusSchema,
+  signalConfidenceSchema,
+  signalTrendSchema,
   skinTypeSchema,
-  studySessionStatusSchema,
+  studyEnrollmentStatusSchema,
+  studyRecruitmentStatusSchema,
+  subscriptionStatusSchema,
   subscriptionTierSchema,
+  timelineKindSchema,
   trendSchema,
   userRoleSchema,
   userStatusSchema,
-  verdictSchema,
-  washoutStatusSchema,
   wearableProviderSchema,
 } from "@/lib/db/enums";
 
-describe("enum schemas - 有效值通过", () => {
-  it("interventionCategorySchema 接受 11 类", () => {
-    for (const v of [
-      "retinoid",
-      "moisturizer",
-      "sunscreen",
-      "serum_vitamin_c",
-      "serum_niacinamide",
-      "serum_peptide",
-      "eye_cream",
-      "exfoliant",
-      "supplement",
-      "procedure",
-      "other",
-    ]) {
-      expect(interventionCategorySchema.parse(v)).toBe(v);
-    }
-  });
-
-  it("faceSideSchema = left/right", () => {
-    expect(faceSideSchema.parse("left")).toBe("left");
-    expect(faceSideSchema.parse("right")).toBe("right");
-  });
-
-  it("faceSideWithBothSchema = left/right/both（仅 intervention_log）", () => {
-    expect(faceSideWithBothSchema.parse("both")).toBe("both");
-  });
-
+describe("保留枚举 - 有效值通过", () => {
   it("authProviderSchema = email/google", () => {
     expect(authProviderSchema.parse("email")).toBe("email");
     expect(authProviderSchema.parse("google")).toBe("google");
   });
 
-  it("userRoleSchema = user/clinic", () => {
-    expect(userRoleSchema.parse("user")).toBe("user");
-    expect(userRoleSchema.parse("clinic")).toBe("clinic");
+  it("userRoleSchema = user/clinic/collaborator", () => {
+    for (const v of ["user", "clinic", "collaborator"]) {
+      expect(userRoleSchema.parse(v)).toBe(v);
+    }
   });
 
-  it("subscriptionTierSchema = free/paid/premium/vip", () => {
-    for (const v of ["free", "paid", "premium", "vip"]) {
+  it("subscriptionTierSchema = free/decision", () => {
+    for (const v of ["free", "decision"]) {
       expect(subscriptionTierSchema.parse(v)).toBe(v);
     }
   });
@@ -99,59 +75,6 @@ describe("enum schemas - 有效值通过", () => {
     }
   });
 
-  it("studySessionStatusSchema 接受 5 值", () => {
-    for (const v of [
-      "pending_first_capture",
-      "active",
-      "paused",
-      "completed",
-      "abandoned",
-    ]) {
-      expect(studySessionStatusSchema.parse(v)).toBe(v);
-    }
-  });
-
-  it("washoutStatusSchema = not_started/in_progress/completed", () => {
-    for (const v of ["not_started", "in_progress", "completed"]) {
-      expect(washoutStatusSchema.parse(v)).toBe(v);
-    }
-  });
-
-  it("captureWindowSchema = morning/midday/evening", () => {
-    for (const v of ["morning", "midday", "evening"]) {
-      expect(captureWindowSchema.parse(v)).toBe(v);
-    }
-  });
-
-  it("captureDeviceSchema = phone_front/phone_rear/dermoscope", () => {
-    for (const v of ["phone_front", "phone_rear", "dermoscope"]) {
-      expect(captureDeviceSchema.parse(v)).toBe(v);
-    }
-  });
-
-  it("mcsLevelSchema = High/Medium/Low", () => {
-    for (const v of ["High", "Medium", "Low"]) {
-      expect(mcsLevelSchema.parse(v)).toBe(v);
-    }
-  });
-
-  it("lightingScoreSchema = pass/fail", () => {
-    expect(lightingScoreSchema.parse("pass")).toBe("pass");
-    expect(lightingScoreSchema.parse("fail")).toBe("fail");
-  });
-
-  it("sisStatusSchema = computed/degraded/skipped", () => {
-    for (const v of ["computed", "degraded", "skipped"]) {
-      expect(sisStatusSchema.parse(v)).toBe(v);
-    }
-  });
-
-  it("dataQualitySchema = complete/partial/missing", () => {
-    for (const v of ["complete", "partial", "missing"]) {
-      expect(dataQualitySchema.parse(v)).toBe(v);
-    }
-  });
-
   it("wearableProviderSchema 接受 7 值", () => {
     for (const v of [
       "apple_healthkit",
@@ -171,124 +94,15 @@ describe("enum schemas - 有效值通过", () => {
     expect(connectionStatusSchema.parse("revoked")).toBe("revoked");
   });
 
+  it("dataQualitySchema = complete/partial/missing", () => {
+    for (const v of ["complete", "partial", "missing"]) {
+      expect(dataQualitySchema.parse(v)).toBe(v);
+    }
+  });
+
   it("trendSchema = improving/stable/declining", () => {
     for (const v of ["improving", "stable", "declining"]) {
       expect(trendSchema.parse(v)).toBe(v);
-    }
-  });
-
-  it("confidenceLevelSchema = high/medium/low", () => {
-    for (const v of ["high", "medium", "low"]) {
-      expect(confidenceLevelSchema.parse(v)).toBe(v);
-    }
-  });
-
-  it("insightTypeSchema 接受 5 值", () => {
-    for (const v of [
-      "skin_sleep_correlation",
-      "sis_drop_explained",
-      "lifestyle_skin_link",
-      "milestone_approaching",
-      "cohort_recommendation",
-    ]) {
-      expect(insightTypeSchema.parse(v)).toBe(v);
-    }
-  });
-
-  it("milestoneTypeSchema 接受 6 值", () => {
-    for (const v of [
-      "first_positive_sis",
-      "sustained_?wk",
-      "clinic_elastometry_validated",
-      "best_sis_ever",
-      "sleep_improved",
-      "lifestyle_correlated",
-    ]) {
-      expect(milestoneTypeSchema.parse(v)).toBe(v);
-    }
-  });
-
-  it("changeTypeSchema 接受 8 值", () => {
-    for (const v of [
-      "sleep_habit",
-      "diet",
-      "exercise",
-      "stress_mgmt",
-      "alcohol",
-      "skincare_routine",
-      "supplement",
-      "medication",
-    ]) {
-      expect(changeTypeSchema.parse(v)).toBe(v);
-    }
-  });
-
-  it("sisActionSchema = viewed/changed_product/continued/paused/skipped", () => {
-    for (const v of [
-      "viewed",
-      "changed_product",
-      "continued",
-      "paused",
-      "skipped",
-    ]) {
-      expect(sisActionSchema.parse(v)).toBe(v);
-    }
-  });
-
-  it("expertNameSchema = brenner/gunter/skin_specialist", () => {
-    for (const v of ["brenner", "gunter", "skin_specialist"]) {
-      expect(expertNameSchema.parse(v)).toBe(v);
-    }
-  });
-
-  it("contentTypeSchema = paper/protocol/guideline/annotation", () => {
-    for (const v of ["paper", "protocol", "guideline", "annotation"]) {
-      expect(contentTypeSchema.parse(v)).toBe(v);
-    }
-  });
-
-  it("expertDomainSchema 接受 6 值", () => {
-    for (const v of [
-      "hormone_skin",
-      "barrier_function",
-      "glycation",
-      "photoaging",
-      "elasticity",
-      "formulation",
-    ]) {
-      expect(expertDomainSchema.parse(v)).toBe(v);
-    }
-  });
-
-  it("verdictSchema = keep/stop/review/caution", () => {
-    for (const v of ["keep", "stop", "review", "caution"]) {
-      expect(verdictSchema.parse(v)).toBe(v);
-    }
-  });
-
-  it("glucoseTrendSchema 接受 7 值（Dexcom 对齐）", () => {
-    for (const v of [
-      "double_up",
-      "single_up",
-      "forty_five_up",
-      "flat",
-      "forty_five_down",
-      "single_down",
-      "double_down",
-    ]) {
-      expect(glucoseTrendSchema.parse(v)).toBe(v);
-    }
-  });
-
-  it("dermMagnificationSchema = 10x/20x/50x", () => {
-    for (const v of ["10x", "20x", "50x"]) {
-      expect(dermMagnificationSchema.parse(v)).toBe(v);
-    }
-  });
-
-  it("captureQualitySchema = good/fair/poor", () => {
-    for (const v of ["good", "fair", "poor"]) {
-      expect(captureQualitySchema.parse(v)).toBe(v);
     }
   });
 
@@ -298,80 +112,263 @@ describe("enum schemas - 有效值通过", () => {
   });
 });
 
+describe("消费决策域枚举 - 有效值通过", () => {
+  it("timelineKindSchema 接受 6 值", () => {
+    for (const v of [
+      "note",
+      "treatment",
+      "photo",
+      "lab",
+      "decision",
+      "outcome",
+    ]) {
+      expect(timelineKindSchema.parse(v)).toBe(v);
+    }
+  });
+
+  it("signalConfidence 含连字符 not-assessable", () => {
+    expect(signalConfidenceSchema.parse("not-assessable")).toBe(
+      "not-assessable",
+    );
+    expect(signalConfidenceSchema.parse("observed")).toBe("observed");
+    expect(() => signalConfidenceSchema.parse("unknown")).toThrow();
+  });
+
+  it("signalTrendSchema = up/down/flat", () => {
+    for (const v of ["up", "down", "flat"]) {
+      expect(signalTrendSchema.parse(v)).toBe(v);
+    }
+  });
+
+  it("decisionStatus 含连字符 in-progress", () => {
+    expect(decisionStatusSchema.parse("in-progress")).toBe("in-progress");
+    expect(() => decisionStatusSchema.parse("in_progress")).toThrow();
+  });
+
+  it("decisionTypeSchema 接受 9 类", () => {
+    for (const v of [
+      "thermage",
+      "ultherapy",
+      "botox",
+      "laser",
+      "filler",
+      "hrt",
+      "skincare",
+      "clinic",
+      "not_sure",
+    ]) {
+      expect(decisionTypeSchema.parse(v)).toBe(v);
+    }
+  });
+
+  it("studyRecruitmentStatusSchema = recruiting/closed/completed", () => {
+    for (const v of ["recruiting", "closed", "completed"]) {
+      expect(studyRecruitmentStatusSchema.parse(v)).toBe(v);
+    }
+  });
+
+  it("studyEnrollmentStatusSchema = enrolled/invited/completed", () => {
+    for (const v of ["enrolled", "invited", "completed"]) {
+      expect(studyEnrollmentStatusSchema.parse(v)).toBe(v);
+    }
+  });
+
+  it("consentKey 三档", () => {
+    for (const v of [
+      "self",
+      "deidentified_contribution",
+      "identified_research",
+    ]) {
+      expect(consentKeySchema.parse(v)).toBe(v);
+    }
+    expect(() => consentKeySchema.parse("public")).toThrow();
+  });
+
+  it("bodyInsightKindSchema 接受 4 值", () => {
+    for (const v of ["attention", "aging_velocity", "pattern", "change"]) {
+      expect(bodyInsightKindSchema.parse(v)).toBe(v);
+    }
+  });
+
+  it("insightAccentSchema = red/amber/purple", () => {
+    for (const v of ["red", "amber", "purple"]) {
+      expect(insightAccentSchema.parse(v)).toBe(v);
+    }
+  });
+
+  it("insightToneSchema = green/amber/purple", () => {
+    for (const v of ["green", "amber", "purple"]) {
+      expect(insightToneSchema.parse(v)).toBe(v);
+    }
+  });
+
+  it("experimentStatusSchema = running/planned/done", () => {
+    for (const v of ["running", "planned", "done"]) {
+      expect(experimentStatusSchema.parse(v)).toBe(v);
+    }
+  });
+
+  it("healthRecordKindSchema = lab/imaging/checkup/vitals", () => {
+    for (const v of ["lab", "imaging", "checkup", "vitals"]) {
+      expect(healthRecordKindSchema.parse(v)).toBe(v);
+    }
+  });
+
+  it("ocrStatusSchema = pending/processing/done/manual", () => {
+    for (const v of ["pending", "processing", "done", "manual"]) {
+      expect(ocrStatusSchema.parse(v)).toBe(v);
+    }
+  });
+
+  it("subscriptionStatusSchema = active/canceled/past_due/trialing", () => {
+    for (const v of ["active", "canceled", "past_due", "trialing"]) {
+      expect(subscriptionStatusSchema.parse(v)).toBe(v);
+    }
+  });
+});
+
+describe("P2 / P3（B 端）枚举 - 有效值通过", () => {
+  it("journeySourceTypeSchema 接受 4 值", () => {
+    for (const v of [
+      "founder_interview",
+      "verified_member",
+      "partner_clinic",
+      "research_study",
+    ]) {
+      expect(journeySourceTypeSchema.parse(v)).toBe(v);
+    }
+  });
+
+  it("followUpStatusSchema = open/done/dismissed", () => {
+    for (const v of ["open", "done", "dismissed"]) {
+      expect(followUpStatusSchema.parse(v)).toBe(v);
+    }
+  });
+
+  it("clinicPlanTierSchema = basic/full", () => {
+    for (const v of ["basic", "full"]) {
+      expect(clinicPlanTierSchema.parse(v)).toBe(v);
+    }
+  });
+
+  it("authorizationStatusSchema = active/revoked", () => {
+    for (const v of ["active", "revoked"]) {
+      expect(authorizationStatusSchema.parse(v)).toBe(v);
+    }
+  });
+
+  it("authorizationActionSchema 接受 4 值", () => {
+    for (const v of ["granted", "revoked", "scope_changed", "accessed"]) {
+      expect(authorizationActionSchema.parse(v)).toBe(v);
+    }
+  });
+
+  it("appointmentStatusSchema 接受 5 值", () => {
+    for (const v of [
+      "scheduled",
+      "done",
+      "report_review",
+      "consultation",
+      "canceled",
+    ]) {
+      expect(appointmentStatusSchema.parse(v)).toBe(v);
+    }
+  });
+
+  it("reviewStatusSchema = ai_drafted/in_review/approved/sent", () => {
+    for (const v of ["ai_drafted", "in_review", "approved", "sent"]) {
+      expect(reviewStatusSchema.parse(v)).toBe(v);
+    }
+  });
+
+  it("referralStatusSchema 接受 4 值", () => {
+    for (const v of ["pending", "accepted", "declined", "completed"]) {
+      expect(referralStatusSchema.parse(v)).toBe(v);
+    }
+  });
+
+  it("invoiceStatusSchema = draft/sent/paid/void", () => {
+    for (const v of ["draft", "sent", "paid", "void"]) {
+      expect(invoiceStatusSchema.parse(v)).toBe(v);
+    }
+  });
+});
+
 describe("enum schemas - 无效值抛错", () => {
   const invalidCases: Array<[string, unknown, string]> = [
-    ["interventionCategorySchema", "unknown_cat", "category"],
-    ["faceSideSchema", "center", "face_side"],
-    ["faceSideWithBothSchema", "all", "face_side"],
     ["authProviderSchema", "apple", "auth_provider"],
     ["userRoleSchema", "admin", "role"],
-    ["subscriptionTierSchema", "ultimate", "tier"],
+    ["subscriptionTierSchema", "premium", "tier（研究档已裁）"],
     ["userStatusSchema", "banned", "status"],
     ["hormonalStatusSchema", "postmenopausal", "hormonal_status"],
-    ["studySessionStatusSchema", "running", "status"],
-    ["washoutStatusSchema", "done", "washout_status"],
-    ["captureWindowSchema", "night", "preferred_capture_window"],
-    ["captureDeviceSchema", "dslr", "capture_device"],
-    ["mcsLevelSchema", "high", "mcs_level（大小写敏感）"],
-    ["lightingScoreSchema", "ok", "lighting_score"],
-    ["sisStatusSchema", "failed", "sis status"],
-    ["dataQualitySchema", "bad", "data_quality"],
     ["wearableProviderSchema", "fitbit", "provider"],
     ["connectionStatusSchema", "expired", "status"],
+    ["dataQualitySchema", "bad", "data_quality"],
     ["trendSchema", "worsening", "trend"],
-    ["confidenceLevelSchema", "certain", "confidence"],
-    ["insightTypeSchema", "random_insight", "insight_type"],
-    [
-      "milestoneTypeSchema",
-      "sustained_5wk",
-      "milestone_type（占位值需待 §27-4 确认）",
-    ],
-    ["changeTypeSchema", "smoking", "change_type"],
-    ["sisActionSchema", "ignored", "action_taken"],
-    ["expertNameSchema", "smith", "expert_name"],
-    ["contentTypeSchema", "video", "content_type"],
-    ["expertDomainSchema", "acne", "domain"],
-    ["verdictSchema", "maybe", "verdict"],
-    ["glucoseTrendSchema", "slight_up", "trend_arrow"],
-    ["dermMagnificationSchema", "5x", "derm_magnification"],
-    ["captureQualitySchema", "excellent", "capture_quality"],
+    ["timelineKindSchema", "misc", "kind"],
+    ["signalConfidenceSchema", "unknown", "confidence"],
+    ["signalTrendSchema", "sideways", "trend"],
+    ["decisionStatusSchema", "in_progress", "status（连字符）"],
+    ["decisionTypeSchema", "surgery", "type"],
+    ["studyRecruitmentStatusSchema", "paused", "recruitment_status"],
+    ["studyEnrollmentStatusSchema", "withdrawn", "status"],
+    ["consentKeySchema", "public", "key"],
+    ["bodyInsightKindSchema", "trend", "kind"],
+    ["insightAccentSchema", "green", "accent"],
+    ["insightToneSchema", "red", "tone"],
+    ["experimentStatusSchema", "aborted", "status"],
+    ["healthRecordKindSchema", "note", "kind"],
+    ["ocrStatusSchema", "failed", "ocr_status"],
+    ["subscriptionStatusSchema", "expired", "status"],
+    ["journeySourceTypeSchema", "blog", "source_type"],
+    ["followUpStatusSchema", "closed", "status"],
+    ["clinicPlanTierSchema", "premium", "plan_tier"],
+    ["authorizationStatusSchema", "pending", "status"],
+    ["authorizationActionSchema", "viewed", "action"],
+    ["appointmentStatusSchema", "no_show", "status"],
+    ["reviewStatusSchema", "draft", "status"],
+    ["referralStatusSchema", "rejected", "status"],
+    ["invoiceStatusSchema", "overdue", "status"],
   ];
+
+  const schemaMap: Record<string, import("zod").ZodTypeAny> = {
+    authProviderSchema,
+    userRoleSchema,
+    subscriptionTierSchema,
+    userStatusSchema,
+    hormonalStatusSchema,
+    wearableProviderSchema,
+    connectionStatusSchema,
+    dataQualitySchema,
+    trendSchema,
+    timelineKindSchema,
+    signalConfidenceSchema,
+    signalTrendSchema,
+    decisionStatusSchema,
+    decisionTypeSchema,
+    studyRecruitmentStatusSchema,
+    studyEnrollmentStatusSchema,
+    consentKeySchema,
+    bodyInsightKindSchema,
+    insightAccentSchema,
+    insightToneSchema,
+    experimentStatusSchema,
+    healthRecordKindSchema,
+    ocrStatusSchema,
+    subscriptionStatusSchema,
+    journeySourceTypeSchema,
+    followUpStatusSchema,
+    clinicPlanTierSchema,
+    authorizationStatusSchema,
+    authorizationActionSchema,
+    appointmentStatusSchema,
+    reviewStatusSchema,
+    referralStatusSchema,
+    invoiceStatusSchema,
+  };
 
   for (const [schemaName, invalidValue, field] of invalidCases) {
     it(`${schemaName} 拒绝 ${JSON.stringify(invalidValue)}（${field}）`, () => {
-      const schemaMap: Record<string, import("zod").ZodTypeAny> = {
-        interventionCategorySchema,
-        faceSideSchema,
-        faceSideWithBothSchema,
-        authProviderSchema,
-        userRoleSchema,
-        subscriptionTierSchema,
-        userStatusSchema,
-        hormonalStatusSchema,
-        studySessionStatusSchema,
-        washoutStatusSchema,
-        captureWindowSchema,
-        captureDeviceSchema,
-        mcsLevelSchema,
-        lightingScoreSchema,
-        sisStatusSchema,
-        dataQualitySchema,
-        wearableProviderSchema,
-        connectionStatusSchema,
-        trendSchema,
-        confidenceLevelSchema,
-        insightTypeSchema,
-        milestoneTypeSchema,
-        changeTypeSchema,
-        sisActionSchema,
-        expertNameSchema,
-        contentTypeSchema,
-        expertDomainSchema,
-        verdictSchema,
-        glucoseTrendSchema,
-        dermMagnificationSchema,
-        captureQualitySchema,
-      };
       expect(() => schemaMap[schemaName].parse(invalidValue)).toThrow();
     });
   }
