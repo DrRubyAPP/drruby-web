@@ -62,6 +62,18 @@ export const auth = betterAuth({
       },
     },
   },
+  // OTP 按 IP 限流（默认仅生产开启，这里显式打开使各环境语义一致）。命中返回
+  // 429（better-auth 内建）。键名对齐 emailOTP 插件真实 endpoint：
+  //   发码 /email-otp/send-verification-otp → 3 次 / 分
+  //   校验登录 /sign-in/email-otp        → 10 次 / 分
+  rateLimit: {
+    enabled: true,
+    window: 60,
+    customRules: {
+      "/email-otp/send-verification-otp": { window: 60, max: 3 },
+      "/sign-in/email-otp": { window: 60, max: 10 },
+    },
+  },
   account: {
     accountLinking: { enabled: true, trustedProviders: ["google"] },
   },
