@@ -53,6 +53,31 @@
           "$ref": "#/components/schemas/AgingMetricDTO"
         }
       },
+      "AppendEntryBody": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "description": "条目文本"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/decisionStatusSchema"
+              }
+            ],
+            "description": "当时决策状态快照（缺省沿用决策当前状态）"
+          },
+          "occurredAt": {
+            "type": "string",
+            "description": "发生时间 ISO（缺省 now）"
+          }
+        },
+        "required": [
+          "text"
+        ]
+      },
       "appointmentStatusSchema": {
         "type": "string",
         "enum": [
@@ -218,6 +243,110 @@
           "$ref": "#/components/schemas/ContributionDTO"
         }
       },
+      "CreateDecisionBody": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "minLength": 1,
+            "description": "决策问题"
+          },
+          "status": {
+            "$ref": "#/components/schemas/decisionStatusSchema"
+          },
+          "type": {
+            "type": "object",
+            "description": "预设决策类型（可空）"
+          }
+        },
+        "required": [
+          "question",
+          "status"
+        ]
+      },
+      "CreateExperimentBody": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "hypothesis": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "$ref": "#/components/schemas/experimentStatusSchema"
+          },
+          "window": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "title",
+          "hypothesis",
+          "status",
+          "window"
+        ]
+      },
+      "CreateHealthRecordBody": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/healthRecordKindSchema"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source": {
+            "type": "string"
+          },
+          "objectKey": {
+            "type": "string"
+          },
+          "recordedAt": {
+            "type": "string",
+            "description": "记录时间 ISO"
+          }
+        },
+        "required": [
+          "kind",
+          "title",
+          "recordedAt"
+        ]
+      },
+      "CreateTimelineBody": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/timelineKindSchema"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "detail": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "occurredAt": {
+            "type": "string",
+            "description": "发生时间 ISO（缺省 now）"
+          },
+          "decisionId": {
+            "type": "string",
+            "description": "关联决策（须属当前用户）"
+          }
+        },
+        "required": [
+          "kind",
+          "title"
+        ]
+      },
       "dataQualitySchema": {
         "type": "string",
         "enum": [
@@ -375,6 +504,9 @@
           "occurredAt"
         ]
       },
+      "DecisionItemResponse": {
+        "$ref": "#/components/schemas/DecisionDTO"
+      },
       "DecisionListResponse": {
         "type": "array",
         "items": {
@@ -406,6 +538,64 @@
           "clinic",
           "not_sure"
         ]
+      },
+      "DeleteMeResponse": {
+        "type": "object",
+        "properties": {
+          "deleted": {
+            "type": "boolean",
+            "enum": [
+              true
+            ]
+          }
+        },
+        "required": [
+          "deleted"
+        ]
+      },
+      "EnrollBody": {
+        "type": "object",
+        "properties": {
+          "arm": {
+            "type": "string",
+            "description": "分组臂（可选）"
+          },
+          "consentGiven": {
+            "type": "boolean",
+            "enum": [
+              true
+            ],
+            "description": "逐项知情同意，必须为 true"
+          }
+        },
+        "required": [
+          "consentGiven"
+        ]
+      },
+      "EnrollmentResponse": {
+        "type": "object",
+        "properties": {
+          "studyId": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/studyEnrollmentStatusSchema"
+          },
+          "arm": {
+            "type": "string"
+          },
+          "consentGiven": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "studyId",
+          "status",
+          "consentGiven"
+        ]
+      },
+      "EntryResponse": {
+        "$ref": "#/components/schemas/DecisionEntryDTO"
       },
       "ExperimentDTO": {
         "type": "object",
@@ -459,6 +649,40 @@
           "dismissed"
         ]
       },
+      "HealthRecordDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/healthRecordKindSchema"
+          },
+          "title": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "objectKey": {
+            "type": "string"
+          },
+          "ocrStatus": {
+            "$ref": "#/components/schemas/ocrStatusSchema"
+          },
+          "recordedAt": {
+            "type": "string",
+            "description": "记录时间 ISO（← recordedAt）"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "title",
+          "ocrStatus",
+          "recordedAt"
+        ]
+      },
       "healthRecordKindSchema": {
         "type": "string",
         "enum": [
@@ -467,6 +691,12 @@
           "checkup",
           "vitals"
         ]
+      },
+      "HealthRecordListResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/HealthRecordDTO"
+        }
       },
       "HealthResponse": {
         "type": "object",
@@ -911,6 +1141,59 @@
           "declining"
         ]
       },
+      "UpdateConsentBody": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "boolean",
+            "description": "目标开关值"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      },
+      "UpdateContributionBody": {
+        "type": "object",
+        "properties": {
+          "shared": {
+            "type": "boolean",
+            "description": "是否共享该数据贡献（可随时撤回）"
+          }
+        },
+        "required": [
+          "shared"
+        ]
+      },
+      "UpdateDecisionBody": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "object"
+          },
+          "question": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "$ref": "#/components/schemas/decisionTypeSchema",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateMeBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "显示名"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
       "userRoleSchema": {
         "type": "string",
         "enum": [
@@ -937,6 +1220,25 @@
           "whoop",
           "ultrahuman",
           "health_connect"
+        ]
+      },
+      "WithdrawResponse": {
+        "type": "object",
+        "properties": {
+          "studyId": {
+            "type": "string"
+          },
+          "withdrawn": {
+            "type": "boolean"
+          },
+          "consentGiven": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "studyId",
+          "withdrawn",
+          "consentGiven"
         ]
       }
     },
@@ -1104,6 +1406,66 @@
         }
       }
     },
+    "/consent/{id}": {
+      "patch": {
+        "operationId": "patch-consent-{id}",
+        "summary": "Toggle consent setting",
+        "description": "切换某档隐私开关。`self`（locked）档永久开启，尝试关闭 → 409。越权按 404",
+        "tags": [
+          "Consent"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateConsentBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentSettingDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
     "/contributions": {
       "get": {
         "operationId": "get-contributions",
@@ -1144,6 +1506,66 @@
         }
       }
     },
+    "/contributions/{id}": {
+      "patch": {
+        "operationId": "patch-contributions-{id}",
+        "summary": "Toggle data contribution sharing",
+        "description": "切换某条数据贡献的共享状态（opt-in，可撤回）。越权按 404",
+        "tags": [
+          "Contributions"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateContributionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContributionDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
     "/decisions": {
       "get": {
         "operationId": "get-decisions",
@@ -1165,6 +1587,53 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/DecisionListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post-decisions",
+        "summary": "Create decision",
+        "description": "新建一个决策（归属当前用户）",
+        "tags": [
+          "Decisions"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDecisionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionItemResponse"
                 }
               }
             }
@@ -1233,6 +1702,124 @@
             "$ref": "#/components/responses/500"
           }
         }
+      },
+      "patch": {
+        "operationId": "patch-decisions-{id}",
+        "summary": "Update decision",
+        "description": "推进决策状态（可选改 question/type）；decided 时自动记 decidedAt。越权按 404 处理",
+        "tags": [
+          "Decisions"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDecisionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionItemResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/decisions/{id}/entries": {
+      "post": {
+        "operationId": "post-decisions-{id}-entries",
+        "summary": "Append decision entry",
+        "description": "向决策追加一条 append-only 时间线条目（不可编辑/删除）。越权按 404 处理",
+        "tags": [
+          "Decisions"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppendEntryBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
       }
     },
     "/experiments": {
@@ -1256,6 +1843,53 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ExperimentListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post-experiments",
+        "summary": "Create experiment",
+        "description": "为当前用户创建一个 N-of-1 实验",
+        "tags": [
+          "Experiments"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateExperimentBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExperimentDTO"
                 }
               }
             }
@@ -1297,6 +1931,93 @@
           },
           "400": {
             "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/health/reports": {
+      "get": {
+        "operationId": "get-health-reports",
+        "summary": "List health reports",
+        "description": "当前用户的健康报告（化验/影像/体检/生命体征，最新在前）",
+        "tags": [
+          "Health"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthRecordListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post-health-reports",
+        "summary": "Create health report",
+        "description": "人工录入一条健康报告（ocrStatus=manual）。非法 kind → 400",
+        "tags": [
+          "Health"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateHealthRecordBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthRecordDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
           },
           "500": {
             "$ref": "#/components/responses/500"
@@ -1500,6 +2221,121 @@
             "$ref": "#/components/responses/500"
           }
         }
+      },
+      "patch": {
+        "operationId": "patch-me",
+        "summary": "Update current user",
+        "description": "更新当前用户 profile（本轮仅 name）",
+        "tags": [
+          "Me"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMeBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete-me",
+        "summary": "Delete current user",
+        "description": "软删脱敏当前账号（不可逆）：置 deleted + 脱敏 email/name + 失效 session；不物理删",
+        "tags": [
+          "Me"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteMeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/me/export": {
+      "get": {
+        "operationId": "get-me-export",
+        "summary": "Export current user's data",
+        "description": "聚合当前用户全部关联数据为单个 JSON 导出（数据自主权：可携带/可审阅）。仅导出本人数据",
+        "tags": [
+          "Me"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
       }
     },
     "/signals": {
@@ -1622,6 +2458,117 @@
         }
       }
     },
+    "/studies/{id}/enroll": {
+      "post": {
+        "operationId": "post-studies-{id}-enroll",
+        "summary": "Enroll into study",
+        "description": "入组某研究（逐项知情同意，consentGiven 必 true）。(studyId,userId) 唯一 → 重复入组幂等",
+        "tags": [
+          "Studies"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnrollBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnrollmentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/studies/{id}/withdraw": {
+      "post": {
+        "operationId": "post-studies-{id}-withdraw",
+        "summary": "Withdraw from study",
+        "description": "退出某研究（保留记录，标记 withdrawnAt + 收回同意）。未入组 → 404",
+        "tags": [
+          "Studies"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WithdrawResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
     "/timeline": {
       "get": {
         "operationId": "get-timeline",
@@ -1643,6 +2590,53 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/TimelineListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post-timeline",
+        "summary": "Create timeline event",
+        "description": "向当前用户的身体时间线追加一条事件（可选关联决策）",
+        "tags": [
+          "Timeline"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTimelineBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimelineEventDTO"
                 }
               }
             }

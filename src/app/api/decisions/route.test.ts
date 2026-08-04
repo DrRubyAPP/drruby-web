@@ -19,7 +19,9 @@ describe("POST /api/decisions", () => {
   it("未登录 → 401", async () => {
     const { POST } = await import("./route");
     asAnonymous();
-    const res = await POST(jsonRequest({ question: "q", status: "considering" }));
+    const res = await POST(
+      jsonRequest({ question: "q", status: "considering" }),
+    );
     expect(res.status).toBe(401);
   });
 

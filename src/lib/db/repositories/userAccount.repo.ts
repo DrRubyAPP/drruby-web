@@ -1,4 +1,3 @@
-import type { UserAccount } from "~prisma/client";
 import {
   type AuthProvider,
   authProviderSchema,
@@ -10,6 +9,7 @@ import {
   userStatusSchema,
 } from "@/lib/db/enums";
 import { prisma } from "@/lib/db/prisma";
+import type { UserAccount } from "~prisma/client";
 
 export interface CreateUserAccountInput {
   email: string;

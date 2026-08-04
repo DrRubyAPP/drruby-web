@@ -28,9 +28,7 @@ describe("账号自主权 /api/me", () => {
     const { PATCH } = await import("./route");
     const user = await makeUser("me-patch@example.com");
     asUser(user.id);
-    const res = await PATCH(
-      jsonRequest({ name: "Ruby" }, { method: "PATCH" }),
-    );
+    const res = await PATCH(jsonRequest({ name: "Ruby" }, { method: "PATCH" }));
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.name).toBe("Ruby");

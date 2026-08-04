@@ -18,7 +18,9 @@ describe("PATCH /api/consent/[id]", () => {
 
   it("关闭 self（locked）档 → 409 且库未变", async () => {
     const { PATCH } = await import("./route");
-    const consentRepo = await import("@/lib/db/repositories/consentSetting.repo");
+    const consentRepo = await import(
+      "@/lib/db/repositories/consentSetting.repo"
+    );
     const user = await makeUser("consent-self@example.com");
     const setting = await consentRepo.upsert(user.id, {
       key: "self",
@@ -41,7 +43,9 @@ describe("PATCH /api/consent/[id]", () => {
 
   it("切换可变档 → 成功", async () => {
     const { PATCH } = await import("./route");
-    const consentRepo = await import("@/lib/db/repositories/consentSetting.repo");
+    const consentRepo = await import(
+      "@/lib/db/repositories/consentSetting.repo"
+    );
     const user = await makeUser("consent-var@example.com");
     const setting = await consentRepo.upsert(user.id, {
       key: "deidentified_contribution",
@@ -62,7 +66,9 @@ describe("PATCH /api/consent/[id]", () => {
 
   it("越权切他人设置 → 404", async () => {
     const { PATCH } = await import("./route");
-    const consentRepo = await import("@/lib/db/repositories/consentSetting.repo");
+    const consentRepo = await import(
+      "@/lib/db/repositories/consentSetting.repo"
+    );
     const owner = await makeUser("consent-owner@example.com");
     const intruder = await makeUser("consent-intruder@example.com");
     const setting = await consentRepo.upsert(owner.id, {
