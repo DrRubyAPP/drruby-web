@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { ZodError } from "zod";
 import { logger } from "./logger";
 
 /**
@@ -40,6 +41,20 @@ export function handle<Args extends unknown[]>(
         return NextResponse.json(
           { error: { code: e.code, message: e.message } },
           { status: e.status },
+        );
+      }
+      // 入参校验失败（route 内 `*Body.parse()`）→ 统一 400，携带字段级 issues
+      if (e instanceof ZodError) {
+        logger.warn({ err: e }, "Validation error");
+        return NextResponse.json(
+          {
+            error: {
+              code: "validation_error",
+              message: "请求参数不合法",
+              issues: e.issues,
+            },
+          },
+          { status: 400 },
         );
       }
       logger.error({ err: e }, "Unhandled error");
