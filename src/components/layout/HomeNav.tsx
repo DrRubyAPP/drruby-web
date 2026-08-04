@@ -73,6 +73,9 @@ export default async function HomeNav({
           {appControls && user && role === "clinic" && (
             <a href="/clinic">Clinic</a>
           )}
+          {appControls && user && role === "collaborator" && (
+            <a href="/collaborate/workspace">Workspace</a>
+          )}
         </div>
         <div className="actions">
           {appControls && <LocaleSwitcher />}

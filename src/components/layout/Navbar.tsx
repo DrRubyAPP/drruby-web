@@ -58,6 +58,14 @@ export default async function Navbar() {
             {t("clinic")}
           </Link>
         )}
+        {user && role === "collaborator" && (
+          <Link
+            href="/collaborate/workspace"
+            className="text-[14px] font-normal tracking-[0.1em] text-dr-mid no-underline hover:text-dr-ink transition-colors"
+          >
+            {t("collaborate")}
+          </Link>
+        )}
       </div>
 
       <div className="flex items-center gap-3">

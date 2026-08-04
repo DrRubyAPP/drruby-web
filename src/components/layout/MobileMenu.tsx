@@ -12,7 +12,13 @@ import { homeHrefForRole } from "@/lib/auth/roles";
 
 interface NavLink {
   href: string;
-  key: "howItWorks" | "skin" | "healthspan" | "portal" | "clinic";
+  key:
+    | "howItWorks"
+    | "skin"
+    | "healthspan"
+    | "portal"
+    | "clinic"
+    | "collaborate";
 }
 
 // 始终可见的公开链接。
@@ -75,6 +81,9 @@ export default function MobileMenu({
   }
   if (isAuthed && role === "clinic") {
     links.push({ href: "/clinic", key: "clinic" });
+  }
+  if (isAuthed && role === "collaborator") {
+    links.push({ href: "/collaborate/workspace", key: "collaborate" });
   }
 
   return (

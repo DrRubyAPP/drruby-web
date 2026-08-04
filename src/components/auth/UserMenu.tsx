@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import UserAvatar from "@/components/auth/UserAvatar";
 import { Link } from "@/i18n/navigation";
 import { authClient } from "@/lib/auth/client";
-import { homeHrefForRole } from "@/lib/auth/roles";
+import { homeHrefForRole, homeNavKeyForRole } from "@/lib/auth/roles";
 
 interface UserMenuProps {
   role: string | null;
@@ -28,7 +28,7 @@ export default function UserMenu({ role, image, name, email }: UserMenuProps) {
   const ref = useRef<HTMLDivElement>(null);
 
   const homeHref = homeHrefForRole(role);
-  const homeLabel = role === "clinic" ? t("clinic") : t("portal");
+  const homeLabel = t(homeNavKeyForRole(role));
 
   useEffect(() => {
     function onPointer(e: MouseEvent) {

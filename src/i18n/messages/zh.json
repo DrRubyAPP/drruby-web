@@ -5,6 +5,7 @@
     "healthspan": "健康寿命",
     "portal": "我的门户",
     "clinic": "诊所",
+    "collaborate": "协作站",
     "login": "登录",
     "getStarted": "立即开始",
     "menu": "菜单",
@@ -486,7 +487,13 @@
     "formIntroSub": "前 500 名用户可免费获得 3 个月 Pro 权益。告诉我们你的肌肤状况 — 我们会确保 DrRuby 为你而打造。",
     "formHeading": "获取抢先体验",
     "formSubheading": "加入候补名单 — 上线时附赠免费肌肤预览。",
-    "ageOptions": ["30 岁以下", "30–39 岁", "40–49 岁", "50–59 岁", "60 岁以上"],
+    "ageOptions": [
+      "30 岁以下",
+      "30–39 岁",
+      "40–49 岁",
+      "50–59 岁",
+      "60 岁以上"
+    ],
     "skinConcerns": [
       {
         "value": "inflammation",
