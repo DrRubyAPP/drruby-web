@@ -22,6 +22,10 @@ export async function create(
   });
 }
 
+export async function findById(id: string): Promise<Contribution | null> {
+  return prisma.contribution.findUnique({ where: { id } });
+}
+
 export async function listByUser(userId: string): Promise<Contribution[]> {
   return prisma.contribution.findMany({
     where: { userId },

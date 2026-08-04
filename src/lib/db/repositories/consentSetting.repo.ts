@@ -27,6 +27,10 @@ export async function upsert(
   });
 }
 
+export async function findById(id: string): Promise<ConsentSetting | null> {
+  return prisma.consentSetting.findUnique({ where: { id } });
+}
+
 export async function listByUser(userId: string): Promise<ConsentSetting[]> {
   return prisma.consentSetting.findMany({
     where: { userId },
