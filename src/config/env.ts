@@ -23,6 +23,10 @@ const schema = z.object({
   MAILCHIMP_API_KEY: z.string().min(1),
   MAILCHIMP_SERVER_PREFIX: z.string().min(1),
   MAILCHIMP_AUDIENCE_ID: z.string().min(1),
+  // OpenAI（Ask DrRuby 代理 + 洞察文案润色）—— 秘钥仅服务端，绝不进 NEXT_PUBLIC_*
+  OPENAI_API_KEY: z.string().min(1),
+  OPENAI_MODEL: z.string().min(1).default("gpt-4o-mini"),
+  OPENAI_BASE_URL: z.url().default("https://api.openai.com/v1"),
   // 日志级别
   LOG_LEVEL: z
     .enum(["fatal", "error", "warn", "info", "debug", "trace"])

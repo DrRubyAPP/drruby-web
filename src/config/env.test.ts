@@ -13,6 +13,7 @@ const VALID = {
   MAILCHIMP_API_KEY: "mc-key",
   MAILCHIMP_SERVER_PREFIX: "us1",
   MAILCHIMP_AUDIENCE_ID: "aud-id",
+  OPENAI_API_KEY: "sk-test",
 } as const;
 
 describe("parseServerEnv", () => {
@@ -23,6 +24,10 @@ describe("parseServerEnv", () => {
     // Defaults kick in for optional vars.
     expect(env.LOG_LEVEL).toBe("info");
     expect(env.NODE_ENV).toBe("test");
+    // OpenAI defaults kick in when only the key is provided.
+    expect(env.OPENAI_API_KEY).toBe("sk-test");
+    expect(env.OPENAI_MODEL).toBe("gpt-4o-mini");
+    expect(env.OPENAI_BASE_URL).toBe("https://api.openai.com/v1");
   });
 
   it("throws naming the missing variable", () => {
@@ -40,5 +45,16 @@ describe("parseServerEnv", () => {
     expect(() =>
       parseServerEnv({ ...VALID, DATABASE_URL: "not-a-url" }),
     ).toThrow(/DATABASE_URL/);
+  });
+
+  it("throws naming the missing OPENAI_API_KEY", () => {
+    const { OPENAI_API_KEY: _omit, ...rest } = VALID;
+    expect(() => parseServerEnv(rest)).toThrow(/OPENAI_API_KEY/);
+  });
+
+  it("throws on an invalid OPENAI_BASE_URL", () => {
+    expect(() =>
+      parseServerEnv({ ...VALID, OPENAI_BASE_URL: "not-a-url" }),
+    ).toThrow(/OPENAI_BASE_URL/);
   });
 });
