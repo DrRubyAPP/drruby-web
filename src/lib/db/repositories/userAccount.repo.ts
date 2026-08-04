@@ -83,6 +83,20 @@ export async function update(
 }
 
 /**
+ * 更新账号 profile（仅 name）。
+ * email 变更须走 better-auth 验证流程，不在此处理。
+ */
+export async function updateProfile(
+  id: string,
+  data: { name?: string },
+): Promise<UserAccount> {
+  return prisma.userAccount.update({
+    where: { id },
+    data: { name: data.name },
+  });
+}
+
+/**
  * 软删除：置 status=deleted + deletedAt
  * 红线 §0.3.7：删号时脱敏保留研究数据而非物理删除
  */
@@ -91,4 +105,33 @@ export async function softDelete(id: string): Promise<UserAccount> {
     where: { id },
     data: { status: "deleted", deletedAt: new Date() },
   });
+}
+
+/**
+ * 软删脱敏（不可逆）：
+ * - status='deleted' + deletedAt=now()，行仍在（保留合规最小痕迹，绝不物理删）
+ * - 脱敏 email/name（email → `deleted+<id>@deleted.invalid`，name 置空），
+ *   使账号无法再定位到自然人，且不与真实邮箱冲突
+ * - 失效该用户全部 session（后续 cookie/bearer 均无法再解析出登录态）
+ *
+ * 红线 §0.3.7 + task-10 SP3：DELETE /me 软删脱敏不可逆。
+ */
+export async function softDeleteAndAnonymize(id: string): Promise<UserAccount> {
+  const anonymizedEmail = `deleted+${id}@deleted.invalid`;
+  const [account] = await prisma.$transaction([
+    prisma.userAccount.update({
+      where: { id },
+      data: {
+        status: "deleted",
+        deletedAt: new Date(),
+        email: anonymizedEmail,
+        name: null,
+        googleSub: null,
+        passwordHash: null,
+      },
+    }),
+    // 撤销登录态：删除该用户的所有 session
+    prisma.session.deleteMany({ where: { userId: id } }),
+  ]);
+  return account;
 }

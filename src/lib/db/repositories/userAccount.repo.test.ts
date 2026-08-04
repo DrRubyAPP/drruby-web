@@ -7,7 +7,9 @@ import {
   findByEmail,
   findById,
   softDelete,
+  softDeleteAndAnonymize,
   update,
+  updateProfile,
 } from "./userAccount.repo";
 
 const VALID_INPUT: CreateUserAccountInput = {
@@ -156,6 +158,51 @@ describe("userAccount.repo", () => {
 
       expect(deleted.status).toBe("deleted");
       expect(deleted.deletedAt).toBeInstanceOf(Date);
+    });
+  });
+
+  describe("updateProfile", () => {
+    it("仅更新 name", async () => {
+      const created = await create(VALID_INPUT);
+      const updated = await updateProfile(created.id, { name: "Ruby" });
+      expect(updated.name).toBe("Ruby");
+      expect(updated.email).toBe(VALID_INPUT.email);
+    });
+  });
+
+  describe("softDeleteAndAnonymize", () => {
+    it("行仍在、status=deleted、脱敏 email/name、清 session（不可逆）", async () => {
+      const created = await create({ ...VALID_INPUT, googleSub: undefined });
+      await update(created.id, {}); // 确保存在
+      await prisma.userAccount.update({
+        where: { id: created.id },
+        data: { name: "Alice" },
+      });
+      await prisma.session.create({
+        data: {
+          id: "sess-anon-1",
+          token: "tok-anon-1",
+          userId: created.id,
+          expiresAt: new Date("2999-01-01T00:00:00.000Z"),
+        },
+      });
+
+      const anon = await softDeleteAndAnonymize(created.id);
+      expect(anon.status).toBe("deleted");
+      expect(anon.deletedAt).toBeInstanceOf(Date);
+      expect(anon.email).toBe(`deleted+${created.id}@deleted.invalid`);
+      expect(anon.name).toBeNull();
+      expect(anon.passwordHash).toBeNull();
+
+      // 行未被物理删除
+      const still = await findById(created.id);
+      expect(still).not.toBeNull();
+
+      // session 清空
+      const sessions = await prisma.session.findMany({
+        where: { userId: created.id },
+      });
+      expect(sessions).toHaveLength(0);
     });
   });
 });
