@@ -20,11 +20,452 @@
       }
     },
     "schemas": {
+      "AgingMetricDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "caption": {
+            "type": "string"
+          },
+          "tone": {
+            "$ref": "#/components/schemas/insightToneSchema"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "value",
+          "caption",
+          "tone"
+        ]
+      },
+      "AgingVelocityListResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AgingMetricDTO"
+        }
+      },
+      "appointmentStatusSchema": {
+        "type": "string",
+        "enum": [
+          "scheduled",
+          "done",
+          "report_review",
+          "consultation",
+          "canceled"
+        ]
+      },
+      "AttentionDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "tag": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "accent": {
+            "$ref": "#/components/schemas/insightAccentSchema"
+          }
+        },
+        "required": [
+          "id",
+          "tag",
+          "title",
+          "body",
+          "accent"
+        ]
+      },
+      "AttentionListResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AttentionDTO"
+        }
+      },
+      "authorizationActionSchema": {
+        "type": "string",
+        "enum": [
+          "granted",
+          "revoked",
+          "scope_changed",
+          "accessed"
+        ]
+      },
+      "authorizationStatusSchema": {
+        "type": "string",
+        "enum": [
+          "active",
+          "revoked"
+        ]
+      },
+      "authProviderSchema": {
+        "type": "string",
+        "enum": [
+          "email",
+          "google"
+        ]
+      },
+      "bodyInsightKindSchema": {
+        "type": "string",
+        "enum": [
+          "attention",
+          "aging_velocity",
+          "pattern",
+          "change"
+        ]
+      },
+      "clinicPlanTierSchema": {
+        "type": "string",
+        "enum": [
+          "basic",
+          "full"
+        ]
+      },
       "ConfigState": {
         "type": "string",
         "enum": [
           "configured",
           "missing"
+        ]
+      },
+      "connectionStatusSchema": {
+        "type": "string",
+        "enum": [
+          "active",
+          "revoked"
+        ]
+      },
+      "consentKeySchema": {
+        "type": "string",
+        "enum": [
+          "self",
+          "deidentified_contribution",
+          "identified_research"
+        ]
+      },
+      "ConsentListResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ConsentSettingDTO"
+        }
+      },
+      "ConsentSettingDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "value": {
+            "type": "boolean"
+          },
+          "locked": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "value"
+        ]
+      },
+      "ContributionDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "shared": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "shared"
+        ]
+      },
+      "ContributionListResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ContributionDTO"
+        }
+      },
+      "dataQualitySchema": {
+        "type": "string",
+        "enum": [
+          "complete",
+          "partial",
+          "missing"
+        ]
+      },
+      "DecisionBriefDTO": {
+        "type": "object",
+        "properties": {
+          "yourHistory": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "similarJourneys": {
+            "type": "object",
+            "properties": {
+              "summary": {
+                "type": "string"
+              },
+              "note": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "summary",
+              "note"
+            ]
+          },
+          "evidence": {
+            "type": "object",
+            "properties": {
+              "known": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "uncertain": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "known",
+              "uncertain"
+            ]
+          },
+          "questionsForClinician": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "yourHistory",
+          "similarJourneys",
+          "evidence",
+          "questionsForClinician"
+        ]
+      },
+      "DecisionDetailDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "question": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/decisionStatusSchema"
+          },
+          "updated": {
+            "type": "string"
+          },
+          "brief": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DecisionBriefDTO"
+              }
+            ]
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DecisionEntryDTO"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "question",
+          "status",
+          "updated",
+          "entries"
+        ]
+      },
+      "DecisionDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "question": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/decisionStatusSchema"
+          },
+          "updated": {
+            "type": "string"
+          },
+          "brief": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DecisionBriefDTO"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "question",
+          "status",
+          "updated"
+        ]
+      },
+      "DecisionEntryDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "statusSnapshot": {
+            "$ref": "#/components/schemas/decisionStatusSchema"
+          },
+          "occurredAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "text",
+          "statusSnapshot",
+          "occurredAt"
+        ]
+      },
+      "DecisionListResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/DecisionDTO"
+        }
+      },
+      "DecisionResponse": {
+        "$ref": "#/components/schemas/DecisionDetailDTO"
+      },
+      "decisionStatusSchema": {
+        "type": "string",
+        "enum": [
+          "considering",
+          "in-progress",
+          "decided",
+          "paused"
+        ]
+      },
+      "decisionTypeSchema": {
+        "type": "string",
+        "enum": [
+          "thermage",
+          "ultherapy",
+          "botox",
+          "laser",
+          "filler",
+          "hrt",
+          "skincare",
+          "clinic",
+          "not_sure"
+        ]
+      },
+      "ExperimentDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "hypothesis": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/experimentStatusSchema"
+          },
+          "window": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "hypothesis",
+          "status",
+          "window"
+        ]
+      },
+      "ExperimentListResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ExperimentDTO"
+        }
+      },
+      "experimentStatusSchema": {
+        "type": "string",
+        "enum": [
+          "running",
+          "planned",
+          "done"
+        ]
+      },
+      "fitzpatrickScaleSchema": {
+        "type": "string"
+      },
+      "followUpStatusSchema": {
+        "type": "string",
+        "enum": [
+          "open",
+          "done",
+          "dismissed"
+        ]
+      },
+      "healthRecordKindSchema": {
+        "type": "string",
+        "enum": [
+          "lab",
+          "imaging",
+          "checkup",
+          "vitals"
         ]
       },
       "HealthResponse": {
@@ -60,6 +501,293 @@
         "required": [
           "status",
           "mailchimp"
+        ]
+      },
+      "hormonalStatusSchema": {
+        "type": "string",
+        "enum": [
+          "cycling",
+          "pregnant",
+          "perimenopausal",
+          "postmenopausal_lt5y",
+          "postmenopausal_gt5y",
+          "on_hrt",
+          "on_contraceptive"
+        ]
+      },
+      "HormoneListResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/HormoneReadingDTO"
+        }
+      },
+      "HormoneReadingDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "marker": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "phase": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "marker",
+          "value",
+          "phase",
+          "note"
+        ]
+      },
+      "insightAccentSchema": {
+        "type": "string",
+        "enum": [
+          "red",
+          "amber",
+          "purple"
+        ]
+      },
+      "insightToneSchema": {
+        "type": "string",
+        "enum": [
+          "green",
+          "amber",
+          "purple"
+        ]
+      },
+      "invoiceStatusSchema": {
+        "type": "string",
+        "enum": [
+          "draft",
+          "sent",
+          "paid",
+          "void"
+        ]
+      },
+      "journeySourceTypeSchema": {
+        "type": "string",
+        "enum": [
+          "founder_interview",
+          "verified_member",
+          "partner_clinic",
+          "research_study"
+        ]
+      },
+      "MeResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "memberSince": {
+            "type": "string",
+            "description": "注册时间 ISO 字符串（← createdAt）"
+          },
+          "role": {
+            "$ref": "#/components/schemas/userRoleSchema"
+          },
+          "subscriptionTier": {
+            "$ref": "#/components/schemas/subscriptionTierSchema"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "email",
+          "memberSince",
+          "role",
+          "subscriptionTier"
+        ]
+      },
+      "ocrStatusSchema": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "processing",
+          "done",
+          "manual"
+        ]
+      },
+      "referralStatusSchema": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "accepted",
+          "declined",
+          "completed"
+        ]
+      },
+      "reviewStatusSchema": {
+        "type": "string",
+        "enum": [
+          "ai_drafted",
+          "in_review",
+          "approved",
+          "sent"
+        ]
+      },
+      "signalConfidenceSchema": {
+        "type": "string",
+        "enum": [
+          "observed",
+          "possible",
+          "not-assessable"
+        ]
+      },
+      "SignalDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "confidence": {
+            "$ref": "#/components/schemas/signalConfidenceSchema"
+          },
+          "trend": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/signalTrendSchema"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "value",
+          "source",
+          "confidence"
+        ]
+      },
+      "SignalListResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/SignalDTO"
+        }
+      },
+      "signalTrendSchema": {
+        "type": "string",
+        "enum": [
+          "up",
+          "down",
+          "flat"
+        ]
+      },
+      "SkinScanResponse": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string"
+          },
+          "headline": {
+            "type": "string"
+          },
+          "zones": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkinZoneDTO"
+            }
+          }
+        },
+        "required": [
+          "date",
+          "headline",
+          "zones"
+        ],
+        "nullable": true
+      },
+      "skinTypeSchema": {
+        "type": "string"
+      },
+      "SkinZoneDTO": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "status"
+        ]
+      },
+      "StudyDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/studyEnrollmentStatusSchema"
+          },
+          "arm": {
+            "type": "string"
+          },
+          "consentGiven": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "status",
+          "consentGiven"
+        ]
+      },
+      "studyEnrollmentStatusSchema": {
+        "type": "string",
+        "enum": [
+          "enrolled",
+          "invited",
+          "completed"
+        ]
+      },
+      "StudyListResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/StudyDTO"
+        }
+      },
+      "studyRecruitmentStatusSchema": {
+        "type": "string",
+        "enum": [
+          "recruiting",
+          "closed",
+          "completed"
         ]
       },
       "SubscribeBody": {
@@ -112,6 +840,104 @@
             "type": "string"
           }
         }
+      },
+      "subscriptionStatusSchema": {
+        "type": "string",
+        "enum": [
+          "active",
+          "canceled",
+          "past_due",
+          "trialing"
+        ]
+      },
+      "subscriptionTierSchema": {
+        "type": "string",
+        "enum": [
+          "free",
+          "decision"
+        ]
+      },
+      "TimelineEventDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/timelineKindSchema"
+          },
+          "title": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "date",
+          "kind",
+          "title"
+        ]
+      },
+      "timelineKindSchema": {
+        "type": "string",
+        "enum": [
+          "note",
+          "treatment",
+          "photo",
+          "lab",
+          "decision",
+          "outcome"
+        ]
+      },
+      "TimelineListResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/TimelineEventDTO"
+        }
+      },
+      "trendSchema": {
+        "type": "string",
+        "enum": [
+          "improving",
+          "stable",
+          "declining"
+        ]
+      },
+      "userRoleSchema": {
+        "type": "string",
+        "enum": [
+          "user",
+          "clinic",
+          "collaborator"
+        ]
+      },
+      "userStatusSchema": {
+        "type": "string",
+        "enum": [
+          "active",
+          "suspended",
+          "deleted"
+        ]
+      },
+      "wearableProviderSchema": {
+        "type": "string",
+        "enum": [
+          "apple_healthkit",
+          "oura",
+          "dexcom",
+          "libre",
+          "whoop",
+          "ultrahuman",
+          "health_connect"
+        ]
       }
     },
     "responses": {
@@ -238,6 +1064,217 @@
     }
   },
   "paths": {
+    "/consent": {
+      "get": {
+        "operationId": "get-consent",
+        "summary": "List consent settings",
+        "description": "当前用户的三档隐私开关（self 档 locked 永开）",
+        "tags": [
+          "Consent"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/contributions": {
+      "get": {
+        "operationId": "get-contributions",
+        "summary": "List data contributions",
+        "description": "当前用户的数据贡献（opt-in，可撤回，最新在前）",
+        "tags": [
+          "Contributions"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContributionListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/decisions": {
+      "get": {
+        "operationId": "get-decisions",
+        "summary": "List decisions",
+        "description": "当前用户的决策列表（省 brief，最新更新在前）",
+        "tags": [
+          "Decisions"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/decisions/{id}": {
+      "get": {
+        "operationId": "get-decisions-{id}",
+        "summary": "Get decision detail",
+        "description": "单个决策详情（含三源 brief 快照与 append-only 时间线条目）",
+        "tags": [
+          "Decisions"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DecisionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/experiments": {
+      "get": {
+        "operationId": "get-experiments",
+        "summary": "List experiments",
+        "description": "当前用户的 N-of-1 实验（最新在前）",
+        "tags": [
+          "Experiments"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExperimentListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "operationId": "get-health",
@@ -260,6 +1297,126 @@
           },
           "400": {
             "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/hormone-layer": {
+      "get": {
+        "operationId": "get-hormone-layer",
+        "summary": "List hormone-layer readings",
+        "description": "当前用户的激素层读数（周期上下文，最新在前）",
+        "tags": [
+          "Hormone-layer"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HormoneListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/insights/aging-velocity": {
+      "get": {
+        "operationId": "get-insights-aging-velocity",
+        "summary": "List aging-velocity metrics",
+        "description": "变化速度指标（示意，非结论；无数据返回 []）",
+        "tags": [
+          "Insights"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgingVelocityListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/insights/attention": {
+      "get": {
+        "operationId": "get-insights-attention",
+        "summary": "List attention cards",
+        "description": "首页「今日值得关注」卡片（无数据返回 []）",
+        "tags": [
+          "Insights"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttentionListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
           },
           "500": {
             "$ref": "#/components/responses/500"
@@ -304,14 +1461,247 @@
           }
         }
       }
+    },
+    "/me": {
+      "get": {
+        "operationId": "get-me",
+        "summary": "Get current user",
+        "description": "当前登录用户的账号 profile（getUser）",
+        "tags": [
+          "Me"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/signals": {
+      "get": {
+        "operationId": "get-signals",
+        "summary": "List signals",
+        "description": "当前用户的设备/化验信号（含来源与置信度，最新在前）",
+        "tags": [
+          "Signals"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignalListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/skin-scan/latest": {
+      "get": {
+        "operationId": "get-skin-scan-latest",
+        "summary": "Get latest skin scan",
+        "description": "当前用户最近一次皮肤扫描结果（无记录返回 null）",
+        "tags": [
+          "Skin-scan"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkinScanResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/studies": {
+      "get": {
+        "operationId": "get-studies",
+        "summary": "List studies",
+        "description": "研究目录 ⋈ 当前用户入组：已入组用 enrollment 投影；",
+        "tags": [
+          "Studies"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudyListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/timeline": {
+      "get": {
+        "operationId": "get-timeline",
+        "summary": "List timeline events",
+        "description": "当前用户的身体时间线（快速记录/上传/决策快照，最新在前）",
+        "tags": [
+          "Timeline"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimelineListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
     }
   },
   "tags": [
     {
+      "name": "Consent"
+    },
+    {
+      "name": "Contributions"
+    },
+    {
+      "name": "Decisions"
+    },
+    {
+      "name": "Experiments"
+    },
+    {
       "name": "Health"
     },
     {
+      "name": "Hormone-layer"
+    },
+    {
+      "name": "Insights"
+    },
+    {
       "name": "Mailchimp"
+    },
+    {
+      "name": "Me"
+    },
+    {
+      "name": "Signals"
+    },
+    {
+      "name": "Skin-scan"
+    },
+    {
+      "name": "Studies"
+    },
+    {
+      "name": "Timeline"
     }
   ]
 }
