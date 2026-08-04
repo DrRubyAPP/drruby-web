@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { emailOTP } from "better-auth/plugins";
+import { bearer, emailOTP } from "better-auth/plugins";
 import { sendOtpEmail } from "@/lib/auth/email";
 import { getAuthEnv } from "@/lib/auth/env";
 import { prisma } from "@/lib/db/prisma";
@@ -75,6 +75,9 @@ export const auth = betterAuth({
         await sendOtpEmail(email, otp);
       },
     }),
+    // 让同一 getSession 认 `Authorization: Bearer <token>`，供 RN App 直连；
+    // 登录响应会附带 `set-auth-token` 头，客户端存下后回传为 bearer。
+    bearer(),
   ],
   databaseHooks: {
     user: {
