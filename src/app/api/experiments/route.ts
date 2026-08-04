@@ -16,6 +16,14 @@ export const ExperimentDTO = z.object({
 });
 export const ExperimentListResponse = z.array(ExperimentDTO);
 
+/** 新增实验入参 */
+export const CreateExperimentBody = z.object({
+  title: z.string().min(1),
+  hypothesis: z.string().min(1),
+  status: experimentStatusSchema,
+  window: z.string().min(1),
+});
+
 function toDTO(row: Experiment): z.infer<typeof ExperimentDTO> {
   return {
     id: row.id,
@@ -38,4 +46,25 @@ export const GET = handle(async () => {
   const user = await requireUser();
   const rows = await experimentRepo.listByUser(user.id);
   return NextResponse.json(ExperimentListResponse.parse(rows.map(toDTO)));
+});
+
+/**
+ * Create experiment
+ * @description 为当前用户创建一个 N-of-1 实验
+ * @body CreateExperimentBody
+ * @response ExperimentDTO
+ * @auth bearer
+ * @responseSet auth
+ * @openapi
+ */
+export const POST = handle(async (req: Request) => {
+  const user = await requireUser();
+  const body = CreateExperimentBody.parse(await req.json());
+  const row = await experimentRepo.create(user.id, {
+    title: body.title,
+    hypothesis: body.hypothesis,
+    status: body.status,
+    window: body.window,
+  });
+  return NextResponse.json(toDTO(row), { status: 201 });
 });
