@@ -31,7 +31,30 @@ export async function requireUser(): Promise<SessionUser> {
   if (!session?.user) {
     throw new AppError("UNAUTHORIZED", "请先登录", 401);
   }
+  // 软删守卫：已注销账号即使持有有效 session/token 也拒鉴权，避免 task-10
+  // 软删脱敏后仍能登录。`deletedAt` 经 additionalFields 暴露到 session.user。
+  if ((session.user as { deletedAt?: Date | null }).deletedAt) {
+    throw new AppError("UNAUTHORIZED", "账号已注销", 401);
+  }
   return session.user;
+}
+
+/**
+ * 在 `requireUser()` 之上校验角色：`user.role ∈ roles` 才放行，否则抛 403
+ * （`AppError("FORBIDDEN")`）；未登录仍先走 `requireUser()` 的 401。
+ *
+ * 配合 `handle()` 包装器，越权请求得到标准 403 响应体（对齐 401/404 语义）。
+ * 供 SP7 诊所门户 / 科研协作站的服务端 RBAC 复用。
+ */
+export async function requireRole(
+  ...roles: readonly string[]
+): Promise<SessionUser> {
+  const user = await requireUser();
+  const role = (user as { role?: string }).role;
+  if (!role || !roles.includes(role)) {
+    throw new AppError("FORBIDDEN", "无权访问", 403);
+  }
+  return user;
 }
 
 export { homeHrefForRole } from "@/lib/auth/roles";

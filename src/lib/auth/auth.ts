@@ -52,6 +52,14 @@ export const auth = betterAuth({
         defaultValue: "email",
         input: false,
       },
+      // 软删标记：暴露到 session.user，供 requireUser 对「已注销但仍持有有效
+      // session/token」的用户拒鉴权（task-10 软删脱敏后不应仍能登录）。
+      // input:false → 客户端不可写；仅服务端软删流程落库。
+      deletedAt: {
+        type: "date",
+        required: false,
+        input: false,
+      },
     },
   },
   account: {

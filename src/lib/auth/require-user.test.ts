@@ -119,4 +119,23 @@ describe("requireUser", () => {
 
     expect(viaCookie.id).toBe(viaBearer.id);
   });
+
+  it("软删用户即使持有有效 session 也抛 401（deletedAt 拒鉴权）", async () => {
+    const { requireUser } = await import("@/lib/auth/session");
+    const { prisma } = await import("@/lib/db/prisma");
+    const { cookieHeader, userId } = await signIn("deleted@example.com");
+
+    // task-10 软删脱敏后，session/token 仍有效但账号已注销 → 应拒登。
+    await prisma.userAccount.update({
+      where: { id: userId },
+      data: { deletedAt: new Date() },
+    });
+
+    currentHeaders = new Headers({ cookie: cookieHeader });
+    await expect(requireUser()).rejects.toMatchObject({
+      name: "AppError",
+      code: "UNAUTHORIZED",
+      status: 401,
+    });
+  });
 });
