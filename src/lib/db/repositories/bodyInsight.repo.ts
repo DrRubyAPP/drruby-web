@@ -47,6 +47,30 @@ export async function create(
   });
 }
 
+/**
+ * 替换某用户某 kind 的全部洞察（刷新语义：事务内先删后批量插，保证幂等、不累积重复行）。
+ * 返回写入条数。空 inputs 即等价于清空该 kind。
+ */
+export async function replaceByUserAndKind(
+  userId: string,
+  kind: BodyInsightKind,
+  inputs: CreateBodyInsightInput[],
+): Promise<number> {
+  bodyInsightKindSchema.parse(kind);
+  for (const input of inputs) validateInput(input);
+  await prisma.$transaction([
+    prisma.bodyInsight.deleteMany({ where: { userId, kind } }),
+    prisma.bodyInsight.createMany({
+      data: inputs.map(({ meta, ...rest }) => ({
+        userId,
+        ...rest,
+        meta: (meta ?? undefined) as Prisma.InputJsonValue | undefined,
+      })),
+    }),
+  ]);
+  return inputs.length;
+}
+
 /** 按 kind 列出（服务 attention / aging_velocity 两端点），最新在前 */
 export async function listByUserAndKind(
   userId: string,
