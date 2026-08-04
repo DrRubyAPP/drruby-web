@@ -1,13 +1,14 @@
 import { getSessionCookie } from "better-auth/cookies";
-import createMiddleware from "next-intl/middleware";
 import { type NextRequest, NextResponse } from "next/server";
+import createMiddleware from "next-intl/middleware";
 import { routing } from "@/i18n/routing";
 
 // next-intl 本地化路由中间件（处理 locale 前缀的 rewrite/redirect）。
 const intlMiddleware = createMiddleware(routing);
 
 // 受保护前缀（去 locale 前缀后匹配）：未登录访问重定向到本地化登录页。
-const PROTECTED = ["/portal", "/clinic"];
+// 仅拦「是否登录」；`/collaborate` 营销页公开，只保护 `/collaborate/workspace` 子树。
+const PROTECTED = ["/portal", "/clinic", "/collaborate/workspace"];
 
 /** 拆出 locale 前缀：`/zh/portal` → { locale: "zh", rest: "/portal" }。 */
 function localeOf(pathname: string): { locale: string; rest: string } {
