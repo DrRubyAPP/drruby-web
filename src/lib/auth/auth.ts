@@ -62,6 +62,13 @@ export const auth = betterAuth({
       },
     },
   },
+  // 显式化 session/bearer 生命周期：7 天过期，活跃满 1 天滑动续期（updateAge）。
+  // bearer token 与 session 同生命周期，过期后 getSession 返回 null → requireUser
+  // 统一 401 语义（RN 端据此触发重登，见 auth-token-contract.md）。
+  session: {
+    expiresIn: 60 * 60 * 24 * 7, // 7 天
+    updateAge: 60 * 60 * 24, // 1 天滑动续期
+  },
   // OTP 按 IP 限流（默认仅生产开启，这里显式打开使各环境语义一致）。命中返回
   // 429（better-auth 内建）。键名对齐 emailOTP 插件真实 endpoint：
   //   发码 /email-otp/send-verification-otp → 3 次 / 分

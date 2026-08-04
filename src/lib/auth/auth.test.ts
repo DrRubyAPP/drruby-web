@@ -85,6 +85,21 @@ describe("OTP rateLimit 配置", () => {
   });
 });
 
+describe("session 生命周期配置", () => {
+  it("显式落 expiresIn=7天 / updateAge=1天（滑动续期）", async () => {
+    const { auth } = await import("@/lib/auth/auth");
+    const session = (
+      auth.options as {
+        session?: { expiresIn?: number; updateAge?: number };
+      }
+    ).session;
+
+    // bearer token 与 session 同生命周期：7 天过期、活跃满 1 天滑动续期。
+    expect(session?.expiresIn).toBe(60 * 60 * 24 * 7);
+    expect(session?.updateAge).toBe(60 * 60 * 24);
+  });
+});
+
 // 限流通过 HTTP handler 生效（auth.api.* 直调不经限流中间件），故走真实
 // auth.handler 验证发码第 4 次被拒。用独立 IP 桶避免与其他用例相互污染。
 describe("OTP 限流实际生效（发码 3/分 → 第 4 次 429）", () => {
