@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { UnauthorizedRedirect } from "@/components/api";
 import { redirect } from "@/i18n/navigation";
 import { homeHrefForRole } from "@/lib/auth/roles";
 import { getServerSession } from "@/lib/auth/session";
@@ -27,5 +28,10 @@ export default async function PortalLayout({
   if (role !== "user") {
     redirect({ href: homeHrefForRole(role), locale });
   }
-  return <>{children}</>;
+  return (
+    <>
+      <UnauthorizedRedirect />
+      {children}
+    </>
+  );
 }
