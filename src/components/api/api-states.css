@@ -1,0 +1,49 @@
+.api-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 0;
+}
+.api-skeleton-line {
+  height: 14px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #efe9e7 25%, #f6f2f0 37%, #efe9e7 63%);
+  background-size: 400% 100%;
+  animation: api-shimmer 1.3s ease infinite;
+}
+@keyframes api-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+.api-empty,
+.api-error {
+  padding: 16px;
+  text-align: center;
+  color: #a89a95;
+  font-size: 13.5px;
+}
+.api-empty-title {
+  font-weight: 600;
+  color: #7a6f6a;
+  margin-bottom: 4px;
+}
+.api-error-msg {
+  color: #8c2635;
+  margin-bottom: 10px;
+}
+.api-retry {
+  border: 1px solid #d9cfcb;
+  background: #fff;
+  color: #8c2635;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.api-retry:hover {
+  background: #faf6f5;
+}
