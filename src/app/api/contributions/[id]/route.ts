@@ -21,7 +21,7 @@ type Ctx = { params: Promise<{ id: string }> };
  * @responseSet auth
  * @openapi
  */
-export const PATCH = handle(async (req: Request, ctx: Ctx) => {
+export const POST = handle(async (req: Request, ctx: Ctx) => {
   const user = await requireUser();
   const { id } = await ctx.params;
 

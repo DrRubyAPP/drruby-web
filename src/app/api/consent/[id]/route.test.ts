@@ -12,12 +12,12 @@ vi.mock("@/lib/auth/session", async () =>
   (await import("@/lib/test/route-helpers")).sessionModuleMock(),
 );
 
-describe("PATCH /api/consent/[id]", () => {
+describe("POST /api/consent/[id]", () => {
   beforeEach(resetDb);
   afterEach(disconnectDb);
 
   it("关闭 self（locked）档 → 409 且库未变", async () => {
-    const { PATCH } = await import("./route");
+    const { POST } = await import("./route");
     const consentRepo = await import(
       "@/lib/db/repositories/consentSetting.repo"
     );
@@ -31,8 +31,8 @@ describe("PATCH /api/consent/[id]", () => {
     });
 
     asUser(user.id);
-    const res = await PATCH(
-      jsonRequest({ value: false }, { method: "PATCH" }),
+    const res = await POST(
+      jsonRequest({ value: false }, { method: "POST" }),
       params(setting.id),
     );
     expect(res.status).toBe(409);
@@ -42,7 +42,7 @@ describe("PATCH /api/consent/[id]", () => {
   });
 
   it("切换可变档 → 成功", async () => {
-    const { PATCH } = await import("./route");
+    const { POST } = await import("./route");
     const consentRepo = await import(
       "@/lib/db/repositories/consentSetting.repo"
     );
@@ -55,8 +55,8 @@ describe("PATCH /api/consent/[id]", () => {
     });
 
     asUser(user.id);
-    const res = await PATCH(
-      jsonRequest({ value: true }, { method: "PATCH" }),
+    const res = await POST(
+      jsonRequest({ value: true }, { method: "POST" }),
       params(setting.id),
     );
     expect(res.status).toBe(200);
@@ -65,7 +65,7 @@ describe("PATCH /api/consent/[id]", () => {
   });
 
   it("越权切他人设置 → 404", async () => {
-    const { PATCH } = await import("./route");
+    const { POST } = await import("./route");
     const consentRepo = await import(
       "@/lib/db/repositories/consentSetting.repo"
     );
@@ -79,8 +79,8 @@ describe("PATCH /api/consent/[id]", () => {
     });
 
     asUser(intruder.id);
-    const res = await PATCH(
-      jsonRequest({ value: true }, { method: "PATCH" }),
+    const res = await POST(
+      jsonRequest({ value: true }, { method: "POST" }),
       params(setting.id),
     );
     expect(res.status).toBe(404);

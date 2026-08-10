@@ -12,12 +12,12 @@ vi.mock("@/lib/auth/session", async () =>
   (await import("@/lib/test/route-helpers")).sessionModuleMock(),
 );
 
-describe("PATCH /api/contributions/[id]", () => {
+describe("POST /api/contributions/[id]", () => {
   beforeEach(resetDb);
   afterEach(disconnectDb);
 
   it("shared true→false 撤回成功（可撤回）", async () => {
-    const { PATCH } = await import("./route");
+    const { POST } = await import("./route");
     const repo = await import("@/lib/db/repositories/contribution.repo");
     const user = await makeUser("contrib@example.com");
     const row = await repo.create(user.id, {
@@ -27,8 +27,8 @@ describe("PATCH /api/contributions/[id]", () => {
     });
 
     asUser(user.id);
-    const res = await PATCH(
-      jsonRequest({ shared: false }, { method: "PATCH" }),
+    const res = await POST(
+      jsonRequest({ shared: false }, { method: "POST" }),
       params(row.id),
     );
     expect(res.status).toBe(200);
@@ -41,15 +41,15 @@ describe("PATCH /api/contributions/[id]", () => {
     expect(after?.withdrawnAt).not.toBeNull();
 
     // 可再次开启（true↔false 均可）
-    const reshare = await PATCH(
-      jsonRequest({ shared: true }, { method: "PATCH" }),
+    const reshare = await POST(
+      jsonRequest({ shared: true }, { method: "POST" }),
       params(row.id),
     );
     expect((await reshare.json()).shared).toBe(true);
   });
 
   it("越权切他人贡献 → 404", async () => {
-    const { PATCH } = await import("./route");
+    const { POST } = await import("./route");
     const repo = await import("@/lib/db/repositories/contribution.repo");
     const owner = await makeUser("contrib-owner@example.com");
     const intruder = await makeUser("contrib-intruder@example.com");
@@ -59,8 +59,8 @@ describe("PATCH /api/contributions/[id]", () => {
     });
 
     asUser(intruder.id);
-    const res = await PATCH(
-      jsonRequest({ shared: true }, { method: "PATCH" }),
+    const res = await POST(
+      jsonRequest({ shared: true }, { method: "POST" }),
       params(row.id),
     );
     expect(res.status).toBe(404);

@@ -12,12 +12,12 @@ vi.mock("@/lib/auth/session", async () =>
   (await import("@/lib/test/route-helpers")).sessionModuleMock(),
 );
 
-describe("PATCH /api/decisions/[id]", () => {
+describe("POST /api/decisions/[id]", () => {
   beforeEach(resetDb);
   afterEach(disconnectDb);
 
   it("改他人决策 → 404（不泄露存在性）", async () => {
-    const { PATCH } = await import("./route");
+    const { POST } = await import("./route");
     const decisionRepo = await import("@/lib/db/repositories/decision.repo");
     const owner = await makeUser("dec-owner@example.com");
     const intruder = await makeUser("dec-intruder@example.com");
@@ -27,8 +27,8 @@ describe("PATCH /api/decisions/[id]", () => {
     });
 
     asUser(intruder.id);
-    const res = await PATCH(
-      jsonRequest({ status: "decided" }, { method: "PATCH" }),
+    const res = await POST(
+      jsonRequest({ status: "decided" }, { method: "POST" }),
       params(decision.id),
     );
     expect(res.status).toBe(404);
@@ -39,7 +39,7 @@ describe("PATCH /api/decisions/[id]", () => {
   });
 
   it("owner 推进到 decided → 落定 decidedAt", async () => {
-    const { PATCH } = await import("./route");
+    const { POST } = await import("./route");
     const decisionRepo = await import("@/lib/db/repositories/decision.repo");
     const owner = await makeUser("dec-patch@example.com");
     const decision = await decisionRepo.create(owner.id, {
@@ -48,8 +48,8 @@ describe("PATCH /api/decisions/[id]", () => {
     });
 
     asUser(owner.id);
-    const res = await PATCH(
-      jsonRequest({ status: "decided" }, { method: "PATCH" }),
+    const res = await POST(
+      jsonRequest({ status: "decided" }, { method: "POST" }),
       params(decision.id),
     );
     expect(res.status).toBe(200);

@@ -1597,8 +1597,8 @@
       }
     },
     "/consent/{id}": {
-      "patch": {
-        "operationId": "patch-consent-{id}",
+      "post": {
+        "operationId": "post-consent-{id}",
         "summary": "Toggle consent setting",
         "description": "切换某档隐私开关。`self`（locked）档永久开启，尝试关闭 → 409。越权按 404",
         "tags": [
@@ -1697,8 +1697,8 @@
       }
     },
     "/contributions/{id}": {
-      "patch": {
-        "operationId": "patch-contributions-{id}",
+      "post": {
+        "operationId": "post-contributions-{id}",
         "summary": "Toggle data contribution sharing",
         "description": "切换某条数据贡献的共享状态（opt-in，可撤回）。越权按 404",
         "tags": [
@@ -1893,8 +1893,8 @@
           }
         }
       },
-      "patch": {
-        "operationId": "patch-decisions-{id}",
+      "post": {
+        "operationId": "post-decisions-{id}",
         "summary": "Update decision",
         "description": "推进决策状态（可选改 question/type）；decided 时自动记 decidedAt。越权按 404 处理",
         "tags": [
@@ -2452,8 +2452,8 @@
           }
         }
       },
-      "patch": {
-        "operationId": "patch-me",
+      "post": {
+        "operationId": "post-me",
         "summary": "Update current user",
         "description": "更新当前用户 profile（本轮仅 name）",
         "tags": [
@@ -2498,9 +2498,11 @@
             "$ref": "#/components/responses/500"
           }
         }
-      },
-      "delete": {
-        "operationId": "delete-me",
+      }
+    },
+    "/me/delete": {
+      "post": {
+        "operationId": "post-me-delete",
         "summary": "Delete current user",
         "description": "软删脱敏当前账号（不可逆）：置 deleted + 脱敏 email/name + 失效 session；不物理删",
         "tags": [
