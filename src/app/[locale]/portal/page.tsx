@@ -6,6 +6,7 @@ import { ActiveDecisionsSummary } from "@/components/sections/portal/decisions/A
 import { DecisionsView } from "@/components/sections/portal/decisions/DecisionsView";
 import { HealthView } from "@/components/sections/portal/health/HealthView";
 import { HistoryView } from "@/components/sections/portal/history/HistoryView";
+import { ResearchView } from "@/components/sections/portal/research/ResearchView";
 import { TodayView } from "@/components/sections/portal/today/TodayView";
 import "./portal.css";
 
@@ -658,33 +659,7 @@ export default function PortalPage() {
                 and what it still doesn&rsquo;t know.
               </div>
             </div>
-            <div className="sec">
-              <div className="sec-h">Studies you can join</div>
-              <div className="card">
-                <div className="dec">
-                  <div>
-                    <h4>Perimenopause Sleep Study</h4>
-                    <div className="st">Recruiting &middot; ~5 min/week &middot; IRB-approved</div>
-                  </div>
-                  <button className="dec-badge" onClick={() => go("privacy")}>
-                    Review &amp; join
-                  </button>
-                </div>
-                <div className="dec">
-                  <div>
-                    <h4>Skin Aging Observation</h4>
-                    <div className="st">Recruiting &middot; monthly photo &middot; IRB-approved</div>
-                  </div>
-                  <button className="dec-badge" onClick={() => go("privacy")}>
-                    Review &amp; join
-                  </button>
-                </div>
-              </div>
-              <div style={{ fontSize: 12, color: "#a89a95", marginTop: 10 }}>
-                Joining a study opens a separate, specific consent &mdash; reviewed in your Consent
-                Center.
-              </div>
-            </div>
+            <ResearchView />
             <div className="sec">
               <div className="sec-h">What are we learning?</div>
               <div className="card matter">
