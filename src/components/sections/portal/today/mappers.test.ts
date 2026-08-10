@@ -31,7 +31,14 @@ describe("mapAttention", () => {
         { id: "a2", tag: "", title: "Pattern", body: "", accent: "amber" },
       ]),
     ).toEqual([
-      { id: "a2", tag: "", title: "Pattern", body: "", accent: "amber", hasBody: false },
+      {
+        id: "a2",
+        tag: "",
+        title: "Pattern",
+        body: "",
+        accent: "amber",
+        hasBody: false,
+      },
     ]);
   });
 

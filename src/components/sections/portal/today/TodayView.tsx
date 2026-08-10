@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { EmptyState, ErrorState, Skeleton } from "@/components/api";
-import { apiClient } from "@/lib/api/client";
 import { useApi } from "@/hooks/useApi";
+import { apiClient } from "@/lib/api/client";
 import type { AgingMetricDto, AttentionDto, RefreshResponse } from "./dto";
 import { mapAging, mapAttention } from "./mappers";
 
@@ -62,7 +62,12 @@ export function TodayView({ onSeeAllSignals }: TodayViewProps) {
     (aging.data ?? []).length === 0;
 
   useEffect(() => {
-    if (!refreshedThisSession && bothEmpty && !refreshing && refreshError === null) {
+    if (
+      !refreshedThisSession &&
+      bothEmpty &&
+      !refreshing &&
+      refreshError === null
+    ) {
       runRefresh();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -72,8 +77,7 @@ export function TodayView({ onSeeAllSignals }: TodayViewProps) {
   const agingRows = mapAging(aging.data ?? []);
 
   const refreshFailedWithOldData =
-    refreshError !== null &&
-    (attention.data !== null || aging.data !== null);
+    refreshError !== null && (attention.data !== null || aging.data !== null);
 
   return (
     <div className="sec">
@@ -122,7 +126,10 @@ export function TodayView({ onSeeAllSignals }: TodayViewProps) {
           {attention.loading ? (
             <Skeleton lines={3} />
           ) : attention.error ? (
-            <ErrorState message={attention.error.message} onRetry={attention.refetch} />
+            <ErrorState
+              message={attention.error.message}
+              onRetry={attention.refetch}
+            />
           ) : attentionCards.length === 0 ? (
             <EmptyState
               title="No attention cards yet"
@@ -171,7 +178,13 @@ export function TodayView({ onSeeAllSignals }: TodayViewProps) {
                     {r.tone}
                   </span>
                   {r.hasCaption && (
-                    <div style={{ fontSize: 12.5, color: "#a89a95", width: "100%" }}>
+                    <div
+                      style={{
+                        fontSize: 12.5,
+                        color: "#a89a95",
+                        width: "100%",
+                      }}
+                    >
                       {r.caption}
                     </div>
                   )}
