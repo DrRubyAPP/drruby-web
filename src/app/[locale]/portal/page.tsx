@@ -6,6 +6,7 @@ import { ActiveDecisionsSummary } from "@/components/sections/portal/decisions/A
 import { DecisionsView } from "@/components/sections/portal/decisions/DecisionsView";
 import { HealthView } from "@/components/sections/portal/health/HealthView";
 import { HistoryView } from "@/components/sections/portal/history/HistoryView";
+import { PrivacyView } from "@/components/sections/portal/privacy/PrivacyView";
 import { ResearchView } from "@/components/sections/portal/research/ResearchView";
 import { TodayView } from "@/components/sections/portal/today/TodayView";
 import "./portal.css";
@@ -716,53 +717,7 @@ export default function PortalPage() {
               <b>Your data. Your choice.</b> You control what DrRuby can access, where it&rsquo;s
               processed, and what &mdash; if anything &mdash; is shared.
             </div>
-            <div className="sec">
-              <div className="sec-h">Privacy &amp; Consent</div>
-              <div className="card">
-                <div className="pf-state">
-                  <span className="pf-dot" />
-                  By default, your data stays private. Nothing is shared unless you explicitly choose
-                  to.
-                </div>
-                <div className="consent-row">
-                  <div>
-                    <b>Use DrRuby for yourself</b>
-                    <span>
-                      Your history remains private. Simply using DrRuby never enrolls you in
-                      community sharing or research.
-                    </span>
-                  </div>
-                  <span className="consent-state">Always on</span>
-                </div>
-                <div className="consent-row">
-                  <div>
-                    <b>Contribute de-identified, aggregated insights</b>
-                    <span>
-                      Helps improve DrRuby for everyone. Identifying information is removed before
-                      contribution.
-                    </span>
-                  </div>
-                  <label className="switch">
-                    <input type="checkbox" />
-                    <span className="slider" />
-                  </label>
-                </div>
-                <div className="consent-row">
-                  <div>
-                    <b>Take part in identified research studies</b>
-                    <span>Opt in per study, each with its own specific consent. Withdraw any time.</span>
-                  </div>
-                  <label className="switch">
-                    <input type="checkbox" />
-                    <span className="slider" />
-                  </label>
-                </div>
-              </div>
-              <div style={{ fontSize: 12, color: "#a89a95", marginTop: 10 }}>
-                Three independent choices. Using DrRuby never implies community contribution or
-                research participation.
-              </div>
-            </div>
+            <PrivacyView />
             <div className="sec">
               <div className="sec-h">Membership</div>
               <div className="card">
