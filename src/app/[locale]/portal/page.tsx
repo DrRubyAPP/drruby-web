@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { HealthView } from "@/components/sections/portal/health/HealthView";
+import { TodayView } from "@/components/sections/portal/today/TodayView";
 import "./portal.css";
 
 type View =
@@ -163,45 +164,7 @@ export default function PortalPage() {
             <div className="hello">Good morning, Ruby &#9728;&#65039;</div>
             <h1>Home</h1>
             <div className="lede">Here&rsquo;s what deserves your attention today.</div>
-            <div className="sec">
-              <div className="sec-h">What deserves your attention today?</div>
-              <div className="card matter mn-primary">
-                <div className="mn-tag">&#9733; Continue your decision</div>
-                <h3>Keep the retinol, or pause it?</h3>
-                <p>
-                  You noted dryness 12 days ago. See your own history and similar journeys before
-                  you decide.
-                </p>
-                <div className="matter-next">Continue this decision &rarr;</div>
-                <div className="why">
-                  <span className="why-src">
-                    Why you&rsquo;re seeing this &middot; you paused this decision 12 days ago
-                  </span>
-                  <span className="conf obs">In progress</span>
-                </div>
-              </div>
-              <div className="card matter">
-                <h3>A pattern worth noticing</h3>
-                <p>
-                  Your sleep has slipped the week before your period in each of the last three
-                  cycles.
-                </p>
-                <div style={{ fontSize: 12, color: "#a89a95", marginTop: 8 }}>
-                  Observed across your own history &mdash; a pattern, not a diagnosis.
-                </div>
-              </div>
-              <div className="card matter">
-                <h3>Learn from your past self</h3>
-                <p>
-                  &ldquo;I almost stopped retinol in week 2 &mdash; glad I didn&rsquo;t.&rdquo;
-                  &mdash; you, 3 months ago. You&rsquo;re weighing a similar call now.
-                </p>
-                <div className="matter-next">Revisit that decision &rarr;</div>
-              </div>
-              <div className="mn-see" onClick={() => go("health")}>
-                See all your body signals &rarr;
-              </div>
-            </div>
+            <TodayView onSeeAllSignals={() => go("health")} />
             <div className="sec">
               <div className="sec-h">Your active decisions</div>
               <div className="card">
