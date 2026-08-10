@@ -1,6 +1,6 @@
 .idea/
 a_docs/
-temp/
+#temp/
 phase2/
 .playwright-mcp/
 .codegraph/
