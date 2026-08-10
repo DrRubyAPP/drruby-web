@@ -1,166 +1,213 @@
 "use client";
 
 import { useRef, useState } from "react";
-import {
-  COACH_MESSAGES,
-  COACH_QUICK_CHIPS,
-  type CoachMessage,
-} from "@/config/user-portal-mock";
+import { COACH_QUICK_CHIPS } from "@/config/user-portal-mock";
+import { useMutation } from "@/hooks/useMutation";
+import { apiClient, ApiError } from "@/lib/api";
+import { toApiMessages, toErrorMessage } from "./coach-helpers";
 
-// §11 AI Coach — 4 design principles:
-//   1. Proactive push (Insight Engine → chatbot speaks first)
-//   2. LLM = translator only (structured output → natural language + citation)
-//   3. Chat = data logging ("I started magnesium today" → Intervention Graph)
-//   4. Hybrid UI (score card taps → chatbot explains with user's own data)
+// §11 AI Coach — 接入 /api/ask 护栏 LLM 代理：
+//   客户端只发 user/assistant 历史，服务端强制注入 SYSTEM_PROMPT + 历史摘要。
+//   typing / error 气泡为本地 UX 态，不参与历史映射。
 
-// Lightweight client-side log detection. The real pipeline runs on the
-// server (Layer 3 Insight Engine); this mock simulates the round trip.
-function buildSystemReply(input: string): CoachMessage {
-  const text = input.toLowerCase();
-  if (/(started|began|taking|resumed)\b/.test(text) && /(magnesium|mg|supplement)/.test(text)) {
-    return {
-      id: `sys-${Date.now()}`,
-      type: "system",
-      content:
-        "Logged to your Intervention Graph. I'll track your Recovery Score and HRV over the next 4 weeks and tell you if we see a response.",
-      meta: { label: "✓ LOGGED TO INTERVENTION GRAPH" },
-    };
-  }
-  if (text.includes("vitamin d")) {
-    return {
-      id: `sys-${Date.now()}`,
-      type: "explain",
-      content:
-        "Your last blood panel (May 30) shows Vitamin D at 28 ng/mL — below the 30–60 ng/mL optimal range. Your supplement log shows 5000 IU D3+K2 daily since Mar 12. Cross-referencing your HRV trend: no degradation, but no clear uplift yet either. Worth retesting in 8 weeks.",
-      meta: {
-        label: "Based on: Blood panel May 30 · Intervention log · HRV trend",
-        source: "Brenner knowledge base · Vitamin D protocol",
-      },
-    };
-  }
-  if (text.includes("hrt")) {
-    return {
-      id: `sys-${Date.now()}`,
-      type: "system",
-      content:
-        "Logged HRT start to your Intervention Graph. I'll watch skin redness, sleep depth, and HRV over the next 6 weeks — that's the typical adjustment window. Flag anything unusual and I'll cross-reference.",
-      meta: { label: "✓ LOGGED TO INTERVENTION GRAPH" },
-    };
-  }
-  return {
-    id: `sys-${Date.now()}`,
-    type: "explain",
-    content:
-      "I can pull up your trends, explain a score, or log something you've started. Try \"I started magnesium today\", \"Why is my Vitamin D low?\", or \"Explain my collagen score\".",
-  };
+type ChatItem =
+  | { id: string; type: "user"; content: string; timestamp?: string }
+  | { id: string; type: "explain"; content: string }
+  | { id: string; type: "typing"; content: string }
+  | { id: string; type: "error"; content: string; userText: string };
+
+type AskResponse = {
+  choices: { message: { role: "assistant"; content: string } }[];
+};
+
+type AskInput = { messages: { role: "user" | "assistant"; content: string }[] };
+
+function nowId(prefix: string): string {
+  return `${prefix}-${Date.now()}`;
 }
 
-function MessageBubble({ msg }: { msg: CoachMessage }) {
-  if (msg.type === "user") {
+function timestamp(): string {
+  return new Date().toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+const TYPING_TEXT = "DrRuby 正在思考…";
+
+function MessageBubble({
+  item,
+  onRetry,
+}: {
+  item: ChatItem;
+  onRetry: (item: Extract<ChatItem, { type: "error" }>) => void;
+}) {
+  if (item.type === "user") {
     return (
       <div className="self-end max-w-[78%] bg-dr-white border border-dr-border px-3.5 py-2.5 rounded-[12px_2px_12px_12px]">
-        <div className="text-[12px] text-dr-ink leading-[1.55]">{msg.content}</div>
-        {msg.timestamp && (
-          <div className="text-[9px] text-dr-mid mt-1">{msg.timestamp}</div>
+        <div className="text-[12px] text-dr-ink leading-[1.55]">{item.content}</div>
+        {item.timestamp && (
+          <div className="text-[9px] text-dr-mid mt-1">{item.timestamp}</div>
         )}
       </div>
     );
   }
 
-  if (msg.type === "insight") {
+  if (item.type === "typing") {
     return (
-      <div className="self-start max-w-[88%] bg-dr-red px-3.5 py-3 rounded-[2px_12px_12px_12px]">
-        {msg.meta?.label && (
-          <div className="text-[8px] font-bold tracking-[0.12em] uppercase text-white/60 mb-1.5">
-            {msg.meta.label}
-          </div>
-        )}
-        <div
-          className="text-[12px] text-white leading-[1.7]"
-          // Allow <strong> in mock content for emphasis
-          dangerouslySetInnerHTML={{ __html: msg.content }}
-        />
-        {msg.meta?.source && (
-          <div className="text-[9px] text-white/55 mt-2 leading-[1.6]">
-            {msg.meta.source}
-          </div>
-        )}
-        {msg.meta?.actions && (
-          <div className="flex flex-wrap gap-1.5 mt-2.5">
-            {msg.meta.actions.map((a) => (
-              <span
-                key={a.label}
-                className="text-[9px] bg-white/15 text-white px-2.5 py-1 rounded-[20px] font-semibold cursor-pointer hover:bg-white/25 transition-colors"
-              >
-                {a.label}
-              </span>
-            ))}
-          </div>
-        )}
+      <div className="self-start max-w-[85%] bg-dr-white border border-dr-border px-3.5 py-2.5 rounded-[2px_12px_12px_12px]">
+        <div className="text-[12px] text-dr-mid leading-[1.7]">{item.content}</div>
       </div>
     );
   }
 
-  // system | explain
-  const isSystem = msg.type === "system";
+  if (item.type === "error") {
+    return (
+      <div className="self-start max-w-[85%] bg-dr-white border border-dr-alert px-3.5 py-2.5 rounded-[2px_12px_12px_12px]">
+        <div className="text-[12px] text-dr-alert leading-[1.7]">{item.content}</div>
+        <button
+          type="button"
+          onClick={() => onRetry(item)}
+          className="mt-2 text-[10px] font-bold tracking-[0.1em] uppercase text-dr-alert border border-dr-alert px-2.5 py-1 rounded-[4px] cursor-pointer hover:bg-dr-alert/10 transition-colors"
+        >
+          重试
+        </button>
+      </div>
+    );
+  }
+
+  // explain (LLM 回复)
   return (
-    <div
-      className={`self-start max-w-[85%] bg-dr-white px-3.5 py-2.5 rounded-[2px_12px_12px_12px] ${
-        isSystem ? "border border-dr-success" : "border border-dr-border"
-      }`}
-    >
-      {isSystem && msg.meta?.label && (
-        <div className="text-[8px] font-bold tracking-[0.1em] uppercase text-dr-success mb-1.5">
-          {msg.meta.label}
-        </div>
-      )}
-      {!isSystem && msg.meta?.label && (
-        <div className="text-[9px] text-dr-mid mb-1.5">{msg.meta.label}</div>
-      )}
-      <div
-        className="text-[12px] text-dr-ink leading-[1.7]"
-        dangerouslySetInnerHTML={{ __html: msg.content }}
-      />
-      {msg.meta?.source && (
-        <div className="text-[9px] text-dr-mid mt-2 leading-[1.6]">
-          {msg.meta.source}
-        </div>
-      )}
+    <div className="self-start max-w-[85%] bg-dr-white border border-dr-border px-3.5 py-2.5 rounded-[2px_12px_12px_12px]">
+      <div className="text-[12px] text-dr-ink leading-[1.7]">{item.content}</div>
     </div>
   );
 }
 
 export default function CoachChat() {
-  const [messages, setMessages] = useState<CoachMessage[]>(COACH_MESSAGES);
+  const [items, setItems] = useState<ChatItem[]>([]);
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  function send(text: string) {
+  // useMutation 仅作 loading 状态容器 + 401 自动 notifyUnauthorized。
+  // 不用 onSuccess（不接收 input）；错误经 lastErrorRef 同步捕获，避免闭包陈旧。
+  const lastErrorRef = useRef<ApiError | null>(null);
+
+  const ask = useMutation<AskInput, AskResponse>(async (payload) => {
+    try {
+      lastErrorRef.current = null;
+      return await apiClient.post<AskResponse>("/api/ask", payload);
+    } catch (e) {
+      lastErrorRef.current = e instanceof ApiError ? e : new ApiError("unknown", 0, "未知错误");
+      throw e; // re-throw 让 useMutation 处理 401 → notifyUnauthorized
+    }
+  });
+
+  function scrollToBottom() {
+    requestAnimationFrame(() => {
+      const el = scrollRef.current;
+      // jsdom 无 scrollTo；运行时也可能为 null
+      if (el && typeof el.scrollTo === "function") {
+        el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+      }
+    });
+  }
+
+  function replaceTyping(replacement: ChatItem | null) {
+    setItems((prev) => {
+      const withoutTyping = prev.filter((p) => p.type !== "typing");
+      return replacement ? [...withoutTyping, replacement] : withoutTyping;
+    });
+  }
+
+  async function send(text: string) {
     const trimmed = text.trim();
-    if (!trimmed) return;
-    const userMsg: CoachMessage = {
-      id: `u-${Date.now()}`,
+    if (!trimmed || ask.loading) return;
+
+    // 在调用 mutate 前快照历史（fn 内部不读 items，避免闭包陈旧）
+    const history = toApiMessages(items);
+    history.push({ role: "user", content: trimmed });
+
+    setInput("");
+
+    const userItem: ChatItem = {
+      id: nowId("u-"),
       type: "user",
       content: trimmed,
-      timestamp: new Date().toLocaleString("en-US", {
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-      }),
+      timestamp: timestamp(),
     };
-    setMessages((prev) => [...prev, userMsg]);
-    setInput("");
-    // Simulate Insight Engine round-trip
-    setTimeout(() => {
-      setMessages((prev) => [...prev, buildSystemReply(trimmed)]);
-      requestAnimationFrame(() => {
-        scrollRef.current?.scrollTo({
-          top: scrollRef.current.scrollHeight,
-          behavior: "smooth",
-        });
+    const typingItem: ChatItem = {
+      id: nowId("t-"),
+      type: "typing",
+      content: TYPING_TEXT,
+    };
+    setItems((prev) => [...prev, userItem, typingItem]);
+    scrollToBottom();
+
+    const out = await ask.mutate({ messages: history });
+    if (out) {
+      replaceTyping({
+        id: nowId("a-"),
+        type: "explain",
+        content: out.choices[0].message.content,
       });
-    }, 600);
+    } else {
+      const err = lastErrorRef.current;
+      if (err && err.status !== 401) {
+        replaceTyping({
+          id: nowId("e-"),
+          type: "error",
+          content: toErrorMessage(err),
+          userText: trimmed,
+        });
+      } else {
+        // 401：useMutation 已调 notifyUnauthorized 跳登录；移除 typing
+        replaceTyping(null);
+      }
+    }
+    scrollToBottom();
+  }
+
+  async function retry(item: Extract<ChatItem, { type: "error" }>) {
+    if (ask.loading) return;
+
+    // 重建历史：把 error 气泡之前的内容作为历史 + 原始 userText
+    const history = toApiMessages(items.filter((i) => i.id !== item.id));
+    history.push({ role: "user", content: item.userText });
+
+    // error 气泡 → typing 气泡
+    setItems((prev) =>
+      prev.map((p) =>
+        p.id === item.id
+          ? { id: nowId("t-"), type: "typing", content: TYPING_TEXT }
+          : p,
+      ),
+    );
+    scrollToBottom();
+
+    const out = await ask.mutate({ messages: history });
+    if (out) {
+      replaceTyping({
+        id: nowId("a-"),
+        type: "explain",
+        content: out.choices[0].message.content,
+      });
+    } else {
+      const err = lastErrorRef.current;
+      if (err && err.status !== 401) {
+        replaceTyping({
+          id: nowId("e-"),
+          type: "error",
+          content: toErrorMessage(err),
+          userText: item.userText,
+        });
+      } else {
+        replaceTyping(null);
+      }
+    }
+    scrollToBottom();
   }
 
   return (
@@ -185,8 +232,8 @@ export default function CoachChat() {
         ref={scrollRef}
         className="flex-1 overflow-y-auto p-4 flex flex-col gap-3 bg-[#FAFAFA]"
       >
-        {messages.map((m) => (
-          <MessageBubble key={m.id} msg={m} />
+        {items.map((m) => (
+          <MessageBubble key={m.id} item={m} onRetry={retry} />
         ))}
       </div>
 
@@ -198,7 +245,8 @@ export default function CoachChat() {
               key={chip}
               type="button"
               onClick={() => send(chip)}
-              className="text-[9px] bg-dr-off text-dr-ink px-2.5 py-1 rounded-[20px] border border-dr-border cursor-pointer hover:border-dr-mid transition-colors"
+              disabled={ask.loading}
+              className="text-[9px] bg-dr-off text-dr-ink px-2.5 py-1 rounded-[20px] border border-dr-border cursor-pointer hover:border-dr-mid transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {chip}
             </button>
@@ -219,7 +267,8 @@ export default function CoachChat() {
           />
           <button
             type="submit"
-            className="bg-dr-red text-white px-3.5 py-2 rounded-[6px] text-[10px] font-bold tracking-[0.1em] uppercase cursor-pointer flex-shrink-0 hover:opacity-90 transition-opacity"
+            disabled={ask.loading}
+            className="bg-dr-red text-white px-3.5 py-2 rounded-[6px] text-[10px] font-bold tracking-[0.1em] uppercase cursor-pointer flex-shrink-0 hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Send
           </button>
