@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import AnswerPage from "@/components/sections/portal/AnswerPage";
 import {
   MOMENT2_ANSWER,
   MOMENT2_DATA_SOURCES,
@@ -11,7 +12,12 @@ import {
   VERDICT_CONFIG,
   type VerdictType,
 } from "@/config/user-portal-mock";
-import AnswerPage from "@/components/sections/portal/AnswerPage";
+import {
+  buildEntryText,
+  moment2ChipsSummary,
+  moment2ToQuestion,
+} from "./mappers";
+import { SaveAsDecisionButton } from "./SaveAsDecisionButton";
 
 type Screen = "select" | "loading" | "answer";
 
@@ -31,9 +37,12 @@ export default function Moment2Flow() {
   const [duration, setDuration] = useState<string | null>(null);
 
   const verdict: VerdictType = duration ? deriveVerdict(duration) : "CONTINUE";
-  const answer = verdict === "TOO_EARLY" ? MOMENT2_TOO_EARLY_ANSWER : MOMENT2_ANSWER;
+  const answer =
+    verdict === "TOO_EARLY" ? MOMENT2_TOO_EARLY_ANSWER : MOMENT2_ANSWER;
   const targets = supplement ? SUPPLEMENT_TARGETS[supplement] : null;
-  const supplementLabel = MOMENT2_SUPPLEMENTS.find((s) => s.id === supplement)?.label;
+  const supplementLabel = MOMENT2_SUPPLEMENTS.find(
+    (s) => s.id === supplement,
+  )?.label;
 
   function handleAnalyze() {
     if (!supplement || !duration) return;
@@ -49,7 +58,8 @@ export default function Moment2Flow() {
           Moment 2 · Is this worth it?
         </div>
         <h1 className="font-serif text-[36px] md:text-[44px] font-light text-dr-ink leading-[1.15] mb-7">
-          Let's check if it's <em className="italic text-dr-red">actually working.</em>
+          Let's check if it's{" "}
+          <em className="italic text-dr-red">actually working.</em>
         </h1>
 
         {/* Question 1 */}
@@ -83,8 +93,11 @@ export default function Moment2Flow() {
                 Targets:
               </span>
               {targets.primary.join(", ")}
-              {targets.secondary.length > 0 && ` · secondary: ${targets.secondary.join(", ")}`}
-              <span className="ml-2">· expected onset {targets.onsetWeeks} weeks</span>
+              {targets.secondary.length > 0 &&
+                ` · secondary: ${targets.secondary.join(", ")}`}
+              <span className="ml-2">
+                · expected onset {targets.onsetWeeks} weeks
+              </span>
             </div>
           )}
         </div>
@@ -171,11 +184,16 @@ export default function Moment2Flow() {
   }
 
   const vConfig = VERDICT_CONFIG[verdict];
+  const durationLabel = MOMENT2_DURATIONS.find((d) => d.id === duration)?.label;
   return (
     <div className="max-w-[760px]">
       {/* Verdict banner (§5.2) */}
-      <div className={`border-l-2 ${vConfig.borderColor} ${vConfig.bgColor} p-5 mb-5`}>
-        <div className={`text-[9px] font-semibold tracking-[0.2em] uppercase ${vConfig.textColor} mb-1.5`}>
+      <div
+        className={`border-l-2 ${vConfig.borderColor} ${vConfig.bgColor} p-5 mb-5`}
+      >
+        <div
+          className={`text-[9px] font-semibold tracking-[0.2em] uppercase ${vConfig.textColor} mb-1.5`}
+        >
           Verdict · {vConfig.type}
           {supplementLabel && (
             <span className="ml-2 normal-case tracking-normal text-dr-mid">
@@ -189,6 +207,17 @@ export default function Moment2Flow() {
       </div>
 
       <AnswerPage data={answer} />
+
+      {supplementLabel && durationLabel && (
+        <SaveAsDecisionButton
+          question={moment2ToQuestion(supplementLabel, durationLabel)}
+          entryText={buildEntryText(
+            2,
+            moment2ChipsSummary(supplementLabel, durationLabel),
+          )}
+          momentN={2}
+        />
+      )}
     </div>
   );
 }

@@ -797,6 +797,50 @@
       "deleteAccountDesc": "永久抹除 DrRuby 保存的关于你的一切。此操作无法撤销。",
       "disclaimerHeading": "完整法律免责声明",
       "footer": "DrRuby 健康智能 · 以 N=1 原则打造 · © 2026 DrRuby"
+    },
+    "decisions": {
+      "title": "我的决策",
+      "lede": "治疗、产品和诊所都归属于一个决策之下 —— 不必维护各自独立的文件夹。",
+      "startNew": "开始一个新决策",
+      "startPrompt": "你正在考虑什么？",
+      "startHint": "DrRuby 帮你在做出决定前理清这件事 —— 它不是让你写日记。",
+      "active": "进行中的决策",
+      "saved": "已保存与已完成",
+      "empty": "暂无决策",
+      "emptyHint": "在上方开始一个新决策。",
+      "newDrawer": {
+        "title": "新决策",
+        "question": "问题",
+        "type": "类型",
+        "status": "状态",
+        "submit": "保存决策",
+        "submitting": "保存中…"
+      },
+      "detail": {
+        "status": "状态",
+        "brief": "决策摘要",
+        "yourHistory": "你的历史",
+        "similarJourneys": "相似历程",
+        "evidence": "证据",
+        "questionsForClinician": "向临床医生提问",
+        "timeline": "时间线",
+        "addEntry": "添加记录",
+        "entryPlaceholder": "发生了什么？你做了什么决定？",
+        "submit": "添加记录",
+        "submitting": "保存中…",
+        "unavailable": "决策不可用"
+      },
+      "todayPreview": {
+        "title": "你进行中的决策"
+      }
+    },
+    "momentSaveCta": {
+      "label": "保存为决策",
+      "submitting": "保存中…",
+      "saved": "已保存。正在跳转…",
+      "errorPartial": "决策已创建，但首条记录追加失败。",
+      "errorFull": "创建决策失败。",
+      "jumpToDecision": "跳到决策 →"
     }
   },
   "clinic": {

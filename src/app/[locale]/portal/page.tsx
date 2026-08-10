@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { ActiveDecisionsSummary } from "@/components/sections/portal/decisions/ActiveDecisionsSummary";
+import { DecisionsView } from "@/components/sections/portal/decisions/DecisionsView";
 import { HealthView } from "@/components/sections/portal/health/HealthView";
 import { TodayView } from "@/components/sections/portal/today/TodayView";
 import "./portal.css";
@@ -165,32 +167,7 @@ export default function PortalPage() {
             <h1>Home</h1>
             <div className="lede">Here&rsquo;s what deserves your attention today.</div>
             <TodayView onSeeAllSignals={() => go("health")} />
-            <div className="sec">
-              <div className="sec-h">Your active decisions</div>
-              <div className="card">
-                <div className="dec">
-                  <div>
-                    <h4>Should I start HRT?</h4>
-                    <div className="st">Last updated 8 days ago &middot; 2 new relevant journeys</div>
-                  </div>
-                  <span className="dec-badge">Researching</span>
-                </div>
-                <div className="dec">
-                  <div>
-                    <h4>Is Thermage worth it for me?</h4>
-                    <div className="st">Waiting for second consultation</div>
-                  </div>
-                  <span className="dec-badge">Considering</span>
-                </div>
-                <div className="dec">
-                  <div>
-                    <h4>Which strength-training plan should I follow?</h4>
-                    <div className="st">Week 3</div>
-                  </div>
-                  <span className="dec-badge">Trying</span>
-                </div>
-              </div>
-            </div>
+            <ActiveDecisionsSummary onClick={() => go("decisions")} />
             <div className="sec">
               <div className="sec-h">Your progress</div>
               <div className="card">
@@ -255,146 +232,7 @@ export default function PortalPage() {
 
           {/* ===== MY DECISIONS ===== */}
           <div className={on("decisions")} id="v-decisions">
-            <h1>My Decisions</h1>
-            <div className="lede">
-              Treatments, products and clinics live inside a decision &mdash; not as separate
-              folders to maintain.
-            </div>
-            <div className="sec">
-              <div className="sec-h">Start a new decision</div>
-              <div className="card">
-                <div style={{ fontSize: 14, color: "var(--p-ink)", marginBottom: 10 }}>
-                  What are you considering?
-                </div>
-                <div className="ask-ex">
-                  {[
-                    "Thermage",
-                    "Ultherapy",
-                    "Botox",
-                    "Laser",
-                    "Filler",
-                    "HRT",
-                    "A skincare product",
-                    "A doctor or clinic",
-                    "Not sure yet",
-                  ].map((c) => (
-                    <span className="ask-chip" key={c}>
-                      {c}
-                    </span>
-                  ))}
-                </div>
-                <div style={{ fontSize: 12, color: "#a89a95", marginTop: 12 }}>
-                  DrRuby helps you understand the decision before you make it &mdash; it doesn&rsquo;t
-                  ask you to start a diary.
-                </div>
-              </div>
-            </div>
-            <div className="sec">
-              <div className="sec-h">Active decisions</div>
-              <div
-                className="dcard"
-                onClick={() => cmToast("Opening decision · Should I start HRT?")}
-              >
-                <div className="dcard-ic">
-                  <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="9" />
-                    <path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z" />
-                  </svg>
-                </div>
-                <div className="dcard-main">
-                  <div className="dcard-top">
-                    <h4>Should I start HRT?</h4>
-                    <span className="dec-badge">Researching</span>
-                  </div>
-                  <div className="st">Updated 8 days ago</div>
-                  <div className="dcard-src">
-                    <span className="ds you">
-                      <i />You
-                    </span>
-                    <span className="ds sim">
-                      <i />Similar journeys
-                    </span>
-                    <span className="ds ev">
-                      <i />Evidence
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div
-                className="dcard"
-                onClick={() => cmToast("Opening decision · Is Thermage worth it?")}
-              >
-                <div className="dcard-ic">
-                  <svg viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="9" />
-                    <path d="M15.6 8.4l-2.1 5.1-5.1 2.1 2.1-5.1z" />
-                  </svg>
-                </div>
-                <div className="dcard-main">
-                  <div className="dcard-top">
-                    <h4>Is Thermage worth it for me?</h4>
-                    <span className="dec-badge">Considering</span>
-                  </div>
-                  <div className="st">Waiting for second consultation</div>
-                  <div className="dcard-src">
-                    <span className="ds you">
-                      <i />You
-                    </span>
-                    <span className="ds sim">
-                      <i />Similar journeys
-                    </span>
-                    <span className="ds ev">
-                      <i />Evidence
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="sec">
-              <div className="sec-h">Inside a decision</div>
-              <div className="card">
-                <div style={{ fontFamily: "var(--p-serif)", fontSize: 20, marginBottom: 10 }}>
-                  Should I do Thermage?
-                </div>
-                <div className="sub-row">
-                  <span>Clinic consultations</span>
-                  <span className="arr">2</span>
-                </div>
-                <div className="sub-row">
-                  <span>Products considered</span>
-                  <span className="arr">3</span>
-                </div>
-                <div className="sub-row">
-                  <span>Cost &amp; what&rsquo;s included</span>
-                  <span className="arr">&rsaquo;</span>
-                </div>
-                <div className="sub-row">
-                  <span>Concerns</span>
-                  <span className="arr">pain, cost, volume</span>
-                </div>
-                <div className="sub-row">
-                  <span>Related real journeys</span>
-                  <span className="arr">5</span>
-                </div>
-                <div className="sub-row">
-                  <span>Final decision &amp; follow-up</span>
-                  <span className="arr">&mdash;</span>
-                </div>
-              </div>
-            </div>
-            <div className="sec">
-              <div className="sec-h">Saved &amp; completed</div>
-              <div className="card">
-                <div className="sub-row">
-                  <span>Considering Retinol &middot; faded</span>
-                  <span className="arr">&rsaquo;</span>
-                </div>
-                <div className="sub-row">
-                  <span>Botox &middot; did not proceed</span>
-                  <span className="arr">&rsaquo;</span>
-                </div>
-              </div>
-            </div>
+            <DecisionsView />
           </div>
 
           {/* ===== LIBRARY (community) ===== */}

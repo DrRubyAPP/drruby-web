@@ -791,6 +791,50 @@
       "deleteAccountDesc": "Permanently erase everything DrRuby holds about you. This cannot be undone.",
       "disclaimerHeading": "Full legal disclaimer",
       "footer": "DrRuby Health Intelligence · Built with the N=1 principle · © 2026 DrRuby"
+    },
+    "decisions": {
+      "title": "My Decisions",
+      "lede": "Treatments, products and clinics live inside a decision — not as separate folders to maintain.",
+      "startNew": "Start a new decision",
+      "startPrompt": "What are you considering?",
+      "startHint": "DrRuby helps you understand the decision before you make it — it doesn't ask you to start a diary.",
+      "active": "Active decisions",
+      "saved": "Saved & completed",
+      "empty": "No decisions yet",
+      "emptyHint": "Start a new decision above.",
+      "newDrawer": {
+        "title": "New decision",
+        "question": "Question",
+        "type": "Type",
+        "status": "Status",
+        "submit": "Save decision",
+        "submitting": "Saving…"
+      },
+      "detail": {
+        "status": "Status",
+        "brief": "Decision brief",
+        "yourHistory": "Your history",
+        "similarJourneys": "Similar journeys",
+        "evidence": "Evidence",
+        "questionsForClinician": "Questions for clinician",
+        "timeline": "Timeline",
+        "addEntry": "Add entry",
+        "entryPlaceholder": "What happened? What did you decide?",
+        "submit": "Add entry",
+        "submitting": "Saving…",
+        "unavailable": "Decision unavailable"
+      },
+      "todayPreview": {
+        "title": "Your active decisions"
+      }
+    },
+    "momentSaveCta": {
+      "label": "Save as decision",
+      "submitting": "Saving…",
+      "saved": "Saved. Redirecting…",
+      "errorPartial": "Decision created, but first entry failed.",
+      "errorFull": "Create decision failed.",
+      "jumpToDecision": "Jump to decision →"
     }
   },
   "clinic": {

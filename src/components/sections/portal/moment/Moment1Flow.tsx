@@ -1,12 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import AnswerPage from "@/components/sections/portal/AnswerPage";
 import {
   MOMENT1_ANSWER,
   MOMENT1_DATA_SOURCES,
   MOMENT1_SYMPTOMS,
 } from "@/config/user-portal-mock";
-import AnswerPage from "@/components/sections/portal/AnswerPage";
+import {
+  buildEntryText,
+  moment1ChipsSummary,
+  moment1ToQuestion,
+} from "./mappers";
+import { SaveAsDecisionButton } from "./SaveAsDecisionButton";
 
 type Screen = "select" | "loading" | "answer";
 
@@ -21,9 +27,7 @@ export default function Moment1Flow() {
     }
     setSelected((prev) => {
       const next = prev.filter((s) => s !== "all");
-      return next.includes(id)
-        ? next.filter((s) => s !== id)
-        : [...next, id];
+      return next.includes(id) ? next.filter((s) => s !== id) : [...next, id];
     });
   }
 
@@ -41,7 +45,8 @@ export default function Moment1Flow() {
           Moment 1 · My skin changed
         </div>
         <h1 className="font-serif text-[36px] md:text-[44px] font-light text-dr-ink leading-[1.15] mb-3">
-          What did you first notice? <em className="italic text-dr-red">Pick everything that applies.</em>
+          What did you first notice?{" "}
+          <em className="italic text-dr-red">Pick everything that applies.</em>
         </h1>
         <p className="text-[12px] text-dr-mid mb-7 leading-[1.7]">
           Multi-select — choose as many as you like. DrRuby will cross-reference
@@ -128,5 +133,24 @@ export default function Moment1Flow() {
     );
   }
 
-  return <AnswerPage data={MOMENT1_ANSWER} />;
+  const selectedLabels: string[] = (() => {
+    const labels = selected
+      .filter((id) => id !== "all")
+      .map((id) => MOMENT1_SYMPTOMS.find((s) => s.id === id)?.label ?? "")
+      .filter(Boolean);
+    // "all" 特殊处理：把 "All of the above" 作为 label 加入末尾
+    if (selected.includes("all")) labels.push("All of the above");
+    return labels;
+  })();
+
+  return (
+    <>
+      <AnswerPage data={MOMENT1_ANSWER} />
+      <SaveAsDecisionButton
+        question={moment1ToQuestion(selectedLabels)}
+        entryText={buildEntryText(1, moment1ChipsSummary(selectedLabels))}
+        momentN={1}
+      />
+    </>
+  );
 }

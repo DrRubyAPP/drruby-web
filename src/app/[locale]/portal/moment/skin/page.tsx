@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import PortalShell from "@/components/layout/PortalShell";
-import Moment1Flow from "@/components/sections/portal/Moment1Flow";
+import Moment1Flow from "@/components/sections/portal/moment/Moment1Flow";
 
 export default async function MomentSkinPage() {
   const t = await getTranslations("portal");
