@@ -1,8 +1,15 @@
 import { describe, expect, it } from "vitest";
 import type { ConsentSettingDto, ContributionDto } from "./dto";
-import { canShare, canToggle, canWithdrawContribution, isLocked } from "./mappers";
+import {
+  canShare,
+  canToggle,
+  canWithdrawContribution,
+  isLocked,
+} from "./mappers";
 
-const consent = (overrides: Partial<ConsentSettingDto> = {}): ConsentSettingDto => ({
+const consent = (
+  overrides: Partial<ConsentSettingDto> = {},
+): ConsentSettingDto => ({
   id: "c1",
   title: "Use DrRuby for yourself",
   description: "...",
@@ -10,7 +17,9 @@ const consent = (overrides: Partial<ConsentSettingDto> = {}): ConsentSettingDto 
   ...overrides,
 });
 
-const contribution = (overrides: Partial<ContributionDto> = {}): ContributionDto => ({
+const contribution = (
+  overrides: Partial<ContributionDto> = {},
+): ContributionDto => ({
   id: "k1",
   title: "Cycle insights",
   description: "...",
@@ -53,7 +62,9 @@ describe("canShare", () => {
 
 describe("canWithdrawContribution", () => {
   it("shared false → false (nothing to withdraw)", () => {
-    expect(canWithdrawContribution(contribution({ shared: false }))).toBe(false);
+    expect(canWithdrawContribution(contribution({ shared: false }))).toBe(
+      false,
+    );
   });
   it("shared true → true", () => {
     expect(canWithdrawContribution(contribution({ shared: true }))).toBe(true);

@@ -8,8 +8,8 @@ import { apiClient } from "@/lib/api/client";
 import type {
   ConsentSettingDto,
   ContributionDto,
-  UpdateContributionResponse,
   UpdateConsentResponse,
+  UpdateContributionResponse,
 } from "./dto";
 import { canShare, canWithdrawContribution, isLocked } from "./mappers";
 import { WithdrawContributionDialog } from "./WithdrawContributionDialog";
@@ -32,9 +32,8 @@ export function PrivacyView() {
 
 /** Privacy & Consent sec：三档开关 */
 function ConsentSection() {
-  const { data, error, loading, refetch } = useApi<ConsentSettingDto[]>(
-    "/api/consent",
-  );
+  const { data, error, loading, refetch } =
+    useApi<ConsentSettingDto[]>("/api/consent");
 
   if (loading) {
     return (
@@ -110,7 +109,10 @@ function ConsentRow({
         <span>{setting.description}</span>
       </div>
       {toggle.error ? (
-        <ErrorState message={toggle.error.message} onRetry={() => toggle.reset()} />
+        <ErrorState
+          message={toggle.error.message}
+          onRetry={() => toggle.reset()}
+        />
       ) : (
         <label className="switch">
           <input
@@ -131,9 +133,8 @@ function ConsentRow({
 
 /** Data Contributions sec：列表 + 分享/撤回 */
 function ContributionsSection() {
-  const { data, error, loading, refetch } = useApi<ContributionDto[]>(
-    "/api/contributions",
-  );
+  const { data, error, loading, refetch } =
+    useApi<ContributionDto[]>("/api/contributions");
   const [withdrawTargetId, setWithdrawTargetId] = useState<string | null>(null);
 
   if (loading) {
@@ -223,7 +224,10 @@ function ContributionRow({
         <span>{contribution.description}</span>
       </div>
       {share.error ? (
-        <ErrorState message={share.error.message} onRetry={() => share.reset()} />
+        <ErrorState
+          message={share.error.message}
+          onRetry={() => share.reset()}
+        />
       ) : canShare(contribution) ? (
         <button
           type="button"
