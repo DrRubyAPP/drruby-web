@@ -1,4 +1,5 @@
 import { ApiError } from "@/lib/api/errors";
+import { clearBearerToken, getBearerToken } from "@/lib/auth/token";
 
 async function toApiError(res: Response): Promise<ApiError> {
   let body: unknown = null;
@@ -28,13 +29,24 @@ export async function fetchJson<T>(
 ): Promise<T> {
   let res: Response;
   try {
+    // 后端数据 API 仅认 bearer 通道：附上本地存储的 token（无则仅靠 cookie 也会 401）。
+    const token = getBearerToken();
     res = await fetch(path, {
       credentials: "include",
       ...init,
-      headers: { Accept: "application/json", ...init?.headers },
+      headers: {
+        Accept: "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : null),
+        ...init?.headers,
+      },
     });
   } catch {
     throw new ApiError("network_error", 0, "网络异常，请稍后重试");
+  }
+
+  // 401：session 过期 / 软删 / token 失效 → 清本地 token，触发上层重登跳转。
+  if (res.status === 401) {
+    clearBearerToken();
   }
 
   if (!res.ok) {

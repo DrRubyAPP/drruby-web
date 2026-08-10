@@ -24,16 +24,17 @@ vi.mock("@/lib/auth/email", () => ({
 }));
 
 // 用可变 holder 控制 `headers()` 返回值，驱动 requireRole 的登录/角色分支。
+// 后端 API 仅认 bearer：所有用例用 `Authorization: Bearer <token>` 驱动。
 let currentHeaders = new Headers();
 vi.mock("next/headers", () => ({
   headers: async () => currentHeaders,
 }));
 
 /**
- * 走真实 emailOTP 登录流程，返回 cookie 头与 userId，供角色守卫测试复用。
+ * 走真实 emailOTP 登录流程，返回 bearer token 与 userId，供角色守卫测试复用。
  */
 async function signIn(email: string): Promise<{
-  cookieHeader: string;
+  bearerToken: string;
   userId: string;
 }> {
   const { auth } = await import("@/lib/auth/auth");
@@ -51,9 +52,9 @@ async function signIn(email: string): Promise<{
   });
   expect(res.status).toBe(200);
 
-  const cookieHeader = (res.headers.get("set-cookie") ?? "").split(";")[0];
+  const bearerToken = res.headers.get("set-auth-token") ?? "";
   const user = await prisma.userAccount.findFirstOrThrow({ where: { email } });
-  return { cookieHeader, userId: user.id };
+  return { bearerToken, userId: user.id };
 }
 
 describe("requireRole", () => {
@@ -72,9 +73,9 @@ describe("requireRole", () => {
   it("命中：role ∈ roles 时放行并返回 user", async () => {
     const { requireRole } = await import("@/lib/auth/session");
     // 新用户默认 role=user
-    const { cookieHeader, userId } = await signIn("role-user@example.com");
+    const { bearerToken, userId } = await signIn("role-user@example.com");
 
-    currentHeaders = new Headers({ cookie: cookieHeader });
+    currentHeaders = new Headers({ authorization: `Bearer ${bearerToken}` });
     const user = await requireRole("user", "clinic");
     expect(user.id).toBe(userId);
     expect((user as { role?: string }).role).toBe("user");
@@ -82,9 +83,9 @@ describe("requireRole", () => {
 
   it("未命中：role ∉ roles 时抛 403 FORBIDDEN", async () => {
     const { requireRole } = await import("@/lib/auth/session");
-    const { cookieHeader } = await signIn("role-mismatch@example.com");
+    const { bearerToken } = await signIn("role-mismatch@example.com");
 
-    currentHeaders = new Headers({ cookie: cookieHeader });
+    currentHeaders = new Headers({ authorization: `Bearer ${bearerToken}` });
     // 默认 role=user，要求 clinic/collaborator → 403
     await expect(requireRole("clinic", "collaborator")).rejects.toMatchObject({
       name: "AppError",
@@ -96,13 +97,13 @@ describe("requireRole", () => {
   it("已提升角色：DB 改 role=clinic 后 requireRole('clinic') 放行", async () => {
     const { requireRole } = await import("@/lib/auth/session");
     const { prisma } = await import("@/lib/db/prisma");
-    const { cookieHeader, userId } = await signIn("role-clinic@example.com");
+    const { bearerToken, userId } = await signIn("role-clinic@example.com");
     await prisma.userAccount.update({
       where: { id: userId },
       data: { role: "clinic" },
     });
 
-    currentHeaders = new Headers({ cookie: cookieHeader });
+    currentHeaders = new Headers({ authorization: `Bearer ${bearerToken}` });
     const user = await requireRole("clinic");
     expect(user.id).toBe(userId);
   });

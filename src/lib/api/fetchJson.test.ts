@@ -2,6 +2,15 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { ApiError } from "@/lib/api/errors";
 import { fetchJson } from "@/lib/api/fetchJson";
 
+// 模拟 bearer token 存储：默认无 token；具体用例再设定返回值。
+const getBearerToken = vi.fn(() => null as string | null);
+const clearBearerToken = vi.fn();
+vi.mock("@/lib/auth/token", () => ({
+  getBearerToken: () => getBearerToken(),
+  setBearerToken: vi.fn(),
+  clearBearerToken: () => clearBearerToken(),
+}));
+
 function mockFetch(
   res: Partial<Response> & { _json?: unknown; _text?: string },
 ) {
@@ -48,6 +57,44 @@ describe("fetchJson", () => {
         headers: expect.objectContaining({ Accept: "application/json" }),
       }),
     );
+  });
+
+  it("attaches Authorization: Bearer when a token is stored (API 禁 cookie 通道)", async () => {
+    getBearerToken.mockReturnValue("tok-abc");
+    const spy = vi.fn(
+      async () =>
+        ({
+          ok: true,
+          status: 200,
+          text: async () => "{}",
+          json: async () => ({}),
+        }) as unknown as Response,
+    );
+    vi.stubGlobal("fetch", spy);
+    await fetchJson("/api/me");
+    expect(spy).toHaveBeenCalledWith(
+      "/api/me",
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          Authorization: "Bearer tok-abc",
+        }),
+      }),
+    );
+  });
+
+  it("clears stored token on 401 (session 过期 → 重登闭环)", async () => {
+    getBearerToken.mockReturnValue("tok-abc");
+    clearBearerToken.mockClear();
+    mockFetch({
+      ok: false,
+      status: 401,
+      _json: { error: { code: "UNAUTHORIZED", message: "请先登录" } },
+    });
+    await expect(fetchJson("/api/me")).rejects.toMatchObject({
+      code: "UNAUTHORIZED",
+      status: 401,
+    });
+    expect(clearBearerToken).toHaveBeenCalled();
   });
 
   it("4xx with error body → ApiError(code,status,message,issues)", async () => {

@@ -23,8 +23,8 @@ vi.mock("@/lib/auth/email", () => ({
   sendOtpEmail: vi.fn().mockResolvedValue(undefined),
 }));
 
-// 用可变 holder 控制 `headers()` 返回值，从而驱动 requireUser 的 cookie /
-// bearer / 未登录三条路径。
+// 用可变 holder 控制 `headers()` 返回值，从而驱动 requireUser 的 bearer / 未登录
+// 两条路径；cookie 通道现被 `requireUser()` 拒绝（仅 bearer 放行）。
 let currentHeaders = new Headers();
 vi.mock("next/headers", () => ({
   headers: async () => currentHeaders,
@@ -89,13 +89,17 @@ describe("requireUser", () => {
     });
   });
 
-  it("cookie session 通道解析出 user", async () => {
+  it("cookie session 通道被拒：带 cookie 无 bearer → 401", async () => {
     const { requireUser } = await import("@/lib/auth/session");
-    const { cookieHeader, userId } = await signIn("cookie-user@example.com");
+    const { cookieHeader } = await signIn("cookie-user@example.com");
 
+    // 后端 API 已禁 cookie 通道：仅凭 cookie 应被拒。
     currentHeaders = new Headers({ cookie: cookieHeader });
-    const user = await requireUser();
-    expect(user.id).toBe(userId);
+    await expect(requireUser()).rejects.toMatchObject({
+      name: "AppError",
+      code: "UNAUTHORIZED",
+      status: 401,
+    });
   });
 
   it("Bearer token 通道解析出同一 user（bearer 插件已挂载）", async () => {
@@ -107,31 +111,37 @@ describe("requireUser", () => {
     expect(user.id).toBe(userId);
   });
 
-  it("cookie 与 Bearer 两条通道指向同一 user", async () => {
+  it("cookie 通道被拒、Bearer 通道解析出同一 user", async () => {
     const { requireUser } = await import("@/lib/auth/session");
-    const { cookieHeader, bearerToken } = await signIn("both@example.com");
+    const { cookieHeader, bearerToken, userId } =
+      await signIn("both@example.com");
 
+    // 仅 cookie：被拒。
     currentHeaders = new Headers({ cookie: cookieHeader });
-    const viaCookie = await requireUser();
+    await expect(requireUser()).rejects.toMatchObject({
+      name: "AppError",
+      code: "UNAUTHORIZED",
+      status: 401,
+    });
 
+    // 仅 bearer：放行，解析出同一 user（cookie 被忽略）。
     currentHeaders = new Headers({ authorization: `Bearer ${bearerToken}` });
     const viaBearer = await requireUser();
-
-    expect(viaCookie.id).toBe(viaBearer.id);
+    expect(viaBearer.id).toBe(userId);
   });
 
-  it("软删用户即使持有有效 session 也抛 401（deletedAt 拒鉴权）", async () => {
+  it("软删用户即使持有有效 token 也抛 401（deletedAt 拒鉴权）", async () => {
     const { requireUser } = await import("@/lib/auth/session");
     const { prisma } = await import("@/lib/db/prisma");
-    const { cookieHeader, userId } = await signIn("deleted@example.com");
+    const { bearerToken, userId } = await signIn("deleted@example.com");
 
-    // task-10 软删脱敏后，session/token 仍有效但账号已注销 → 应拒登。
+    // task-10 软删脱敏后，token 仍有效但账号已注销 → 应拒登。
     await prisma.userAccount.update({
       where: { id: userId },
       data: { deletedAt: new Date() },
     });
 
-    currentHeaders = new Headers({ cookie: cookieHeader });
+    currentHeaders = new Headers({ authorization: `Bearer ${bearerToken}` });
     await expect(requireUser()).rejects.toMatchObject({
       name: "AppError",
       code: "UNAUTHORIZED",

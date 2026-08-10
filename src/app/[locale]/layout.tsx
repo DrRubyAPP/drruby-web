@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
+import { TokenBootstrap } from "@/components/auth/TokenBootstrap";
 import { routing } from "@/i18n/routing";
 import { normalizeTheme, THEME_COOKIE } from "@/lib/theme";
 import "../globals.css";
@@ -67,7 +68,10 @@ export default async function LocaleLayout({
       suppressHydrationWarning
     >
       <body>
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <NextIntlClientProvider>
+          <TokenBootstrap />
+          {children}
+        </NextIntlClientProvider>
       </body>
     </html>
   );
