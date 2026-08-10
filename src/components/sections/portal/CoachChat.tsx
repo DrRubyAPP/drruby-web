@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { COACH_QUICK_CHIPS } from "@/config/user-portal-mock";
 import { useMutation } from "@/hooks/useMutation";
-import { apiClient, ApiError } from "@/lib/api";
+import { ApiError, apiClient } from "@/lib/api";
 import { toApiMessages, toErrorMessage } from "./coach-helpers";
 
 // §11 AI Coach — 接入 /api/ask 护栏 LLM 代理：
@@ -47,7 +47,9 @@ function MessageBubble({
   if (item.type === "user") {
     return (
       <div className="self-end max-w-[78%] bg-dr-white border border-dr-border px-3.5 py-2.5 rounded-[12px_2px_12px_12px]">
-        <div className="text-[12px] text-dr-ink leading-[1.55]">{item.content}</div>
+        <div className="text-[12px] text-dr-ink leading-[1.55]">
+          {item.content}
+        </div>
         {item.timestamp && (
           <div className="text-[9px] text-dr-mid mt-1">{item.timestamp}</div>
         )}
@@ -58,7 +60,9 @@ function MessageBubble({
   if (item.type === "typing") {
     return (
       <div className="self-start max-w-[85%] bg-dr-white border border-dr-border px-3.5 py-2.5 rounded-[2px_12px_12px_12px]">
-        <div className="text-[12px] text-dr-mid leading-[1.7]">{item.content}</div>
+        <div className="text-[12px] text-dr-mid leading-[1.7]">
+          {item.content}
+        </div>
       </div>
     );
   }
@@ -66,7 +70,9 @@ function MessageBubble({
   if (item.type === "error") {
     return (
       <div className="self-start max-w-[85%] bg-dr-white border border-dr-alert px-3.5 py-2.5 rounded-[2px_12px_12px_12px]">
-        <div className="text-[12px] text-dr-alert leading-[1.7]">{item.content}</div>
+        <div className="text-[12px] text-dr-alert leading-[1.7]">
+          {item.content}
+        </div>
         <button
           type="button"
           onClick={() => onRetry(item)}
@@ -81,7 +87,9 @@ function MessageBubble({
   // explain (LLM 回复)
   return (
     <div className="self-start max-w-[85%] bg-dr-white border border-dr-border px-3.5 py-2.5 rounded-[2px_12px_12px_12px]">
-      <div className="text-[12px] text-dr-ink leading-[1.7]">{item.content}</div>
+      <div className="text-[12px] text-dr-ink leading-[1.7]">
+        {item.content}
+      </div>
     </div>
   );
 }
@@ -100,7 +108,8 @@ export default function CoachChat() {
       lastErrorRef.current = null;
       return await apiClient.post<AskResponse>("/api/ask", payload);
     } catch (e) {
-      lastErrorRef.current = e instanceof ApiError ? e : new ApiError("unknown", 0, "未知错误");
+      lastErrorRef.current =
+        e instanceof ApiError ? e : new ApiError("unknown", 0, "未知错误");
       throw e; // re-throw 让 useMutation 处理 401 → notifyUnauthorized
     }
   });
@@ -274,7 +283,8 @@ export default function CoachChat() {
           </button>
         </form>
         <div className="text-[8px] text-dr-mid mt-1.5 text-center">
-          DrRuby provides health information, not medical advice · Always consult your doctor
+          DrRuby provides health information, not medical advice · Always
+          consult your doctor
         </div>
       </div>
     </div>
