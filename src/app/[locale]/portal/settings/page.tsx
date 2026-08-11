@@ -1,14 +1,24 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import PortalShell from "@/components/layout/PortalShell";
-import { PORTAL_USER } from "@/config/user-portal-mock";
+import { AccountSummary } from "@/components/sections/portal/settings/AccountSummary";
+import { DeleteAccountDialog } from "@/components/sections/portal/settings/DeleteAccountDialog";
+import { ExportDataButton } from "@/components/sections/portal/settings/ExportDataButton";
 
 // §14.1 Local-first: data export/delete always available, no dark patterns.
 // §7.4.1 Full legal disclaimer lives here (answer pages link to it).
 
 const SHARED_CLINICS = [
-  { name: "Clarity Skin Clinic", shared: "Skin scans + AI Reports", since: "Jun 2, 2026" },
-  { name: "Meridian Women's Health", shared: "Hormonal patterns + Cycle data", since: "May 15, 2026" },
+  {
+    name: "Clarity Skin Clinic",
+    shared: "Skin scans + AI Reports",
+    since: "Jun 2, 2026",
+  },
+  {
+    name: "Meridian Women's Health",
+    shared: "Hormonal patterns + Cycle data",
+    since: "May 15, 2026",
+  },
 ];
 
 const TOGGLES = [
@@ -57,21 +67,8 @@ export default async function SettingsPage() {
             <span className="block w-2.5 h-px bg-dr-red" />
             {t("settings.accountHeading")}
           </div>
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="w-10 h-10 rounded-full bg-[rgba(200,16,46,0.1)] flex items-center justify-center text-[13px] text-dr-red font-medium">
-              {PORTAL_USER.initials}
-            </div>
-            <div className="flex-1 min-w-[180px]">
-              <div className="text-[13px] text-dr-ink leading-tight">{PORTAL_USER.fullName}</div>
-              <div className="text-[11px] text-dr-mid mt-0.5">{PORTAL_USER.email}</div>
-            </div>
-            <button
-              type="button"
-              className="text-[10px] font-semibold tracking-[0.14em] uppercase text-dr-ink border border-dr-border px-3 py-2 cursor-pointer hover:border-dr-mid transition-colors"
-            >
-              {t("settings.editProfile")}
-            </button>
-          </div>
+          {/* 客户端岛：读 GET /api/me 只读身份 + 链到 Profile 编辑 */}
+          <AccountSummary />
         </div>
 
         {/* Sharing controls — §14 */}
@@ -87,7 +84,9 @@ export default async function SettingsPage() {
                 className="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0 flex-wrap"
               >
                 <div className="flex-1 min-w-[200px]">
-                  <div className="text-[12px] text-dr-ink leading-tight">{c.name}</div>
+                  <div className="text-[12px] text-dr-ink leading-tight">
+                    {c.name}
+                  </div>
                   <div className="text-[10px] text-dr-mid mt-0.5">
                     Sharing: {c.shared} · since {c.since}
                   </div>
@@ -115,10 +114,17 @@ export default async function SettingsPage() {
           </div>
           <div className="flex flex-col divide-y divide-dr-border">
             {TOGGLES.map((t) => (
-              <div key={t.id} className="flex items-start justify-between gap-4 py-3.5 first:pt-0 last:pb-0">
+              <div
+                key={t.id}
+                className="flex items-start justify-between gap-4 py-3.5 first:pt-0 last:pb-0"
+              >
                 <div className="flex-1">
-                  <div className="text-[12px] text-dr-ink leading-tight">{t.label}</div>
-                  <div className="text-[11px] text-dr-mid mt-1 leading-[1.6]">{t.desc}</div>
+                  <div className="text-[12px] text-dr-ink leading-tight">
+                    {t.label}
+                  </div>
+                  <div className="text-[11px] text-dr-mid mt-1 leading-[1.6]">
+                    {t.desc}
+                  </div>
                 </div>
                 {/* Visual toggle (non-interactive in static render) */}
                 <div
@@ -144,28 +150,10 @@ export default async function SettingsPage() {
             {t("settings.dataOwnershipHeading")}
           </div>
           <div className="flex flex-col gap-2.5">
-            <button
-              type="button"
-              className="text-left p-3.5 border border-dr-border hover:border-dr-mid transition-colors cursor-pointer"
-            >
-              <div className="text-[12px] text-dr-ink leading-tight">
-                {t("settings.exportData")}
-              </div>
-              <div className="text-[10px] text-dr-mid mt-1">
-                {t("settings.exportDataDesc")}
-              </div>
-            </button>
-            <button
-              type="button"
-              className="text-left p-3.5 border border-dr-red hover:bg-[rgba(200,16,46,0.02)] transition-colors cursor-pointer"
-            >
-              <div className="text-[12px] text-dr-red leading-tight">
-                {t("settings.deleteAccount")}
-              </div>
-              <div className="text-[10px] text-dr-mid mt-1">
-                {t("settings.deleteAccountDesc")}
-              </div>
-            </button>
+            {/* 客户端岛：bearer blob 下载 GET /api/me/export */}
+            <ExportDataButton />
+            {/* 客户端岛：二次确认 → POST /api/me/delete → 清 token 跳登录 */}
+            <DeleteAccountDialog />
           </div>
         </div>
 
@@ -177,35 +165,46 @@ export default async function SettingsPage() {
           </div>
           <div className="text-[11px] text-dr-ink leading-[1.8] space-y-2.5">
             <p>
-              DrRuby provides health insights based on your personal data, not medical diagnoses.
-              Always consult a qualified healthcare provider for medical concerns.
+              DrRuby provides health insights based on your personal data, not
+              medical diagnoses. Always consult a qualified healthcare provider
+              for medical concerns.
             </p>
             <p>
-              DrRuby does not claim to diagnose, cure, treat, or prevent any disease. The Skin
-              Health Intelligence Framework outputs pattern-based observations, not clinical
-              determinations. Domain C (Structural Aging Signals) is intentionally not output in
-              the MVP phase.
+              DrRuby does not claim to diagnose, cure, treat, or prevent any
+              disease. The Skin Health Intelligence Framework outputs
+              pattern-based observations, not clinical determinations. Domain C
+              (Structural Aging Signals) is intentionally not output in the MVP
+              phase.
             </p>
             <p>
-              DrRuby does not calculate or claim biological age, aging speed, or any age-anchored
-              score. References to "baseline" or "patterns typical for women your age" refer to
-              population reference ranges from the Brenner knowledge base, not a determination of
-              your individual biological age.
+              DrRuby does not calculate or claim biological age, aging speed, or
+              any age-anchored score. References to "baseline" or "patterns
+              typical for women your age" refer to population reference ranges
+              from the Brenner knowledge base, not a determination of your
+              individual biological age.
             </p>
             <p>
-              Supplement efficacy verdicts (CONTINUE / STOP / PARTIAL / TOO EARLY) are based on
-              comparison to your personal baseline and Brenner-reviewed target indicators. They are
-              not medical advice. Do not stop or start any medication or supplement based solely on
+              Supplement efficacy verdicts (CONTINUE / STOP / PARTIAL / TOO
+              EARLY) are based on comparison to your personal baseline and
+              Brenner-reviewed target indicators. They are not medical advice.
+              Do not stop or start any medication or supplement based solely on
               DrRuby output — discuss with your healthcare provider.
             </p>
             <p>
-              Your health data is stored locally on your device by default. Sharing with clinics or
-              for anonymized research is opt-in and revocable. See{" "}
-              <Link href="/portal/settings" className="text-dr-red underline underline-offset-2">
+              Your health data is stored locally on your device by default.
+              Sharing with clinics or for anonymized research is opt-in and
+              revocable. See{" "}
+              <Link
+                href="/portal/settings"
+                className="text-dr-red underline underline-offset-2"
+              >
                 Privacy Policy
               </Link>{" "}
               and{" "}
-              <Link href="/portal/settings" className="text-dr-red underline underline-offset-2">
+              <Link
+                href="/portal/settings"
+                className="text-dr-red underline underline-offset-2"
+              >
                 Terms of Service
               </Link>{" "}
               for full details.
