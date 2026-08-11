@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import PortalShell from "@/components/layout/PortalShell";
 import MedicalDisclaimer from "@/components/common/MedicalDisclaimer";
-import { CONNECTED_SOURCES, PORTAL_USER } from "@/config/user-portal-mock";
+import PortalShell from "@/components/layout/PortalShell";
+import { ProfileIdentityCard } from "@/components/sections/portal/profile/ProfileIdentityCard";
+import { CONNECTED_SOURCES } from "@/config/user-portal-mock";
 
 // §12.1 Health Profile — non-anxiety-inducing layout.
 // Per §3 design principle: don't lead with scores. Frame as context, not judgement.
@@ -46,29 +46,16 @@ export default async function ProfilePage() {
       pageSub={t("profile.pageSub")}
     >
       <div className="max-w-[820px]">
-        {/* Identity */}
-        <div className="bg-dr-white border border-dr-border p-5 mb-3 flex items-center gap-4 flex-wrap">
-          <div className="w-14 h-14 rounded-full bg-[rgba(200,16,46,0.1)] flex items-center justify-center text-[18px] text-dr-red font-medium">
-            {PORTAL_USER.initials}
-          </div>
-          <div className="flex-1 min-w-[200px]">
-            <div className="font-serif text-[22px] font-light text-dr-ink leading-tight">
-              {PORTAL_USER.fullName}
-            </div>
-            <div className="text-[11px] text-dr-mid mt-0.5">{PORTAL_USER.email}</div>
-          </div>
-          <Link
-            href="/portal/settings"
-            className="text-[10px] font-semibold tracking-[0.14em] uppercase text-dr-ink no-underline border border-dr-border px-3 py-2 hover:border-dr-mid transition-colors"
-          >
-            {t("common.editSettings")}
-          </Link>
-        </div>
+        {/* Identity — 客户端岛：读 GET /api/me + 内联改 name */}
+        <ProfileIdentityCard />
 
         {/* Facts grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
           {PROFILE_FACTS.map((f) => (
-            <div key={f.label} className="bg-dr-white border border-dr-border p-4">
+            <div
+              key={f.label}
+              className="bg-dr-white border border-dr-border p-4"
+            >
               <div className="text-[9px] font-semibold tracking-[0.2em] uppercase text-dr-red mb-2 flex items-center gap-2">
                 <span className="block w-2.5 h-px bg-dr-red" />
                 {f.label}
@@ -94,8 +81,12 @@ export default async function ProfilePage() {
               >
                 <span className="text-[18px] flex-shrink-0">{src.icon}</span>
                 <div className="flex-1 min-w-0">
-                  <div className="text-[12px] text-dr-ink leading-tight">{src.name}</div>
-                  <div className="text-[9px] text-dr-mid mt-0.5 capitalize">{src.status}</div>
+                  <div className="text-[12px] text-dr-ink leading-tight">
+                    {src.name}
+                  </div>
+                  <div className="text-[9px] text-dr-mid mt-0.5 capitalize">
+                    {src.status}
+                  </div>
                 </div>
                 {src.status === "connected" ? (
                   <span className="w-1.5 h-1.5 rounded-full bg-dr-success flex-shrink-0" />
@@ -124,12 +115,21 @@ export default async function ProfilePage() {
           </div>
           <div className="flex flex-col divide-y divide-dr-border">
             {CONDITIONS.map((c) => (
-              <div key={c.name} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
+              <div
+                key={c.name}
+                className="flex items-center justify-between py-3 first:pt-0 last:pb-0"
+              >
                 <div>
-                  <div className="text-[12px] text-dr-ink leading-tight">{c.name}</div>
-                  <div className="text-[9px] text-dr-mid mt-0.5">Noted {c.noted}</div>
+                  <div className="text-[12px] text-dr-ink leading-tight">
+                    {c.name}
+                  </div>
+                  <div className="text-[9px] text-dr-mid mt-0.5">
+                    Noted {c.noted}
+                  </div>
                 </div>
-                <div className={`text-[9px] font-semibold tracking-[0.14em] uppercase ${STATUS_STYLE[c.status]}`}>
+                <div
+                  className={`text-[9px] font-semibold tracking-[0.14em] uppercase ${STATUS_STYLE[c.status]}`}
+                >
                   {t(STATUS_KEY[c.status] as never)}
                 </div>
               </div>
@@ -159,8 +159,12 @@ export default async function ProfilePage() {
                   <div className="text-[9px] font-semibold tracking-[0.14em] uppercase text-dr-mid">
                     {item.date}
                   </div>
-                  <div className="text-[12px] text-dr-ink leading-tight mt-0.5">{item.label}</div>
-                  <div className="text-[10px] text-dr-mid mt-0.5">{item.note}</div>
+                  <div className="text-[12px] text-dr-ink leading-tight mt-0.5">
+                    {item.label}
+                  </div>
+                  <div className="text-[10px] text-dr-mid mt-0.5">
+                    {item.note}
+                  </div>
                 </div>
               </div>
             ))}
