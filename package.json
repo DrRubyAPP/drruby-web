@@ -25,6 +25,7 @@
     "db:migrate:status": "prisma migrate status",
     "db:studio": "prisma studio",
     "db:push": "prisma db push",
+    "db:seed": "tsx prisma/seed.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {

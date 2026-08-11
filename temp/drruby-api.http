@@ -52,7 +52,7 @@ Origin: {{baseUrl}}
 
 {
   "email": "{{email}}",
-  "otp": "433792"
+  "otp": "349438"
 }
 
 > {%
@@ -62,7 +62,18 @@ Origin: {{baseUrl}}
 ### 1.3 当前 session（better-auth）
 GET {{api}}/auth/get-session
 
-### 1.4 登出（better-auth POST /api/auth/sign-out）
+### 1.4 换发 bearer token（cookie session → bearer；未登录→401）
+###     场景：Google 整页重定向登录 / 页面刷新时本地无 bearer，用 cookie 换取。
+###     数据 API 只认 bearer、不认 cookie；此端点仅做等价换发，不扩大鉴权面。
+###     走 cookie 通道（REST Client 自带 session cookie），返回 { token }。
+GET {{api}}/auth/token
+
+> {%
+  client.log(`[${request.method}] ${request.url} → ${response.status}`);
+  client.log(JSON.stringify(response.body, null, 2));
+%}
+
+### 1.5 登出（better-auth POST /api/auth/sign-out）
 ###     cookie 通道：清掉 session cookie；bearer 通道：吊销当前 token。
 ###     登出后立即重放 1.3 / 2.1 应 401（未登录）。
 POST {{api}}/auth/sign-out
@@ -416,11 +427,49 @@ Content-Type: application/json
 
 
 ###############################################################################
-# §7 页面 / 文档（浏览器辅助）
+# §7 公开 / 营销端点（无需登录 · Mailchimp）
 ###############################################################################
 
-### 7.1 OpenAPI 文档 JSON
+### 7.1 GET /health — 服务 + Mailchimp 配置健康（全配→200 ok；缺项→503 degraded）
+###     无鉴权；mailchimp.{apiKey,serverPrefix,audienceId} ∈ configured|missing
+GET {{api}}/health
+
+> {%
+  client.log(`[${request.method}] ${request.url} → ${response.status}`);
+  client.log(JSON.stringify(response.body, null, 2));
+%}
+
+### 7.2 POST /mailchimp/subscribe — 落地页订阅（无鉴权；email 必填，其余可选）
+###     formId ∈ home|skin|healthspan；透传 Mailchimp 状态码与 body
+POST {{api}}/mailchimp/subscribe
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "firstName": "Ruby",
+  "formId": "home"
+}
+
+> {%
+  client.log(`[${request.method}] ${request.url} → ${response.status}`);
+  client.log(JSON.stringify(response.body, null, 2));
+%}
+
+### 7.3 subscribe 非法邮箱 → 400（z.email 校验）
+POST {{api}}/mailchimp/subscribe
+Content-Type: application/json
+
+{
+  "email": "not-an-email"
+}
+
+
+###############################################################################
+# §8 页面 / 文档（浏览器辅助）
+###############################################################################
+
+### 8.1 OpenAPI 文档 JSON
 GET {{baseUrl}}/openapi.json
 
-### 7.2 My Body 视图并发取的三端点（task-13 H 组）— 已在 §3.1 / §3.6 / §3.7 覆盖
+### 8.2 My Body 视图并发取的三端点（task-13 H 组）— 已在 §3.1 / §3.6 / §3.7 覆盖
 ###     /api/signals · /api/hormone-layer · /api/skin-scan/latest
