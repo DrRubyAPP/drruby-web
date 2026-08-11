@@ -737,7 +737,40 @@
       "backToList": "← 所有报告",
       "summaryHeading": "可带给医生的摘要",
       "summaryDesc": "请在下次就诊前将此报告分享给你的医生。DrRuby 不作诊断 — 它为你的医生提供进行高效对话所需的纵向背景。",
-      "shareCta": "分享给诊所 →"
+      "shareCta": "分享给诊所 →",
+      "detailPageTitle": "报告",
+      "detailPageSub2": "AI 工具 · 你的健康记录",
+      "kind": {
+        "lab": "化验",
+        "imaging": "影像",
+        "checkup": "体检",
+        "vitals": "生命体征"
+      },
+      "status": {
+        "pending": "待处理",
+        "processing": "处理中",
+        "done": "已完成",
+        "manual": "手动录入"
+      },
+      "addCta": "+ 新增报告",
+      "empty": "还没有报告。添加你的第一份健康报告，开始建立你的记录。",
+      "emptyCta": "添加第一份报告",
+      "loadError": "无法加载你的报告，请重试。",
+      "notFound": "未找到该报告。",
+      "sourceLabel": "来源",
+      "form": {
+        "title": "新增报告",
+        "kind": "类型",
+        "titleField": "标题",
+        "source": "来源（可选）",
+        "recordedAt": "记录日期",
+        "titleRequired": "标题为必填项。",
+        "dateRequired": "记录日期为必填项。",
+        "submit": "添加报告",
+        "submitting": "添加中…",
+        "cancel": "取消",
+        "error": "无法保存报告，请检查字段后重试。"
+      }
     },
     "clinic": {
       "pageTitle": "预约诊所",

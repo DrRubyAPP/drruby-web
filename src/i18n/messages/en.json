@@ -731,7 +731,40 @@
       "backToList": "← All reports",
       "summaryHeading": "Doctor-ready summary",
       "summaryDesc": "Share this report with your physician before your next visit. DrRuby doesn't diagnose — it gives your doctor the longitudinal context they need to have a productive conversation with you.",
-      "shareCta": "Share with a clinic →"
+      "shareCta": "Share with a clinic →",
+      "detailPageTitle": "Report",
+      "detailPageSub2": "AI Tools · Your health record",
+      "kind": {
+        "lab": "Lab",
+        "imaging": "Imaging",
+        "checkup": "Checkup",
+        "vitals": "Vitals"
+      },
+      "status": {
+        "pending": "Pending",
+        "processing": "Processing",
+        "done": "Done",
+        "manual": "Manual"
+      },
+      "addCta": "+ New report",
+      "empty": "No reports yet. Add your first health report to start building your record.",
+      "emptyCta": "Add your first report",
+      "loadError": "Couldn't load your reports. Please try again.",
+      "notFound": "Report not found.",
+      "sourceLabel": "Source",
+      "form": {
+        "title": "New report",
+        "kind": "Type",
+        "titleField": "Title",
+        "source": "Source (optional)",
+        "recordedAt": "Recorded date",
+        "titleRequired": "Title is required.",
+        "dateRequired": "Recorded date is required.",
+        "submit": "Add report",
+        "submitting": "Adding…",
+        "cancel": "Cancel",
+        "error": "Couldn't save the report. Please check the fields and try again."
+      }
     },
     "clinic": {
       "pageTitle": "Book a Clinic",
