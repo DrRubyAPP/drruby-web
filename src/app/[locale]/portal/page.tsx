@@ -55,11 +55,10 @@ type View =
   | "research"
   | "privacy";
 
-const NAV: { id: View; title: string; sub: string; icon: React.ReactNode }[] = [
+const NAV: { id: View; titleKey: string; icon: React.ReactNode }[] = [
   {
     id: "today",
-    title: "Home",
-    sub: "Today’s feed",
+    titleKey: "dashboard.tabs.today",
     icon: (
       <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
         <path d="M4 11l8-7 8 7" />
@@ -69,8 +68,7 @@ const NAV: { id: View; title: string; sub: string; icon: React.ReactNode }[] = [
   },
   {
     id: "health",
-    title: "My Body",
-    sub: "Your data & changes",
+    titleKey: "dashboard.tabs.health",
     icon: (
       <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 20s-7.5-4.35-9.5-8.5C.8 8 2.3 4.5 6 4.5c2 0 3.6 1.2 6 3.8 2.4-2.6 4-3.8 6-3.8 3.7 0 5.2 3.5 3.5 7C19.5 15.65 12 20 12 20z" />
@@ -79,8 +77,7 @@ const NAV: { id: View; title: string; sub: string; icon: React.ReactNode }[] = [
   },
   {
     id: "decisions",
-    title: "My Decisions",
-    sub: "What you’re weighing",
+    titleKey: "dashboard.tabs.decisions",
     icon: (
       <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
         <path d="M9 11l3 3 8-8" />
@@ -90,8 +87,7 @@ const NAV: { id: View; title: string; sub: string; icon: React.ReactNode }[] = [
   },
   {
     id: "community",
-    title: "Library",
-    sub: "Learn from real journeys",
+    titleKey: "dashboard.tabs.community",
     icon: (
       <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
         <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
@@ -103,8 +99,7 @@ const NAV: { id: View; title: string; sub: string; icon: React.ReactNode }[] = [
   },
   {
     id: "research",
-    title: "Research",
-    sub: "Studies you can join · opt-in",
+    titleKey: "dashboard.tabs.research",
     icon: (
       <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
         <path d="M9 3h6" />
@@ -114,8 +109,7 @@ const NAV: { id: View; title: string; sub: string; icon: React.ReactNode }[] = [
   },
   {
     id: "privacy",
-    title: "Profile",
-    sub: "Account & privacy",
+    titleKey: "dashboard.tabs.privacy",
     icon: (
       <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="8" r="4" />
@@ -197,7 +191,7 @@ export default function PortalPage() {
             >
               <span className="pt-ic">{item.icon}</span>
               <span className="pt-tx">
-                <b>{item.title}</b>
+                <b>{t(item.titleKey)}</b>
               </span>
             </button>
           ))}
@@ -266,8 +260,7 @@ export default function PortalPage() {
                   ))}
                 </div>
                 <div style={{ fontSize: 12, color: "#a89a95", marginTop: 12 }}>
-                  DrRuby explains results, shows what changed, and helps you form questions &mdash;
-                  it does not give medical advice or tell you what to do.
+                  {t("dashboard.ask.disclaimer")}
                 </div>
               </div>
             </div>
@@ -708,7 +701,7 @@ export default function PortalPage() {
             <h1>Profile &amp; Privacy</h1>
             <div className="pf-head">
               {meErr ? (
-                <ErrorState message="Couldn&rsquo;t load profile" onRetry={refetchMe} />
+                <ErrorState message={t("dashboard.profile.error")} onRetry={refetchMe} />
               ) : (
                 <>
                   <div className="pf-av">{me ? (getInitials(meName) || "—") : "—"}</div>
@@ -817,33 +810,33 @@ export default function PortalPage() {
       >
         <div className="cm2-mbox">
           <div style={{ fontSize: 11, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--p-red)", fontWeight: 700 }}>
-            Ask a question
+            {t("dashboard.modal.eyebrow")}
           </div>
           <div style={{ fontFamily: "var(--p-serif)", fontSize: 22, margin: "4px 0 4px" }}>
-            What are you trying to do?
+            {t("dashboard.modal.title")}
           </div>
           <div style={{ fontSize: 13, color: "#999", marginBottom: 14 }}>
-            Choosing a starting point makes your question &mdash; and the answers &mdash; more useful.
+            {t("dashboard.modal.subtitle")}
           </div>
           <div className="cm2-choices">
             <button className="cm2-choice" onClick={() => go("decisions")}>
-              <b>Make a decision</b>
+              <b>{t("dashboard.modal.choices.decision")}</b>
               <span>Should I do this?</span>
             </button>
             <button className="cm2-choice" onClick={() => router.push("/portal/coach")}>
-              <b>Understand something</b>
+              <b>{t("dashboard.modal.choices.understand")}</b>
               <span>What does this mean?</span>
             </button>
             <button className="cm2-choice" onClick={() => go("community")}>
-              <b>Ask for others&rsquo; experience</b>
+              <b>{t("dashboard.modal.choices.others")}</b>
               <span>Has anyone been through this?</span>
             </button>
             <button className="cm2-choice" onClick={() => router.push("/portal/moment/feel")}>
-              <b>Share my experience</b>
+              <b>{t("dashboard.modal.choices.share")}</b>
               <span>What happened to me</span>
             </button>
             <button className="cm2-choice" onClick={() => go("health")}>
-              <b>Show my results</b>
+              <b>{t("dashboard.modal.choices.results")}</b>
               <span>With interval &amp; context</span>
             </button>
           </div>

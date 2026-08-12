@@ -618,16 +618,38 @@
         "placeholder": "我的血检结果对我意味着什么？",
         "button": "提问",
         "loading": "正在提问…",
-        "error": "无法获取答案，请重试。"
+        "error": "无法获取答案，请重试。",
+        "disclaimer": "DrRuby 解释结果、展示变化、帮你形成问题 — 不提供医疗建议，也不替你做决定。"
       },
       "profile": {
         "memberSince": "{email} · {year} 年加入",
         "logout": "登出",
+        "error": "无法加载个人资料",
         "plan": {
           "free": "免费版 — 了解自己。",
           "plus": "Plus 版 — 更深入的洞察。",
           "pro": "Pro 版 — 全方位健康寿命陪伴。",
           "unknown": "—"
+        }
+      },
+      "tabs": {
+        "today": "首页",
+        "health": "我的身体",
+        "decisions": "我的决策",
+        "community": "图书馆",
+        "research": "研究",
+        "privacy": "个人资料"
+      },
+      "modal": {
+        "eyebrow": "提出问题",
+        "title": "你想做什么？",
+        "subtitle": "选择一个起点，能让你的问题 — 以及答案 — 更有用。",
+        "choices": {
+          "decision": "做一个决定",
+          "understand": "理解某件事",
+          "others": "问问他人的经验",
+          "share": "分享我的经历",
+          "results": "查看我的结果"
         }
       }
     },

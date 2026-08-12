@@ -612,16 +612,38 @@
         "placeholder": "What does my blood test mean for me?",
         "button": "Ask",
         "loading": "Asking…",
-        "error": "Couldn't get an answer. Try again."
+        "error": "Couldn't get an answer. Try again.",
+        "disclaimer": "DrRuby explains results, shows what changed, and helps you form questions — it does not give medical advice or tell you what to do."
       },
       "profile": {
         "memberSince": "{email} · Member since {year}",
         "logout": "Log out",
+        "error": "Couldn't load profile",
         "plan": {
           "free": "Free — Remember yourself.",
           "plus": "Plus — Deeper insights.",
           "pro": "Pro — Full healthspan companion.",
           "unknown": "—"
+        }
+      },
+      "tabs": {
+        "today": "Home",
+        "health": "My Body",
+        "decisions": "My Decisions",
+        "community": "Library",
+        "research": "Research",
+        "privacy": "Profile"
+      },
+      "modal": {
+        "eyebrow": "Ask a question",
+        "title": "What are you trying to do?",
+        "subtitle": "Choosing a starting point makes your question — and the answers — more useful.",
+        "choices": {
+          "decision": "Make a decision",
+          "understand": "Understand something",
+          "others": "Ask for others' experience",
+          "share": "Share my experience",
+          "results": "Show my results"
         }
       }
     },
