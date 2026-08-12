@@ -365,13 +365,7 @@ export default function PortalPage() {
               <div className="sec-h">Relevant to your decision</div>
               <div className="card">
                 <div className="ask-ex">
-                  {["Considering Thermage", "Firmness & laxity", "Dry skin", "First treatment", "Deciding now"].map(
-                    (c) => (
-                      <span className="ask-chip" key={c}>
-                        {c}
-                      </span>
-                    ),
-                  )}
+                  <span className="coming-soon">{t("dashboard.comingSoon")}</span>
                 </div>
                 <div className="cm2-note">
                   Matched by your <b>decision, goal, concerns, and timing</b> &mdash; not by age,
@@ -379,22 +373,17 @@ export default function PortalPage() {
                 </div>
                 <div className="cm2-counts">
                   <div className="cm2-stat">
-                    <b>248</b>
+                    <span className="coming-soon">{t("dashboard.comingSoon")}</span>
                     <span>journeys</span>
                   </div>
                   <div className="cm2-stat">
-                    <b>63</b>
+                    <span className="coming-soon">{t("dashboard.comingSoon")}</span>
                     <span>discussions</span>
                   </div>
                   <div className="cm2-stat">
-                    <b>42</b>
+                    <span className="coming-soon">{t("dashboard.comingSoon")}</span>
                     <span>with photos</span>
                   </div>
-                </div>
-                <div style={{ fontSize: 11.5, color: "#b3a9a4", marginTop: 12, fontStyle: "italic" }}>
-                  Illustrative numbers (pre-launch). DrRuby distinguishes illustrative examples from
-                  early and mature collections &mdash; it never implies evidence it hasn&rsquo;t
-                  earned.
                 </div>
               </div>
             </div>
@@ -575,23 +564,19 @@ export default function PortalPage() {
               <div className="card">
                 <div className="found">
                   <div>
-                    <div className="n">42</div>
+                    <div className="n"><span className="coming-soon">{t("dashboard.comingSoon")}</span></div>
                     <div className="l">new journeys</div>
                   </div>
                   <div>
-                    <div className="n">18</div>
+                    <div className="n"><span className="coming-soon">{t("dashboard.comingSoon")}</span></div>
                     <div className="l">long-term updates</div>
                   </div>
                   <div>
-                    <div className="n" style={{ fontSize: 18, paddingTop: 6 }}>
-                      Thermage
-                    </div>
+                    <div className="n"><span className="coming-soon">{t("dashboard.comingSoon")}</span></div>
                     <div className="l">most discussed</div>
                   </div>
                   <div>
-                    <div className="n" style={{ fontSize: 18, paddingTop: 6 }}>
-                      Wait 3 months
-                    </div>
+                    <div className="n"><span className="coming-soon">{t("dashboard.comingSoon")}</span></div>
                     <div className="l">top lesson</div>
                   </div>
                 </div>
@@ -601,16 +586,7 @@ export default function PortalPage() {
               <div className="sec-h">Following &middot; journeys, not people</div>
               <div className="card">
                 <div className="sub-row">
-                  <span>Amy&rsquo;s HRT journey &middot; Month 8</span>
-                  <span className="arr">&rsaquo;</span>
-                </div>
-                <div className="sub-row">
-                  <span>Thermage collection</span>
-                  <span className="arr">&rsaquo;</span>
-                </div>
-                <div className="sub-row">
-                  <span>Melasma group</span>
-                  <span className="arr">&rsaquo;</span>
+                  <span className="coming-soon">{t("dashboard.comingSoon")}</span>
                 </div>
               </div>
             </div>
@@ -773,9 +749,7 @@ export default function PortalPage() {
               )}
             </div>
             <div className="pf-status">
-              <span className="pf-pill on">Private by default</span>
-              <span className="pf-pill">No community sharing</span>
-              <span className="pf-pill">No active studies</span>
+              <span className="pf-pill"><span className="coming-soon">{t("dashboard.comingSoon")}</span></span>
             </div>
             <div className="lede">
               <b>Your data. Your choice.</b> You control what DrRuby can access, where it&rsquo;s
@@ -826,15 +800,15 @@ export default function PortalPage() {
               <div className="card">
                 <div className="sub-row">
                   <span>Connected data sources</span>
-                  <span className="arr">Apple Health, 1 lab</span>
+                  <span className="arr"><span className="coming-soon">{t("dashboard.comingSoon")}</span></span>
                 </div>
                 <div className="sub-row">
                   <span>Permissions</span>
-                  <span className="arr">Camera, Photos, Health, Location</span>
+                  <span className="arr"><span className="coming-soon">{t("dashboard.comingSoon")}</span></span>
                 </div>
                 <div className="sub-row">
                   <span>Where data is processed</span>
-                  <span className="arr">On-device preferred</span>
+                  <span className="arr"><span className="coming-soon">{t("dashboard.comingSoon")}</span></span>
                 </div>
               </div>
             </div>

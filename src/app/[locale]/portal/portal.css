@@ -507,3 +507,7 @@
 #app-portal .switch .slider:before{content:"";position:absolute;height:20px;width:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
 #app-portal .switch input:checked + .slider{background:#cf1736}
 #app-portal .switch input:checked + .slider:before{transform:translateX(20px)}
+
+/* Coming soon 占位（无 API 的区块灰度化，区块不删除） */
+#app-portal .coming-soon{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--p-mid);background:var(--p-soft);border-radius:999px;padding:4px 10px}
+#app-portal .cs-block{opacity:.6;pointer-events:none}
