@@ -8,7 +8,8 @@ const intlMiddleware = createMiddleware(routing);
 
 // 受保护前缀（去 locale 前缀后匹配）：未登录访问重定向到本地化登录页。
 // 仅拦「是否登录」；`/collaborate` 营销页公开，只保护 `/collaborate/workspace` 子树。
-const PROTECTED = ["/portal", "/clinic", "/collaborate/workspace"];
+// `/admin` 由 admin/layout.tsx 服务端 requireRole("admin") 兜底角色守卫。
+const PROTECTED = ["/portal", "/clinic", "/collaborate/workspace", "/admin"];
 
 /** 拆出 locale 前缀：`/zh/portal` → { locale: "zh", rest: "/portal" }。 */
 function localeOf(pathname: string): { locale: string; rest: string } {

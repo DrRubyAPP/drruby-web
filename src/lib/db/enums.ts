@@ -18,8 +18,13 @@ import { z } from "zod";
 export const authProviderSchema = z.enum(["email", "google"]);
 export type AuthProvider = z.infer<typeof authProviderSchema>;
 
-/** user_account.role：user（消费者）| clinic（诊所员工）| collaborator（科研协作者，verified） */
-export const userRoleSchema = z.enum(["user", "clinic", "collaborator"]);
+/** user_account.role：user（消费者）| clinic（诊所员工）| collaborator（科研协作者，verified）| admin（管理后台） */
+export const userRoleSchema = z.enum([
+  "user",
+  "clinic",
+  "collaborator",
+  "admin",
+]);
 export type UserRole = z.infer<typeof userRoleSchema>;
 
 /** user_account.subscription_tier / subscription.tier：backend_v5 §2.6 两档 */
@@ -161,9 +166,7 @@ export const studyEnrollmentStatusSchema = z.enum([
   "invited",
   "completed",
 ]);
-export type StudyEnrollmentStatus = z.infer<
-  typeof studyEnrollmentStatusSchema
->;
+export type StudyEnrollmentStatus = z.infer<typeof studyEnrollmentStatusSchema>;
 
 /** consent_setting.key — 三档隐私开关 */
 export const consentKeySchema = z.enum([

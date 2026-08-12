@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   appointmentStatusSchema,
-  authProviderSchema,
   authorizationActionSchema,
   authorizationStatusSchema,
+  authProviderSchema,
   bodyInsightKindSchema,
   clinicPlanTierSchema,
   connectionStatusSchema,
@@ -43,8 +43,8 @@ describe("保留枚举 - 有效值通过", () => {
     expect(authProviderSchema.parse("google")).toBe("google");
   });
 
-  it("userRoleSchema = user/clinic/collaborator", () => {
-    for (const v of ["user", "clinic", "collaborator"]) {
+  it("userRoleSchema = user/clinic/collaborator/admin", () => {
+    for (const v of ["user", "clinic", "collaborator", "admin"]) {
       expect(userRoleSchema.parse(v)).toBe(v);
     }
   });
@@ -297,7 +297,7 @@ describe("P2 / P3（B 端）枚举 - 有效值通过", () => {
 describe("enum schemas - 无效值抛错", () => {
   const invalidCases: Array<[string, unknown, string]> = [
     ["authProviderSchema", "apple", "auth_provider"],
-    ["userRoleSchema", "admin", "role"],
+    ["userRoleSchema", "superuser", "role"],
     ["subscriptionTierSchema", "premium", "tier（研究档已裁）"],
     ["userStatusSchema", "banned", "status"],
     ["hormonalStatusSchema", "postmenopausal", "hormonal_status"],

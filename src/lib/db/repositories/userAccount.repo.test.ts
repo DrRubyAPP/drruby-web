@@ -76,9 +76,14 @@ describe("userAccount.repo", () => {
         create({
           ...VALID_INPUT,
           // @ts-expect-error: 测试无效值
-          role: "admin",
+          role: "superuser",
         }),
       ).rejects.toThrow();
+    });
+
+    it("接受 role=admin（管理后台角色）", async () => {
+      const user = await create({ ...VALID_INPUT, role: "admin" });
+      expect(user.role).toBe("admin");
     });
 
     it("拒绝无效 subscriptionTier 枚举值", async () => {

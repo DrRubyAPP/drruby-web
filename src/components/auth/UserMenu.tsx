@@ -28,7 +28,7 @@ export default function UserMenu({ role, image, name, email }: UserMenuProps) {
   const ref = useRef<HTMLDivElement>(null);
 
   const homeHref = homeHrefForRole(role);
-  const homeLabel = t(homeNavKeyForRole(role));
+  const homeLabelKey = homeNavKeyForRole(role);
 
   useEffect(() => {
     function onPointer(e: MouseEvent) {
@@ -85,14 +85,16 @@ export default function UserMenu({ role, image, name, email }: UserMenuProps) {
           role="menu"
           className="absolute right-0 top-full mt-2 w-44 bg-dr-white border border-dr-border shadow-lg py-1 z-[60]"
         >
-          <Link
-            role="menuitem"
-            href={homeHref}
-            onClick={() => setOpen(false)}
-            className={itemClass}
-          >
-            {homeLabel}
-          </Link>
+          {homeLabelKey && (
+            <Link
+              role="menuitem"
+              href={homeHref}
+              onClick={() => setOpen(false)}
+              className={itemClass}
+            >
+              {t(homeLabelKey)}
+            </Link>
+          )}
           <button
             role="menuitem"
             type="button"
