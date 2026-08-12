@@ -14,6 +14,10 @@ describe("homeHrefForRole", () => {
     expect(homeHrefForRole("user")).toBe("/portal");
   });
 
+  it("admin → /portal（admin 也是一般用户）", () => {
+    expect(homeHrefForRole("admin")).toBe("/portal");
+  });
+
   it("空/未知 role → /portal（兜底）", () => {
     expect(homeHrefForRole(null)).toBe("/portal");
     expect(homeHrefForRole(undefined)).toBe("/portal");
@@ -26,6 +30,10 @@ describe("homeNavKeyForRole", () => {
     expect(homeNavKeyForRole("clinic")).toBe("clinic");
     expect(homeNavKeyForRole("collaborator")).toBe("collaborate");
     expect(homeNavKeyForRole("user")).toBe("portal");
+  });
+
+  it("admin → portal（admin 头像下拉菜单保留消费者门户入口）", () => {
+    expect(homeNavKeyForRole("admin")).toBe("portal");
   });
 
   it("空/未知 role → portal（兜底）", () => {
