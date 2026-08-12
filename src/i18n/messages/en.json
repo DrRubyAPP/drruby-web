@@ -598,7 +598,32 @@
     "dashboard": {
       "title": "Dashboard",
       "subtitle": "Your healthspan, today",
-      "comingSoon": "Coming soon"
+      "comingSoon": "Coming soon",
+      "greeting": {
+        "morning": "Good morning, {name} ☀️",
+        "afternoon": "Good afternoon, {name}",
+        "evening": "Good evening, {name}"
+      },
+      "timeline": {
+        "empty": "No activity yet",
+        "error": "Couldn't load timeline"
+      },
+      "ask": {
+        "placeholder": "What does my blood test mean for me?",
+        "button": "Ask",
+        "loading": "Asking…",
+        "error": "Couldn't get an answer. Try again."
+      },
+      "profile": {
+        "memberSince": "{email} · Member since {year}",
+        "logout": "Log out",
+        "plan": {
+          "free": "Free — Remember yourself.",
+          "plus": "Plus — Deeper insights.",
+          "pro": "Pro — Full healthspan companion.",
+          "unknown": "—"
+        }
+      }
     },
     "common": {
       "back": "← Back",

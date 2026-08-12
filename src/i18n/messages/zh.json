@@ -604,7 +604,32 @@
     "dashboard": {
       "title": "仪表盘",
       "subtitle": "你的健康寿命，今天",
-      "comingSoon": "即将推出"
+      "comingSoon": "即将推出",
+      "greeting": {
+        "morning": "早上好，{name} ☀️",
+        "afternoon": "下午好，{name}",
+        "evening": "晚上好，{name}"
+      },
+      "timeline": {
+        "empty": "暂无活动",
+        "error": "无法加载时间线"
+      },
+      "ask": {
+        "placeholder": "我的血检结果对我意味着什么？",
+        "button": "提问",
+        "loading": "正在提问…",
+        "error": "无法获取答案，请重试。"
+      },
+      "profile": {
+        "memberSince": "{email} · {year} 年加入",
+        "logout": "登出",
+        "plan": {
+          "free": "免费版 — 了解自己。",
+          "plus": "Plus 版 — 更深入的洞察。",
+          "pro": "Pro 版 — 全方位健康寿命陪伴。",
+          "unknown": "—"
+        }
+      }
     },
     "common": {
       "back": "← 返回",

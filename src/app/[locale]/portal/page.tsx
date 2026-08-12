@@ -4,6 +4,17 @@ import { Link } from "@/i18n/navigation";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import PortalShell from "@/components/layout/PortalShell";
+import LogoutButton from "@/components/auth/LogoutButton";
+import { ErrorState } from "@/components/api/ErrorState";
+import { useApi } from "@/hooks/useApi";
+import { apiClient } from "@/lib/api/client";
+import { useMutation } from "@/hooks/useMutation";
+import {
+  getFirstName,
+  getGreetingKey,
+  getInitials,
+  getTierKey,
+} from "@/lib/portal/dashboard";
 import { ActiveDecisionsSummary } from "@/components/sections/portal/decisions/ActiveDecisionsSummary";
 import { DecisionsView } from "@/components/sections/portal/decisions/DecisionsView";
 import { HealthView } from "@/components/sections/portal/health/HealthView";
@@ -11,6 +22,28 @@ import { PrivacyView } from "@/components/sections/portal/privacy/PrivacyView";
 import { ResearchView } from "@/components/sections/portal/research/ResearchView";
 import { TodayView } from "@/components/sections/portal/today/TodayView";
 import "./portal.css";
+
+interface MeResponse {
+  id: string;
+  name: string;
+  email: string;
+  memberSince: string;
+  role: string;
+  subscriptionTier: string;
+}
+
+interface TimelineEventDTO {
+  id: string;
+  date: string;
+  kind: string;
+  title: string;
+  detail?: string;
+  source?: string;
+}
+
+interface AskResponse {
+  choices: { message: { role: string; content: string } }[];
+}
 
 type View =
   | "today"
@@ -96,6 +129,17 @@ export default function PortalPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
+  // 当前用户 profile（含 memberSince/subscriptionTier，session 不提供）
+  const {
+    data: me,
+    error: meErr,
+    loading: meLoading,
+    refetch: refetchMe,
+  } = useApi<MeResponse>("/api/me");
+  const meName = me?.name?.trim() || "";
+  const meFirst = getFirstName(meName) || "—";
+  const greetingKey = me ? getGreetingKey(new Date()) : null;
+
   const go = (v: View) => {
     setView(v);
     const m = document.querySelector<HTMLElement>("#app-portal .ufm");
@@ -132,7 +176,9 @@ export default function PortalPage() {
         <div className="ufm">
           {/* ===== TODAY / HOME ===== */}
           <div className={on("today")} id="v-today">
-            <div className="hello">Good morning, Ruby &#9728;&#65039;</div>
+            <div className="hello">
+            {me && greetingKey ? t(greetingKey, { name: meFirst }) : ""}
+          </div>
             <h1>Home</h1>
             <div className="lede">Here&rsquo;s what deserves your attention today.</div>
             <TodayView onSeeAllSignals={() => go("health")} />
@@ -655,11 +701,24 @@ export default function PortalPage() {
           <div className={on("privacy")} id="v-privacy">
             <h1>Profile &amp; Privacy</h1>
             <div className="pf-head">
-              <div className="pf-av">RJ</div>
-              <div>
-                <div className="pf-name">Ruby Johnson</div>
-                <div className="pf-meta">rubysun@gmail.com &middot; Member since 2026</div>
-              </div>
+              {meErr ? (
+                <ErrorState message="Couldn&rsquo;t load profile" onRetry={refetchMe} />
+              ) : (
+                <>
+                  <div className="pf-av">{me ? (getInitials(meName) || "—") : "—"}</div>
+                  <div>
+                    <div className="pf-name">{me ? (meName || "—") : "—"}</div>
+                    <div className="pf-meta">
+                      {me
+                        ? t("dashboard.profile.memberSince", {
+                            email: me.email,
+                            year: new Date(me.memberSince).getFullYear(),
+                          })
+                        : "—"}
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
             <div className="pf-status">
               <span className="pf-pill on">Private by default</span>
@@ -702,10 +761,7 @@ export default function PortalPage() {
                   <span>Account security</span>
                   <span className="arr">&rsaquo;</span>
                 </div>
-                <Link href="/" className="sub-row" style={{ color: "#8C2635" }}>
-                  <span>Log out</span>
-                  <span className="arr">&rsaquo;</span>
-                </Link>
+                <LogoutButton className="w-full text-left text-[14.5px] text-dr-red py-3.5 border-t border-dr-border hover:opacity-70 transition-opacity disabled:opacity-60" />
               </div>
             </div>
             <div className="sec">
