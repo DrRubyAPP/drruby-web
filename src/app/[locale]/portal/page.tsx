@@ -161,6 +161,15 @@ export default function PortalPage() {
     askMut.mutate(q);
   }
 
+  // Timeline：最近 5 条（按 date 倒序）
+  const { data: timeline, error: tlErr, loading: tlLoading } = useApi<TimelineEventDTO[]>(
+    "/api/timeline",
+  );
+  const recentTimeline = (timeline ?? [])
+    .slice()
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 5);
+
   const go = (v: View) => {
     setView(v);
     const m = document.querySelector<HTMLElement>("#app-portal .ufm");
@@ -266,21 +275,18 @@ export default function PortalPage() {
               <div className="sec-h">Your timeline</div>
               <div className="card">
                 <div className="tl">
-                  <div className="tl-item">
-                    <span className="tl-dot" />
-                    <div className="tl-d">June 18</div>
-                    <div className="tl-t">Lab result uploaded</div>
-                  </div>
-                  <div className="tl-item">
-                    <span className="tl-dot" />
-                    <div className="tl-d">June 12</div>
-                    <div className="tl-t">Sleep trend changed</div>
-                  </div>
-                  <div className="tl-item">
-                    <span className="tl-dot" />
-                    <div className="tl-d">May 25</div>
-                    <div className="tl-t">Baseline photo</div>
-                  </div>
+                  {tlLoading && <div className="tl-empty">…</div>}
+                  {tlErr && <ErrorState message={t("dashboard.timeline.error")} />}
+                  {!tlLoading && !tlErr && recentTimeline.length === 0 && (
+                    <div className="tl-empty">{t("dashboard.timeline.empty")}</div>
+                  )}
+                  {recentTimeline.map((e) => (
+                    <div className="tl-item" key={e.id}>
+                      <span className="tl-dot" />
+                      <div className="tl-d">{new Date(e.date).toLocaleDateString()}</div>
+                      <div className="tl-t">{e.title}</div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -782,9 +788,9 @@ export default function PortalPage() {
                 <div className="sub-row">
                   <div className="sr2">
                     <b>Your plan</b>
-                    <span>Free &mdash; Remember yourself.</span>
+                    <span>{me ? t(getTierKey(me.subscriptionTier)) : "—"}</span>
                   </div>
-                  <span className="arr">Free</span>
+                  <span className="arr">&rsaquo;</span>
                 </div>
                 <Link href="/pricing" className="sub-row" style={{ cursor: "pointer", color: "inherit" }}>
                   <span>View plans</span>
