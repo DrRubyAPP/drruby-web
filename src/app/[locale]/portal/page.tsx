@@ -6,6 +6,8 @@ import { useTranslations } from "next-intl";
 import PortalShell from "@/components/layout/PortalShell";
 import LogoutButton from "@/components/auth/LogoutButton";
 import { ErrorState } from "@/components/api/ErrorState";
+import { DeleteAccountDialog } from "@/components/sections/portal/settings/DeleteAccountDialog";
+import { ExportDataButton } from "@/components/sections/portal/settings/ExportDataButton";
 import { useApi } from "@/hooks/useApi";
 import { apiClient } from "@/lib/api/client";
 import { useMutation } from "@/hooks/useMutation";
@@ -788,50 +790,29 @@ export default function PortalPage() {
                   <span>View plans</span>
                   <span className="arr">&rsaquo;</span>
                 </Link>
-                <div className="sub-row">
-                  <span>Manage billing</span>
-                  <span className="arr">&rsaquo;</span>
-                </div>
+                {/* TODO: 付费计划上线后接 /portal/billing */}
               </div>
             </div>
             <div className="sec">
               <div className="sec-h">Account</div>
               <div className="card">
-                <div className="sub-row">
+                <Link href="/portal/profile" className="sub-row" style={{ cursor: "pointer", color: "inherit" }}>
                   <span>Your profile</span>
                   <span className="arr">&rsaquo;</span>
-                </div>
-                <div className="sub-row">
+                </Link>
+                <Link href="/portal/settings" className="sub-row" style={{ cursor: "pointer", color: "inherit" }}>
                   <span>Account security</span>
                   <span className="arr">&rsaquo;</span>
-                </div>
+                </Link>
                 <LogoutButton className="w-full text-left text-[14.5px] text-dr-red py-3.5 border-t border-dr-border hover:opacity-70 transition-opacity disabled:opacity-60" />
               </div>
             </div>
             <div className="sec">
               <div className="sec-h">Your data</div>
               <div className="card">
-                <div className="sub-row">
-                  <div className="sr2">
-                    <b>Activity log</b>
-                    <span>Everything DrRuby has recorded.</span>
-                  </div>
-                  <span className="arr">&rsaquo;</span>
-                </div>
-                <div className="sub-row">
-                  <div className="sr2">
-                    <b>Download my data</b>
-                    <span>A copy of your full history.</span>
-                  </div>
-                  <span className="arr">&rsaquo;</span>
-                </div>
-                <div className="sub-row">
-                  <div className="sr2">
-                    <b>Delete my history or account</b>
-                    <span>Remove your data, any time.</span>
-                  </div>
-                  <span className="arr">&rsaquo;</span>
-                </div>
+                {/* TODO: /portal/settings#activity 锚点 */}
+                <ExportDataButton />
+                <DeleteAccountDialog />
               </div>
             </div>
             <div className="sec">
@@ -851,48 +832,21 @@ export default function PortalPage() {
                 </div>
               </div>
             </div>
-            <div className="sec">
-              <div className="sec-h">Notifications &amp; Appearance</div>
-              <div className="card">
-                <div className="sub-row">
-                  <span>Notification preferences</span>
-                  <span className="arr">&rsaquo;</span>
-                </div>
-                <div className="sub-row">
-                  <span>Appearance &amp; language</span>
-                  <span className="arr">&rsaquo;</span>
-                </div>
-              </div>
-            </div>
+            {/* TODO: /portal/settings 通知与外观偏好 */}
             <div className="sec">
               <div className="sec-h">Help</div>
               <div className="card">
-                <div className="sub-row">
+                <a href="mailto:support@drruby.ai" className="sub-row" style={{ cursor: "pointer", color: "inherit" }}>
                   <span>Help &amp; support</span>
                   <span className="arr">&rsaquo;</span>
-                </div>
-                <div className="sub-row">
+                </a>
+                <a href="mailto:feedback@drruby.ai" className="sub-row" style={{ cursor: "pointer", color: "inherit" }}>
                   <span>Report a problem</span>
                   <span className="arr">&rsaquo;</span>
-                </div>
+                </a>
               </div>
             </div>
-            <div className="sec">
-              <div className="sec-h">Legal</div>
-              <div className="card">
-                {[
-                  "Terms of Service",
-                  "Privacy Policy",
-                  "Consumer Health Data Privacy Policy",
-                  "Research Consent Terms",
-                ].map((r) => (
-                  <div className="sub-row" key={r}>
-                    <span>{r}</span>
-                    <span className="arr">&rsaquo;</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            {/* TODO: 静态页 /legal/tos 等 */}
           </div>
         </div>
 
