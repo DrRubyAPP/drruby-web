@@ -95,6 +95,18 @@ export default function UserMenu({ role, image, name, email }: UserMenuProps) {
               {t(homeLabelKey)}
             </Link>
           )}
+          {role === "admin" && (
+            <a
+              role="menuitem"
+              href="/admin"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setOpen(false)}
+              className={itemClass}
+            >
+              {t("admin")}
+            </a>
+          )}
           <button
             role="menuitem"
             type="button"
