@@ -14,7 +14,7 @@
  * 前置：目标邮箱须先在 /login 注册账户（emailOTP 或 Google）。
  */
 import "dotenv/config";
-import { userAccountRepo } from "../src/lib/db";
+import { userAccountRepo } from "@/lib/db";
 
 async function main() {
   const email = process.env.ADMIN_EMAIL;
