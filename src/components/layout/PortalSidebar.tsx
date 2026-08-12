@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { PORTAL_NAV, PORTAL_USER } from "@/config/user-portal-mock";
+import { authClient } from "@/lib/auth/client";
+import { PORTAL_NAV } from "@/config/user-portal-mock";
 
 // Sidebar nav labels are driven by i18n keys; the mock provides href/icon/badge.
 const NAV_LABEL_KEY: Record<string, string> = {
@@ -29,6 +30,15 @@ export default function PortalSidebar() {
   const pathname = usePathname();
   const t = useTranslations("portal");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { data: session } = authClient.useSession();
+  const user = session?.user;
+  const displayName = user?.name?.trim() || user?.email || "—";
+  // initials 取显示名前两词首字母；email-only 时取 @ 前本地名首字母
+  const initials = displayName
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .join("");
 
   const sidebar = (
     <aside className="bg-dr-ink w-[220px] flex-shrink-0 flex flex-col h-full">
@@ -89,14 +99,14 @@ export default function PortalSidebar() {
       {/* User */}
       <div className="px-6 py-4 border-t border-white/6 overflow-hidden">
         <div className="w-8 h-8 rounded-full bg-[rgba(200,16,46,0.2)] flex items-center justify-center text-[12px] text-white font-medium float-left mr-2.5">
-          {PORTAL_USER.initials}
+          {initials || "—"}
         </div>
         <div className="overflow-hidden">
           <div className="text-[11px] text-white/65 leading-[1.2]">
-            {PORTAL_USER.fullName}
+            {displayName}
           </div>
           <div className="text-[9px] text-white/20 truncate">
-            {PORTAL_USER.email}
+            {user?.email ?? "—"}
           </div>
         </div>
       </div>
