@@ -9,7 +9,7 @@ import {
   userStatusSchema,
 } from "@/lib/db/enums";
 import { prisma } from "@/lib/db/prisma";
-import type { UserAccount } from "~prisma/client";
+import type { Prisma, UserAccount } from "~prisma/client";
 
 export interface CreateUserAccountInput {
   email: string;
@@ -134,4 +134,77 @@ export async function softDeleteAndAnonymize(id: string): Promise<UserAccount> {
     prisma.session.deleteMany({ where: { userId: id } }),
   ]);
   return account;
+}
+
+/**
+ * Admin 后台用户列表 select：排除 passwordHash / googleSub 等敏感字段。
+ * 与 AdminUserDTO 字段对齐（任务 4 路由层）。
+ */
+export const AdminUserSelect = {
+  id: true,
+  email: true,
+  name: true,
+  role: true,
+  status: true,
+  authProvider: true,
+  emailVerified: true,
+  subscriptionTier: true,
+  timezone: true,
+  lastLoginAt: true,
+  createdAt: true,
+  updatedAt: true,
+} as const satisfies Prisma.UserAccountSelect;
+
+export type AdminUserRow = Prisma.UserAccountGetPayload<{
+  select: typeof AdminUserSelect;
+}>;
+
+export interface ListUsersParams {
+  page: number;
+  pageSize: number;
+  search?: string;
+}
+
+export interface ListUsersResult {
+  data: AdminUserRow[];
+  total: number;
+}
+
+/**
+ * Admin 后台用户列表查询：
+ * - 过滤 deletedAt: null（不返回已软删除用户，total 也不含）
+ * - search 走 email OR name 部分匹配（case-insensitive）
+ * - 按 createdAt 倒序
+ * - skip/take 分页（page 从 1 开始）
+ *
+ * 调用方负责校验 page>=1、pageSize 上限等约束。
+ */
+export async function list({
+  page,
+  pageSize,
+  search,
+}: ListUsersParams): Promise<ListUsersResult> {
+  const trimmed = search?.trim();
+  const where: Prisma.UserAccountWhereInput = {
+    deletedAt: null,
+    ...(trimmed
+      ? {
+          OR: [
+            { email: { contains: trimmed, mode: "insensitive" } },
+            { name: { contains: trimmed, mode: "insensitive" } },
+          ],
+        }
+      : {}),
+  };
+  const [data, total] = await Promise.all([
+    prisma.userAccount.findMany({
+      where,
+      select: AdminUserSelect,
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    }),
+    prisma.userAccount.count({ where }),
+  ]);
+  return { data, total };
 }

@@ -6,6 +6,7 @@ import {
   create,
   findByEmail,
   findById,
+  list,
   softDelete,
   softDeleteAndAnonymize,
   update,
@@ -208,6 +209,166 @@ describe("userAccount.repo", () => {
         where: { userId: created.id },
       });
       expect(sessions).toHaveLength(0);
+    });
+  });
+
+  describe("list", () => {
+    it("分页返回用户列表（按 createdAt 倒序）", async () => {
+      // 用显式 createdAt 确保 ordering 确定性（避免毫秒级并发碰撞）
+      const u1 = await prisma.userAccount.create({
+        data: {
+          ...VALID_INPUT,
+          email: "u1@x.com",
+          createdAt: new Date("2026-01-01T00:00:00Z"),
+        },
+      });
+      const u2 = await prisma.userAccount.create({
+        data: {
+          ...VALID_INPUT,
+          email: "u2@x.com",
+          createdAt: new Date("2026-01-02T00:00:00Z"),
+        },
+      });
+      const u3 = await prisma.userAccount.create({
+        data: {
+          ...VALID_INPUT,
+          email: "u3@x.com",
+          createdAt: new Date("2026-01-03T00:00:00Z"),
+        },
+      });
+
+      const { data, total } = await list({ page: 1, pageSize: 2 });
+
+      expect(data).toHaveLength(2);
+      expect(total).toBe(3);
+      // 倒序：u3 → u2 → u1
+      expect(data[0].id).toBe(u3.id);
+      expect(data[1].id).toBe(u2.id);
+    });
+
+    it("分页第二页返回剩余用户", async () => {
+      const u1 = await prisma.userAccount.create({
+        data: {
+          ...VALID_INPUT,
+          email: "u1@x.com",
+          createdAt: new Date("2026-01-01T00:00:00Z"),
+        },
+      });
+      await prisma.userAccount.create({
+        data: {
+          ...VALID_INPUT,
+          email: "u2@x.com",
+          createdAt: new Date("2026-01-02T00:00:00Z"),
+        },
+      });
+      await prisma.userAccount.create({
+        data: {
+          ...VALID_INPUT,
+          email: "u3@x.com",
+          createdAt: new Date("2026-01-03T00:00:00Z"),
+        },
+      });
+
+      const { data, total } = await list({ page: 2, pageSize: 2 });
+
+      expect(data).toHaveLength(1);
+      expect(total).toBe(3);
+      expect(data[0].id).toBe(u1.id);
+    });
+
+    it("按 email 部分匹配搜索（case-insensitive）", async () => {
+      await create({ ...VALID_INPUT, email: "alice@example.com" });
+      await create({ ...VALID_INPUT, email: "bob@example.com" });
+
+      const { data, total } = await list({
+        page: 1,
+        pageSize: 20,
+        search: "ALI",
+      });
+
+      expect(total).toBe(1);
+      expect(data).toHaveLength(1);
+      expect(data[0].email).toBe("alice@example.com");
+    });
+
+    it("按 name 部分匹配搜索", async () => {
+      const a = await create({ ...VALID_INPUT, email: "a@x.com" });
+      await updateProfile(a.id, { name: "Alice Wong" });
+      const b = await create({ ...VALID_INPUT, email: "b@x.com" });
+      await updateProfile(b.id, { name: "Bob Smith" });
+      const c = await create({ ...VALID_INPUT, email: "c@x.com" });
+      await updateProfile(c.id, { name: "Alice Bob" });
+
+      const { data, total } = await list({
+        page: 1,
+        pageSize: 20,
+        search: "alice",
+      });
+
+      // Alice Wong + Alice Bob
+      expect(total).toBe(2);
+      expect(data.map((u) => u.email).sort()).toEqual(["a@x.com", "c@x.com"]);
+    });
+
+    it("过滤已软删除用户（data 与 total 均不含）", async () => {
+      const u1 = await create({ ...VALID_INPUT, email: "u1@x.com" });
+      await create({ ...VALID_INPUT, email: "u2@x.com" });
+      await softDelete(u1.id);
+
+      const { data, total } = await list({ page: 1, pageSize: 20 });
+
+      expect(total).toBe(1);
+      expect(data).toHaveLength(1);
+      expect(data[0].email).toBe("u2@x.com");
+    });
+
+    it("search 空字符串等同无搜索", async () => {
+      await create({ ...VALID_INPUT, email: "u1@x.com" });
+      await create({ ...VALID_INPUT, email: "u2@x.com" });
+
+      const { data, total } = await list({
+        page: 1,
+        pageSize: 20,
+        search: "",
+      });
+
+      expect(total).toBe(2);
+      expect(data).toHaveLength(2);
+    });
+
+    it("search 仅空白等同无搜索（trim）", async () => {
+      await create({ ...VALID_INPUT, email: "u1@x.com" });
+
+      const { total } = await list({
+        page: 1,
+        pageSize: 20,
+        search: "   ",
+      });
+
+      expect(total).toBe(1);
+    });
+
+    it("select 排除 passwordHash / googleSub", async () => {
+      await create({
+        ...VALID_INPUT,
+        passwordHash: "hashed_secret",
+        googleSub: undefined,
+      });
+
+      const { data } = await list({ page: 1, pageSize: 20 });
+      const row = data[0];
+
+      expect(row).not.toHaveProperty("passwordHash");
+      expect(row).not.toHaveProperty("googleSub");
+    });
+
+    it("分页超出范围返回空数组 + 正确 total", async () => {
+      await create({ ...VALID_INPUT, email: "u1@x.com" });
+
+      const { data, total } = await list({ page: 5, pageSize: 20 });
+
+      expect(data).toHaveLength(0);
+      expect(total).toBe(1);
     });
   });
 });
