@@ -1,6 +1,6 @@
 "use client";
 
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import PortalShell from "@/components/layout/PortalShell";
@@ -125,6 +125,7 @@ const NAV: { id: View; title: string; sub: string; icon: React.ReactNode }[] = [
 
 export default function PortalPage() {
   const t = useTranslations("portal");
+  const router = useRouter();
   const [view, setView] = useState<View>("today");
   const [modalOpen, setModalOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -140,6 +141,24 @@ export default function PortalPage() {
   const meFirst = getFirstName(meName) || "—";
   const greetingKey = me ? getGreetingKey(new Date()) : null;
 
+  // Ask DrRuby：受控输入 + useMutation POST /api/ask，结果就地展示
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState<string | null>(null);
+  const askMut = useMutation<string, AskResponse>(
+    (q: string) =>
+      apiClient.post<AskResponse>("/api/ask", {
+        messages: [{ role: "user", content: q }],
+      }),
+    { onSuccess: (out) => setAnswer(out?.choices?.[0]?.message?.content ?? "") },
+  );
+
+  function submitAsk() {
+    const q = question.trim();
+    if (!q || askMut.loading) return;
+    setAnswer(null);
+    askMut.mutate(q);
+  }
+
   const go = (v: View) => {
     setView(v);
     const m = document.querySelector<HTMLElement>("#app-portal .ufm");
@@ -148,7 +167,7 @@ export default function PortalPage() {
 
   const cmToast = (msg: string) => {
     setModalOpen(false);
-    setToast(`${msg} selected`);
+    setToast(msg);
     window.setTimeout(() => setToast(null), 2200);
   };
 
@@ -177,8 +196,8 @@ export default function PortalPage() {
           {/* ===== TODAY / HOME ===== */}
           <div className={on("today")} id="v-today">
             <div className="hello">
-            {me && greetingKey ? t(greetingKey, { name: meFirst }) : ""}
-          </div>
+              {me && greetingKey ? t(greetingKey, { name: meFirst }) : ""}
+            </div>
             <h1>Home</h1>
             <div className="lede">Here&rsquo;s what deserves your attention today.</div>
             <TodayView onSeeAllSignals={() => go("health")} />
@@ -200,15 +219,40 @@ export default function PortalPage() {
                   Ask about your results, history or decisions.
                 </div>
                 <div className="ask-in">
-                  <input type="text" placeholder="What does my blood test mean for me?" />
-                  <button className="ask-btn">Ask</button>
+                  <input
+                    type="text"
+                    value={question}
+                    onChange={(e) => setQuestion(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") submitAsk();
+                    }}
+                    placeholder={t("dashboard.ask.placeholder")}
+                  />
+                  <button
+                    className="ask-btn"
+                    onClick={submitAsk}
+                    disabled={askMut.loading || !question.trim()}
+                  >
+                    {askMut.loading ? t("dashboard.ask.loading") : t("dashboard.ask.button")}
+                  </button>
                 </div>
+                {askMut.error && <ErrorState message={t("dashboard.ask.error")} />}
+                {answer && <div className="ask-answer">{answer}</div>}
                 <div className="ask-ex">
-                  <span className="ask-chip">&ldquo;Has my sleep changed?&rdquo;</span>
-                  <span className="ask-chip">&ldquo;Is this skin change consistent?&rdquo;</span>
-                  <span className="ask-chip">
-                    &ldquo;What should I ask at my next appointment?&rdquo;
-                  </span>
+                  {[
+                    "Has my sleep changed?",
+                    "Is this skin change consistent?",
+                    "What should I ask at my next appointment?",
+                  ].map((chip) => (
+                    <button
+                      type="button"
+                      key={chip}
+                      className="ask-chip"
+                      onClick={() => setQuestion(chip)}
+                    >
+                      &ldquo;{chip}&rdquo;
+                    </button>
+                  ))}
                 </div>
                 <div style={{ fontSize: 12, color: "#a89a95", marginTop: 12 }}>
                   DrRuby explains results, shows what changed, and helps you form questions &mdash;
@@ -447,7 +491,7 @@ export default function PortalPage() {
                 <div style={{ marginTop: 14 }}>
                   <button
                     className="cm2-ghost"
-                    onClick={() => cmToast("Contribute anonymously — your info is never shared")}
+                    onClick={() => router.push("/portal/moment/feel")}
                   >
                     Contribute a journey anonymously
                   </button>
@@ -870,23 +914,23 @@ export default function PortalPage() {
             Choosing a starting point makes your question &mdash; and the answers &mdash; more useful.
           </div>
           <div className="cm2-choices">
-            <button className="cm2-choice" onClick={() => cmToast("Make a decision")}>
+            <button className="cm2-choice" onClick={() => go("decisions")}>
               <b>Make a decision</b>
               <span>Should I do this?</span>
             </button>
-            <button className="cm2-choice" onClick={() => cmToast("Understand something")}>
+            <button className="cm2-choice" onClick={() => router.push("/portal/coach")}>
               <b>Understand something</b>
               <span>What does this mean?</span>
             </button>
-            <button className="cm2-choice" onClick={() => cmToast("Ask for others' experience")}>
+            <button className="cm2-choice" onClick={() => go("community")}>
               <b>Ask for others&rsquo; experience</b>
               <span>Has anyone been through this?</span>
             </button>
-            <button className="cm2-choice" onClick={() => cmToast("Share my experience")}>
+            <button className="cm2-choice" onClick={() => router.push("/portal/moment/feel")}>
               <b>Share my experience</b>
               <span>What happened to me</span>
             </button>
-            <button className="cm2-choice" onClick={() => cmToast("Show my results")}>
+            <button className="cm2-choice" onClick={() => go("health")}>
               <b>Show my results</b>
               <span>With interval &amp; context</span>
             </button>
