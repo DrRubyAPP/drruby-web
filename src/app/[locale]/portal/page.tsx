@@ -309,14 +309,6 @@ export default function PortalPage() {
               A learning library, not a feed. Real women&rsquo;s decisions &mdash; structured,
               consented, and relevant to you. Not strangers&rsquo; posts.
             </div>
-            <div className="uf-gate">
-              <b>Experience Library, not a forum.</b> Every experience here is a real decision
-              &mdash; shared with explicit, revocable consent and anonymized, then structured (goal
-              &rarr; decision &rarr; outcome &rarr; reflection). It&rsquo;s{" "}
-              <b>experience, not advice or evidence</b>. Using DrRuby is not the same as
-              contributing. A public discussion module stays gated before launch (Non-goals, legal +
-              ToS, Research Governance).
-            </div>
             <div className="sec">
               <div className="sec-h">Where these experiences come from</div>
               <div className="card">
@@ -603,20 +595,6 @@ export default function PortalPage() {
                   <h4>HRT &middot; 190 journeys</h4>
                   <p>Hair loss &middot; Sleep &middot; Weight &middot; Mood</p>
                 </div>
-              </div>
-              <div className="cm2-note">
-                Batch 1: users don&rsquo;t come to browse a forum &mdash; they come to decide
-                &ldquo;should I do this?&rdquo;. So the community is organized by decision, not by
-                feed.
-              </div>
-            </div>
-            <div className="sec">
-              <div className="cm2-pos">
-                Reddit helps you chat. RealSelf helps you see photos.{" "}
-                <b>DrRuby helps you learn how real decisions actually happen.</b> Every reply here is
-                a journey, not a comment: &ldquo;I had a similar experience&rdquo; &middot; &ldquo;a
-                different experience&rdquo; &middot; &ldquo;I changed my mind later&rdquo; &middot;
-                &ldquo;here&rsquo;s my outcome&rdquo;.
               </div>
             </div>
           </div>

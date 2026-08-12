@@ -102,6 +102,8 @@ export const PORTAL_NAV: NavSection[] = [
 ];
 
 // User info (mock)
+// TODO: PortalHome.tsx（dead code）迁移 session 后删除此 export；PortalSidebar/
+// PortalTopbar 已在 task-24 改用 authClient.useSession，不再读此处。
 export const PORTAL_USER = {
   firstName: "Ruby",
   fullName: "Ruby Johnson",
