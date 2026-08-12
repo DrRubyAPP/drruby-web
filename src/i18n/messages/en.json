@@ -11,7 +11,8 @@
     "menu": "Menu",
     "close": "Close",
     "language": "Switch language",
-    "account": "Account"
+    "account": "Account",
+    "admin": "Admin Console"
   },
   "auth": {
     "title": "Sign in to DrRuby",
@@ -1139,6 +1140,72 @@
       "notifyReports": "AI Report awaiting review",
       "notifyAppointments": "Appointment reminder",
       "notifyChannels": "Email · SMS · App push"
+    }
+  },
+  "admin": {
+    "sidebar": {
+      "title": "Admin",
+      "usersManagement": "User Management"
+    },
+    "users": {
+      "title": "User Management",
+      "subtitle": "Manage user accounts",
+      "search": "Search",
+      "searchPlaceholder": "Search by email or name",
+      "columns": {
+        "email": "Email",
+        "name": "Name",
+        "role": "Role",
+        "status": "Status",
+        "createdAt": "Created At",
+        "lastLoginAt": "Last Login"
+      },
+      "role": {
+        "user": "User",
+        "clinic": "Clinic",
+        "collaborator": "Collaborator",
+        "admin": "Admin"
+      },
+      "status": {
+        "active": "Active",
+        "suspended": "Suspended"
+      },
+      "empty": "No users yet",
+      "noResults": "No matching users",
+      "loadError": "Failed to load users",
+      "pagination": {
+        "prev": "Previous",
+        "next": "Next",
+        "page": "Page {current} of {total}"
+      },
+      "detail": {
+        "title": "User Detail",
+        "back": "Back to list",
+        "form": {
+          "title": "Edit Profile",
+          "name": "Name",
+          "role": "Role",
+          "status": "Status",
+          "submit": "Save",
+          "cancel": "Cancel",
+          "saving": "Saving..."
+        },
+        "readonly": {
+          "authProvider": "Auth Provider",
+          "emailVerified": "Email Verified",
+          "subscriptionTier": "Subscription",
+          "timezone": "Timezone",
+          "updatedAt": "Updated At"
+        },
+        "errors": {
+          "loadSelfForbidden": "Cannot modify your own role",
+          "updateFailed": "Update failed",
+          "notFound": "User not found"
+        },
+        "success": {
+          "updated": "User updated"
+        }
+      }
     }
   }
 }
