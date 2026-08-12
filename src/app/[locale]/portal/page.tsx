@@ -1,11 +1,12 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
+import PortalShell from "@/components/layout/PortalShell";
 import { ActiveDecisionsSummary } from "@/components/sections/portal/decisions/ActiveDecisionsSummary";
 import { DecisionsView } from "@/components/sections/portal/decisions/DecisionsView";
 import { HealthView } from "@/components/sections/portal/health/HealthView";
-import { HistoryView } from "@/components/sections/portal/history/HistoryView";
 import { PrivacyView } from "@/components/sections/portal/privacy/PrivacyView";
 import { ResearchView } from "@/components/sections/portal/research/ResearchView";
 import { TodayView } from "@/components/sections/portal/today/TodayView";
@@ -16,7 +17,6 @@ type View =
   | "health"
   | "decisions"
   | "community"
-  | "history"
   | "research"
   | "privacy";
 
@@ -91,6 +91,7 @@ const NAV: { id: View; title: string; sub: string; icon: React.ReactNode }[] = [
 ];
 
 export default function PortalPage() {
+  const t = useTranslations("portal");
   const [view, setView] = useState<View>("today");
   const [modalOpen, setModalOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -110,60 +111,25 @@ export default function PortalPage() {
   const on = (v: View) => `ufv${view === v ? " on" : ""}`;
 
   return (
-    <div id="app-portal">
-      <div className="uf-top">
-        <Link className="uf-back" href="/">
-          <span
-            style={{ fontSize: 19, fontWeight: 800, color: "#8C2635", marginRight: 2 }}
-          >
-            &larr;
-          </span>
-          <span
-            style={{ fontSize: 20, fontWeight: 850, letterSpacing: "-1px", color: "#171717" }}
-          >
-            Dr<span style={{ color: "#cf1736" }}>Ruby</span>.ai
-          </span>
-        </Link>
-        <div className="uf-note">
-          Concept &middot; understand-first redesign (n=8-driven) &middot; prototype
+    <PortalShell pageTitle={t("dashboard.title")} pageSub={t("dashboard.subtitle")}>
+      <div id="app-portal">
+        <div className="portal-tabs">
+          {NAV.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={`portal-tab${view === item.id ? " active" : ""}`}
+              onClick={() => go(item.id)}
+            >
+              <span className="pt-ic">{item.icon}</span>
+              <span className="pt-tx">
+                <b>{item.title}</b>
+              </span>
+            </button>
+          ))}
         </div>
-      </div>
 
-      <div className="ufw">
-        {/* ── Sidebar ── */}
-        <aside className="side">
-          <div className="logo">
-            Dr<span>Ruby</span>
-          </div>
-          <div className="logo-sub">Know your body</div>
-          <div className="nav">
-            {NAV.map((item) => (
-              <div
-                key={item.id}
-                className={`nav-item${view === item.id ? " active" : ""}`}
-                onClick={() => go(item.id)}
-              >
-                <span className="ni-ic">{item.icon}</span>
-                <span className="ni-tx">
-                  <b>{item.title}</b>
-                  <small>{item.sub}</small>
-                </span>
-              </div>
-            ))}
-          </div>
-          <div className="side-foot">
-            <div className="profile">
-              <div className="avatar">RJ</div>
-              <div>
-                <div className="pname">Ruby Johnson</div>
-                <div className="pmail">rubysun@gmail.com</div>
-              </div>
-            </div>
-          </div>
-        </aside>
-
-        {/* ── Main ── */}
-        <main className="ufm">
+        <div className="ufm">
           {/* ===== TODAY / HOME ===== */}
           <div className={on("today")} id="v-today">
             <div className="hello">Good morning, Ruby &#9728;&#65039;</div>
@@ -581,19 +547,6 @@ export default function PortalPage() {
             </div>
           </div>
 
-          {/* ===== MY HISTORY (no nav entry, matches design) ===== */}
-          <div className={on("history")} id="v-history">
-            <h1>My History</h1>
-            <div className="lede">
-              Your history isn&rsquo;t a record of your past &mdash; it&rsquo;s evidence of how
-              you&rsquo;ve learned. Your past becomes easier to understand over time.
-            </div>
-            <div className="cm2-pos" style={{ marginTop: 16 }}>
-              Everything remembers something. <b>Only DrRuby remembers how you learned.</b>
-            </div>
-            <HistoryView />
-          </div>
-
           {/* ===== RESEARCH ===== */}
           <div className={on("research")} id="v-research">
             <h1>Research</h1>
@@ -841,8 +794,7 @@ export default function PortalPage() {
               </div>
             </div>
           </div>
-        </main>
-      </div>
+        </div>
 
       {/* ── Ask modal ── */}
       <div
@@ -890,6 +842,7 @@ export default function PortalPage() {
       <div className="cm2-toast" style={{ display: toast ? "block" : "none" }}>
         {toast}
       </div>
-    </div>
+      </div>
+    </PortalShell>
   );
 }

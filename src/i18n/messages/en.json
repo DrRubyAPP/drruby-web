@@ -595,6 +595,11 @@
       "primaryAction": "Run New Analysis",
       "onboarding": "Onboarding"
     },
+    "dashboard": {
+      "title": "Dashboard",
+      "subtitle": "Your healthspan, today",
+      "comingSoon": "Coming soon"
+    },
     "common": {
       "back": "← Back",
       "backToHome": "← Back to home",

@@ -601,6 +601,11 @@
       "primaryAction": "运行新分析",
       "onboarding": "引导设置"
     },
+    "dashboard": {
+      "title": "仪表盘",
+      "subtitle": "你的健康寿命，今天",
+      "comingSoon": "即将推出"
+    },
     "common": {
       "back": "← 返回",
       "backToHome": "← 返回首页",
