@@ -23,6 +23,18 @@ describe("AppError", () => {
     expect(e.status).toBe(400);
     expect(e.cause).toBe(cause);
   });
+
+  it("carries optional headers (e.g. Retry-After for 429)", () => {
+    const e = new AppError("rate_limited", "请求过于频繁", 429, {
+      headers: { "Retry-After": "3" },
+    });
+    expect(e.headers).toEqual({ "Retry-After": "3" });
+  });
+
+  it("defaults headers to undefined when not provided", () => {
+    const e = new AppError("bad", "Bad", 400);
+    expect(e.headers).toBeUndefined();
+  });
 });
 
 describe("Result", () => {
@@ -50,6 +62,28 @@ describe("handle", () => {
     expect(await res.json()).toEqual({
       error: { code: "bad_input", message: "Nope" },
     });
+  });
+
+  it("persists AppError headers onto the response (e.g. Retry-After)", async () => {
+    const wrapped = handle(async () => {
+      throw new AppError("rate_limited", "请求过于频繁", 429, {
+        headers: { "Retry-After": "3" },
+      });
+    });
+    const res = await wrapped();
+    expect(res.status).toBe(429);
+    expect(res.headers.get("Retry-After")).toBe("3");
+    expect(await res.json()).toEqual({
+      error: { code: "rate_limited", message: "请求过于频繁" },
+    });
+  });
+
+  it("does not set headers on response when AppError has none", async () => {
+    const wrapped = handle(async () => {
+      throw new AppError("bad_input", "Nope", 422);
+    });
+    const res = await wrapped();
+    expect(res.headers.has("Retry-After")).toBe(false);
   });
 
   it("maps unknown errors to 500 without leaking internals", async () => {

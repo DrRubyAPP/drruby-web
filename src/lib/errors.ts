@@ -5,21 +5,24 @@ import { logger } from "./logger";
 /**
  * 应用级错误：携带机器可读 `code`、HTTP `status` 与可读 `message`。
  * 用于业务层显式抛出「对用户安全」的错误；`cause` 保留底层原因供日志。
+ * `headers` 可选字段允许错误向响应注入额外头（如 429 的 `Retry-After`）。
  */
 export class AppError extends Error {
   readonly code: string;
   readonly status: number;
+  readonly headers?: Record<string, string>;
 
   constructor(
     code: string,
     message: string,
     status = 400,
-    opts?: { cause?: unknown },
+    opts?: { cause?: unknown; headers?: Record<string, string> },
   ) {
     super(message, opts);
     this.name = "AppError";
     this.code = code;
     this.status = status;
+    this.headers = opts?.headers;
   }
 }
 
@@ -38,10 +41,14 @@ export function handle<Args extends unknown[]>(
     } catch (e) {
       if (e instanceof AppError) {
         logger.warn({ code: e.code, err: e }, e.message);
-        return NextResponse.json(
+        const res = NextResponse.json(
           { error: { code: e.code, message: e.message } },
           { status: e.status },
         );
+        if (e.headers) {
+          for (const [k, v] of Object.entries(e.headers)) res.headers.set(k, v);
+        }
+        return res;
       }
       // 入参校验失败（route 内 `*Body.parse()`）→ 统一 400，携带字段级 issues
       if (e instanceof ZodError) {
