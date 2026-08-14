@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { rateLimit } from "@/lib/auth/rate-limit";
 import { requireUser } from "@/lib/auth/session";
 import { handle } from "@/lib/errors";
 import { generateBodyInsights } from "@/lib/insights/generate";
@@ -21,6 +22,12 @@ export const RefreshResponse = z.object({
  */
 export const POST = handle(async () => {
   const user = await requireUser();
+  // 重算洞察是重操作（LLM + DB）→ per-user 限流 6 req/min（Retry-After=10s）
+  await rateLimit(user.id, {
+    routeTag: "insights-refresh",
+    capacity: 6,
+    refillRate: 0.1,
+  });
   const counts = await generateBodyInsights(user.id);
   return NextResponse.json(RefreshResponse.parse(counts));
 });
