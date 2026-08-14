@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { __resetRateLimit } from "@/lib/ask/rate-limit";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { __resetBuckets } from "@/lib/auth/rate-limit";
 import { openAiClient } from "@/lib/llm/client";
 import { asUser, jsonRequest } from "@/lib/test/route-helpers";
 
@@ -30,7 +30,7 @@ const hasKey = openAiClient.isConfigured();
 
 describe.skipIf(!hasKey)("POST /api/ask（真实上游 · live）", () => {
   beforeEach(() => {
-    __resetRateLimit();
+    __resetBuckets();
   });
 
   it("配置自检：.env 的 OPENAI_API_KEY 已被 serverEnv 读到", () => {
