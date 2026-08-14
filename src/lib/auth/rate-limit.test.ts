@@ -34,7 +34,9 @@ describe("rateLimit", () => {
     vi.setSystemTime(0);
     const opts = { routeTag: "ask", capacity: 1, refillRate: 1 };
     await rateLimit("u-instance", opts);
-    await expect(rateLimit("u-instance", opts)).rejects.toBeInstanceOf(AppError);
+    await expect(rateLimit("u-instance", opts)).rejects.toBeInstanceOf(
+      AppError,
+    );
   });
 
   it("令牌按 refillRate 平滑补充（capacity=1, 1 令牌/秒）", async () => {
