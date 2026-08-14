@@ -24,7 +24,7 @@ describe("rateLimit", () => {
     }
     // 第 4 次超阈
     await expect(rateLimit("u1", opts)).rejects.toMatchObject({
-      code: "RATE_LIMITED",
+      code: "rate_limited",
       status: 429,
       headers: { "Retry-After": "3" }, // ceil(1 / (1/3)) = 3
     });

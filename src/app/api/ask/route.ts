@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { buildHistorySummary } from "@/lib/ask/history";
 import { SYSTEM_PROMPT } from "@/lib/ask/prompt";
-import { checkRateLimit } from "@/lib/ask/rate-limit";
+import { rateLimit } from "@/lib/auth/rate-limit";
 import { requireUser } from "@/lib/auth/session";
-import { AppError, handle } from "@/lib/errors";
+import { handle } from "@/lib/errors";
 import {
   type ChatMessage,
   type LlmClient,
@@ -57,10 +57,13 @@ export function __setClient(c: LlmClient): void {
 export const POST = handle(async (req: Request) => {
   const user = await requireUser();
 
-  // per-user 轻量限流（best-effort 内存；多实例需 Redis，见 rate-limit.ts）。
-  if (!checkRateLimit(`ask:${user.id}`)) {
-    throw new AppError("RATE_LIMITED", "请求过于频繁，请稍后再试", 429);
-  }
+  // per-user 令牌桶限流（best-effort 内存；多实例需 Redis，见 auth/rate-limit.ts）。
+  // capacity=20, refillRate=1/3 per s → 20 req/min，Retry-After=3s
+  await rateLimit(user.id, {
+    routeTag: "ask",
+    capacity: 20,
+    refillRate: 1 / 3,
+  });
 
   const body = AskBody.parse(await req.json());
   const summary = await buildHistorySummary(user.id);

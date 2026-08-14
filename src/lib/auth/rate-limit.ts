@@ -50,7 +50,7 @@ export async function rateLimit(
   if (refilled < 1) {
     // 超阈：429 + Retry-After
     const retryAfter = Math.ceil(1 / opts.refillRate);
-    throw new AppError("RATE_LIMITED", "请求过于频繁，请稍后再试", 429, {
+    throw new AppError("rate_limited", "请求过于频繁，请稍后再试", 429, {
       headers: { "Retry-After": String(retryAfter) },
     });
   }

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { __resetRateLimit } from "@/lib/ask/rate-limit";
+import { __resetBuckets } from "@/lib/auth/rate-limit";
 import { AppError } from "@/lib/errors";
 import type { ChatMessage, LlmClient } from "@/lib/llm/client";
 import { asAnonymous, asUser, jsonRequest } from "@/lib/test/route-helpers";
@@ -32,7 +32,7 @@ function fakeClient(
 describe("POST /api/ask", () => {
   beforeEach(() => {
     summary.value = null;
-    __resetRateLimit();
+    __resetBuckets();
   });
 
   it("未登录 → 401", async () => {
@@ -119,7 +119,7 @@ describe("POST /api/ask", () => {
     expect(res.status).toBe(503);
   });
 
-  it("超过限流阈值（20/分）→ 第 21 次 429", async () => {
+  it("超过限流阈值（20/分）→ 第 21 次 429 + Retry-After 头", async () => {
     const { POST, __setClient } = await import("./route");
     __setClient(fakeClient(async () => "ok"));
     asUser("u-rl");
@@ -131,5 +131,12 @@ describe("POST /api/ask", () => {
     }
     const blocked = await POST(body());
     expect(blocked.status).toBe(429);
+    // 令牌桶 capacity=20, refillRate=1/3 per s → Retry-After = ceil(1/(1/3)) = 3
+    expect(blocked.headers.get("Retry-After")).toBe("3");
+    const json = await blocked.json();
+    expect(json.error).toEqual({
+      code: "rate_limited",
+      message: expect.any(String),
+    });
   });
 });
