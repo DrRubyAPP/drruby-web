@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { rateLimit } from "@/lib/auth/rate-limit";
 import { requireUser } from "@/lib/auth/session";
 import {
   bodyInsightRepo,
@@ -27,6 +28,12 @@ import { AppError, handle } from "@/lib/errors";
  */
 export const GET = handle(async () => {
   const user = await requireUser();
+  // 全量导出是重操作（聚合多表）→ per-user 限流 6 req/min（Retry-After=10s）
+  await rateLimit(user.id, {
+    routeTag: "me-export",
+    capacity: 6,
+    refillRate: 0.1,
+  });
 
   const account = await userAccountRepo.findById(user.id);
   if (!account) throw new AppError("NOT_FOUND", "账号不存在", 404);
