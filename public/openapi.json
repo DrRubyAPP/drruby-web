@@ -444,6 +444,143 @@
           "pageSize"
         ]
       },
+      "ComplianceAuditDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "actorUserId": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "action",
+          "actorUserId",
+          "createdAt"
+        ]
+      },
+      "ComplianceDetailDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "patientUserId": {
+            "type": "string"
+          },
+          "patientName": {
+            "type": "string",
+            "nullable": true
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "$ref": "#/components/schemas/authorizationStatusSchema"
+          },
+          "grantedAt": {
+            "type": "string"
+          },
+          "revokedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "audit": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ComplianceAuditDTO"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "patientUserId",
+          "patientName",
+          "scopes",
+          "status",
+          "grantedAt",
+          "revokedAt",
+          "audit"
+        ]
+      },
+      "ComplianceItemDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "patientUserId": {
+            "type": "string"
+          },
+          "patientName": {
+            "type": "string",
+            "nullable": true
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "$ref": "#/components/schemas/authorizationStatusSchema"
+          },
+          "grantedAt": {
+            "type": "string"
+          },
+          "revokedAt": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "patientUserId",
+          "patientName",
+          "scopes",
+          "status",
+          "grantedAt",
+          "revokedAt"
+        ]
+      },
+      "ComplianceListResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ComplianceItemDTO"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "pageSize": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "pageSize"
+        ]
+      },
       "ConfigState": {
         "type": "string",
         "enum": [
@@ -565,6 +702,39 @@
         "required": [
           "patientUserId",
           "draftContent"
+        ]
+      },
+      "CreateCrmActivityBody": {
+        "type": "object",
+        "properties": {
+          "patientUserId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "staffUserId": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/crmActivityTypeSchema"
+          },
+          "note": {
+            "type": "string"
+          },
+          "dueAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/crmActivityStatusSchema"
+              }
+            ]
+          }
+        },
+        "required": [
+          "patientUserId",
+          "type"
         ]
       },
       "CreateDecisionBody": {
@@ -738,6 +908,147 @@
         "required": [
           "kind",
           "title"
+        ]
+      },
+      "CreateTreatmentBody": {
+        "type": "object",
+        "properties": {
+          "patientUserId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "staffUserId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/treatmentTypeSchema"
+              }
+            ]
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/treatmentStatusSchema"
+              }
+            ]
+          },
+          "scheduledAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "amount": {
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "currency": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "patientUserId",
+          "name"
+        ]
+      },
+      "CrmActivityDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "patientUserId": {
+            "type": "string"
+          },
+          "patientName": {
+            "type": "string",
+            "nullable": true
+          },
+          "staffUserId": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "$ref": "#/components/schemas/crmActivityTypeSchema"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "dueAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/crmActivityStatusSchema"
+          }
+        },
+        "required": [
+          "id",
+          "patientUserId",
+          "patientName",
+          "staffUserId",
+          "type",
+          "note",
+          "dueAt",
+          "status"
+        ]
+      },
+      "CrmActivityListResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CrmActivityDTO"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "pageSize": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "pageSize"
+        ]
+      },
+      "crmActivityStatusSchema": {
+        "type": "string",
+        "enum": [
+          "open",
+          "done",
+          "dismissed"
+        ]
+      },
+      "crmActivityTypeSchema": {
+        "type": "string",
+        "enum": [
+          "call",
+          "email",
+          "note",
+          "follow_up",
+          "message"
         ]
       },
       "dataQualitySchema": {
@@ -2049,6 +2360,111 @@
           "$ref": "#/components/schemas/TimelineEventDTO"
         }
       },
+      "TreatmentDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "patientUserId": {
+            "type": "string"
+          },
+          "patientName": {
+            "type": "string",
+            "nullable": true
+          },
+          "staffUserId": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/treatmentTypeSchema",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/treatmentStatusSchema"
+          },
+          "amount": {
+            "type": "string",
+            "nullable": true
+          },
+          "currency": {
+            "type": "string"
+          },
+          "scheduledAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "patientUserId",
+          "patientName",
+          "staffUserId",
+          "name",
+          "type",
+          "status",
+          "amount",
+          "currency",
+          "scheduledAt",
+          "note"
+        ]
+      },
+      "TreatmentListResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TreatmentDTO"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "pageSize": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "pageSize"
+        ]
+      },
+      "treatmentStatusSchema": {
+        "type": "string",
+        "enum": [
+          "planned",
+          "in_progress",
+          "done",
+          "canceled"
+        ]
+      },
+      "treatmentTypeSchema": {
+        "type": "string",
+        "enum": [
+          "thermage",
+          "ultherapy",
+          "botox",
+          "laser",
+          "filler",
+          "hrt",
+          "skincare",
+          "other"
+        ]
+      },
       "trendSchema": {
         "type": "string",
         "enum": [
@@ -2096,6 +2512,10 @@
           "status"
         ]
       },
+      "UpdateComplianceBody": {
+        "type": "object",
+        "properties": {}
+      },
       "UpdateConsentBody": {
         "type": "object",
         "properties": {
@@ -2119,6 +2539,27 @@
         "required": [
           "shared"
         ]
+      },
+      "UpdateCrmActivityBody": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/crmActivityStatusSchema"
+              }
+            ]
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "dueAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
       },
       "UpdateDecisionBody": {
         "type": "object",
@@ -2191,6 +2632,22 @@
         "properties": {
           "trend": {
             "$ref": "#/components/schemas/trendSchema",
+            "nullable": true
+          }
+        }
+      },
+      "UpdateTreatmentBody": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/treatmentStatusSchema"
+              }
+            ]
+          },
+          "note": {
+            "type": "string",
             "nullable": true
           }
         }
@@ -2708,6 +3165,133 @@
         }
       }
     },
+    "/clinic/compliance": {
+      "get": {
+        "operationId": "get-clinic-compliance",
+        "summary": "List clinic authorizations (compliance view)",
+        "description": "本诊所跨端授权列表（合规视图）；支持 status 筛选",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/clinic/crm": {
+      "get": {
+        "operationId": "get-clinic-crm",
+        "summary": "List clinic CRM activities",
+        "description": "按 clinicId 过滤 + 分页；支持 patientUserId / status 筛选",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmActivityListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post-clinic-crm",
+        "summary": "Create CRM activity",
+        "description": "诊所建跟进/活动（clinicId 来自会话，不允许客户端覆盖）；默认 status=open",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCrmActivityBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmActivityDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
     "/clinic/finance": {
       "get": {
         "operationId": "get-clinic-finance",
@@ -3049,6 +3633,93 @@
         }
       }
     },
+    "/clinic/treatments": {
+      "get": {
+        "operationId": "get-clinic-treatments",
+        "summary": "List clinic treatments",
+        "description": "按 clinicId 过滤 + 分页；支持 status / patientUserId 筛选",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TreatmentListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post-clinic-treatments",
+        "summary": "Create treatment",
+        "description": "诊所建治疗记录（clinicId 来自会话，不允许客户端覆盖）；默认 status=planned",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTreatmentBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TreatmentDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
     "/clinic/appointments/{id}": {
       "get": {
         "operationId": "get-clinic-appointments-{id}",
@@ -3139,6 +3810,215 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AppointmentDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/clinic/compliance/{id}": {
+      "get": {
+        "operationId": "get-clinic-compliance-{id}",
+        "summary": "Get authorization detail (compliance)",
+        "description": "单条授权 + 审计流水；归属不匹配按 404",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceDetailDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patch-clinic-compliance-{id}",
+        "summary": "Revoke authorization (compliance)",
+        "description": "撤销授权（仅此写端点）；已撤销再撤销 → 422；归属不匹配按 404",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceDetailDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/clinic/crm/{id}": {
+      "get": {
+        "operationId": "get-clinic-crm-{id}",
+        "summary": "Get CRM activity detail",
+        "description": "单条 CRM 活动；归属不匹配按 404",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmActivityDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patch-clinic-crm-{id}",
+        "summary": "Update CRM activity",
+        "description": "改状态 / 备注 / 到期时间",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCrmActivityBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrmActivityDTO"
                 }
               }
             }
@@ -3626,6 +4506,115 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ScanRecordDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/clinic/treatments/{id}": {
+      "get": {
+        "operationId": "get-clinic-treatments-{id}",
+        "summary": "Get treatment detail",
+        "description": "单条治疗记录；归属不匹配按 404",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TreatmentDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patch-clinic-treatments-{id}",
+        "summary": "Update treatment",
+        "description": "改状态 / 改备注",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTreatmentBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TreatmentDTO"
                 }
               }
             }

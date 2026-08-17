@@ -289,3 +289,39 @@ export type ReferralStatus = z.infer<typeof referralStatusSchema>;
 /** invoice.status */
 export const invoiceStatusSchema = z.enum(["draft", "sent", "paid", "void"]);
 export type InvoiceStatus = z.infer<typeof invoiceStatusSchema>;
+
+/** treatment.status */
+export const treatmentStatusSchema = z.enum([
+  "planned",
+  "in_progress",
+  "done",
+  "canceled",
+]);
+export type TreatmentStatus = z.infer<typeof treatmentStatusSchema>;
+
+/** treatment.type */
+export const treatmentTypeSchema = z.enum([
+  "thermage",
+  "ultherapy",
+  "botox",
+  "laser",
+  "filler",
+  "hrt",
+  "skincare",
+  "other",
+]);
+export type TreatmentType = z.infer<typeof treatmentTypeSchema>;
+
+/** crm_activity.type */
+export const crmActivityTypeSchema = z.enum([
+  "call",
+  "email",
+  "note",
+  "follow_up",
+  "message",
+]);
+export type CrmActivityType = z.infer<typeof crmActivityTypeSchema>;
+
+/** crm_activity.status */
+export const crmActivityStatusSchema = z.enum(["open", "done", "dismissed"]);
+export type CrmActivityStatus = z.infer<typeof crmActivityStatusSchema>;
