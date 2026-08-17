@@ -60,6 +60,7 @@ model UserAccount {
   hormoneReadings  HormoneReading[]
   contributions    Contribution[]
   healthRecords    HealthRecord[]
+  aiReports        AiReport[]
   photos           Photo[]
   subscription     Subscription?
 
@@ -484,6 +485,26 @@ model HealthRecord {
 
   @@index([userId, recordedAt], map: "health_record_user_recorded_idx")
   @@map("health_record")
+}
+
+/// AI 生成报告（skin|hormone|body）— task-26；规则提炼 findings + LLM 仅润色
+/// findings 存 JSON（[{level,tag,title,desc}]，对齐 App mock AIReport）；meta 存 {degraded?, llm?, generatedAt}
+model AiReport {
+  id        String   @id @default(cuid(2))
+  userId    String   @map("user_id")
+  type      String   // skin|hormone|body
+  title     String
+  summary   String
+  findings  Json?
+  meta      Json?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user      UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type], map: "ai_report_user_type_idx")
+  @@index([userId, createdAt], map: "ai_report_user_created_idx")
+  @@map("ai_report")
 }
 
 /// 照片（before/after，绑定 report/独立）— backend_v5 §2.3a

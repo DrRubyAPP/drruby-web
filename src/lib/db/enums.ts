@@ -215,6 +215,14 @@ export const ocrStatusSchema = z.enum([
 ]);
 export type OcrStatus = z.infer<typeof ocrStatusSchema>;
 
+/** ai_report.type — task-26 AI 报告域 */
+export const aiReportTypeSchema = z.enum(["skin", "hormone", "body"]);
+export type AiReportType = z.infer<typeof aiReportTypeSchema>;
+
+/** ai_report.findings[].level — 对齐前端 mock AIReport.findings.level */
+export const findingLevelSchema = z.enum(["good", "warn", "alert"]);
+export type FindingLevel = z.infer<typeof findingLevelSchema>;
+
 /** subscription.status */
 export const subscriptionStatusSchema = z.enum([
   "active",
