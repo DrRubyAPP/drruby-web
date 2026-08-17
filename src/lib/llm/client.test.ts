@@ -103,4 +103,70 @@ describe("openAiClient", () => {
     mockEnv.OPENAI_API_KEY = "";
     expect(openAiClient.isConfigured()).toBe(false);
   });
+
+  describe("onUsage（token 成本记账，task-26）", () => {
+    it("上游返回 usage → onUsage 收到真实 token 数", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(
+          async () =>
+            ({
+              ok: true,
+              json: async () => ({
+                choices: [{ message: { content: "ok" } }],
+                usage: { prompt_tokens: 120, completion_tokens: 30 },
+              }),
+            }) as unknown as Response,
+        ),
+      );
+      const onUsage = vi.fn();
+
+      const out = await openAiClient.chatComplete(
+        [{ role: "user", content: "hi" }],
+        { onUsage },
+      );
+
+      expect(out).toBe("ok");
+      expect(onUsage).toHaveBeenCalledWith({
+        promptTokens: 120,
+        completionTokens: 30,
+      });
+    });
+
+    it("上游无 usage → onUsage 不被调用，返回值不受影响", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async () => okResponse("ok")),
+      );
+      const onUsage = vi.fn();
+
+      const out = await openAiClient.chatComplete(
+        [{ role: "user", content: "hi" }],
+        { onUsage },
+      );
+
+      expect(out).toBe("ok");
+      expect(onUsage).not.toHaveBeenCalled();
+    });
+
+    it("不传 onUsage → 行为与旧版一致", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(
+          async () =>
+            ({
+              ok: true,
+              json: async () => ({
+                choices: [{ message: { content: "ok" } }],
+                usage: { prompt_tokens: 1, completion_tokens: 2 },
+              }),
+            }) as unknown as Response,
+        ),
+      );
+
+      await expect(
+        openAiClient.chatComplete([{ role: "user", content: "hi" }]),
+      ).resolves.toBe("ok");
+    });
+  });
 });

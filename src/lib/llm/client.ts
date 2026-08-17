@@ -13,11 +13,21 @@ export interface ChatMessage {
   content: string;
 }
 
+/** 上游 usage 记账（仅 token 数，不含任何内容/PII）。 */
+export interface LlmUsage {
+  promptTokens?: number;
+  completionTokens?: number;
+}
+
 export interface LlmClient {
   /** 单发补全，返回 assistant 文本内容（无内容时返回空串）。 */
   chatComplete(
     messages: ChatMessage[],
-    opts?: { timeoutMs?: number },
+    opts?: {
+      timeoutMs?: number;
+      /** 上游返回 usage 时回调真实 token 数（成本记账用，可选、非破坏）。 */
+      onUsage?: (usage: LlmUsage) => void;
+    },
   ): Promise<string>;
   /** 是否配置了 key —— 供洞察润色「缺 key 降级规则原文」判断，不抛错。 */
   isConfigured(): boolean;
@@ -57,7 +67,14 @@ export const openAiClient: LlmClient = {
       }
       const json = (await res.json()) as {
         choices?: { message?: { content?: string } }[];
+        usage?: { prompt_tokens?: number; completion_tokens?: number };
       };
+      if (opts?.onUsage && json.usage) {
+        opts.onUsage({
+          promptTokens: json.usage.prompt_tokens,
+          completionTokens: json.usage.completion_tokens,
+        });
+      }
       return json.choices?.[0]?.message?.content ?? "";
     } catch (e) {
       if (e instanceof AppError) throw e;
