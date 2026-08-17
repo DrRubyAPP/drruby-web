@@ -16,6 +16,8 @@ const TABLE_ORDER_FOR_CLEANUP = [
   "authorizationAudit",
   "authorization",
   "clinicReport",
+  "treatment",
+  "crmActivity",
   "appointment",
   "invoice",
   "referral",

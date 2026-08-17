@@ -1,3 +1,4 @@
+import type { ClinicUser } from "@/lib/auth/clinic";
 import { AppError } from "@/lib/errors";
 
 /**
@@ -86,4 +87,48 @@ export async function makeUser(email: string): Promise<{ id: string }> {
   const { create } = await import("@/lib/db/repositories/userAccount.repo");
   const user = await create({ email, authProvider: "email", role: "user" });
   return { id: user.id };
+}
+
+// --- Clinic 测试脚手架（供 clinic 路由测试复用） ---
+
+/** clinic 测试当前上下文 holder（驱动 requireClinicUser 的鉴权态）。 */
+export const currentClinic: { userId: string; clinicId: string } = {
+  userId: "",
+  clinicId: "",
+};
+
+/** 设为已登录诊所用户（带 clinicId）。 */
+export function asClinic(userId: string, clinicId: string): void {
+  currentClinic.userId = userId;
+  currentClinic.clinicId = clinicId;
+}
+
+/** 便捷建 clinic 用户 + 诊所 + ClinicStaff，返回 { userId, clinicId }。 */
+export async function makeClinicUser(
+  email: string,
+): Promise<{ userId: string; clinicId: string }> {
+  const { create } = await import("@/lib/db/repositories/userAccount.repo");
+  const user = await create({ email, authProvider: "email", role: "clinic" });
+  const { prisma } = await import("@/lib/db/prisma");
+  const clinic = await prisma.clinic.create({ data: { name: "Test Clinic" } });
+  await prisma.clinicStaff.create({
+    data: { clinicId: clinic.id, userId: user.id, title: "doctor" },
+  });
+  return { userId: user.id, clinicId: clinic.id };
+}
+
+/** 供 clinic 路由测试文件复用的 `@/lib/auth/clinic` 模块 mock。 */
+export function clinicSessionMock() {
+  return {
+    requireClinicUser: async (): Promise<ClinicUser> => {
+      if (!currentClinic.userId) {
+        throw new AppError("UNAUTHORIZED", "请先登录", 401);
+      }
+      return {
+        id: currentClinic.userId,
+        clinicId: currentClinic.clinicId,
+        role: "clinic",
+      };
+    },
+  };
 }

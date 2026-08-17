@@ -78,6 +78,8 @@ model UserAccount {
   clinicReports       ClinicReport[]        @relation("ClinicReportPatient")
   referrals           Referral[]            @relation("ReferralFromUser")
   invoices            Invoice[]             @relation("InvoicePatient")
+  treatments          Treatment[]           @relation("TreatmentPatient")
+  crmActivities       CrmActivity[]         @relation("CrmActivityPatient")
   collaboratorProfile CollaboratorProfile?  @relation("CollaboratorProfileUser")
 
   @@index([status, deletedAt], map: "user_account_status_deleted_at_idx")
@@ -652,6 +654,8 @@ model Clinic {
   reports        ClinicReport[]
   referrals      Referral[]
   invoices       Invoice[]
+  treatments     Treatment[]
+  crmActivities  CrmActivity[]
 
   @@map("clinic")
 }
@@ -812,6 +816,51 @@ model Invoice {
   @@index([clinicId, status], map: "invoice_clinic_status_idx")
   @@index([patientUserId], map: "invoice_patient_id_idx")
   @@map("invoice")
+}
+
+/// 诊所侧治疗/服务记录（Treatments & Billing 中的「治疗」部分）
+model Treatment {
+  id            String   @id @default(cuid(2))
+  clinicId      String   @map("clinic_id")
+  patientUserId String   @map("patient_user_id")
+  staffUserId   String?  @map("staff_user_id")
+  name          String
+  type          String?  // thermage|ultherapy|botox|laser|filler|hrt|skincare|other
+  status        String   @default("planned") // planned|in_progress|done|canceled
+  amount        Decimal?
+  currency      String   @default("USD")
+  scheduledAt   DateTime? @map("scheduled_at") @db.Timestamptz
+  note          String?
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  clinic        Clinic      @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  patient       UserAccount @relation("TreatmentPatient", fields: [patientUserId], references: [id], onDelete: Cascade)
+
+  @@index([clinicId, status], map: "treatment_clinic_status_idx")
+  @@index([patientUserId], map: "treatment_patient_id_idx")
+  @@map("treatment")
+}
+
+/// 诊所侧 CRM 跟进/活动日志（CRM & Follow-up）
+model CrmActivity {
+  id            String   @id @default(cuid(2))
+  clinicId      String   @map("clinic_id")
+  patientUserId String   @map("patient_user_id")
+  staffUserId   String?  @map("staff_user_id")
+  type          String   // call|email|note|follow_up|message
+  note          String?
+  dueAt         DateTime? @map("due_at") @db.Timestamptz
+  status        String   @default("open") // open|done|dismissed
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  clinic        Clinic      @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  patient       UserAccount @relation("CrmActivityPatient", fields: [patientUserId], references: [id], onDelete: Cascade)
+
+  @@index([clinicId, status], map: "crm_activity_clinic_status_idx")
+  @@index([patientUserId], map: "crm_activity_patient_id_idx")
+  @@map("crm_activity")
 }
 
 // =============================================================================
