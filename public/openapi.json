@@ -20,6 +20,89 @@
       }
     },
     "schemas": {
+      "AdminUserDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "role": {
+            "$ref": "#/components/schemas/userRoleSchema"
+          },
+          "status": {
+            "$ref": "#/components/schemas/userStatusSchema"
+          },
+          "authProvider": {
+            "type": "string"
+          },
+          "emailVerified": {
+            "type": "boolean"
+          },
+          "subscriptionTier": {
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "lastLoginAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "name",
+          "role",
+          "status",
+          "authProvider",
+          "emailVerified",
+          "subscriptionTier",
+          "timezone",
+          "lastLoginAt",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "AdminUserListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminUserDTO"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "pageSize": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "data",
+          "total",
+          "page",
+          "pageSize"
+        ]
+      },
       "AgingMetricDTO": {
         "type": "object",
         "properties": {
@@ -76,6 +159,75 @@
         },
         "required": [
           "text"
+        ]
+      },
+      "AppointmentDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "patientUserId": {
+            "type": "string"
+          },
+          "patientName": {
+            "type": "string",
+            "nullable": true
+          },
+          "staffUserId": {
+            "type": "string",
+            "nullable": true
+          },
+          "referralId": {
+            "type": "string",
+            "nullable": true
+          },
+          "scheduledAt": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/appointmentStatusSchema"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "patientUserId",
+          "patientName",
+          "staffUserId",
+          "referralId",
+          "scheduledAt",
+          "status",
+          "note"
+        ]
+      },
+      "AppointmentListResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppointmentDTO"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "pageSize": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "pageSize"
         ]
       },
       "appointmentStatusSchema": {
@@ -312,6 +464,32 @@
           "$ref": "#/components/schemas/ContributionDTO"
         }
       },
+      "CreateAppointmentBody": {
+        "type": "object",
+        "properties": {
+          "patientUserId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "staffUserId": {
+            "type": "string"
+          },
+          "referralId": {
+            "type": "string"
+          },
+          "scheduledAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "patientUserId",
+          "scheduledAt"
+        ]
+      },
       "CreateDecisionBody": {
         "type": "object",
         "properties": {
@@ -324,7 +502,11 @@
             "$ref": "#/components/schemas/decisionStatusSchema"
           },
           "type": {
-            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/decisionTypeSchema"
+              }
+            ],
             "description": "预设决策类型（可空）"
           }
         },
@@ -384,6 +566,41 @@
           "kind",
           "title",
           "recordedAt"
+        ]
+      },
+      "CreateScanRecordBody": {
+        "type": "object",
+        "properties": {
+          "patientUserId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "objectKey": {
+            "type": "string",
+            "minLength": 1
+          },
+          "inflammatoryScore": {
+            "type": "number"
+          },
+          "pigmentationScore": {
+            "type": "number"
+          },
+          "textureScore": {
+            "type": "number"
+          },
+          "trend": {
+            "$ref": "#/components/schemas/trendSchema",
+            "nullable": true
+          },
+          "capturedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "patientUserId",
+          "objectKey",
+          "capturedAt"
         ]
       },
       "CreateTimelineBody": {
@@ -881,6 +1098,23 @@
           "research_study"
         ]
       },
+      "ListQuery": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "default": 1,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 9007199254740991
+          },
+          "search": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "page"
+        ]
+      },
       "MeResponse": {
         "type": "object",
         "properties": {
@@ -923,6 +1157,289 @@
           "manual"
         ]
       },
+      "PatchUserBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "role": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/userRoleSchema"
+              }
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "suspended"
+            ]
+          }
+        }
+      },
+      "PatientAuthorizationDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "type": "string"
+          },
+          "grantedAt": {
+            "type": "string"
+          },
+          "revokedAt": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "scopes",
+          "status",
+          "grantedAt",
+          "revokedAt"
+        ]
+      },
+      "PatientDetailDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string"
+          },
+          "ageRange": {
+            "type": "string",
+            "nullable": true
+          },
+          "concern": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastScan": {
+            "type": "string",
+            "nullable": true
+          },
+          "indices": {
+            "type": "object",
+            "properties": {
+              "inflammation": {
+                "type": "number",
+                "nullable": true
+              },
+              "pigmentation": {
+                "type": "number",
+                "nullable": true
+              },
+              "texture": {
+                "type": "number",
+                "nullable": true
+              }
+            },
+            "required": [
+              "inflammation",
+              "pigmentation",
+              "texture"
+            ]
+          },
+          "authStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "pending",
+              "new"
+            ]
+          },
+          "nextAppointment": {
+            "type": "string",
+            "nullable": true
+          },
+          "authorizations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PatientAuthorizationDTO"
+            }
+          },
+          "recentScans": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PatientScanDTO"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "email",
+          "ageRange",
+          "concern",
+          "lastScan",
+          "indices",
+          "authStatus",
+          "status",
+          "nextAppointment",
+          "authorizations",
+          "recentScans"
+        ]
+      },
+      "PatientDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string"
+          },
+          "ageRange": {
+            "type": "string",
+            "nullable": true
+          },
+          "concern": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastScan": {
+            "type": "string",
+            "nullable": true
+          },
+          "indices": {
+            "type": "object",
+            "properties": {
+              "inflammation": {
+                "type": "number",
+                "nullable": true
+              },
+              "pigmentation": {
+                "type": "number",
+                "nullable": true
+              },
+              "texture": {
+                "type": "number",
+                "nullable": true
+              }
+            },
+            "required": [
+              "inflammation",
+              "pigmentation",
+              "texture"
+            ]
+          },
+          "authStatus": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "pending",
+              "new"
+            ]
+          },
+          "nextAppointment": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "email",
+          "ageRange",
+          "concern",
+          "lastScan",
+          "indices",
+          "authStatus",
+          "status",
+          "nextAppointment"
+        ]
+      },
+      "PatientListResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PatientDTO"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "pageSize": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "pageSize"
+        ]
+      },
+      "PatientScanDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "capturedAt": {
+            "type": "string"
+          },
+          "inflammation": {
+            "type": "number",
+            "nullable": true
+          },
+          "pigmentation": {
+            "type": "number",
+            "nullable": true
+          },
+          "texture": {
+            "type": "number",
+            "nullable": true
+          },
+          "trend": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "capturedAt",
+          "inflammation",
+          "pigmentation",
+          "texture",
+          "trend"
+        ]
+      },
       "referralStatusSchema": {
         "type": "string",
         "enum": [
@@ -956,6 +1473,80 @@
           "in_review",
           "approved",
           "sent"
+        ]
+      },
+      "ScanRecordDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "patientUserId": {
+            "type": "string"
+          },
+          "patientName": {
+            "type": "string",
+            "nullable": true
+          },
+          "objectKey": {
+            "type": "string"
+          },
+          "capturedAt": {
+            "type": "string"
+          },
+          "inflammatoryScore": {
+            "type": "number",
+            "nullable": true
+          },
+          "pigmentationScore": {
+            "type": "number",
+            "nullable": true
+          },
+          "textureScore": {
+            "type": "number",
+            "nullable": true
+          },
+          "trend": {
+            "$ref": "#/components/schemas/trendSchema",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "patientUserId",
+          "patientName",
+          "objectKey",
+          "capturedAt",
+          "inflammatoryScore",
+          "pigmentationScore",
+          "textureScore",
+          "trend"
+        ]
+      },
+      "ScanRecordListResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScanRecordDTO"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "pageSize": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "pageSize"
         ]
       },
       "signalConfidenceSchema": {
@@ -1227,6 +1818,22 @@
           "declining"
         ]
       },
+      "UpdateAppointmentBody": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/appointmentStatusSchema"
+              }
+            ]
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "UpdateConsentBody": {
         "type": "object",
         "properties": {
@@ -1255,7 +1862,11 @@
         "type": "object",
         "properties": {
           "status": {
-            "type": "object"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/decisionStatusSchema"
+              }
+            ]
           },
           "question": {
             "type": "string",
@@ -1280,12 +1891,22 @@
           "name"
         ]
       },
+      "UpdateScanRecordBody": {
+        "type": "object",
+        "properties": {
+          "trend": {
+            "$ref": "#/components/schemas/trendSchema",
+            "nullable": true
+          }
+        }
+      },
       "userRoleSchema": {
         "type": "string",
         "enum": [
           "user",
           "clinic",
-          "collaborator"
+          "collaborator",
+          "admin"
         ]
       },
       "userStatusSchema": {
@@ -1452,6 +2073,155 @@
     }
   },
   "paths": {
+    "/admin/users": {
+      "get": {
+        "operationId": "get-admin-users",
+        "summary": "List users (admin)",
+        "description": "管理后台用户列表（分页 + email/name 搜索）。仅 admin 角色可访问。",
+        "tags": [
+          "Admin"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "bearer admin": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminUserListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/admin/users/{id}": {
+      "get": {
+        "operationId": "get-admin-users-{id}",
+        "summary": "Get user detail (admin)",
+        "description": "管理后台用户详情。仅 admin 角色可访问；已软删用户返回 404。",
+        "tags": [
+          "Admin"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "bearer admin": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminUserDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patch-admin-users-{id}",
+        "summary": "Patch user (admin)",
+        "description": "改他人 name/role/status；改自己 → 403；已软删 → 404；非法 body → 400。",
+        "tags": [
+          "Admin"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "bearer admin": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchUserBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminUserDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
     "/ask": {
       "post": {
         "operationId": "post-ask",
@@ -1549,6 +2319,489 @@
                 }
               }
             }
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/clinic/appointments": {
+      "get": {
+        "operationId": "get-clinic-appointments",
+        "summary": "List clinic appointments",
+        "description": "按 clinicId 过滤 + 分页；支持 status / from / to 筛选",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppointmentListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post-clinic-appointments",
+        "summary": "Create appointment",
+        "description": "诊所建预约（clinicId 来自会话，不允许客户端覆盖）",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAppointmentBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppointmentDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/clinic/patients": {
+      "get": {
+        "operationId": "get-clinic-patients",
+        "summary": "List clinic patients (derived, read-only)",
+        "description": "本诊所患者派生视图：Authorization/Appointment/SkinArchive 关联的 UserAccount + 投影。支持 authStatus/status/q 筛选",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatientListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/clinic/skin-archive": {
+      "get": {
+        "operationId": "get-clinic-skin-archive",
+        "summary": "List clinic skin archive scans",
+        "description": "按 clinicId 过滤 + 分页；支持 patientUserId / trend 筛选",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScanRecordListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post-clinic-skin-archive",
+        "summary": "Create skin archive scan",
+        "description": "诊所上传扫描记录（clinicId 来自会话，不允许客户端覆盖）",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateScanRecordBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScanRecordDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/clinic/appointments/{id}": {
+      "get": {
+        "operationId": "get-clinic-appointments-{id}",
+        "summary": "Get appointment detail",
+        "description": "单条预约；归属不匹配按 404",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppointmentDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patch-clinic-appointments-{id}",
+        "summary": "Update appointment",
+        "description": "推进状态 / 改备注",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAppointmentBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppointmentDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/clinic/patients/{id}": {
+      "get": {
+        "operationId": "get-clinic-patients-{id}",
+        "summary": "Get patient detail (derived, read-only)",
+        "description": "单患者派生视图（含授权 + 最近扫描）；非本诊所患者 → 404",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatientDetailDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/clinic/skin-archive/{id}": {
+      "get": {
+        "operationId": "get-clinic-skin-archive-{id}",
+        "summary": "Get skin archive scan detail",
+        "description": "单条扫描记录；归属不匹配按 404",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScanRecordDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patch-clinic-skin-archive-{id}",
+        "summary": "Update skin archive scan",
+        "description": "改趋势（trend）；skin_archive 无 note 列，不支持备注修改",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateScanRecordBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScanRecordDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
           },
           "500": {
             "$ref": "#/components/responses/500"
@@ -2891,10 +4144,16 @@
   },
   "tags": [
     {
+      "name": "Admin"
+    },
+    {
       "name": "Ask"
     },
     {
       "name": "Auth"
+    },
+    {
+      "name": "Clinic"
     },
     {
       "name": "Consent"

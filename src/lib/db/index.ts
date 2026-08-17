@@ -27,3 +27,6 @@ export * as studyEnrollmentRepo from "./repositories/studyEnrollment.repo";
 export * as timelineEventRepo from "./repositories/timelineEvent.repo";
 export * as userAccountRepo from "./repositories/userAccount.repo";
 export * as userBaselineRepo from "./repositories/userBaseline.repo";
+export * as appointmentRepo from "./repositories/clinic/appointment.repo";
+export * as patientRepo from "./repositories/clinic/patient.repo";
+export * as skinArchiveRepo from "./repositories/clinic/skinArchive.repo";

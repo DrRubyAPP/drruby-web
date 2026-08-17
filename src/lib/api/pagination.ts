@@ -18,8 +18,10 @@ export interface PageResult<T> {
 }
 
 interface PageableModel {
-  findMany: (args: Record<string, unknown>) => Promise<unknown[]>;
-  count: (args: Record<string, unknown>) => Promise<number>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  findMany: (args: any) => Promise<unknown[]>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  count: (args: any) => Promise<number>;
 }
 
 /**
