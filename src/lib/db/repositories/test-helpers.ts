@@ -37,6 +37,7 @@ const TABLE_ORDER_FOR_CLEANUP = [
   "notification",
   "followUpTask",
   // P1 消费域
+  "aiReport",
   "photo",
   "healthRecord",
   "subscription",

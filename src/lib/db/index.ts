@@ -12,6 +12,7 @@
 
 export * from "./enums";
 export { prisma } from "./prisma";
+export * as aiReportRepo from "./repositories/aiReport.repo";
 export * as bodyInsightRepo from "./repositories/bodyInsight.repo";
 export * as appointmentRepo from "./repositories/clinic/appointment.repo";
 export * as clinicReportRepo from "./repositories/clinic/clinicReport.repo";
