@@ -1,6 +1,6 @@
-import { AppError } from "@/lib/errors";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { __resetBuckets } from "@/lib/auth/rate-limit";
+import { AppError } from "@/lib/errors";
 import {
   asAnonymous,
   asUser,
@@ -29,7 +29,9 @@ function fakeReport(over: Record<string, unknown> = {}) {
     type: "skin",
     title: "皮肤状态报告",
     summary: "整体平稳。",
-    findings: [{ level: "good", tag: "水分", title: "保湿良好", desc: "保持现状" }],
+    findings: [
+      { level: "good", tag: "水分", title: "保湿良好", desc: "保持现状" },
+    ],
     meta: { degraded: true },
     createdAt: now,
     updatedAt: now,
