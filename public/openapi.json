@@ -381,6 +381,69 @@
           "full"
         ]
       },
+      "ClinicReportDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "patientUserId": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/reviewStatusSchema"
+          },
+          "draftContent": {
+            "nullable": true
+          },
+          "finalContent": {
+            "nullable": true
+          },
+          "reviewerUserId": {
+            "type": "string",
+            "nullable": true
+          },
+          "sentAt": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "patientUserId",
+          "status",
+          "draftContent",
+          "finalContent",
+          "reviewerUserId",
+          "sentAt"
+        ]
+      },
+      "ClinicReportListResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClinicReportDTO"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "pageSize": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "pageSize"
+        ]
+      },
       "ConfigState": {
         "type": "string",
         "enum": [
@@ -490,6 +553,20 @@
           "scheduledAt"
         ]
       },
+      "CreateClinicReportBody": {
+        "type": "object",
+        "properties": {
+          "patientUserId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "draftContent": {}
+        },
+        "required": [
+          "patientUserId",
+          "draftContent"
+        ]
+      },
       "CreateDecisionBody": {
         "type": "object",
         "properties": {
@@ -566,6 +643,36 @@
           "kind",
           "title",
           "recordedAt"
+        ]
+      },
+      "CreateInvoiceBody": {
+        "type": "object",
+        "properties": {
+          "patientUserId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "amount": {
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "currency": {
+            "type": "string"
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "patientUserId",
+          "amount"
         ]
       },
       "CreateScanRecordBody": {
@@ -1080,6 +1187,74 @@
           "purple"
         ]
       },
+      "InvoiceDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "patientUserId": {
+            "type": "string"
+          },
+          "patientName": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/invoiceStatusSchema"
+          },
+          "issuedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "paidAt": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "patientUserId",
+          "patientName",
+          "amount",
+          "currency",
+          "status",
+          "issuedAt",
+          "paidAt"
+        ]
+      },
+      "InvoiceListResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InvoiceDTO"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "pageSize": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "pageSize"
+        ]
+      },
       "invoiceStatusSchema": {
         "type": "string",
         "enum": [
@@ -1438,6 +1613,70 @@
           "pigmentation",
           "texture",
           "trend"
+        ]
+      },
+      "ReferralDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "fromUserId": {
+            "type": "string"
+          },
+          "requestedService": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "$ref": "#/components/schemas/referralStatusSchema"
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "flaggedMetrics": {
+            "nullable": true
+          },
+          "commissionAmount": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "fromUserId",
+          "requestedService",
+          "status",
+          "note",
+          "flaggedMetrics",
+          "commissionAmount"
+        ]
+      },
+      "ReferralListResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReferralDTO"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "pageSize": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "pageSize"
         ]
       },
       "referralStatusSchema": {
@@ -1834,6 +2073,29 @@
           }
         }
       },
+      "UpdateClinicReportBody": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/reviewStatusSchema"
+          },
+          "reviewerUserId": {
+            "type": "string",
+            "nullable": true
+          },
+          "finalContent": {
+            "nullable": true
+          },
+          "sentAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
       "UpdateConsentBody": {
         "type": "object",
         "properties": {
@@ -1878,6 +2140,17 @@
           }
         }
       },
+      "UpdateInvoiceBody": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/invoiceStatusSchema"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
       "UpdateMeBody": {
         "type": "object",
         "properties": {
@@ -1889,6 +2162,28 @@
         },
         "required": [
           "name"
+        ]
+      },
+      "UpdateReferralBody": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/referralStatusSchema"
+          },
+          "commissionAmount": {
+            "oneOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "nullable": true
+          }
+        },
+        "required": [
+          "status"
         ]
       },
       "UpdateScanRecordBody": {
@@ -2413,6 +2708,93 @@
         }
       }
     },
+    "/clinic/finance": {
+      "get": {
+        "operationId": "get-clinic-finance",
+        "summary": "List clinic invoices",
+        "description": "按 clinicId 过滤 + 分页；支持 status 筛选",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post-clinic-finance",
+        "summary": "Create invoice",
+        "description": "诊所开票（clinicId 来自会话，不允许客户端覆盖）；默认 status=draft",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateInvoiceBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
     "/clinic/patients": {
       "get": {
         "operationId": "get-clinic-patients",
@@ -2434,6 +2816,133 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PatientListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/clinic/referrals": {
+      "get": {
+        "operationId": "get-clinic-referrals",
+        "summary": "List clinic referrals",
+        "description": "按 clinicId 过滤 + 分页；支持 status 筛选（仅读取，无创建端点）",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferralListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/clinic/reports-queue": {
+      "get": {
+        "operationId": "get-clinic-reports-queue",
+        "summary": "List clinic report queue",
+        "description": "按 clinicId 过滤 + 分页；支持 status 筛选",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClinicReportListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post-clinic-reports-queue",
+        "summary": "Create AI draft report",
+        "description": "诊所建 AI 草稿（clinicId 来自会话，不允许客户端覆盖）；默认 status=ai_drafted",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateClinicReportBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClinicReportDTO"
                 }
               }
             }
@@ -2649,6 +3158,115 @@
         }
       }
     },
+    "/clinic/finance/{id}": {
+      "get": {
+        "operationId": "get-clinic-finance-{id}",
+        "summary": "Get invoice detail",
+        "description": "单条发票；归属不匹配按 404",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patch-clinic-finance-{id}",
+        "summary": "Update invoice",
+        "description": "推进状态机（draft→sent→paid|void）；sent 置 issuedAt、paid 置 paidAt；非法跃迁 422",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateInvoiceBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
     "/clinic/patients/{id}": {
       "get": {
         "operationId": "get-clinic-patients-{id}",
@@ -2681,6 +3299,224 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PatientDetailDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/clinic/referrals/{id}": {
+      "get": {
+        "operationId": "get-clinic-referrals-{id}",
+        "summary": "Get referral detail",
+        "description": "单条转介；归属不匹配按 404",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferralDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patch-clinic-referrals-{id}",
+        "summary": "Update referral",
+        "description": "推进状态机（pending→accepted|declined|completed）；accepted/completed 可写 commissionAmount；非法跃迁 422",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateReferralBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferralDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/clinic/reports-queue/{id}": {
+      "get": {
+        "operationId": "get-clinic-reports-queue-{id}",
+        "summary": "Get report detail",
+        "description": "单条报告；归属不匹配按 404",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClinicReportDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patch-clinic-reports-queue-{id}",
+        "summary": "Advance report state machine",
+        "description": "ai_drafted→in_review（记 reviewerUserId）→approved（写 finalContent）→sent（置 sentAt）；逆向/跳步 422",
+        "tags": [
+          "Clinic"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateClinicReportBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClinicReportDTO"
                 }
               }
             }

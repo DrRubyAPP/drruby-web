@@ -30,3 +30,6 @@ export * as userBaselineRepo from "./repositories/userBaseline.repo";
 export * as appointmentRepo from "./repositories/clinic/appointment.repo";
 export * as patientRepo from "./repositories/clinic/patient.repo";
 export * as skinArchiveRepo from "./repositories/clinic/skinArchive.repo";
+export * as invoiceRepo from "./repositories/clinic/invoice.repo";
+export * as referralRepo from "./repositories/clinic/referral.repo";
+export * as clinicReportRepo from "./repositories/clinic/clinicReport.repo";
