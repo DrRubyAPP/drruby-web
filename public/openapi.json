@@ -136,6 +136,108 @@
           "$ref": "#/components/schemas/AgingMetricDTO"
         }
       },
+      "AiReportDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/aiReportTypeSchema"
+          },
+          "title": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiReportFindingDTO"
+            },
+            "nullable": true
+          },
+          "meta": {
+            "type": "object",
+            "additionalProperties": {},
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "title",
+          "summary",
+          "findings",
+          "meta",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "AiReportFindingDTO": {
+        "type": "object",
+        "properties": {
+          "level": {
+            "$ref": "#/components/schemas/findingLevelSchema"
+          },
+          "tag": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "desc": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "level",
+          "tag",
+          "title",
+          "desc"
+        ]
+      },
+      "AiReportListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiReportDTO"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "pageSize": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "data",
+          "total",
+          "page",
+          "pageSize"
+        ]
+      },
+      "aiReportTypeSchema": {
+        "type": "string",
+        "enum": [
+          "skin",
+          "hormone",
+          "body"
+        ]
+      },
       "AppendEntryBody": {
         "type": "object",
         "properties": {
@@ -663,6 +765,22 @@
         "items": {
           "$ref": "#/components/schemas/ContributionDTO"
         }
+      },
+      "CreateAiReportBody": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/aiReportTypeSchema"
+              }
+            ],
+            "description": "报告类型：skin|hormone|body"
+          }
+        },
+        "required": [
+          "type"
+        ]
       },
       "CreateAppointmentBody": {
         "type": "object",
@@ -1340,6 +1458,14 @@
           "running",
           "planned",
           "done"
+        ]
+      },
+      "findingLevelSchema": {
+        "type": "string",
+        "enum": [
+          "good",
+          "warn",
+          "alert"
         ]
       },
       "fitzpatrickScaleSchema": {
@@ -2955,6 +3081,144 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AdminUserDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/ai-reports": {
+      "get": {
+        "operationId": "get-ai-reports",
+        "summary": "List AI reports",
+        "description": "当前用户的 AI 报告分页列表（createdAt desc，可按 type 过滤）。",
+        "tags": [
+          "Ai-reports"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiReportListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "post": {
+        "operationId": "post-ai-reports",
+        "summary": "Generate AI report",
+        "description": "按类型同步生成一条 AI 报告（规则提炼 findings + LLM 仅润色，可降级）",
+        "tags": [
+          "Ai-reports"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAiReportBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiReportDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/ai-reports/{id}": {
+      "get": {
+        "operationId": "get-ai-reports-{id}",
+        "summary": "Get AI report detail",
+        "description": "获取单条 AI 报告详情。非本人报告按 404 处理（不暴露存在性）。",
+        "tags": [
+          "Ai-reports"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiReportDTO"
                 }
               }
             }
@@ -5970,6 +6234,9 @@
   "tags": [
     {
       "name": "Admin"
+    },
+    {
+      "name": "Ai-reports"
     },
     {
       "name": "Ask"
