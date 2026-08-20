@@ -188,3 +188,11 @@ src/
 - 运行时需 Node 环境 + Mailchimp 环境变量 + `DATABASE_URL`
 - 生产迁移：`pnpm db:migrate:deploy`（Railway release phase 或部署脚本）
 - `/api/health` 可作部署后健康探针
+
+## 发布流程（重要）
+
+版本发布为**纯手动流程**，不引入自动化工具，不打 git tag，不建 GitHub Release。
+每次发布由发布人手动改 `package.json` 的 `version` 并手写 `CHANGELOG.md`。
+
+完整步骤、版本号 bump 决策参考（SemVer）、CHANGELOG 分类规范见 **`RELEASING.md`**。
+要点：发布从 `dev` 分支切出；提交信息用 `chore(release): vx.y.z`。
