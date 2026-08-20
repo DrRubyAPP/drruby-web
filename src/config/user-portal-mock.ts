@@ -87,7 +87,8 @@ export const PORTAL_NAV: NavSection[] = [
   {
     label: "AI Tools",
     items: [
-      { label: "AI Reports", href: "/portal/reports", icon: "◎", badge: "2" },
+      // badge 暂无后端计数接口 → 先隐藏红点；接入 API 后再回填 badge 字段
+      { label: "AI Reports", href: "/portal/reports", icon: "◎" },
       { label: "Personal Coach", href: "/portal/coach", icon: "◎" },
     ],
   },

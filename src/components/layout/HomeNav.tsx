@@ -63,7 +63,7 @@ export default async function HomeNav({
           <a href={`${sectionPrefix}#how`}>How It Works</a>
           <a href={`${sectionPrefix}#skin`}>Skin</a>
           <a href={`${sectionPrefix}#healthspan`}>Age well</a>
-          <a href="/clinic">For Clinics</a>
+          {role === "clinic" && <a href="/clinic">For Clinics</a>}
           <a href="/collaborate">Collaborate</a>
           <a href={`${sectionPrefix}#science`}>Trust</a>
           <a href="/pricing">Pricing</a>

@@ -58,6 +58,23 @@ async function main() {
   const userId = user.id;
   console.log(`[seed] user id = ${userId}`);
 
+  // 1b) 诊所账号（role=clinic），可 emailOTP 登录进入 clinic portal
+  const clinic = await prisma.userAccount.upsert({
+    where: { email: "clinic@163.com" },
+    update: { role: "clinic" },
+    create: {
+      email: "clinic@163.com",
+      emailVerified: true,
+      authProvider: "email",
+      role: "clinic",
+      subscriptionTier: "free",
+      timezone: "Asia/Shanghai",
+      status: "active",
+      name: "Demo Clinic",
+    },
+  });
+  console.log(`[seed] clinic id = ${clinic.id}`);
+
   // 2) 幂等清理：先删子表再删父表（外键安全顺序）
   await prisma.decisionEntry.deleteMany({ where: { userId } });
   await prisma.timelineEvent.deleteMany({ where: { userId } });

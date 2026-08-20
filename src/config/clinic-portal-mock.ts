@@ -38,7 +38,8 @@ export const CLINIC_NAV: ClinicNavSection[] = [
   {
     label: "Clinical",
     items: [
-      { label: "AI Reports", href: "/clinic/reports/queue", icon: "◎", badge: "5" },
+      // badge 暂无后端计数语义 → 先隐藏红点；将来可用 reports-queue?status=... 的 total 回填
+      { label: "AI Reports", href: "/clinic/reports/queue", icon: "◎" },
       { label: "Skin Archive", href: "/clinic/skin-archive", icon: "◎" },
       { label: "Patients", href: "/clinic/patients", icon: "◎" },
     ],
@@ -46,7 +47,7 @@ export const CLINIC_NAV: ClinicNavSection[] = [
   {
     label: "Operations",
     items: [
-      { label: "Appointments", href: "/clinic/appointments", icon: "◎", badge: "3 new" },
+      { label: "Appointments", href: "/clinic/appointments", icon: "◎" },
       { label: "Treatments & Billing", href: "/clinic/treatments", icon: "◎" },
       { label: "CRM & Follow-up", href: "/clinic/crm", icon: "◎" },
     ],
@@ -54,7 +55,7 @@ export const CLINIC_NAV: ClinicNavSection[] = [
   {
     label: "Platform",
     items: [
-      { label: "DrRuby Referrals", href: "/clinic/referrals", icon: "◎", badge: "2", badgeTone: "green" },
+      { label: "DrRuby Referrals", href: "/clinic/referrals", icon: "◎" },
       { label: "Finance & Fees", href: "/clinic/finance", icon: "◎" },
       { label: "Compliance", href: "/clinic/compliance", icon: "◎" },
     ],
