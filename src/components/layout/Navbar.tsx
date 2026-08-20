@@ -31,13 +31,13 @@ export default async function Navbar() {
           {t("howItWorks")}
         </Link>
         <Link
-          href="/skin"
+          href="/portal/skin"
           className="text-[14px] font-normal tracking-[0.1em] text-dr-mid no-underline hover:text-dr-ink transition-colors"
         >
           {t("skin")}
         </Link>
         <Link
-          href="/healthspan"
+          href="/portal/healthspan"
           className="text-[14px] font-normal tracking-[0.1em] text-dr-mid no-underline hover:text-dr-ink transition-colors"
         >
           {t("healthspan")}

@@ -32,6 +32,9 @@ describe("proxy middleware", () => {
 
     it.each([
       "/portal",
+      // skin/healthspan 已从公开营销页迁入 portal，现属受保护前缀。
+      "/portal/skin",
+      "/portal/healthspan",
       "/clinic",
       "/collaborate/workspace",
     ])("%s 无 cookie → 重定向 /login 并带 redirect 回跳", (path) => {
@@ -62,9 +65,9 @@ describe("proxy middleware", () => {
   });
 
   describe("放行（交给 next-intl 本地化路由）", () => {
-    it("公开路径（/skin）未登录也放行", () => {
+    it("公开路径（/waitlist）未登录也放行", () => {
       mockGetSessionCookie.mockReturnValue(null);
-      expect(passedToIntl(proxy(req("/skin")))).toBe(true);
+      expect(passedToIntl(proxy(req("/waitlist")))).toBe(true);
     });
 
     it("/collaborate 营销页（非 workspace 子树）未登录放行", () => {

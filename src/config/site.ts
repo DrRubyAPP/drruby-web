@@ -3,8 +3,8 @@
 /** Pages shown in the top Navbar. `labelKey` resolves against the `nav` namespace. */
 export const NAV_PAGES = [
   { key: "home", href: "/" },
-  { key: "skin", href: "/skin" },
-  { key: "healthspan", href: "/healthspan" },
+  { key: "skin", href: "/portal/skin" },
+  { key: "healthspan", href: "/portal/healthspan" },
   { key: "waitlist", href: "/waitlist" },
 ] as const;
 

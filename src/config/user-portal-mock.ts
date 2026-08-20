@@ -79,8 +79,8 @@ export const PORTAL_NAV: NavSection[] = [
     label: "My Health",
     items: [
       { label: "Dashboard", href: "/portal", icon: "◉", active: true },
-      { label: "Skin Analysis", href: "/skin", icon: "◎" },
-      { label: "Healthspan", href: "/healthspan", icon: "◎" },
+      { label: "Skin Analysis", href: "/portal/skin", icon: "◎" },
+      { label: "Healthspan", href: "/portal/healthspan", icon: "◎" },
       { label: "My Health Profile", href: "/portal/profile", icon: "◎" },
     ],
   },
@@ -436,7 +436,8 @@ export const COACH_MESSAGES: CoachMessage[] = [
       "Your Skin Score rose 4 points this month. The main driver is hydration (+18%) — consistent with your new HA serum (started May 22). Your Collagen Index is still at 58; this is the gap to watch.",
     meta: {
       label: "You tapped: Skin Score 78 ↑+4",
-      source: "Based on: Skin scan Jun 5 · Wearable sleep data · Intervention log",
+      source:
+        "Based on: Skin scan Jun 5 · Wearable sleep data · Intervention log",
     },
   },
 ];
@@ -453,7 +454,12 @@ export interface AIReport {
   date: string;
   title: string;
   summary: string;
-  findings: { level: "good" | "warn" | "alert"; tag: string; title: string; desc: string }[];
+  findings: {
+    level: "good" | "warn" | "alert";
+    tag: string;
+    title: string;
+    desc: string;
+  }[];
   status: "new" | "viewed";
 }
 
@@ -512,7 +518,12 @@ export const AI_REPORTS: AIReport[] = [
 export const CONNECTED_SOURCES = [
   { id: "apple-health", name: "Apple Health", status: "connected", icon: "🍎" },
   { id: "oura", name: "Oura Ring", status: "connected", icon: "💍" },
-  { id: "skin-scan", name: "DrRuby Skin Scans", status: "connected", icon: "📸" },
+  {
+    id: "skin-scan",
+    name: "DrRuby Skin Scans",
+    status: "connected",
+    icon: "📸",
+  },
   { id: "manual", name: "Manual entries", status: "connected", icon: "✍️" },
   { id: "labs", name: "Blood panel", status: "available", icon: "🧪" },
   { id: "whoop", name: "Whoop", status: "available", icon: "⌚" },

@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { authClient } from "@/lib/auth/client";
+import { useState } from "react";
 import { PORTAL_NAV } from "@/config/user-portal-mock";
+import { authClient } from "@/lib/auth/client";
 
 // Sidebar nav labels are driven by i18n keys; the mock provides href/icon/badge.
 const NAV_LABEL_KEY: Record<string, string> = {
@@ -41,7 +41,7 @@ export default function PortalSidebar() {
     .join("");
 
   const sidebar = (
-    <aside className="bg-dr-ink w-[220px] flex-shrink-0 flex flex-col h-full">
+    <aside className="bg-[#3a3a3a] w-[220px] flex-shrink-0 flex flex-col h-full">
       {/* Logo */}
       <div className="px-6 pt-7 pb-6 border-b border-white/6">
         <Link
@@ -60,7 +60,9 @@ export default function PortalSidebar() {
         {PORTAL_NAV.map((section) => (
           <div key={section.label}>
             <div className="text-[8px] font-semibold tracking-[0.22em] uppercase text-white/15 px-6 pt-2.5 pb-1">
-              {SECTION_KEY[section.label] ? t(SECTION_KEY[section.label]) : section.label}
+              {SECTION_KEY[section.label]
+                ? t(SECTION_KEY[section.label])
+                : section.label}
             </div>
             {section.items.map((item) => {
               const isActive =
@@ -116,7 +118,9 @@ export default function PortalSidebar() {
   return (
     <>
       {/* Desktop */}
-      <div className="hidden md:block sticky top-0 h-screen self-start">{sidebar}</div>
+      <div className="hidden md:block sticky top-0 h-screen self-start">
+        {sidebar}
+      </div>
 
       {/* Mobile toggle */}
       <button

@@ -20,7 +20,7 @@ export default async function PricingCTA() {
             {t("primary")}
           </Link>
           <Link
-            href="/skin"
+            href="/portal/skin"
             className="bg-transparent text-white border border-white/40 px-5.5 py-2.5 text-[15px] font-semibold tracking-[0.1em] cursor-pointer no-underline hover:bg-white/10 transition-colors text-center"
           >
             {t("ghost")}
