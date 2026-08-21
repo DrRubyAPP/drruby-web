@@ -1,6 +1,7 @@
 import { getSessionCookie } from "better-auth/cookies";
 import { type NextRequest, NextResponse } from "next/server";
 import createMiddleware from "next-intl/middleware";
+import { LOCALE_SWITCH_ENABLED } from "@/config/site";
 import { routing } from "@/i18n/routing";
 
 // next-intl 本地化路由中间件（处理 locale 前缀的 rewrite/redirect）。
@@ -41,7 +42,18 @@ export function proxy(request: NextRequest) {
   }
 
   // 其余交给 next-intl 处理本地化路由。
-  return intlMiddleware(request);
+  const response = intlMiddleware(request);
+
+  // 关闭语言切换时（localeDetection 已关），把残留的 NEXT_LOCALE cookie 重置为默认语言，
+  // 防止之前访问 /zh 种下的 zh cookie 继续干扰；双保险锁定默认语言。
+  if (
+    !LOCALE_SWITCH_ENABLED &&
+    request.cookies.get("NEXT_LOCALE")?.value !== routing.defaultLocale
+  ) {
+    response.cookies.set("NEXT_LOCALE", routing.defaultLocale, { path: "/" });
+  }
+
+  return response;
 }
 
 export const config = {
