@@ -901,29 +901,12 @@ export default function PortalPage() {
             <div className="sec">
               <div className="sec-h">Account</div>
               <div className="card">
-                <Link
-                  href="/portal/profile"
-                  className="sub-row"
-                  style={{ cursor: "pointer", color: "inherit" }}
-                >
-                  <span>Your profile</span>
-                  <span className="arr">&rsaquo;</span>
-                </Link>
-                <Link
-                  href="/portal/settings"
-                  className="sub-row"
-                  style={{ cursor: "pointer", color: "inherit" }}
-                >
-                  <span>Account security</span>
-                  <span className="arr">&rsaquo;</span>
-                </Link>
-                <LogoutButton className="w-full text-left text-[14.5px] text-dr-red py-3.5 border-t border-dr-border hover:opacity-70 transition-opacity disabled:opacity-60" />
+                <LogoutButton className="w-full text-left text-[14.5px] text-dr-red py-3.5 hover:opacity-70 transition-opacity disabled:opacity-60" />
               </div>
             </div>
             <div className="sec">
               <div className="sec-h">Your data</div>
               <div className="card">
-                {/* TODO: /portal/settings#activity 锚点 */}
                 <ExportDataButton />
                 <DeleteAccountDialog />
               </div>
@@ -957,7 +940,7 @@ export default function PortalPage() {
                 </div>
               </div>
             </div>
-            {/* TODO: /portal/settings 通知与外观偏好 */}
+            {/* TODO: 通知与外观偏好设置 */}
             <div className="sec">
               <div className="sec-h">Help</div>
               <div className="card">

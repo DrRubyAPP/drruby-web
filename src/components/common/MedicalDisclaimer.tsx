@@ -8,10 +8,7 @@ export default function MedicalDisclaimer() {
   return (
     <div className="text-[10px] text-[#aaa] leading-[1.6] mt-4">
       {t("disclaimer.short")}{" "}
-      <Link
-        href="/portal/settings"
-        className="underline text-[#aaa] hover:text-dr-mid"
-      >
+      <Link href="/portal" className="underline text-[#aaa] hover:text-dr-mid">
         {t("disclaimer.seeFull")}
       </Link>
     </div>

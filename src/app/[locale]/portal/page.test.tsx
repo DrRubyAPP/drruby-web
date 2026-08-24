@@ -193,19 +193,15 @@ describe("PortalPage /portal 仪表盘", () => {
     expect(screen.getByText("dashboard.timeline.error")).toBeInTheDocument();
   });
 
-  it("Profile sub-row：Your profile / Account security 链接正确；Manage billing 不在 DOM", () => {
+  it("Profile 视图：导出/删除数据复用组件已渲染；死链行不在 DOM", () => {
     render(<PortalPage />);
     // 切到 Profile 视图
     const profileTab = screen.getByText("dashboard.tabs.privacy.label");
     fireEvent.click(profileTab);
 
-    const profileLink = screen.getByText("Your profile").closest("a");
-    expect(profileLink?.getAttribute("href")).toBe("/portal/profile");
-
-    const securityLink = screen.getByText("Account security").closest("a");
-    expect(securityLink?.getAttribute("href")).toBe("/portal/settings");
-
-    // Manage billing 已删除（task-24 任务5）
+    // 旧页面路由行已删除（task-34 任务3）
+    expect(screen.queryByText("Your profile")).toBeNull();
+    expect(screen.queryByText("Account security")).toBeNull();
     expect(screen.queryByText("Manage billing")).toBeNull();
 
     // Download my data / Delete account 复用组件已渲染
