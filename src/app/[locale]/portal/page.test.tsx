@@ -193,16 +193,22 @@ describe("PortalPage /portal 仪表盘", () => {
     expect(screen.getByText("dashboard.timeline.error")).toBeInTheDocument();
   });
 
-  it("Profile 视图：导出/删除数据复用组件已渲染；死链行不在 DOM", () => {
+  it("Profile 视图：导出/删除数据复用组件已渲染；设计稿静态行不挂死链", () => {
     render(<PortalPage />);
     // 切到 Profile 视图
     const profileTab = screen.getByText("dashboard.tabs.privacy.label");
     fireEvent.click(profileTab);
 
-    // 旧页面路由行已删除（task-34 任务3）
-    expect(screen.queryByText("Your profile")).toBeNull();
-    expect(screen.queryByText("Account security")).toBeNull();
-    expect(screen.queryByText("Manage billing")).toBeNull();
+    // Your profile / Account security 按设计稿渲染为静态行，但不是链接
+    // （task-34 已删除对应路由，不恢复死链）
+    const profileRow = screen.getByText("Your profile").closest("div");
+    expect(profileRow?.querySelector("a")).toBeNull();
+    const securityRow = screen.getByText("Account security").closest("div");
+    expect(securityRow?.querySelector("a")).toBeNull();
+
+    // Manage billing 按设计稿渲染为静态行，但不是链接（无 /portal/billing 死链）
+    const billing = screen.getByText("Manage billing").closest("div");
+    expect(billing?.querySelector("a")).toBeNull();
 
     // Download my data / Delete account 复用组件已渲染
     expect(screen.getByText("Export all my data")).toBeInTheDocument();

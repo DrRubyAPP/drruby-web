@@ -44,22 +44,32 @@ export function ExportDataButton() {
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <button
-        type="button"
-        onClick={handleExport}
-        disabled={loading}
-        className="text-left p-3.5 border border-dr-border hover:border-dr-mid transition-colors cursor-pointer disabled:opacity-60"
-      >
-        <div className="text-[12px] text-dr-ink leading-tight">
-          {loading ? "Exporting…" : "Export all my data"}
-        </div>
-        <div className="text-[10px] text-dr-mid mt-1">
-          Download a portable JSON archive of every scan, log, and report.
-          Includes full history.
-        </div>
-      </button>
+    <>
+      <div className="sub-row" style={{ cursor: loading ? "wait" : "pointer" }}>
+        <button
+          type="button"
+          onClick={handleExport}
+          disabled={loading}
+          style={{
+            background: "transparent",
+            border: 0,
+            padding: 0,
+            fontFamily: "inherit",
+            fontSize: "inherit",
+            color: "inherit",
+            textAlign: "left",
+            flex: 1,
+            cursor: loading ? "wait" : "pointer",
+          }}
+        >
+          <div className="sr2">
+            <b>{loading ? "Exporting…" : "Download my data"}</b>
+            <span>A copy of your full history.</span>
+          </div>
+        </button>
+        <span className="arr">&rsaquo;</span>
+      </div>
       {msg && <ErrorState message={msg} />}
-    </div>
+    </>
   );
 }

@@ -73,19 +73,29 @@ export function DeleteAccountDialog() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="w-full text-left p-3.5 border border-dr-red hover:bg-[rgba(200,16,46,0.02)] transition-colors cursor-pointer"
-      >
-        <div className="text-[12px] text-dr-red leading-tight">
-          Delete my account & all data
-        </div>
-        <div className="text-[10px] text-dr-mid mt-1">
-          Permanently erase everything DrRuby holds about you. This cannot be
-          undone.
-        </div>
-      </button>
+      <div className="sub-row" style={{ cursor: "pointer" }}>
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          style={{
+            background: "transparent",
+            border: 0,
+            padding: 0,
+            fontFamily: "inherit",
+            fontSize: "inherit",
+            color: "inherit",
+            textAlign: "left",
+            flex: 1,
+            cursor: "pointer",
+          }}
+        >
+          <div className="sr2">
+            <b>Delete my history or account</b>
+            <span>Remove your data, any time.</span>
+          </div>
+        </button>
+        <span className="arr">&rsaquo;</span>
+      </div>
 
       {open && (
         <div

@@ -30,7 +30,9 @@ beforeEach(() => {
 
 function openDialog() {
   render(<DeleteAccountDialog />);
-  fireEvent.click(screen.getByRole("button", { name: /Delete my account/i }));
+  fireEvent.click(
+    screen.getByRole("button", { name: /Delete my history or account/i }),
+  );
 }
 
 describe("DeleteAccountDialog", () => {
@@ -74,7 +76,9 @@ describe("DeleteAccountDialog", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
     expect(postMock).not.toHaveBeenCalled();
     // 重新打开：复选框已复位、确认禁用
-    fireEvent.click(screen.getByRole("button", { name: /Delete my account/i }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /Delete my history or account/i }),
+    );
     expect(screen.getByRole("checkbox")).not.toBeChecked();
     expect(screen.getByRole("button", { name: /Yes, delete/i })).toBeDisabled();
   });

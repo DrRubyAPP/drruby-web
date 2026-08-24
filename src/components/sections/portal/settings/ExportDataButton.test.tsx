@@ -34,7 +34,7 @@ describe("ExportDataButton", () => {
   it("点击 → GET /api/me/export → 触发 blob 下载，文件名匹配", async () => {
     getMock.mockResolvedValueOnce({ account: { id: "u1" } });
     render(<ExportDataButton />);
-    fireEvent.click(screen.getByRole("button", { name: /Export/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Download my data/i }));
 
     expect(getMock).toHaveBeenCalledWith("/api/me/export");
     await waitFor(() => expect(createUrlSpy).toHaveBeenCalledTimes(1));
@@ -49,7 +49,7 @@ describe("ExportDataButton", () => {
   it("network_error → 展示统一网络异常文案，不泄漏后端 message", async () => {
     getMock.mockRejectedValueOnce(new ApiError("network_error", 0, "boom"));
     render(<ExportDataButton />);
-    fireEvent.click(screen.getByRole("button", { name: /Export/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Download my data/i }));
     await waitFor(() =>
       expect(screen.getByText("网络异常，请检查后重试")).toBeInTheDocument(),
     );
@@ -59,7 +59,7 @@ describe("ExportDataButton", () => {
   it("401 → 不展示错误文案（交上层处理）", async () => {
     getMock.mockRejectedValueOnce(new ApiError("unauthorized", 401, "no"));
     render(<ExportDataButton />);
-    fireEvent.click(screen.getByRole("button", { name: /Export/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Download my data/i }));
     await waitFor(() => expect(getMock).toHaveBeenCalledTimes(1));
     expect(screen.queryByText(/网络异常/)).toBeNull();
     expect(screen.queryByText(/发生未知错误/)).toBeNull();

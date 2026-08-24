@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { EmptyState, ErrorState, Skeleton } from "@/components/api";
+import { ErrorState, Skeleton } from "@/components/api";
 import { useApi } from "@/hooks/useApi";
 import { DecisionDetailDrawer } from "./DecisionDetailDrawer";
 import type { DecisionDto } from "./dto";
@@ -14,9 +14,10 @@ import {
 import { NewDecisionDrawer } from "./NewDecisionDrawer";
 
 /**
- * My Decisions 视图：替换 portal/page.tsx 的 v-decisions inline 段。
- * - GET /api/decisions → 按 status 分组（active / saved）
+ * My Decisions 视图：4 个 section 常驻（设计稿结构）。
  * - Start a new decision chips → 打开 NewDecisionDrawer（预填 chip）
+ * - Active decisions / Saved & completed ← GET /api/decisions 按 status 分组
+ * - Inside a decision 为静态示例区块
  * - 列表卡片点击 → 打开 DecisionDetailDrawer（GET /api/decisions/[id]）
  */
 export function DecisionsView() {
@@ -24,6 +25,8 @@ export function DecisionsView() {
     useApi<DecisionDto[]>("/api/decisions");
   const [newDrawerChip, setNewDrawerChip] = useState<string | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
+
+  const { active, saved } = groupDecisions(data ?? []);
 
   function handleCreated(id: string) {
     setNewDrawerChip(null);
@@ -67,19 +70,102 @@ export function DecisionsView() {
         </div>
       </div>
 
-      {/* 主体：四态 */}
-      {loading ? (
-        <Skeleton lines={4} />
-      ) : error ? (
-        <ErrorState message={error.message} onRetry={refetch} />
-      ) : !data || data.length === 0 ? (
-        <EmptyState
-          title="No decisions yet"
-          hint="Start a new decision above."
-        />
-      ) : (
-        <DecisionsList items={data} onSelect={setDetailId} />
-      )}
+      {/* Active decisions：API 四态（section 常驻） */}
+      <div className="sec">
+        <div className="sec-h">Active decisions</div>
+        {loading ? (
+          <Skeleton lines={3} />
+        ) : error ? (
+          <ErrorState message={error.message} onRetry={refetch} />
+        ) : active.length === 0 ? (
+          <div className="cm2-note">
+            Nothing being weighed right now &mdash; start one above.
+          </div>
+        ) : (
+          active.map((d) => (
+            <DecisionCard
+              key={d.id}
+              decision={d}
+              onClick={() => setDetailId(d.id)}
+            />
+          ))
+        )}
+      </div>
+
+      {/* Inside a decision（静态，设计稿） */}
+      <div className="sec">
+        <div className="sec-h">Inside a decision</div>
+        <div className="card">
+          <div
+            style={{
+              fontFamily: "var(--p-serif)",
+              fontSize: 20,
+              marginBottom: 10,
+            }}
+          >
+            Should I do Thermage?
+          </div>
+          <div className="sub-row">
+            <span>Clinic consultations</span>
+            <span className="arr">2</span>
+          </div>
+          <div className="sub-row">
+            <span>Products considered</span>
+            <span className="arr">3</span>
+          </div>
+          <div className="sub-row">
+            <span>Cost &amp; what&rsquo;s included</span>
+            <span className="arr">&rsaquo;</span>
+          </div>
+          <div className="sub-row">
+            <span>Concerns</span>
+            <span className="arr">pain, cost, volume</span>
+          </div>
+          <div className="sub-row">
+            <span>Related real journeys</span>
+            <span className="arr">5</span>
+          </div>
+          <div className="sub-row">
+            <span>Final decision &amp; follow-up</span>
+            <span className="arr">&mdash;</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Saved & completed：section 常驻，行数据来自 API */}
+      <div className="sec">
+        <div className="sec-h">Saved &amp; completed</div>
+        {!loading && !error && saved.length === 0 ? (
+          <div className="cm2-note">Nothing saved or completed yet.</div>
+        ) : (
+          saved.length > 0 && (
+            <div className="card">
+              {saved.map((d) => (
+                <div
+                  key={d.id}
+                  className="sub-row"
+                  onClick={() => setDetailId(d.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setDetailId(d.id);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  style={{ cursor: "pointer" }}
+                >
+                  <span>
+                    {d.question} &middot;{" "}
+                    {statusToLabel(d.status).toLowerCase()}
+                  </span>
+                  <span className="arr">&rsaquo;</span>
+                </div>
+              ))}
+            </div>
+          )
+        )}
+      </div>
 
       {newDrawerChip !== null && (
         <NewDecisionDrawer
@@ -94,45 +180,6 @@ export function DecisionsView() {
           onClose={() => setDetailId(null)}
           onChanged={refetch}
         />
-      )}
-    </>
-  );
-}
-
-/** Active + Saved 两组渲染（仅展示，无内部状态）。 */
-function DecisionsList({
-  items,
-  onSelect,
-}: {
-  items: DecisionDto[];
-  onSelect: (id: string) => void;
-}) {
-  const { active, saved } = groupDecisions(items);
-  return (
-    <>
-      {active.length > 0 && (
-        <div className="sec">
-          <div className="sec-h">Active decisions</div>
-          {active.map((d) => (
-            <DecisionCard
-              key={d.id}
-              decision={d}
-              onClick={() => onSelect(d.id)}
-            />
-          ))}
-        </div>
-      )}
-      {saved.length > 0 && (
-        <div className="sec">
-          <div className="sec-h">Saved &amp; completed</div>
-          {saved.map((d) => (
-            <DecisionCard
-              key={d.id}
-              decision={d}
-              onClick={() => onSelect(d.id)}
-            />
-          ))}
-        </div>
       )}
     </>
   );
@@ -179,6 +226,20 @@ function DecisionCard({
           <div className="st">For: {goalToLabel(decision.goal)}</div>
         )}
         <div className="st">Updated {formatRelative(decision.updated)}</div>
+        <div className="dcard-src">
+          <span className="ds you">
+            <i />
+            You
+          </span>
+          <span className="ds sim">
+            <i />
+            Similar journeys
+          </span>
+          <span className="ds ev">
+            <i />
+            Evidence
+          </span>
+        </div>
       </div>
     </div>
   );

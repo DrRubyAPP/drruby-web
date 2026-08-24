@@ -246,7 +246,27 @@ export default function PortalPage() {
             <TodayView onSeeAllSignals={() => go("health")} />
             <ActiveDecisionsSummary onClick={() => go("decisions")} />
             <div className="sec">
-              <div className="sec-h">Your progress</div>
+              <div className="sec-h">Learn from your past self</div>
+              <div className="card matter">
+                <h3>A note from your past self</h3>
+                <p>
+                  &ldquo;I almost stopped retinol in week 2 &mdash; glad I
+                  didn&rsquo;t.&rdquo; &mdash; you, 3 months ago. You&rsquo;re
+                  weighing a similar call now.
+                </p>
+                <div className="matter-next">Revisit that decision &rarr;</div>
+              </div>
+              <div className="card matter">
+                <h3>A pattern worth noticing</h3>
+                <p>
+                  Your sleep has slipped the week before your period in each of
+                  the last three cycles.
+                </p>
+                <div style={{ fontSize: 12, color: "#a89a95", marginTop: 8 }}>
+                  Observed across your own history &mdash; a pattern, not a
+                  diagnosis.
+                </div>
+              </div>
               <div className="card">
                 <div
                   style={{ fontSize: 15, color: "#524d49", lineHeight: 1.65 }}
@@ -594,6 +614,38 @@ export default function PortalPage() {
             </div>
             <div className="sec">
               <div className="sec-h">
+                Ask others &middot; optional forum module (gated)
+              </div>
+              <div className="card">
+                <div className="cm2-q">
+                  <div className="cm2-qt">Should I start HRT?</div>
+                  <div className="cm2-qmeta">
+                    48 replies &middot; 12 similar journeys &middot; 2 expert
+                    comments
+                  </div>
+                </div>
+                <div className="cm2-q">
+                  <div className="cm2-qt">Anyone regret Thermage?</div>
+                  <div className="cm2-qmeta">
+                    61 replies &middot; 18 similar journeys
+                  </div>
+                </div>
+                <div className="cm2-q">
+                  <div className="cm2-qt">How did you choose your clinic?</div>
+                  <div className="cm2-qmeta">
+                    33 replies &middot; 9 similar journeys
+                  </div>
+                </div>
+                <div className="cm2-q">
+                  <div className="cm2-qt">How long until you saw results?</div>
+                  <div className="cm2-qmeta">
+                    54 replies &middot; 21 similar journeys
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="sec">
+              <div className="sec-h">
                 Things I wish I knew &middot; regret stories
               </div>
               <div className="card">
@@ -701,6 +753,23 @@ export default function PortalPage() {
                   <h4>HRT &middot; 190 journeys</h4>
                   <p>Hair loss &middot; Sleep &middot; Weight &middot; Mood</p>
                 </div>
+              </div>
+              <div className="cm2-note">
+                Batch 1: users don&rsquo;t come to browse a forum &mdash; they
+                come to decide &ldquo;should I do this?&rdquo;. So the community
+                is organized by decision, not by feed.
+              </div>
+            </div>
+            <div className="sec">
+              <div className="cm2-pos">
+                Reddit helps you chat. RealSelf helps you see photos.{" "}
+                <b>
+                  DrRuby helps you learn how real decisions actually happen.
+                </b>{" "}
+                Every reply here is a journey, not a comment: &ldquo;I had a
+                similar experience&rdquo; &middot; &ldquo;a different
+                experience&rdquo; &middot; &ldquo;I changed my mind later&rdquo;
+                &middot; &ldquo;here&rsquo;s my outcome&rdquo;.
               </div>
             </div>
           </div>
@@ -867,9 +936,9 @@ export default function PortalPage() {
               )}
             </div>
             <div className="pf-status">
-              <span className="pf-pill">
-                <span className="coming-soon">{t("dashboard.comingSoon")}</span>
-              </span>
+              <span className="pf-pill on">Private by default</span>
+              <span className="pf-pill">No community sharing</span>
+              <span className="pf-pill">No active studies</span>
             </div>
             <div className="lede">
               <b>Your data. Your choice.</b> You control what DrRuby can access,
@@ -895,18 +964,39 @@ export default function PortalPage() {
                   <span>View plans</span>
                   <span className="arr">&rsaquo;</span>
                 </Link>
-                {/* TODO: 付费计划上线后接 /portal/billing */}
+                <div className="sub-row">
+                  <span>Manage billing</span>
+                  <span className="arr">&rsaquo;</span>
+                </div>
               </div>
             </div>
             <div className="sec">
               <div className="sec-h">Account</div>
               <div className="card">
-                <LogoutButton className="w-full text-left text-[14.5px] text-dr-red py-3.5 hover:opacity-70 transition-opacity disabled:opacity-60" />
+                <div className="sub-row">
+                  <span>Your profile</span>
+                  <span className="arr">&rsaquo;</span>
+                </div>
+                <div className="sub-row">
+                  <span>Account security</span>
+                  <span className="arr">&rsaquo;</span>
+                </div>
+                <div className="sub-row" style={{ color: "#8C2635" }}>
+                  <LogoutButton className="bg-transparent border-0 p-0 text-left text-[14.5px] font-normal cursor-pointer hover:opacity-70 transition-opacity disabled:opacity-60" />
+                  <span className="arr">&rsaquo;</span>
+                </div>
               </div>
             </div>
             <div className="sec">
               <div className="sec-h">Your data</div>
               <div className="card">
+                <div className="sub-row">
+                  <div className="sr2">
+                    <b>Activity log</b>
+                    <span>Everything DrRuby has recorded.</span>
+                  </div>
+                  <span className="arr">&rsaquo;</span>
+                </div>
                 <ExportDataButton />
                 <DeleteAccountDialog />
               </div>
@@ -940,7 +1030,19 @@ export default function PortalPage() {
                 </div>
               </div>
             </div>
-            {/* TODO: 通知与外观偏好设置 */}
+            <div className="sec">
+              <div className="sec-h">Notifications &amp; Appearance</div>
+              <div className="card">
+                <div className="sub-row">
+                  <span>Notification preferences</span>
+                  <span className="arr">&rsaquo;</span>
+                </div>
+                <div className="sub-row">
+                  <span>Appearance &amp; language</span>
+                  <span className="arr">&rsaquo;</span>
+                </div>
+              </div>
+            </div>
             <div className="sec">
               <div className="sec-h">Help</div>
               <div className="card">
@@ -962,7 +1064,27 @@ export default function PortalPage() {
                 </a>
               </div>
             </div>
-            {/* TODO: 静态页 /legal/tos 等 */}
+            <div className="sec">
+              <div className="sec-h">Legal</div>
+              <div className="card">
+                <div className="sub-row">
+                  <span>Terms of Service</span>
+                  <span className="arr">&rsaquo;</span>
+                </div>
+                <div className="sub-row">
+                  <span>Privacy Policy</span>
+                  <span className="arr">&rsaquo;</span>
+                </div>
+                <div className="sub-row">
+                  <span>Consumer Health Data Privacy Policy</span>
+                  <span className="arr">&rsaquo;</span>
+                </div>
+                <div className="sub-row">
+                  <span>Research Consent Terms</span>
+                  <span className="arr">&rsaquo;</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
