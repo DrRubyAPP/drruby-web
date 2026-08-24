@@ -32,9 +32,9 @@ describe("proxy middleware", () => {
 
     it.each([
       "/portal",
-      // skin/healthspan 已从公开营销页迁入 portal，现属受保护前缀。
-      "/portal/skin",
-      "/portal/healthspan",
+      // flows 页是 portal 下仅存的子路由（旧 skin/healthspan 页已删，task-34）。
+      "/portal/consider/skin",
+      "/portal/observe/feel",
       "/clinic",
       "/collaborate/workspace",
     ])("%s 无 cookie → 重定向 /login 并带 redirect 回跳", (path) => {

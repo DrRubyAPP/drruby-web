@@ -34,7 +34,7 @@ export default async function DualEntry() {
       {/* Two cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border-t border-dr-border">
         <Link
-          href="/portal/skin"
+          href="/portal"
           className="group relative overflow-hidden cursor-pointer flex flex-col justify-start p-7 md:p-13 no-underline text-inherit transition-all hover:brightness-97"
           style={{
             background: "linear-gradient(160deg,#F5F0EE 0%,#EDE5E0 100%)",
@@ -60,7 +60,7 @@ export default async function DualEntry() {
           </div>
         </Link>
         <Link
-          href="/portal/healthspan"
+          href="/portal"
           className="group relative overflow-hidden cursor-pointer flex flex-col justify-start p-7 md:p-13 no-underline text-inherit transition-all hover:brightness-97 md:border-l border-t md:border-t-0 border-dr-border"
           style={{
             background: "linear-gradient(160deg,#F0F0F0 0%,#E8E5E2 100%)",

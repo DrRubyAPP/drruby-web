@@ -290,9 +290,6 @@
       "basedOn": "Based on 8 scans over 90 days",
       "fullReport": "Full PDF Report →"
     },
-    "products": {
-      "title": "Recommended Based on Your Scan"
-    },
     "clinicEntry": {
       "eyebrow": "Clinical Care",
       "title": "Want a dermatologist's eyes on your scan?",
@@ -574,25 +571,8 @@
     "networkError": "Network error. Please try again."
   },
   "portal": {
-    "brand": "DrRuby",
     "brandSub": "Know your body",
-    "nav": {
-      "myHealth": "My Health",
-      "aiTools": "AI Tools",
-      "care": "Care",
-      "dashboard": "Dashboard",
-      "skinAnalysis": "Skin Analysis",
-      "healthspan": "Healthspan",
-      "healthProfile": "My Health Profile",
-      "aiReports": "AI Reports",
-      "personalCoach": "Personal Coach",
-      "bookClinic": "Book a Clinic",
-      "products": "Products & Plans",
-      "appointments": "Appointments"
-    },
     "topbar": {
-      "sourcesConnected": "{count} sources connected",
-      "primaryAction": "Run New Analysis",
       "onboarding": "Onboarding",
       "backToPortal": "Back to portal"
     },
@@ -713,95 +693,6 @@
       "shippingDesc": "This enters private beta after the skin and supplement checks are stable. We're deliberately not rushing it — hormonal and mood signals are easy to misread, and we'd rather be slow and right than fast and noisy.",
       "trySkinCheck": "Try the skin check instead →"
     },
-    "coach": {
-      "pageTitle": "Personal Coach",
-      "pageSub": "AI Tools · Powered by your data",
-      "title": "Ask DrRuby. <em>It already knows you.</em>",
-      "sub": "This isn't a generic chatbot. Every answer is grounded in your own longitudinal data — scans, wearables, intervention log — translated to plain language by the Insight Engine. Chat is also how you log: say \"I started magnesium\" and it's tracked.",
-      "headerTitle": "DrRuby AI",
-      "headerSub": "Powered by your data · Not a chatbot",
-      "live": "● Live",
-      "placeholder": "Ask a question or log something (supplement, symptom, lab…)",
-      "send": "Send",
-      "footnote": "DrRuby provides health information, not medical advice · Always consult your doctor"
-    },
-    "profile": {
-      "pageTitle": "My Health Profile",
-      "pageSub": "My Health · Personal context",
-      "identityHeading": "Profile",
-      "sourcesHeading": "Connected data sources",
-      "sourcesFootnote": "Your data stays on your device. Sharing is always opt-in, per source, per clinic.",
-      "trackingHeading": "What DrRuby is tracking for you",
-      "trackingFootnote": "DrRuby doesn't diagnose. These are patterns your data and self-reports suggest — context for the conversations you have with your own doctor.",
-      "timelineHeading": "Your DrRuby timeline",
-      "statusMonitor": "monitor",
-      "statusImproving": "improving",
-      "statusAlert": "alert"
-    },
-    "reports": {
-      "listPageTitle": "AI Reports",
-      "listPageSub": "AI Tools · Plain-language findings",
-      "listTitle": "Reports generated <em>from your data.</em>",
-      "listSub": "Each report turns your recent scans, wearables, and self-reports into three buckets — Positive, Monitor, Action. No score obsession. Just what to do next.",
-      "findingPositive": "Positive",
-      "findingMonitor": "Monitor",
-      "findingAction": "Action",
-      "statusNew": "new",
-      "statusViewed": "viewed",
-      "detailPageSub": "AI Report · {date}",
-      "backToList": "← All reports",
-      "summaryHeading": "Doctor-ready summary",
-      "summaryDesc": "Share this report with your physician before your next visit. DrRuby doesn't diagnose — it gives your doctor the longitudinal context they need to have a productive conversation with you.",
-      "shareCta": "Share with a clinic →",
-      "detailPageTitle": "Report",
-      "detailPageSub2": "AI Tools · Your health record",
-      "kind": {
-        "lab": "Lab",
-        "imaging": "Imaging",
-        "checkup": "Checkup",
-        "vitals": "Vitals"
-      },
-      "status": {
-        "pending": "Pending",
-        "processing": "Processing",
-        "done": "Done",
-        "manual": "Manual"
-      },
-      "addCta": "+ New report",
-      "empty": "No reports yet. Add your first health report to start building your record.",
-      "emptyCta": "Add your first report",
-      "loadError": "Couldn't load your reports. Please try again.",
-      "notFound": "Report not found.",
-      "sourceLabel": "Source",
-      "form": {
-        "title": "New report",
-        "kind": "Type",
-        "titleField": "Title",
-        "source": "Source (optional)",
-        "recordedAt": "Recorded date",
-        "titleRequired": "Title is required.",
-        "dateRequired": "Recorded date is required.",
-        "submit": "Add report",
-        "submitting": "Adding…",
-        "cancel": "Cancel",
-        "error": "Couldn't save the report. Please check the fields and try again."
-      }
-    },
-    "clinic": {
-      "pageTitle": "Book a Clinic",
-      "pageSub": "Care · Partner dermatology & women's health",
-      "title": "Arrive prepared. <em>Not from scratch.</em>",
-      "sub": "DrRuby partner clinics receive a summary of your longitudinal data before the appointment — with your explicit authorization. Your doctor walks in already knowing your history. You can revoke access at any time.",
-      "beforeYouBook": "Before you book",
-      "beforeYouBookDesc": "Choose which data to share. Clinics only see what you authorize — never your full history.",
-      "manageSharing": "Manage sharing →",
-      "nextAvailable": "Next available",
-      "viewProfile": "View clinic profile",
-      "sharingSupported": "DrRuby data sharing supported",
-      "alreadyBooked": "Already booked?",
-      "alreadyBookedDesc": "Manage upcoming and past appointments in one place.",
-      "goToAppointments": "Go to appointments →"
-    },
     "products": {
       "pageTitle": "Products & Plans",
       "pageSub": "Care · AI-matched for your data",
@@ -814,37 +705,6 @@
       "currentPlan": "Your current plan",
       "saveMoneyDesc": "Adding more supplements on top of a stack that already covers your bases rarely helps. Use the Coach to evaluate before you add — most stacks have 1–2 redundant items.",
       "evaluateStack": "Evaluate my stack →"
-    },
-    "appointments": {
-      "pageTitle": "Appointments",
-      "pageSub": "Care · Upcoming and past visits",
-      "title": "Your visits, <em>in one place.</em>",
-      "sub": "Post-visit notes from partner clinics sync back to DrRuby — so your timeline stays complete without you re-typing anything.",
-      "bookClinic": "Book a clinic →",
-      "upcoming": "Upcoming",
-      "past": "Past visits",
-      "emptyUpcoming": "No upcoming appointments.",
-      "statusUpcoming": "upcoming",
-      "statusCompleted": "completed",
-      "statusCancelled": "cancelled"
-    },
-    "settings": {
-      "pageTitle": "Settings",
-      "pageSub": "Privacy · Data ownership · Disclaimer",
-      "title": "Your data. <em>Your terms.</em>",
-      "sub": "DrRuby is local-first. Health data lives on your device; sharing is per-clinic, per-source, and revocable at any time. Export or delete everything below — no support ticket required.",
-      "accountHeading": "Account",
-      "editProfile": "Edit profile",
-      "sharingHeading": "Clinic sharing",
-      "sharingFootnote": "Clinics only see what you explicitly authorize. Revoking takes effect immediately.",
-      "preferencesHeading": "Preferences",
-      "dataOwnershipHeading": "Data ownership",
-      "exportData": "Export all my data",
-      "exportDataDesc": "Download a portable JSON archive of every scan, log, and report. Includes full history.",
-      "deleteAccount": "Delete my account & all data",
-      "deleteAccountDesc": "Permanently erase everything DrRuby holds about you. This cannot be undone.",
-      "disclaimerHeading": "Full legal disclaimer",
-      "footer": "DrRuby Health Intelligence · Built with the N=1 principle · © 2026 DrRuby"
     },
     "decisions": {
       "title": "My Decisions",

@@ -290,9 +290,6 @@
       "basedOn": "基于 90 天内的 8 次扫描",
       "fullReport": "完整 PDF 报告 →"
     },
-    "products": {
-      "title": "根据你的扫描推荐"
-    },
     "clinicEntry": {
       "eyebrow": "临床护理",
       "title": "想让皮肤科医生审视你的扫描结果？",
@@ -580,25 +577,8 @@
     "networkError": "网络错误，请重试。"
   },
   "portal": {
-    "brand": "DrRuby",
     "brandSub": "认识你的身体",
-    "nav": {
-      "myHealth": "我的健康",
-      "aiTools": "AI 工具",
-      "care": "护理",
-      "dashboard": "仪表盘",
-      "skinAnalysis": "肌肤分析",
-      "healthspan": "健康寿命",
-      "healthProfile": "我的健康档案",
-      "aiReports": "AI 报告",
-      "personalCoach": "个人教练",
-      "bookClinic": "预约诊所",
-      "products": "产品与套餐",
-      "appointments": "预约"
-    },
     "topbar": {
-      "sourcesConnected": "已连接 {count} 个数据源",
-      "primaryAction": "运行新分析",
       "onboarding": "引导设置",
       "backToPortal": "返回门户"
     },
@@ -719,95 +699,6 @@
       "shippingDesc": "这一评估将在肌肤分析与补剂评估稳定后进入私密测试。我们刻意不去仓促推进 — 激素与情绪信号容易被误读，我们宁愿慢而准确，也不愿快而杂乱。",
       "trySkinCheck": "改为尝试肌肤分析 →"
     },
-    "coach": {
-      "pageTitle": "个人教练",
-      "pageSub": "AI 工具 · 由你的数据驱动",
-      "title": "向 DrRuby 提问。<em>它已经了解你。</em>",
-      "sub": "这不是一个通用聊天机器人。每一个回答都立足于你自己的纵向数据 — 扫描、可穿戴设备、干预记录 — 由洞见引擎转化为通俗语言。对话也是你的记录方式：说“我开始服用镁了”，它就会被追踪。",
-      "headerTitle": "DrRuby AI",
-      "headerSub": "由你的数据驱动 · 不是聊天机器人",
-      "live": "● 在线",
-      "placeholder": "提出问题或记录某事（补剂、症状、化验…）",
-      "send": "发送",
-      "footnote": "DrRuby 提供健康信息，而非医疗建议 · 请务必咨询你的医生"
-    },
-    "profile": {
-      "pageTitle": "我的健康档案",
-      "pageSub": "我的健康 · 个人背景",
-      "identityHeading": "档案",
-      "sourcesHeading": "已连接的数据源",
-      "sourcesFootnote": "你的数据留在你的设备上。共享始终需按数据源、按诊所逐项主动授权。",
-      "trackingHeading": "DrRuby 正在为你追踪的内容",
-      "trackingFootnote": "DrRuby 不作诊断。这些是你的数据和自我报告所呈现的规律 — 是你与自己医生对话时的背景参考。",
-      "timelineHeading": "你的 DrRuby 时间线",
-      "statusMonitor": "关注",
-      "statusImproving": "改善中",
-      "statusAlert": "警示"
-    },
-    "reports": {
-      "listPageTitle": "AI 报告",
-      "listPageSub": "AI 工具 · 通俗语言的发现",
-      "listTitle": "<em>由你的数据</em>生成的报告。",
-      "listSub": "每份报告将你近期的扫描、可穿戴设备和自我报告归入三类 — 正面、关注、行动。不执着于评分。只告诉你下一步该做什么。",
-      "findingPositive": "正面",
-      "findingMonitor": "关注",
-      "findingAction": "行动",
-      "statusNew": "新",
-      "statusViewed": "已查看",
-      "detailPageSub": "AI 报告 · {date}",
-      "backToList": "← 所有报告",
-      "summaryHeading": "可带给医生的摘要",
-      "summaryDesc": "请在下次就诊前将此报告分享给你的医生。DrRuby 不作诊断 — 它为你的医生提供进行高效对话所需的纵向背景。",
-      "shareCta": "分享给诊所 →",
-      "detailPageTitle": "报告",
-      "detailPageSub2": "AI 工具 · 你的健康记录",
-      "kind": {
-        "lab": "化验",
-        "imaging": "影像",
-        "checkup": "体检",
-        "vitals": "生命体征"
-      },
-      "status": {
-        "pending": "待处理",
-        "processing": "处理中",
-        "done": "已完成",
-        "manual": "手动录入"
-      },
-      "addCta": "+ 新增报告",
-      "empty": "还没有报告。添加你的第一份健康报告，开始建立你的记录。",
-      "emptyCta": "添加第一份报告",
-      "loadError": "无法加载你的报告，请重试。",
-      "notFound": "未找到该报告。",
-      "sourceLabel": "来源",
-      "form": {
-        "title": "新增报告",
-        "kind": "类型",
-        "titleField": "标题",
-        "source": "来源（可选）",
-        "recordedAt": "记录日期",
-        "titleRequired": "标题为必填项。",
-        "dateRequired": "记录日期为必填项。",
-        "submit": "添加报告",
-        "submitting": "添加中…",
-        "cancel": "取消",
-        "error": "无法保存报告，请检查字段后重试。"
-      }
-    },
-    "clinic": {
-      "pageTitle": "预约诊所",
-      "pageSub": "护理 · 合作皮肤科与女性健康",
-      "title": "有备而来。<em>无需从头开始。</em>",
-      "sub": "在你明确授权下，DrRuby 合作诊所会在就诊前收到你纵向数据的摘要。你的医生一进门便已了解你的病史。你可以随时撤销访问权限。",
-      "beforeYouBook": "预约前",
-      "beforeYouBookDesc": "选择要分享哪些数据。诊所只能看到你授权的内容 — 绝不包括你的完整病史。",
-      "manageSharing": "管理共享 →",
-      "nextAvailable": "最近可预约",
-      "viewProfile": "查看诊所资料",
-      "sharingSupported": "支持 DrRuby 数据共享",
-      "alreadyBooked": "已经预约了？",
-      "alreadyBookedDesc": "在一处管理即将到来和过往的预约。",
-      "goToAppointments": "前往预约 →"
-    },
     "products": {
       "pageTitle": "产品与套餐",
       "pageSub": "护理 · 由 AI 匹配你的数据",
@@ -820,37 +711,6 @@
       "currentPlan": "你当前的套餐",
       "saveMoneyDesc": "在已经覆盖基础的方案之上再添加补剂，往往帮助不大。添加前请用教练评估一下 — 大多数方案都有 1–2 项多余项目。",
       "evaluateStack": "评估我的方案 →"
-    },
-    "appointments": {
-      "pageTitle": "预约",
-      "pageSub": "护理 · 即将到来与过往就诊",
-      "title": "你的就诊，<em>尽在一处。</em>",
-      "sub": "合作诊所的诊后记录会同步回 DrRuby — 让你的时间线保持完整，无需重新录入任何内容。",
-      "bookClinic": "预约诊所 →",
-      "upcoming": "即将到来",
-      "past": "过往就诊",
-      "emptyUpcoming": "暂无即将到来的预约。",
-      "statusUpcoming": "即将到来",
-      "statusCompleted": "已完成",
-      "statusCancelled": "已取消"
-    },
-    "settings": {
-      "pageTitle": "设置",
-      "pageSub": "隐私 · 数据所有权 · 免责声明",
-      "title": "你的数据。<em>你说了算。</em>",
-      "sub": "DrRuby 以本地为先。健康数据存于你的设备上；共享按诊所、按数据源进行，并可随时撤销。在下方导出或删除全部数据 — 无需提交任何工单。",
-      "accountHeading": "账户",
-      "editProfile": "编辑资料",
-      "sharingHeading": "诊所共享",
-      "sharingFootnote": "诊所只能看到你明确授权的内容。撤销即时生效。",
-      "preferencesHeading": "偏好设置",
-      "dataOwnershipHeading": "数据所有权",
-      "exportData": "导出我的全部数据",
-      "exportDataDesc": "下载一份可移植的 JSON 档案，包含每一次扫描、记录和报告。含完整历史。",
-      "deleteAccount": "删除我的账户及全部数据",
-      "deleteAccountDesc": "永久抹除 DrRuby 保存的关于你的一切。此操作无法撤销。",
-      "disclaimerHeading": "完整法律免责声明",
-      "footer": "DrRuby 健康智能 · 以 N=1 原则打造 · © 2026 DrRuby"
     },
     "decisions": {
       "title": "我的决策",

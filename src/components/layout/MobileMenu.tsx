@@ -24,8 +24,8 @@ interface NavLink {
 // 始终可见的公开链接。
 const PUBLIC_LINKS: NavLink[] = [
   { href: "/", key: "howItWorks" },
-  { href: "/portal/skin", key: "skin" },
-  { href: "/portal/healthspan", key: "healthspan" },
+  { href: "/portal", key: "skin" },
+  { href: "/portal", key: "healthspan" },
 ];
 
 interface MobileMenuProps {
