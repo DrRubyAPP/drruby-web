@@ -1,64 +1,7 @@
 // User Portal mock data — sourced from tech-index/index.html User Portal mockup
 // and website-user-portal.md spec. Replace with real API in production.
-
-export type InsightPriority = "P0" | "P1" | "P2" | "P3";
-
-export interface ProactiveInsight {
-  id: string;
-  priority: InsightPriority;
-  headline: string;
-  detail: string;
-  ctaLabel: string;
-  ctaHref: string;
-  source?: string;
-}
-
-// §6 Proactive Insight — currently triggered (only 1 within 72h)
-export const ACTIVE_INSIGHT: ProactiveInsight | null = {
-  id: "insight-001",
-  priority: "P1",
-  headline: "I noticed your HRV dropped 18% in the last 10 days",
-  detail:
-    "The last time your HRV dropped like this, your skin changed 10 days later. Worth a quick check-in.",
-  ctaLabel: "Look into this →",
-  ctaHref: "/portal/moment/skin",
-  source: "Pattern matched · Jun 14",
-};
-
-// §3.2 Three Trigger entries (fixed order, cannot reorder)
-export interface HomeTrigger {
-  id: "skin-changed" | "stack-worth" | "feel-different";
-  index: string;
-  title: string;
-  subtitle: string;
-  href: string;
-  comingSoon?: boolean;
-}
-
-export const HOME_TRIGGERS: HomeTrigger[] = [
-  {
-    id: "skin-changed",
-    index: "01",
-    title: "My skin changed",
-    subtitle: "Something looks or feels different lately",
-    href: "/portal/moment/skin",
-  },
-  {
-    id: "stack-worth",
-    index: "02",
-    title: "Is this worth it?",
-    subtitle: "Check if a supplement or product is helping you",
-    href: "/portal/moment/stack",
-  },
-  {
-    id: "feel-different",
-    index: "03",
-    title: "I feel different",
-    subtitle: "Energy, sleep, mood, hormonal changes",
-    href: "/portal/moment/feel",
-    comingSoon: true,
-  },
-];
+// Spine 映射（a_docs/drruby-docs/product-spine.md）：
+//   skin flow = CONSIDER+DECIDE(skin)，stack flow = CONSIDER+DECIDE(supplement)
 
 // Sidebar navigation structure (§1.1)
 export interface NavItem {
@@ -102,17 +45,6 @@ export const PORTAL_NAV: NavSection[] = [
   },
 ];
 
-// User info (mock)
-// TODO: PortalHome.tsx（dead code）迁移 session 后删除此 export；PortalSidebar/
-// PortalTopbar 已在 task-24 改用 authClient.useSession，不再读此处。
-export const PORTAL_USER = {
-  firstName: "Ruby",
-  fullName: "Ruby Johnson",
-  email: "rubysun@gmail.com",
-  initials: "RJ",
-  connectedSources: 4,
-};
-
 // §2.1 Onboarding screen 1 — single question with chip options
 export const ONBOARDING_CONCERNS = [
   { id: "skin-tired", label: "My skin looks tired / dull" },
@@ -125,8 +57,8 @@ export const ONBOARDING_CONCERNS = [
   },
 ] as const;
 
-// §4.1 Moment 1 — multi-select chip options
-export const MOMENT1_SYMPTOMS = [
+// §4.1 skin consider flow — multi-select chip options
+export const SKIN_CONSIDER_SYMPTOMS = [
   { id: "dryness", label: "Dryness" },
   { id: "dullness", label: "Dullness" },
   { id: "breakouts", label: "Breakouts" },
@@ -135,15 +67,15 @@ export const MOMENT1_SYMPTOMS = [
 ] as const;
 
 // §4.1 Loading data sources (fade-in one by one)
-export const MOMENT1_DATA_SOURCES = [
+export const SKIN_CONSIDER_DATA_SOURCES = [
   "Sleep quality",
   "HRV trends",
   "Skin photos",
   "Cycle data",
 ];
 
-// §5.1 Moment 2 — supplement options
-export const MOMENT2_SUPPLEMENTS = [
+// §5.1 stack consider flow — supplement options
+export const STACK_CONSIDER_SUPPLEMENTS = [
   { id: "nmn", label: "NMN" },
   { id: "collagen", label: "Collagen" },
   { id: "vitamin-d", label: "Vitamin D" },
@@ -152,14 +84,14 @@ export const MOMENT2_SUPPLEMENTS = [
   { id: "other", label: "Other" },
 ] as const;
 
-export const MOMENT2_DURATIONS = [
+export const STACK_CONSIDER_DURATIONS = [
   { id: "lt-2w", label: "Less than 2 weeks" },
   { id: "2-4w", label: "2–4 weeks" },
   { id: "1-2m", label: "1–2 months" },
   { id: "3m-plus", label: "3+ months" },
 ] as const;
 
-export const MOMENT2_DATA_SOURCES = [
+export const STACK_CONSIDER_DATA_SOURCES = [
   "Skin health status",
   "Sleep depth",
   "HRV trend",
@@ -231,8 +163,8 @@ export interface AnswerData {
   referText?: string;
 }
 
-// Mock answer for Moment 1 (skin changed — breakouts)
-export const MOMENT1_ANSWER: AnswerData = {
+// Mock answer for skin consider flow (skin changed — breakouts)
+export const SKIN_CONSIDER_ANSWER: AnswerData = {
   headline: "This isn't just your skin.",
   subtitle: "Based on your last 6 weeks of data",
   dataCards: [
@@ -271,9 +203,9 @@ export const MOMENT1_ANSWER: AnswerData = {
     "Adding a new serum right now won't help — this is systemic, not topical. Save the $80.",
 };
 
-// Mock answer for Moment 2 — TOO_EARLY verdict (§5.2: < 4 weeks of use)
+// Mock answer for stack consider flow — TOO_EARLY verdict (§5.2: < 4 weeks of use)
 // §5.3: new supplement entry auto-enters TOO_EARLY verdict flow
-export const MOMENT2_TOO_EARLY_ANSWER: AnswerData = {
+export const STACK_CONSIDER_TOO_EARLY_ANSWER: AnswerData = {
   headline: "Too early to tell — but we're watching.",
   subtitle: "Based on patterns typical for women your age · 2 weeks in",
   dataCards: [
@@ -349,8 +281,8 @@ export const SUPPLEMENT_TARGETS: Record<
   },
 };
 
-// Mock answer for Moment 2 (Magnesium, 4+ weeks → CONTINUE)
-export const MOMENT2_ANSWER: AnswerData = {
+// Mock answer for stack consider flow (Magnesium, 4+ weeks → CONTINUE)
+export const STACK_CONSIDER_ANSWER: AnswerData = {
   headline: "Your magnesium is doing its job.",
   subtitle: "Based on 4 weeks of data since you started",
   dataCards: [

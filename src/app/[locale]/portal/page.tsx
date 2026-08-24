@@ -471,7 +471,7 @@ export default function PortalPage() {
                 <div style={{ marginTop: 14 }}>
                   <button
                     className="cm2-ghost"
-                    onClick={() => router.push("/portal/moment/feel")}
+                    onClick={() => router.push("/portal/observe/feel")}
                   >
                     Contribute a journey anonymously
                   </button>

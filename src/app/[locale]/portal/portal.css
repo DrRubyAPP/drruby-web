@@ -89,15 +89,6 @@
 #app-portal .quick-note input{border:0;outline:0;flex:1;height:100%;padding:0 20px;font-family:var(--p-sans);font-size:15px;color:#3f3b39;background:transparent;}
 #app-portal .quick-note input::placeholder{color:#aaa3a0;}
 #app-portal .quick-save{margin-right:8px;height:42px;padding:0 22px;border:0;border-radius:10px;background:linear-gradient(180deg,#c55a60,#b7464b);color:#fff;font-family:var(--p-sans);font-size:14px;font-weight:600;cursor:pointer;}
-#app-portal .timeline{position:relative;display:grid;grid-template-columns:repeat(5,1fr);align-items:start;padding:10px 20px 0;}
-#app-portal .timeline:before{content:"";position:absolute;left:11%;right:11%;top:42px;border-top:1px dashed #eadfdb;}
-#app-portal .moment{position:relative;text-align:center;z-index:1;padding-bottom:0;}
-#app-portal .bubble{width:64px;height:64px;margin:0 auto 12px;border-radius:50%;background:linear-gradient(180deg,#fbf5f4,#f8efed);border:1px solid #ebdfdc;display:flex;align-items:center;justify-content:center;}
-#app-portal .bubble svg{width:22px;height:22px;stroke:#d37779;stroke-width:1.7;fill:none;}
-#app-portal .moment.today .bubble{border:2px solid #a94044;box-shadow:0 4px 10px rgba(169,64,68,.08);}
-#app-portal .moment.today .bubble svg{stroke:#a94044;}
-#app-portal .moment-label{font-size:13.5px;color:#6f6966;}
-#app-portal .moment.today .moment-label{color:#7e272c;font-weight:600;}
 .story-stat{text-align:left;}
 .story-stat .n{font-size:20px;font-weight:700;color:var(--p-ink);margin-top:6px;}
 .story-stat .l{font-size:12px;color:#999;margin-top:2px;}
@@ -401,9 +392,6 @@
 #app-portal .why-src{font-size:13.5px;color:#857c76}
 #app-portal .conf{font-size:12px}
 #skin .kicker{font-size:13px}
-#skin .moment small{font-size:13px}
-#skin .moment h3{font-size:26px}
-#skin .moment p{font-size:17px;color:#524d49;line-height:1.65}
 #skin .chip{font-size:12.5px}
 #skin .learning-card p{color:rgba(255,255,255,.85);font-size:18px}
 #skin .learning-card .metric{font-size:44px}

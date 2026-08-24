@@ -657,27 +657,6 @@
       "short": "DrRuby provides health insights based on your personal data, not medical diagnoses. Always consult a qualified healthcare provider for medical concerns.",
       "seeFull": "See full disclaimer →"
     },
-    "home": {
-      "pageTitle": "Good morning, Ruby",
-      "pageSub": "Dashboard Overview",
-      "greetingMorning": "Good morning",
-      "greetingAfternoon": "Good afternoon",
-      "greetingEvening": "Good evening",
-      "headline": "How can I help you <em>today?</em>",
-      "trigger1Index": "01",
-      "trigger1Title": "My skin changed",
-      "trigger1Sub": "Something looks or feels different lately",
-      "trigger1Cta": "Start",
-      "trigger2Index": "02",
-      "trigger2Title": "Is this worth it?",
-      "trigger2Sub": "Check if a supplement or product is helping you",
-      "trigger2Cta": "Start",
-      "trigger3Index": "03",
-      "trigger3Title": "I feel different",
-      "trigger3Sub": "Energy, sleep, mood, hormonal changes",
-      "trigger3Cta": "Notify me",
-      "comingSoon": "Coming soon"
-    },
     "onboarding": {
       "step1Eyebrow": "DrRuby Onboarding · Step 1 of 3",
       "step1Title": "What's the one thing that's been <em>bothering you</em> most lately?",
@@ -694,10 +673,10 @@
       "step3CtaTitle": "Save your insights",
       "step3CtaSub": "Create a free account to track your progress and get proactive insights."
     },
-    "moment1": {
+    "considerSkin": {
       "pageTitle": "My skin changed",
-      "pageSub": "Moment 1 · Skin Analysis",
-      "eyebrow": "Moment 1 · My skin changed",
+      "pageSub": "Consider · Skin Analysis",
+      "eyebrow": "Consider · My skin changed",
       "title": "What did you first notice? <em>Pick everything that applies.</em>",
       "sub": "Multi-select — choose as many as you like. DrRuby will cross-reference with your recent data.",
       "cta": "Look into this →",
@@ -706,10 +685,10 @@
       "loadingSub": "Comparing to your baseline from 6 months ago",
       "loadingFootnote": "This takes a few seconds on purpose — we're cross-referencing 6 weeks of data, not just today."
     },
-    "moment2": {
+    "considerStack": {
       "pageTitle": "Is this worth it?",
-      "pageSub": "Moment 2 · Supplement Evaluation",
-      "eyebrow": "Moment 2 · Is this worth it?",
+      "pageSub": "Consider · Supplement Evaluation",
+      "eyebrow": "Consider · Is this worth it?",
       "title": "Let's check if it's <em>actually working.</em>",
       "q1": "1 · What are you evaluating?",
       "q2": "2 · How long have you been taking it?",
@@ -722,16 +701,16 @@
       "loadingSub": "Comparing before and after you started",
       "verdictLabel": "Verdict"
     },
-    "moment3": {
+    "observeFeel": {
       "pageTitle": "I feel different",
-      "pageSub": "Moment 3 · Energy · Sleep · Mood · Hormones",
-      "eyebrow": "Moment 3 · Coming soon",
+      "pageSub": "Observe · Energy · Sleep · Mood · Hormones",
+      "eyebrow": "Observe · Coming soon",
       "title": "Energy, sleep, mood, <em>hormonal shifts</em> — a single place to make sense of them.",
-      "sub": "We're building Moment 3 as a slow, careful evaluation — not a quick check. It will cross-reference your wearable data, hormonal cycle, and self-reported patterns the same way Moments 1 and 2 do, but tuned for the signals that don't show up in a skin scan.",
+      "sub": "We're building this as a slow, careful evaluation — not a quick check. It will cross-reference your wearable data, hormonal cycle, and self-reported patterns the same way the skin and supplement checks do, but tuned for the signals that don't show up in a skin scan.",
       "whatYouGet": "What you'll get",
       "shippingIn": "Shipping in Phase 2",
-      "shippingDesc": "Moment 3 enters private beta after Moments 1 and 2 are stable. We're deliberately not rushing it — hormonal and mood signals are easy to misread, and we'd rather be slow and right than fast and noisy.",
-      "tryMoment1": "Try Moment 1 instead →"
+      "shippingDesc": "This enters private beta after the skin and supplement checks are stable. We're deliberately not rushing it — hormonal and mood signals are easy to misread, and we'd rather be slow and right than fast and noisy.",
+      "trySkinCheck": "Try the skin check instead →"
     },
     "coach": {
       "pageTitle": "Personal Coach",
@@ -902,7 +881,7 @@
         "title": "Your active decisions"
       }
     },
-    "momentSaveCta": {
+    "saveCta": {
       "label": "Save as decision",
       "submitting": "Saving…",
       "saved": "Saved. Redirecting…",

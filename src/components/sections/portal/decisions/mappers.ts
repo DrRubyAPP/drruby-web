@@ -170,30 +170,41 @@ export function goalToLabel(goal: string): string {
   return goal.charAt(0).toUpperCase() + goal.slice(1);
 }
 
-// ===== moment 文本构造（供 sub-plan-3 SaveAsDecisionButton 使用） =====
+// ===== Spine flow 文本构造（供 flows/SaveAsDecisionButton 使用） =====
+// 映射定义见 a_docs/drruby-docs/product-spine.md：
+//   skin flow = CONSIDER+DECIDE(skin)，stack flow = CONSIDER+DECIDE(supplement)，feel flow = OBSERVE+LEARN
 
-/** Moment 1 chips → question: "Skin: dryness, redness"（chip labels join with comma） */
-export function moment1ToQuestion(symptomLabels: string[]): string {
+/** flow 来源（写入决策首条 entry 的来源标注） */
+export type FlowSource = "skin-analysis" | "supplement-evaluation" | "feel-check-in";
+
+const FLOW_SOURCE_TO_LABEL: Record<FlowSource, string> = {
+  "skin-analysis": "Skin analysis",
+  "supplement-evaluation": "Supplement evaluation",
+  "feel-check-in": "Feel check-in",
+};
+
+/** skin flow chips → question: "Skin: dryness, redness"（chip labels join with comma） */
+export function skinConsiderToQuestion(symptomLabels: string[]): string {
   return `Skin: ${symptomLabels.join(", ")}`;
 }
 
-/** Moment 2 supplement + duration → question: "Magnesium · 4-8w" */
-export function moment2ToQuestion(
+/** stack flow supplement + duration → question: "Magnesium · 4-8w" */
+export function stackConsiderToQuestion(
   supplementLabel: string,
   durationLabel: string,
 ): string {
   return `${supplementLabel} · ${durationLabel}`;
 }
 
-/** Moment 3 静态文案 → question */
-export function moment3ToQuestion(): string {
+/** feel flow 静态文案 → question */
+export function feelObserveToQuestion(): string {
   return "How I've been feeling";
 }
 
-/** 构造首条 entry 的 text："Created from <Moment N> · <chips>" */
+/** 构造首条 entry 的 text："Created from <flow 来源> · <chips>" */
 export function buildEntryText(
-  momentN: 1 | 2 | 3,
+  source: FlowSource,
   chipsSummary: string,
 ): string {
-  return `Created from Moment ${momentN} · ${chipsSummary}`;
+  return `Created from ${FLOW_SOURCE_TO_LABEL[source]} · ${chipsSummary}`;
 }

@@ -1,19 +1,19 @@
 import { getTranslations } from "next-intl/server";
 import PortalShell from "@/components/layout/PortalShell";
-import Moment1Flow from "@/components/sections/portal/moment/Moment1Flow";
+import SkinConsiderFlow from "@/components/sections/portal/flows/SkinConsiderFlow";
 
-export default async function MomentSkinPage() {
+export default async function ConsiderSkinPage() {
   const t = await getTranslations("portal");
   return (
     <PortalShell
-      pageTitle={t("moment1.pageTitle")}
-      pageSub={t("moment1.pageSub")}
+      pageTitle={t("considerSkin.pageTitle")}
+      pageSub={t("considerSkin.pageSub")}
       primaryAction={{
         label: t("topbar.primaryAction"),
-        href: "/portal/moment/skin",
+        href: "/portal/consider/skin",
       }}
     >
-      <Moment1Flow />
+      <SkinConsiderFlow />
     </PortalShell>
   );
 }

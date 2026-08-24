@@ -5,7 +5,7 @@ DrRuby.ai 官网——女性健康寿命（healthspan）智能平台。以皮肤
 包含四类页面：
 
 - **公开落地页**：`/`（首页）、`/skin`、`/healthspan`、`/waitlist`
-- **用户门户**：`/portal/*`（首页、appointments、clinic、coach、moment、products、profile、reports、settings、onboarding）
+- **用户门户**：`/portal/*`（首页、appointments、clinic、coach、consider、observe、products、profile、reports、settings、onboarding）
 - **诊所门户**：`/clinic/*`（appointments、compliance、crm、finance、modules、patients、referrals、reports、settings、skin-archive、treatments）
 - **API**：`/api/health`（健康检查）、`/api/mailchimp/subscribe`（订阅）
 

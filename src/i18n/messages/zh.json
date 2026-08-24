@@ -663,27 +663,6 @@
       "short": "DrRuby 基于你的个人数据提供健康洞见，而非医疗诊断。如有医疗方面的疑虑，请务必咨询合格的医疗服务提供者。",
       "seeFull": "查看完整免责声明 →"
     },
-    "home": {
-      "pageTitle": "早上好，Ruby",
-      "pageSub": "仪表盘概览",
-      "greetingMorning": "早上好",
-      "greetingAfternoon": "下午好",
-      "greetingEvening": "晚上好",
-      "headline": "<em>今天</em>我能帮你做些什么？",
-      "trigger1Index": "01",
-      "trigger1Title": "我的肌肤变了",
-      "trigger1Sub": "最近看起来或感觉有些不同",
-      "trigger1Cta": "开始",
-      "trigger2Index": "02",
-      "trigger2Title": "这值得吗？",
-      "trigger2Sub": "检查某款补剂或产品是否对你有帮助",
-      "trigger2Cta": "开始",
-      "trigger3Index": "03",
-      "trigger3Title": "我感觉不一样了",
-      "trigger3Sub": "精力、睡眠、情绪、激素变化",
-      "trigger3Cta": "通知我",
-      "comingSoon": "即将推出"
-    },
     "onboarding": {
       "step1Eyebrow": "DrRuby 引导设置 · 第 1 步，共 3 步",
       "step1Title": "最近最让你<em>困扰</em>的一件事是什么？",
@@ -700,10 +679,10 @@
       "step3CtaTitle": "保存你的洞见",
       "step3CtaSub": "创建免费账户，追踪你的进展并获得主动洞见。"
     },
-    "moment1": {
+    "considerSkin": {
       "pageTitle": "我的肌肤变了",
-      "pageSub": "时刻 1 · 肌肤分析",
-      "eyebrow": "时刻 1 · 我的肌肤变了",
+      "pageSub": "考量 · 肌肤分析",
+      "eyebrow": "考量 · 我的肌肤变了",
       "title": "你最先注意到了什么？<em>选择所有适用项。</em>",
       "sub": "多选 — 想选多少就选多少。DrRuby 会与你近期的数据交叉比对。",
       "cta": "深入了解 →",
@@ -712,10 +691,10 @@
       "loadingSub": "正在与你 6 个月前的基线作比较",
       "loadingFootnote": "这特意需要几秒钟 — 我们正在交叉比对 6 周的数据，而不只是今天的。"
     },
-    "moment2": {
+    "considerStack": {
       "pageTitle": "这值得吗？",
-      "pageSub": "时刻 2 · 补剂评估",
-      "eyebrow": "时刻 2 · 这值得吗？",
+      "pageSub": "考量 · 补剂评估",
+      "eyebrow": "考量 · 这值得吗？",
       "title": "让我们看看它是否<em>真的有效。</em>",
       "q1": "1 · 你要评估什么？",
       "q2": "2 · 你服用它多久了？",
@@ -728,16 +707,16 @@
       "loadingSub": "对比你开始服用前后的情况",
       "verdictLabel": "结论"
     },
-    "moment3": {
+    "observeFeel": {
       "pageTitle": "我感觉不一样了",
-      "pageSub": "时刻 3 · 精力 · 睡眠 · 情绪 · 激素",
-      "eyebrow": "时刻 3 · 即将推出",
+      "pageSub": "观察 · 精力 · 睡眠 · 情绪 · 激素",
+      "eyebrow": "观察 · 即将推出",
       "title": "精力、睡眠、情绪、<em>激素变化</em> — 一处即可理清它们。",
-      "sub": "我们正将时刻 3 打造为一次缓慢、审慎的评估 — 而非快速检查。它会像时刻 1 和 2 那样交叉比对你的可穿戴设备数据、激素周期和自我报告的规律，但专为那些不会在肌肤扫描中显现的信号而调校。",
+      "sub": "我们正将这一评估打造为一次缓慢、审慎的复盘 — 而非快速检查。它会像肌肤分析与补剂评估那样交叉比对你的可穿戴设备数据、激素周期和自我报告的规律，但专为那些不会在肌肤扫描中显现的信号而调校。",
       "whatYouGet": "你将获得",
       "shippingIn": "将在第二阶段发布",
-      "shippingDesc": "时刻 3 将在时刻 1 和 2 稳定后进入私密测试。我们刻意不去仓促推进 — 激素与情绪信号容易被误读，我们宁愿慢而准确，也不愿快而杂乱。",
-      "tryMoment1": "改为尝试时刻 1 →"
+      "shippingDesc": "这一评估将在肌肤分析与补剂评估稳定后进入私密测试。我们刻意不去仓促推进 — 激素与情绪信号容易被误读，我们宁愿慢而准确，也不愿快而杂乱。",
+      "trySkinCheck": "改为尝试肌肤分析 →"
     },
     "coach": {
       "pageTitle": "个人教练",
@@ -908,7 +887,7 @@
         "title": "你进行中的决策"
       }
     },
-    "momentSaveCta": {
+    "saveCta": {
       "label": "保存为决策",
       "submitting": "保存中…",
       "saved": "已保存。正在跳转…",

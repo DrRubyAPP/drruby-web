@@ -19,13 +19,12 @@ type Step =
 interface SaveAsDecisionButtonProps {
   question: string;
   entryText: string;
-  momentN: 1 | 2 | 3;
   /** 该决策服务的目标（对齐 concern_goals 词汇，必填） */
   goal: string;
 }
 
 /**
- * 共享按钮：3 个 moment flow 末尾「Save as decision」CTA。
+ * 共享按钮：3 个 Spine flow 末尾「Save as decision」CTA。
  *
  * 状态机：
  * - idle → creating (POST /api/decisions)
@@ -39,11 +38,10 @@ interface SaveAsDecisionButtonProps {
 export function SaveAsDecisionButton({
   question,
   entryText,
-  momentN,
   goal,
 }: SaveAsDecisionButtonProps) {
   const router = useRouter();
-  const t = useTranslations("portal.momentSaveCta");
+  const t = useTranslations("portal.saveCta");
   const [step, setStep] = useState<Step>("idle");
   const [createdId, setCreatedId] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);

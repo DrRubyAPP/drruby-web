@@ -241,7 +241,7 @@ export default function Home() {
         <section id="how" className="section soft">
           <div className="wrap">
             <div className="kicker">Your next decision</div>
-            <h2>DrRuby remembers what happened last time.</h2>
+            <h2>Your next decision starts with your history.</h2>
             <div className="how-grid">
               <div className="how-visual">
                 <div className="phone">
@@ -296,8 +296,8 @@ export default function Home() {
               </div>
             </div>
             <p className="sub" style={{ textAlign: "center", maxWidth: 520, margin: "28px auto 0" }}>
-              So your next decision doesn&rsquo;t start from zero &mdash; it starts with what you
-              already know.
+              So your next decision doesn&rsquo;t start from zero &mdash; it starts with what
+              you&rsquo;ve learned.
             </p>
             <div style={{ marginTop: 38, textAlign: "center" }}>
               <StoreRow />
@@ -380,20 +380,29 @@ export default function Home() {
             <div className="cb-flow">
               <div className="cb-card">
                 <div className="cb-badge">1</div>
-                <div className="cb-h">Every decision</div>
-                <div className="cb-p">becomes part of your understanding.</div>
+                <div className="cb-h">What matters to you</div>
+                <div className="cb-p">
+                  Start with what you&rsquo;re trying to improve, and what you&rsquo;re
+                  considering.
+                </div>
               </div>
               <div className="cb-arrow">&rarr;</div>
               <div className="cb-card">
                 <div className="cb-badge">2</div>
-                <div className="cb-h">Every outcome</div>
-                <div className="cb-p">teaches you something.</div>
+                <div className="cb-h">Make a choice. See what happens.</div>
+                <div className="cb-p">
+                  Bring together your history, similar journeys, and science &mdash; then
+                  remember what you chose and what changed.
+                </div>
               </div>
               <div className="cb-arrow">&rarr;</div>
               <div className="cb-card">
                 <div className="cb-badge">3</div>
-                <div className="cb-h">Every lesson</div>
-                <div className="cb-p">makes the next decision easier.</div>
+                <div className="cb-h">Learn for next time</div>
+                <div className="cb-p">
+                  Your experience becomes part of your history, so your next decision
+                  starts with what you&rsquo;ve learned.
+                </div>
               </div>
             </div>
             <div className="cb-close">Every decision makes the next one better.</div>
@@ -511,7 +520,7 @@ export default function Home() {
             </div>
             <div className="ft-sub">
               <div className="ft-sub-h">
-                Learn to understand your body, <em>one decision at a time.</em>
+                Learn to understand your body, <em>every decision building on the last.</em>
               </div>
               <div className="ft-sub-p">
                 Occasional notes on making better health decisions &mdash; grounded in your own

@@ -1,22 +1,24 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import AnswerPage from "@/components/sections/portal/AnswerPage";
 import {
-  MOMENT1_ANSWER,
-  MOMENT1_DATA_SOURCES,
-  MOMENT1_SYMPTOMS,
+  SKIN_CONSIDER_ANSWER,
+  SKIN_CONSIDER_DATA_SOURCES,
+  SKIN_CONSIDER_SYMPTOMS,
 } from "@/config/user-portal-mock";
 import {
   buildEntryText,
-  moment1ChipsSummary,
-  moment1ToQuestion,
+  skinChipsSummary,
+  skinConsiderToQuestion,
 } from "./mappers";
 import { SaveAsDecisionButton } from "./SaveAsDecisionButton";
 
 type Screen = "select" | "loading" | "answer";
 
-export default function Moment1Flow() {
+export default function SkinConsiderFlow() {
+  const t = useTranslations("portal.considerSkin");
   const [screen, setScreen] = useState<Screen>("select");
   const [selected, setSelected] = useState<string[]>([]);
 
@@ -42,19 +44,17 @@ export default function Moment1Flow() {
     return (
       <div className="max-w-[680px]">
         <div className="text-[10px] font-semibold tracking-[0.28em] uppercase text-dr-red mb-3">
-          Moment 1 · My skin changed
+          {t("eyebrow")}
         </div>
         <h1 className="font-serif text-[36px] md:text-[44px] font-light text-dr-ink leading-[1.15] mb-3">
-          What did you first notice?{" "}
-          <em className="italic text-dr-red">Pick everything that applies.</em>
+          {t.rich("title", {
+            em: (chunks) => <em className="italic text-dr-red">{chunks}</em>,
+          })}
         </h1>
-        <p className="text-[12px] text-dr-mid mb-7 leading-[1.7]">
-          Multi-select — choose as many as you like. DrRuby will cross-reference
-          with your recent data.
-        </p>
+        <p className="text-[12px] text-dr-mid mb-7 leading-[1.7]">{t("sub")}</p>
 
         <div className="flex flex-wrap gap-2.5 mb-8">
-          {MOMENT1_SYMPTOMS.map((s) => {
+          {SKIN_CONSIDER_SYMPTOMS.map((s) => {
             const active = selected.includes(s.id);
             return (
               <button
@@ -84,7 +84,7 @@ export default function Moment1Flow() {
               : "bg-dr-red text-white hover:opacity-90 transition-opacity"
           }`}
         >
-          Look into this →
+          {t("cta")}
         </button>
       </div>
     );
@@ -94,17 +94,17 @@ export default function Moment1Flow() {
     return (
       <div className="max-w-[560px]">
         <div className="text-[10px] font-semibold tracking-[0.28em] uppercase text-dr-red mb-3">
-          Analyzing
+          {t("loadingEyebrow")}
         </div>
         <h1 className="font-serif text-[32px] md:text-[38px] font-light text-dr-ink leading-[1.2] mb-2">
-          Looking at your recent patterns…
+          {t("loadingTitle")}
         </h1>
         <p className="text-[12px] text-dr-mid mb-8 leading-[1.7]">
-          Comparing to your baseline from 6 months ago
+          {t("loadingSub")}
         </p>
 
         <div className="flex flex-col gap-3">
-          {MOMENT1_DATA_SOURCES.map((src, i) => (
+          {SKIN_CONSIDER_DATA_SOURCES.map((src, i) => (
             <div
               key={src}
               className="flex items-center gap-3 opacity-0"
@@ -118,10 +118,7 @@ export default function Moment1Flow() {
           ))}
         </div>
 
-        <div className="text-[11px] text-dr-mid mt-8">
-          This takes a few seconds on purpose — we're cross-referencing 6 weeks
-          of data, not just today.
-        </div>
+        <div className="text-[11px] text-dr-mid mt-8">{t("loadingFootnote")}</div>
 
         <style>{`
           @keyframes fadeInUp {
@@ -136,7 +133,7 @@ export default function Moment1Flow() {
   const selectedLabels: string[] = (() => {
     const labels = selected
       .filter((id) => id !== "all")
-      .map((id) => MOMENT1_SYMPTOMS.find((s) => s.id === id)?.label ?? "")
+      .map((id) => SKIN_CONSIDER_SYMPTOMS.find((s) => s.id === id)?.label ?? "")
       .filter(Boolean);
     // "all" 特殊处理：把 "All of the above" 作为 label 加入末尾
     if (selected.includes("all")) labels.push("All of the above");
@@ -145,11 +142,10 @@ export default function Moment1Flow() {
 
   return (
     <>
-      <AnswerPage data={MOMENT1_ANSWER} />
+      <AnswerPage data={SKIN_CONSIDER_ANSWER} />
       <SaveAsDecisionButton
-        question={moment1ToQuestion(selectedLabels)}
-        entryText={buildEntryText(1, moment1ChipsSummary(selectedLabels))}
-        momentN={1}
+        question={skinConsiderToQuestion(selectedLabels)}
+        entryText={buildEntryText("skin-analysis", skinChipsSummary(selectedLabels))}
         goal="skin"
       />
     </>

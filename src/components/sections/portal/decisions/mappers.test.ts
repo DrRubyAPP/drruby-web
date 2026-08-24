@@ -12,9 +12,9 @@ import {
   isActive,
   mapBrief,
   mapDecisionDetail,
-  moment1ToQuestion,
-  moment2ToQuestion,
-  moment3ToQuestion,
+  feelObserveToQuestion,
+  skinConsiderToQuestion,
+  stackConsiderToQuestion,
   sortEntries,
   statusToLabel,
 } from "./mappers";
@@ -281,33 +281,33 @@ describe("DECISION_STATUSES", () => {
   });
 });
 
-describe("moment text builders", () => {
-  it("moment1ToQuestion joins symptom labels", () => {
-    expect(moment1ToQuestion(["Dryness", "Redness"])).toBe(
+describe("spine flow text builders", () => {
+  it("skinConsiderToQuestion joins symptom labels", () => {
+    expect(skinConsiderToQuestion(["Dryness", "Redness"])).toBe(
       "Skin: Dryness, Redness",
     );
-    expect(moment1ToQuestion(["Breakouts"])).toBe("Skin: Breakouts");
+    expect(skinConsiderToQuestion(["Breakouts"])).toBe("Skin: Breakouts");
   });
 
-  it("moment2ToQuestion joins supplement + duration", () => {
-    expect(moment2ToQuestion("Magnesium", "1–2 months")).toBe(
+  it("stackConsiderToQuestion joins supplement + duration", () => {
+    expect(stackConsiderToQuestion("Magnesium", "1–2 months")).toBe(
       "Magnesium · 1–2 months",
     );
   });
 
-  it("moment3ToQuestion returns fixed text", () => {
-    expect(moment3ToQuestion()).toBe("How I've been feeling");
+  it("feelObserveToQuestion returns fixed text", () => {
+    expect(feelObserveToQuestion()).toBe("How I've been feeling");
   });
 
-  it("buildEntryText wraps momentN + chips", () => {
-    expect(buildEntryText(1, "Dryness, Redness")).toBe(
-      "Created from Moment 1 · Dryness, Redness",
+  it("buildEntryText wraps flow source + chips", () => {
+    expect(buildEntryText("skin-analysis", "Dryness, Redness")).toBe(
+      "Created from Skin analysis · Dryness, Redness",
     );
-    expect(buildEntryText(2, "Magnesium · 1–2 months")).toBe(
-      "Created from Moment 2 · Magnesium · 1–2 months",
+    expect(buildEntryText("supplement-evaluation", "Magnesium · 1–2 months")).toBe(
+      "Created from Supplement evaluation · Magnesium · 1–2 months",
     );
-    expect(buildEntryText(3, "How I've been feeling")).toBe(
-      "Created from Moment 3 · How I've been feeling",
+    expect(buildEntryText("feel-check-in", "How I've been feeling")).toBe(
+      "Created from Feel check-in · How I've been feeling",
     );
   });
 });

@@ -60,7 +60,7 @@ export default function PricingPage() {
           </div>
 
           <div className="pcard feature">
-            <div className="ptag">For moments when a decision matters</div>
+            <div className="ptag">For the decisions that matter</div>
             <div className="pname">Decision</div>
             <div className="pvalue serif">Understand yourself.</div>
             <div className="pline">Be better prepared when a decision matters.</div>

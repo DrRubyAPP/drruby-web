@@ -1,21 +1,22 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import AnswerPage from "@/components/sections/portal/AnswerPage";
 import {
-  MOMENT2_ANSWER,
-  MOMENT2_DATA_SOURCES,
-  MOMENT2_DURATIONS,
-  MOMENT2_SUPPLEMENTS,
-  MOMENT2_TOO_EARLY_ANSWER,
+  STACK_CONSIDER_ANSWER,
+  STACK_CONSIDER_DATA_SOURCES,
+  STACK_CONSIDER_DURATIONS,
+  STACK_CONSIDER_SUPPLEMENTS,
+  STACK_CONSIDER_TOO_EARLY_ANSWER,
   SUPPLEMENT_TARGETS,
   VERDICT_CONFIG,
   type VerdictType,
 } from "@/config/user-portal-mock";
 import {
   buildEntryText,
-  moment2ChipsSummary,
-  moment2ToQuestion,
+  stackChipsSummary,
+  stackConsiderToQuestion,
 } from "./mappers";
 import { SaveAsDecisionButton } from "./SaveAsDecisionButton";
 
@@ -31,16 +32,19 @@ function deriveVerdict(duration: string): VerdictType {
   return "CONTINUE";
 }
 
-export default function Moment2Flow() {
+export default function StackConsiderFlow() {
+  const t = useTranslations("portal.considerStack");
   const [screen, setScreen] = useState<Screen>("select");
   const [supplement, setSupplement] = useState<string | null>(null);
   const [duration, setDuration] = useState<string | null>(null);
 
   const verdict: VerdictType = duration ? deriveVerdict(duration) : "CONTINUE";
   const answer =
-    verdict === "TOO_EARLY" ? MOMENT2_TOO_EARLY_ANSWER : MOMENT2_ANSWER;
+    verdict === "TOO_EARLY"
+      ? STACK_CONSIDER_TOO_EARLY_ANSWER
+      : STACK_CONSIDER_ANSWER;
   const targets = supplement ? SUPPLEMENT_TARGETS[supplement] : null;
-  const supplementLabel = MOMENT2_SUPPLEMENTS.find(
+  const supplementLabel = STACK_CONSIDER_SUPPLEMENTS.find(
     (s) => s.id === supplement,
   )?.label;
 
@@ -55,20 +59,21 @@ export default function Moment2Flow() {
     return (
       <div className="max-w-[680px]">
         <div className="text-[10px] font-semibold tracking-[0.28em] uppercase text-dr-red mb-3">
-          Moment 2 · Is this worth it?
+          {t("eyebrow")}
         </div>
         <h1 className="font-serif text-[36px] md:text-[44px] font-light text-dr-ink leading-[1.15] mb-7">
-          Let's check if it's{" "}
-          <em className="italic text-dr-red">actually working.</em>
+          {t.rich("title", {
+            em: (chunks) => <em className="italic text-dr-red">{chunks}</em>,
+          })}
         </h1>
 
         {/* Question 1 */}
         <div className="mb-7">
           <div className="text-[11px] font-semibold tracking-[0.16em] uppercase text-dr-ink mb-3">
-            1 · What are you evaluating?
+            {t("q1")}
           </div>
           <div className="flex flex-wrap gap-2.5">
-            {MOMENT2_SUPPLEMENTS.map((s) => {
+            {STACK_CONSIDER_SUPPLEMENTS.map((s) => {
               const active = supplement === s.id;
               return (
                 <button
@@ -90,13 +95,13 @@ export default function Moment2Flow() {
           {targets && (
             <div className="mt-3 text-[11px] text-dr-mid leading-[1.6]">
               <span className="font-semibold tracking-[0.12em] uppercase text-dr-ink mr-2">
-                Targets:
+                {t("targets")}
               </span>
               {targets.primary.join(", ")}
               {targets.secondary.length > 0 &&
-                ` · secondary: ${targets.secondary.join(", ")}`}
+                ` · ${t("secondary")}: ${targets.secondary.join(", ")}`}
               <span className="ml-2">
-                · expected onset {targets.onsetWeeks} weeks
+                · {t("expectedOnset", { weeks: targets.onsetWeeks })}
               </span>
             </div>
           )}
@@ -105,10 +110,10 @@ export default function Moment2Flow() {
         {/* Question 2 */}
         <div className="mb-8">
           <div className="text-[11px] font-semibold tracking-[0.16em] uppercase text-dr-ink mb-3">
-            2 · How long have you been taking it?
+            {t("q2")}
           </div>
           <div className="flex flex-wrap gap-2.5">
-            {MOMENT2_DURATIONS.map((d) => {
+            {STACK_CONSIDER_DURATIONS.map((d) => {
               const active = duration === d.id;
               return (
                 <button
@@ -139,7 +144,7 @@ export default function Moment2Flow() {
               : "bg-dr-red text-white hover:opacity-90 transition-opacity"
           }`}
         >
-          Analyze my data →
+          {t("cta")}
         </button>
       </div>
     );
@@ -149,17 +154,17 @@ export default function Moment2Flow() {
     return (
       <div className="max-w-[560px]">
         <div className="text-[10px] font-semibold tracking-[0.28em] uppercase text-dr-red mb-3">
-          Analyzing
+          {t("loadingEyebrow")}
         </div>
         <h1 className="font-serif text-[32px] md:text-[38px] font-light text-dr-ink leading-[1.2] mb-2">
-          Checking your biomarkers…
+          {t("loadingTitle")}
         </h1>
         <p className="text-[12px] text-dr-mid mb-8 leading-[1.7]">
-          Comparing before and after you started
+          {t("loadingSub")}
         </p>
 
         <div className="flex flex-col gap-3">
-          {MOMENT2_DATA_SOURCES.map((src, i) => (
+          {STACK_CONSIDER_DATA_SOURCES.map((src, i) => (
             <div
               key={src}
               className="flex items-center gap-3 opacity-0"
@@ -184,7 +189,9 @@ export default function Moment2Flow() {
   }
 
   const vConfig = VERDICT_CONFIG[verdict];
-  const durationLabel = MOMENT2_DURATIONS.find((d) => d.id === duration)?.label;
+  const durationLabel = STACK_CONSIDER_DURATIONS.find(
+    (d) => d.id === duration,
+  )?.label;
   return (
     <div className="max-w-[760px]">
       {/* Verdict banner (§5.2) */}
@@ -194,7 +201,7 @@ export default function Moment2Flow() {
         <div
           className={`text-[9px] font-semibold tracking-[0.2em] uppercase ${vConfig.textColor} mb-1.5`}
         >
-          Verdict · {vConfig.type}
+          {t("verdictLabel")} · {vConfig.type}
           {supplementLabel && (
             <span className="ml-2 normal-case tracking-normal text-dr-mid">
               · {supplementLabel}
@@ -210,12 +217,11 @@ export default function Moment2Flow() {
 
       {supplementLabel && durationLabel && (
         <SaveAsDecisionButton
-          question={moment2ToQuestion(supplementLabel, durationLabel)}
+          question={stackConsiderToQuestion(supplementLabel, durationLabel)}
           entryText={buildEntryText(
-            2,
-            moment2ChipsSummary(supplementLabel, durationLabel),
+            "supplement-evaluation",
+            stackChipsSummary(supplementLabel, durationLabel),
           )}
-          momentN={2}
           goal="supplements"
         />
       )}
