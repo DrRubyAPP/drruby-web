@@ -863,6 +863,11 @@
             "minLength": 1,
             "description": "决策问题"
           },
+          "goal": {
+            "type": "string",
+            "minLength": 1,
+            "description": "该决策服务的目标（对齐 concern_goals 词汇）"
+          },
           "status": {
             "$ref": "#/components/schemas/decisionStatusSchema"
           },
@@ -877,6 +882,7 @@
         },
         "required": [
           "question",
+          "goal",
           "status"
         ]
       },
@@ -1245,6 +1251,10 @@
           "question": {
             "type": "string"
           },
+          "goal": {
+            "type": "string",
+            "nullable": true
+          },
           "status": {
             "$ref": "#/components/schemas/decisionStatusSchema"
           },
@@ -1268,6 +1278,7 @@
         "required": [
           "id",
           "question",
+          "goal",
           "status",
           "updated",
           "entries"
@@ -1281,6 +1292,10 @@
           },
           "question": {
             "type": "string"
+          },
+          "goal": {
+            "type": "string",
+            "nullable": true
           },
           "status": {
             "$ref": "#/components/schemas/decisionStatusSchema"
@@ -1299,6 +1314,7 @@
         "required": [
           "id",
           "question",
+          "goal",
           "status",
           "updated"
         ]
