@@ -283,7 +283,7 @@ export default function PortalPage() {
             </div>
           </div>
 
-          {/* ===== MY BODY ===== */}
+          {/* ===== MY HEALTH ===== */}
           <div className={on("health")} id="v-health">
             <HealthView />
           </div>

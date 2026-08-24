@@ -5,7 +5,7 @@ import { useApi } from "@/hooks/useApi";
 import type { HormoneDto, SignalDto, SkinScanDto } from "./dto";
 import { mapHormones, mapSignals, mapSkin } from "./mappers";
 
-/** My Body（health）视图：signals / hormone / skin 三区块，各自独立取数与态。 */
+/** My Health（health）视图：signals / hormone / skin 三区块，各自独立取数与态。 */
 export function HealthView() {
   const signals = useApi<SignalDto[]>("/api/signals");
   const hormone = useApi<HormoneDto[]>("/api/hormone-layer");
@@ -17,7 +17,7 @@ export function HealthView() {
 
   return (
     <>
-      <h1>My Body</h1>
+      <h1>My Health</h1>
       <div className="lede">
         Bring your data in. DrRuby helps you see what&rsquo;s relevant &mdash;
         not another dashboard to maintain.
