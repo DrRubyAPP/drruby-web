@@ -577,8 +577,6 @@
       "backToPortal": "Back to portal"
     },
     "dashboard": {
-      "title": "Dashboard",
-      "subtitle": "Your healthspan, today",
       "comingSoon": "Coming soon",
       "greeting": {
         "morning": "Good morning, {name} ☀️",

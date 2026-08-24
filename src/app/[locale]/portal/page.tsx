@@ -4,7 +4,6 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { ErrorState } from "@/components/api/ErrorState";
 import LogoutButton from "@/components/auth/LogoutButton";
-import PortalTopbar from "@/components/layout/PortalTopbar";
 import { ActiveDecisionsSummary } from "@/components/sections/portal/decisions/ActiveDecisionsSummary";
 import { DecisionsView } from "@/components/sections/portal/decisions/DecisionsView";
 import { HealthView } from "@/components/sections/portal/health/HealthView";
@@ -193,10 +192,6 @@ export default function PortalPage() {
 
   return (
     <div id="app-portal">
-      <PortalTopbar
-        pageTitle={t("dashboard.title")}
-        pageSub={t("dashboard.subtitle")}
-      />
       <div className="ufw">
         <aside className="side">
           <Link href="/" className="logo">
@@ -221,6 +216,7 @@ export default function PortalPage() {
             ))}
           </nav>
           <div className="side-foot">
+            <LogoutButton className="mb-2 ml-3 bg-transparent border-0 p-0 text-left text-[13px] font-normal text-[#6b6561] cursor-pointer hover:text-[#b74f53] hover:opacity-100 transition-colors disabled:opacity-60" />
             <div className="profile">
               <div className="avatar">
                 {me ? getInitials(meName) || "—" : "—"}
@@ -375,6 +371,15 @@ export default function PortalPage() {
               A learning library, not a feed. Real women&rsquo;s decisions
               &mdash; structured, consented, and relevant to you. Not
               strangers&rsquo; posts.
+            </div>
+            <div className="uf-gate">
+              <b>Experience Library, not a forum.</b> Every experience here is a
+              real decision &mdash; shared with explicit, revocable consent and
+              anonymized, then structured (goal &rarr; decision &rarr; outcome
+              &rarr; reflection). It&rsquo;s{" "}
+              <b>experience, not advice or evidence</b>. Using DrRuby is not the
+              same as contributing. A public discussion module stays gated
+              before launch (Non-goals, legal + ToS, Research Governance).
             </div>
             <div className="sec">
               <div className="sec-h">Where these experiences come from</div>

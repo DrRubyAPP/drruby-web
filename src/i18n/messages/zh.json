@@ -583,8 +583,6 @@
       "backToPortal": "返回门户"
     },
     "dashboard": {
-      "title": "仪表盘",
-      "subtitle": "你的健康寿命，今天",
       "comingSoon": "即将推出",
       "greeting": {
         "morning": "早上好，{name} ☀️",
