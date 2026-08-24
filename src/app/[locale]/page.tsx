@@ -1,6 +1,9 @@
 import FooterSubscribe from "@/components/FooterSubscribe";
 import "./home-v5.css";
-import { StoreRow, DownloadModal } from "@/components/DownloadWaitlist";
+import {
+  DownloadModal,
+  StartJourneyButton,
+} from "@/components/DownloadWaitlist";
 import HomeNav from "@/components/layout/HomeNav";
 
 export default function Home() {
@@ -12,225 +15,51 @@ export default function Home() {
         {/* HERO */}
         <section className="wrap hero">
           <div className="hero-copy">
-            <div className="eyebrow">A women&rsquo;s health app</div>
+            <div className="eyebrow">From today, and over time</div>
             <h1>
-              DrRuby turns your health history into <em>better decisions.</em>
+              Know your body,
+              <em style={{ display: "block", marginTop: 14 }}>
+                understand yourself over time.
+              </em>
             </h1>
             <div className="lede">
-              Bring everything together.
-              <br />
-              So every decision starts with the full picture.
+              Capture what you notice, connect it to what you tried, and let
+              your own history make your next decision easier. Skin is just the
+              easiest place to start.
             </div>
             <div>
-              <StoreRow />
-              <span className="note">Launching soon. Free to start.</span>
+              <StartJourneyButton />
+              <span className="note">
+                Free to start. Your first entry takes less than a minute.
+              </span>
             </div>
           </div>
           <div className="hero-visual">
-            <img src="/hero-woman.webp" alt="Woman reflecting on her skin journey" />
-          </div>
-        </section>
-
-        {/* ONE PLACE */}
-        <section id="oneplace" className="section">
-          <div className="wrap" style={{ textAlign: "center" }}>
-            <div className="kicker">All in one place</div>
-            <h2>Everything about your health, together.</h2>
-            <p
-              className="sub"
-              style={{
-                fontFamily: "Georgia, serif",
-                color: "#8C2635",
-                maxWidth: 600,
-                marginLeft: "auto",
-                marginRight: "auto",
-              }}
-            >
-              Your notes, photos, cycle, labs, and decisions &mdash; in one place, so every decision
-              starts with the full picture.
-            </p>
-            <div className="op-bento">
-              <div className="opw span2">
-                <div className="opk">Sleep</div>
-                <div className="opv">7h 54m &middot; Good</div>
-                <svg
-                  viewBox="0 0 320 60"
-                  preserveAspectRatio="none"
-                  style={{ width: "100%", height: 50, marginTop: 6 }}
-                >
-                  <polyline
-                    points="4,42 56,32 108,36 160,22 212,33 264,18 312,26"
-                    fill="none"
-                    stroke="#dc99a4"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <circle cx="312" cy="26" r="4.5" fill="#cf1736" />
-                </svg>
-                <div className="ops">Last 7 nights &middot; from your wearable</div>
-              </div>
-              <div className="opw">
-                <div className="opk">Cycle</div>
-                <div className="opv">Day 4</div>
-                <div className="op-dots">
-                  <i className="on" />
-                  <i className="on" />
-                  <i className="on" />
-                  <i className="on today" />
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                  <i />
-                </div>
-                <div className="ops">period &middot; tracked monthly</div>
-              </div>
-              <div className="opw">
-                <div className="opk">Skin &amp; photos</div>
-                <div className="op-thumbs">
-                  <span style={{ background: "linear-gradient(135deg,#ecd8d2,#d6b4ac)" }} />
-                  <span style={{ background: "linear-gradient(135deg,#f0dcd8,#e0b9c0)" }} />
-                </div>
-                <div className="ops">Retinol &middot; week 6</div>
-              </div>
-              <div className="opw">
-                <div className="opk">Labs &amp; records</div>
-                <div className="opv" style={{ fontSize: 32 }}>
-                  128
-                </div>
-                <div className="ops">LDL &middot; Jun 12 &middot; from your doctor</div>
-              </div>
-              <div className="opw">
-                <div className="opk">Decision</div>
-                <div className="opv" style={{ fontSize: 17 }}>
-                  Retinol &mdash; in progress
-                </div>
-                <span className="op-pill">Paused 12 days ago</span>
-              </div>
-              <div className="opw span2">
-                <div className="opk">What you noticed</div>
-                <div className="opv">&ldquo;My skin&rsquo;s been drier this month.&rdquo;</div>
-                <div className="ops">in your own words &middot; Jun 18</div>
-              </div>
-              <div className="opw">
-                <div className="opk">Resting heart</div>
-                <div className="opv" style={{ fontSize: 32 }}>
-                  62{" "}
-                  <span style={{ fontSize: 15, color: "#8a807a", fontFamily: "inherit" }}>bpm</span>
-                </div>
-                <div className="ops">steady this week</div>
-              </div>
-              <div className="opw span3 op-med">
-                <svg
-                  width="22"
-                  height="22"
-                  viewBox="0 0 24 24"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M6 3v5a4 4 0 0 0 8 0V3" />
-                  <path d="M10 16a6 6 0 0 0 6 6 4 4 0 0 0 4-4v-2" />
-                  <circle cx="20" cy="12" r="2" />
-                </svg>
-                <div>
-                  <div className="opv" style={{ fontSize: 16, marginTop: 0 }}>
-                    Medical records
-                  </div>
-                  <div className="ops" style={{ marginTop: 2 }}>
-                    Labs, visit notes, and history &mdash; all in one place
-                  </div>
-                </div>
-                <span className="arr">&rsaquo;</span>
-              </div>
-            </div>
-            <div className="op-close">
-              It all becomes your history &mdash; ready for your next decision.
-            </div>
-            <div style={{ marginTop: 38, textAlign: "center" }}>
-              <StoreRow />
-            </div>
-          </div>
-        </section>
-
-        {/* SCIENCE */}
-        <section id="science" className="science">
-          <div className="wrap">
-            <div className="kicker">Built on real science</div>
-            <h2 style={{ maxWidth: 820 }}>
-              Skin is visible. The biology shaping it is not always obvious.
-            </h2>
-            <p style={{ maxWidth: 640 }}>
-              DrRuby brings longitudinal observation together with carefully labeled scientific
-              context&mdash;without turning uncertainty into a diagnosis or a sales pitch.
-            </p>
-            <div className="advisor-row">
-              <div className="advisor-card">
-                <img className="advisor-photo" src="/charles-brenner.webp" alt="Dr. Charles Brenner" />
-                <div>
-                  <div className="advisor-name">Dr. Charles Brenner, PhD</div>
-                  <div className="advisor-role">Founding Science Advisor</div>
-                  <div className="advisor-creds">
-                    Biochemist &middot; Professor of Metabolic Regulation, University of Helsinki
-                  </div>
+            <img
+              src="/hero-woman.webp"
+              alt="Woman reflecting on her skin journey"
+            />
+            <div className="hero-journey">
+              <div className="hj-title">Your skin journey</div>
+              <div className="hj-step">
+                <span className="hj-dot" />
+                <div className="hj-body">
+                  <div className="hj-k">Started &middot; Mar 12</div>
+                  <div className="hj-t">Retinol 0.025%</div>
                 </div>
               </div>
-              <div className="advisor-card">
-                <div className="adv-ph">+</div>
-                <div>
-                  <div className="advisor-name adv-soon">To be announced</div>
-                  <div className="advisor-role">Women&rsquo;s Health Advisor</div>
-                  <div className="advisor-creds adv-soon">
-                    Placeholder &mdash; name &amp; credentials to be added
-                  </div>
+              <div className="hj-step">
+                <span className="hj-dot" />
+                <div className="hj-body">
+                  <div className="hj-k">Week 2 &middot; Mar 26</div>
+                  <div className="hj-t">Dryness noticed</div>
                 </div>
               </div>
-              <div className="advisor-card">
-                <div className="adv-ph">+</div>
-                <div>
-                  <div className="advisor-name adv-soon">To be announced</div>
-                  <div className="advisor-role">Dermatology Advisor</div>
-                  <div className="advisor-creds adv-soon">
-                    Placeholder &mdash; name &amp; credentials to be added
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div
-              className="trust-points"
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 22,
-                marginTop: 46,
-                borderTop: "1px solid rgba(0,0,0,.08)",
-                paddingTop: 34,
-              }}
-            >
-              <div style={{ flex: 1, minWidth: 220 }}>
-                <div style={{ fontWeight: 800, fontSize: 15, color: "#1a1614" }}>
-                  Private by default
-                </div>
-                <div style={{ fontSize: 13.5, color: "#6b635e", marginTop: 5, lineHeight: 1.55 }}>
-                  Your history is yours. Nothing is shared unless you explicitly choose to.
-                </div>
-              </div>
-              <div style={{ flex: 1, minWidth: 220 }}>
-                <div style={{ fontWeight: 800, fontSize: 15, color: "#1a1614" }}>
-                  Using DrRuby isn&rsquo;t joining research
-                </div>
-                <div style={{ fontSize: 13.5, color: "#6b635e", marginTop: 5, lineHeight: 1.55 }}>
-                  Research is always separate, explicit, and voluntary &mdash; you choose which
-                  scientist or doctor to join.
-                </div>
-              </div>
-              <div style={{ flex: 1, minWidth: 220 }}>
-                <div style={{ fontWeight: 800, fontSize: 15, color: "#1a1614" }}>
-                  You decide, not DrRuby
-                </div>
-                <div style={{ fontSize: 13.5, color: "#6b635e", marginTop: 5, lineHeight: 1.55 }}>
-                  We help you prepare. The decision stays yours &mdash; with your clinician.
+              <div className="hj-step last">
+                <span className="hj-dot" />
+                <div className="hj-body">
+                  <div className="hj-k">Today &middot; Jun 20</div>
+                  <div className="hj-t">Continue this routine?</div>
                 </div>
               </div>
             </div>
@@ -240,9 +69,50 @@ export default function Home() {
         {/* HOW IT WORKS */}
         <section id="how" className="section soft">
           <div className="wrap">
-            <div className="kicker">Your next decision</div>
-            <h2>Your next decision starts with your history.</h2>
+            <div className="kicker">How it works</div>
+            <h2>One decision. Three moments.</h2>
+            <p className="sub">
+              Instead of starting from scratch every time, DrRuby helps you
+              build on your own experience.
+            </p>
             <div className="how-grid">
+              <div className="how-journey">
+                <div className="hm">
+                  <span className="hm-dot" />
+                  <div className="hm-body">
+                    <div className="hm-k">Before</div>
+                    <h3>You have a question</h3>
+                    <p>
+                      &ldquo;Should I start retinol?&rdquo; &middot;
+                      &ldquo;Should I try HRT?&rdquo; &middot; &ldquo;Should I
+                      see this clinic?&rdquo;
+                    </p>
+                  </div>
+                </div>
+                <div className="hm">
+                  <span className="hm-dot" />
+                  <div className="hm-body">
+                    <div className="hm-k">What happened</div>
+                    <h3>Your experience, remembered</h3>
+                    <p>
+                      Started Retinol &rarr; dryness after two weeks &rarr;
+                      stopped &rarr; skin recovered.
+                    </p>
+                  </div>
+                </div>
+                <div className="hm last">
+                  <span className="hm-dot" />
+                  <div className="hm-body">
+                    <div className="hm-k">Next time</div>
+                    <h3>You don&rsquo;t start from zero</h3>
+                    <p>
+                      &ldquo;Thinking about restarting? Last time, dryness
+                      appeared after two weeks.&rdquo; DrRuby gives you your own
+                      context &mdash; it never tells you what to do.
+                    </p>
+                  </div>
+                </div>
+              </div>
               <div className="how-visual">
                 <div className="phone">
                   <div className="phone-status">
@@ -255,20 +125,80 @@ export default function Home() {
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
                     >
-                      <rect x="0" y="6" width="3" height="5" rx=".5" fill="currentColor" />
-                      <rect x="5" y="4" width="3" height="7" rx=".5" fill="currentColor" />
-                      <rect x="10" y="2" width="3" height="9" rx=".5" fill="currentColor" />
-                      <rect x="15" y="0" width="3" height="11" rx=".5" fill="currentColor" />
-                      <path d="M25 5C27.3 2.7 31 2.7 33.3 5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-                      <path d="M27 7.4C28.4 6 30 6 31.3 7.4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                      <rect
+                        x="0"
+                        y="6"
+                        width="3"
+                        height="5"
+                        rx=".5"
+                        fill="currentColor"
+                      />
+                      <rect
+                        x="5"
+                        y="4"
+                        width="3"
+                        height="7"
+                        rx=".5"
+                        fill="currentColor"
+                      />
+                      <rect
+                        x="10"
+                        y="2"
+                        width="3"
+                        height="9"
+                        rx=".5"
+                        fill="currentColor"
+                      />
+                      <rect
+                        x="15"
+                        y="0"
+                        width="3"
+                        height="11"
+                        rx=".5"
+                        fill="currentColor"
+                      />
+                      <path
+                        d="M25 5C27.3 2.7 31 2.7 33.3 5"
+                        stroke="currentColor"
+                        strokeWidth="1.3"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M27 7.4C28.4 6 30 6 31.3 7.4"
+                        stroke="currentColor"
+                        strokeWidth="1.3"
+                        strokeLinecap="round"
+                      />
                       <circle cx="29.2" cy="9.5" r=".9" fill="currentColor" />
-                      <rect x="41" y="1" width="18" height="9" rx="2.1" stroke="currentColor" strokeWidth="1.1" />
-                      <rect x="60.5" y="3.7" width="1.5" height="3.2" rx=".7" fill="currentColor" />
-                      <rect x="43" y="2.7" width="14" height="5.4" rx=".9" fill="currentColor" />
+                      <rect
+                        x="41"
+                        y="1"
+                        width="18"
+                        height="9"
+                        rx="2.1"
+                        stroke="currentColor"
+                        strokeWidth="1.1"
+                      />
+                      <rect
+                        x="60.5"
+                        y="3.7"
+                        width="1.5"
+                        height="3.2"
+                        rx=".7"
+                        fill="currentColor"
+                      />
+                      <rect
+                        x="43"
+                        y="2.7"
+                        width="14"
+                        height="5.4"
+                        rx=".9"
+                        fill="currentColor"
+                      />
                     </svg>
                   </div>
                   <div className="phone-content">
-                    <div className="phone-top">&larr; My Health History</div>
+                    <div className="phone-top">&larr; My History</div>
                     <div className="source-label red">Your History</div>
                     <div className="story-line">
                       <div className="story-step">
@@ -286,8 +216,12 @@ export default function Home() {
                     </div>
                     <div className="story-divider" />
                     <div className="source-label red">Today</div>
-                    <div className="story-question">Thinking about restarting?</div>
-                    <div className="story-note-label">Based on your history</div>
+                    <div className="story-question">
+                      Thinking about restarting?
+                    </div>
+                    <div className="story-note-label">
+                      Based on your history
+                    </div>
                     <div className="story-note-text">
                       Last time, dryness appeared after two weeks.
                     </div>
@@ -295,12 +229,78 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <p className="sub" style={{ textAlign: "center", maxWidth: 520, margin: "28px auto 0" }}>
-              So your next decision doesn&rsquo;t start from zero &mdash; it starts with what
-              you&rsquo;ve learned.
+          </div>
+        </section>
+
+        {/* SKIN — three things before you decide */}
+        <section id="skin" className="section">
+          <div className="wrap">
+            <div className="kicker">Before you decide</div>
+            <h2>Three things Google can&rsquo;t give you.</h2>
+            <p className="sub">
+              Google gives you information. DrRuby brings together your own
+              experience, people like you, and the evidence &mdash; so your next
+              decision is yours, made with more confidence.
             </p>
-            <div style={{ marginTop: 38, textAlign: "center" }}>
-              <StoreRow />
+            <div className="three-things">
+              <div className="tt">
+                <div className="tt-k">You</div>
+                <h3>Your own history</h3>
+                <p>
+                  Your photos, your timeline, your changes over time &mdash; the
+                  one thing no one else has.
+                </p>
+                <div className="tt-ex">
+                  Photo &rarr; Retinol &rarr; dryness &rarr; stopped &rarr;
+                  recovered
+                </div>
+              </div>
+              <div className="tt">
+                <div className="tt-k">People like you</div>
+                <h3>Similar journeys</h3>
+                <p>
+                  Women around your age and situation who tried the same thing
+                  &mdash; what they actually experienced.
+                </p>
+                <div className="tt-ex">
+                  Among women 45&ndash;55 who started retinol, many noticed
+                  dryness around week 2 &mdash; and most who continued said it
+                  settled.
+                </div>
+                <div className="tt-note">
+                  Consented, structured experience &mdash; not a study, not a
+                  recommendation.
+                </div>
+              </div>
+              <div className="tt">
+                <div className="tt-k">Evidence</div>
+                <h3>What the field says</h3>
+                <p>
+                  Dermatologists&rsquo; perspectives and the evidence &mdash; in
+                  plain language, with the uncertainty kept visible.
+                </p>
+                <div className="tt-ex">
+                  What&rsquo;s supported &middot; what&rsquo;s still debated
+                  &middot; where experts disagree
+                </div>
+              </div>
+            </div>
+            <div className="tt-synthesis">
+              <div className="tt-sum">
+                DrRuby brings the three together into a{" "}
+                <strong>Decision Brief</strong> &mdash; what&rsquo;s known,
+                what&rsquo;s still uncertain, and the questions worth asking. It
+                never tells you what to do.
+              </div>
+              <div className="tt-formula">
+                <span>You</span>
+                <b>+</b>
+                <span>People like you</span>
+                <b>+</b>
+                <span>Evidence</span>
+                <b>=</b>
+                <em>confidence in your own decision</em>
+              </div>
             </div>
           </div>
         </section>
@@ -308,16 +308,19 @@ export default function Home() {
         {/* HEALTHSPAN — orbit */}
         <section id="healthspan" className="section soft">
           <div className="wrap">
-            <div className="kicker">The long game</div>
+            <div className="kicker">
+              HealthSpan &middot; a second layer of context
+            </div>
             <h2>
-              Don&rsquo;t fight aging.
+              Skin is what you see.
               <br />
-              <em>Age well.</em>
+              Sleep, hormones, and stress are part of the record too.
             </h2>
             <p className="sub">
-              Skin is what you see &mdash; but sleep, hormones, and stress shape how you age. DrRuby
-              keeps the full picture in one place, so you can care for the long game instead of
-              chasing quick fixes.
+              Sleep, hormones, stress, and treatments are part of your story
+              too. DrRuby gives you one place to note them alongside your skin
+              history, so the full picture is there when you need it &mdash; not
+              scattered across separate apps.
             </p>
             <div className="orbit-wrap">
               <div className="orbit">
@@ -366,96 +369,105 @@ export default function Home() {
           </div>
         </section>
 
-        {/* COMEBACK */}
-        <section id="comeback" className="section soft">
-          <div className="wrap" style={{ textAlign: "center", maxWidth: 920 }}>
-            <h2>
-              Most health apps buzz you all day.
-              <br />
-              <em>
-                <span style={{ color: "#cf1736" }}>DrRuby</span> only speaks up when a decision
-                matters.
-              </em>
+        {/* SCIENCE */}
+        <section id="science" className="science">
+          <div className="wrap">
+            <div className="kicker">Built on real science</div>
+            <h2 style={{ maxWidth: 650 }}>
+              Skin is visible. The biology shaping it is not always obvious.
             </h2>
-            <div className="cb-flow">
-              <div className="cb-card">
-                <div className="cb-badge">1</div>
-                <div className="cb-h">What matters to you</div>
-                <div className="cb-p">
-                  Start with what you&rsquo;re trying to improve, and what you&rsquo;re
-                  considering.
+            <p>
+              DrRuby brings longitudinal observation together with carefully
+              labeled scientific context&mdash;without turning uncertainty into
+              a diagnosis or a sales pitch.
+            </p>
+            <div className="advisor-row">
+              <div className="advisor-card">
+                <img
+                  className="advisor-photo"
+                  src="/charles-brenner.webp"
+                  alt="Dr. Charles Brenner"
+                />
+                <div>
+                  <div className="advisor-name">Dr. Charles Brenner, PhD</div>
+                  <div className="advisor-role">Founding Science Advisor</div>
+                  <div className="advisor-creds">
+                    Biochemist &middot; Professor of Metabolic Regulation,
+                    University of Helsinki
+                  </div>
                 </div>
               </div>
-              <div className="cb-arrow">&rarr;</div>
-              <div className="cb-card">
-                <div className="cb-badge">2</div>
-                <div className="cb-h">Make a choice. See what happens.</div>
-                <div className="cb-p">
-                  Bring together your history, similar journeys, and science &mdash; then
-                  remember what you chose and what changed.
+              <div className="advisor-card">
+                <div className="adv-ph">+</div>
+                <div>
+                  <div className="advisor-name adv-soon">To be announced</div>
+                  <div className="advisor-role">
+                    Women&rsquo;s Health Advisor
+                  </div>
+                  <div className="advisor-creds adv-soon">
+                    Placeholder &mdash; name &amp; credentials to be added
+                  </div>
                 </div>
               </div>
-              <div className="cb-arrow">&rarr;</div>
-              <div className="cb-card">
-                <div className="cb-badge">3</div>
-                <div className="cb-h">Learn for next time</div>
-                <div className="cb-p">
-                  Your experience becomes part of your history, so your next decision
-                  starts with what you&rsquo;ve learned.
+              <div className="advisor-card">
+                <div className="adv-ph">+</div>
+                <div>
+                  <div className="advisor-name adv-soon">To be announced</div>
+                  <div className="advisor-role">Dermatology Advisor</div>
+                  <div className="advisor-creds adv-soon">
+                    Placeholder &mdash; name &amp; credentials to be added
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="cb-close">Every decision makes the next one better.</div>
-            <div style={{ marginTop: 38, textAlign: "center" }}>
-              <StoreRow />
             </div>
           </div>
         </section>
 
-        {/* SKIN — formula */}
-        <section id="skin" className="section">
+        {/* TRUST */}
+        <section id="trust" className="trust">
           <div className="wrap">
-            <div className="kicker">Before you decide</div>
-            <h2>Every health decision deserves the full picture.</h2>
-            <p className="sub">
-              Search gives you information. DrRuby brings together your history, similar experiences,
-              and the evidence &mdash; so you decide with confidence.
+            <div className="kicker">Why trust DrRuby</div>
+            <h2>
+              Personal value first.
+              <br />
+              Research only by separate choice.
+            </h2>
+            <p className="trust-sub">
+              Using DrRuby does not mean participating in research. Your
+              personal history is useful on its own. Research is always
+              separate, explicit, and voluntary.
             </p>
-            <div className="tt-synthesis" style={{ marginTop: 36 }}>
-              <div className="tt-formula2">
-                <span className="ff-term">
-                  <i>
-                    <svg viewBox="0 0 24 24">
-                      <circle cx="12" cy="8" r="3.2" />
-                      <path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6" />
-                    </svg>
-                  </i>
-                  You
-                </span>
-                <b className="ff-op">+</b>
-                <span className="ff-term">
-                  <i>
-                    <svg viewBox="0 0 24 24">
-                      <circle cx="9" cy="9" r="2.6" />
-                      <circle cx="16.5" cy="10" r="2.1" />
-                      <path d="M4 19c0-2.8 2.2-4.6 5-4.6s5 1.8 5 4.6" />
-                      <path d="M15 19c0-1.8 1-3.2 2.8-3.2S20.6 17 20.6 19" />
-                    </svg>
-                  </i>
-                  People like you
-                </span>
-                <b className="ff-op">+</b>
-                <span className="ff-term">
-                  <i>
-                    <svg viewBox="0 0 24 24">
-                      <path d="M9 3h6M10 3v5l-4.2 8.4A2 2 0 0 0 7.6 20h8.8a2 2 0 0 0 1.8-3.6L14 8V3" />
-                    </svg>
-                  </i>
-                  Evidence
-                </span>
-                <b className="ff-op">=</b>
-                <span className="ff-out">Confidence in your own decision</span>
+            <div className="trust-stack">
+              <div className="trust-layer">
+                <div className="trust-tag">You</div>
+                <h3>Your decisions</h3>
+                <p>
+                  Preserved for your own clarity and confidence. This is where
+                  everyone starts&mdash;and where most people stay.
+                </p>
               </div>
+              <div className="trust-layer">
+                <div className="trust-tag">Research &middot; Optional</div>
+                <h3>Decision Research Platform</h3>
+                <p>
+                  Separate consent, separate protocol, never automatic. Powered
+                  by structured multiple N-of-1 research.
+                </p>
+              </div>
+              <div className="trust-layer">
+                <div className="trust-tag">Knowledge</div>
+                <h3>Validated patterns</h3>
+                <p>
+                  Governed, traceable patterns may improve future decision
+                  context. Research improves the platform&mdash;it never
+                  replaces your decisions.
+                </p>
+              </div>
+            </div>
+            <div className="trust-note">
+              Some decision journeys&mdash;shared only with your explicit
+              consent&mdash;may also help research learn. Nothing here happens
+              automatically.
             </div>
           </div>
         </section>
@@ -463,13 +475,16 @@ export default function Home() {
         {/* FINAL CTA */}
         <section id="start" className="final">
           <div className="wrap">
-            <div className="kicker">It doesn&rsquo;t get smarter. It gets more complete.</div>
-            <h2>Build the health history behind your next decision.</h2>
+            <div className="kicker">
+              It doesn&rsquo;t get smarter. It gets more complete.
+            </div>
+            <h2>Build the history behind your next decision.</h2>
             <p>Your first entry takes only a few minutes.</p>
             <p className="final-note">
-              Nothing you&rsquo;ve tried is wasted. It becomes part of your health history.
+              Nothing you&rsquo;ve tried is wasted. It becomes part of your
+              health history.
             </p>
-            <StoreRow />
+            <StartJourneyButton />
           </div>
         </section>
       </main>
@@ -487,7 +502,9 @@ export default function Home() {
                 <h4>Product</h4>
                 <a href="#how">How It Works</a>
                 <a href="#skin">Skin</a>
-                <a href="#science">Trust</a>
+                <a href="#healthspan">HealthSpan</a>
+                <a href="#science">Science</a>
+                <a href="#trust">Trust</a>
                 <a href="/pricing">Pricing</a>
               </div>
               <div className="ft-col">
@@ -515,16 +532,16 @@ export default function Home() {
                   </svg>
                   Collaborate
                 </a>
-                <a href="#science">Research &amp; ethics</a>
+                <a href="#trust">Research &amp; ethics</a>
               </div>
             </div>
             <div className="ft-sub">
               <div className="ft-sub-h">
-                Learn to understand your body, <em>every decision building on the last.</em>
+                Learn to understand your body, <em>one decision at a time.</em>
               </div>
               <div className="ft-sub-p">
-                Occasional notes on making better health decisions &mdash; grounded in your own
-                history, not hype.
+                Occasional notes on making better health decisions &mdash;
+                grounded in your own history, not hype.
               </div>
               <FooterSubscribe />
             </div>
@@ -532,19 +549,42 @@ export default function Home() {
           <div className="ft-bottom">
             <div className="ft-social">
               <a href="#" aria-label="Instagram">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                >
                   <rect x="3" y="3" width="18" height="18" rx="5" />
                   <circle cx="12" cy="12" r="4" />
-                  <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+                  <circle
+                    cx="17.5"
+                    cy="6.5"
+                    r="1"
+                    fill="currentColor"
+                    stroke="none"
+                  />
                 </svg>
               </a>
               <a href="#" aria-label="LinkedIn">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
                   <path d="M4.98 3.5A2.5 2.5 0 112.5 6 2.5 2.5 0 014.98 3.5zM3 8.98h4V21H3zM9 8.98h3.8v1.64h.05a4.16 4.16 0 013.75-2.06c4 0 4.75 2.64 4.75 6.07V21h-4v-5.4c0-1.29 0-2.94-1.8-2.94s-2.07 1.4-2.07 2.85V21H9z" />
                 </svg>
               </a>
               <a href="#" aria-label="X">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
                   <path d="M18.9 2H22l-7.1 8.1L23 22h-6.6l-5.2-6.8L5.3 22H2l7.6-8.7L1.7 2h6.8l4.7 6.2L18.9 2zm-1.2 18h1.9L7.2 3.9H5.2z" />
                 </svg>
               </a>

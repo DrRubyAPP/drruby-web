@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 
 /**
  * When the app ships, set this to the store URL (or a smart App Store /
@@ -69,6 +69,19 @@ export function StoreRow() {
   );
 }
 
+/**
+ * The red "Start Your Journey" pill used across the marketing homepage.
+ * Same behavior as the store buttons: opens the store URL when set, else
+ * the download waitlist modal.
+ */
+export function StartJourneyButton() {
+  return (
+    <button type="button" className="btn primary" onClick={triggerDownload}>
+      Start Your Journey
+    </button>
+  );
+}
+
 /** The single "Download" button in the top nav. */
 export function NavDownloadButton() {
   return (
@@ -128,7 +141,9 @@ export function DownloadModal() {
     e.preventDefault();
     setStatus("loading");
     setMsg("");
-    const email = (e.currentTarget.elements.namedItem("EMAIL") as HTMLInputElement).value;
+    const email = (
+      e.currentTarget.elements.namedItem("EMAIL") as HTMLInputElement
+    ).value;
 
     try {
       const res = await fetch("/api/mailchimp/subscribe", {
@@ -201,16 +216,37 @@ export function DownloadModal() {
         >
           &times;
         </button>
-        <div style={{ fontFamily: "Georgia, serif", fontSize: 26, color: "#1a1614", marginBottom: 8 }}>
+        <div
+          style={{
+            fontFamily: "Georgia, serif",
+            fontSize: 26,
+            color: "#1a1614",
+            marginBottom: 8,
+          }}
+        >
           Download DrRuby
         </div>
-        <div style={{ fontSize: 15, color: "#6b635e", lineHeight: 1.55, marginBottom: 20 }}>
-          Launching soon. Join the waitlist and we&rsquo;ll send you the download link the moment
-          it&rsquo;s available.
+        <div
+          style={{
+            fontSize: 15,
+            color: "#6b635e",
+            lineHeight: 1.55,
+            marginBottom: 20,
+          }}
+        >
+          Launching soon. Join the waitlist and we&rsquo;ll send you the
+          download link the moment it&rsquo;s available.
         </div>
 
         {status === "ok" ? (
-          <div style={{ fontSize: 15, color: "#2e7d5b", fontWeight: 600, padding: "6px 0 4px" }}>
+          <div
+            style={{
+              fontSize: 15,
+              color: "#2e7d5b",
+              fontWeight: 600,
+              padding: "6px 0 4px",
+            }}
+          >
             Thanks &mdash; we&rsquo;ll email you the download link at launch.
           </div>
         ) : (
@@ -254,11 +290,15 @@ export function DownloadModal() {
               {status === "loading" ? "Joining…" : "Join the waitlist"}
             </button>
             {status === "err" && (
-              <div style={{ fontSize: 13, color: "#cf1736", marginTop: 10 }}>{msg}</div>
+              <div style={{ fontSize: 13, color: "#cf1736", marginTop: 10 }}>
+                {msg}
+              </div>
             )}
           </form>
         )}
-        <div style={{ fontSize: 12, color: "#a89a95", marginTop: 14 }}>No spam. Just the launch.</div>
+        <div style={{ fontSize: 12, color: "#a89a95", marginTop: 14 }}>
+          No spam. Just the launch.
+        </div>
       </div>
     </div>
   );
