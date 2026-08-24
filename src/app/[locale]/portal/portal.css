@@ -119,6 +119,12 @@
   opacity: 0.6;
 }
 
+/* ===== flows pages (simplified shell, no sidebar) ===== */
+#app-portal .flow-body {
+  padding: 28px 34px 70px;
+  max-width: 1080px;
+}
+
 /* ===== Light sidebar (reference app-portal .side) ===== */
 #app-portal .ufw {
   display: grid;

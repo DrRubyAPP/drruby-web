@@ -1,19 +1,20 @@
 import { getTranslations } from "next-intl/server";
-import PortalShell from "@/components/layout/PortalShell";
+import PortalTopbar from "@/components/layout/PortalTopbar";
 import StackConsiderFlow from "@/components/sections/portal/flows/StackConsiderFlow";
+import "../../portal.css";
 
 export default async function ConsiderStackPage() {
   const t = await getTranslations("portal");
   return (
-    <PortalShell
-      pageTitle={t("considerStack.pageTitle")}
-      pageSub={t("considerStack.pageSub")}
-      primaryAction={{
-        label: t("topbar.primaryAction"),
-        href: "/portal/consider/skin",
-      }}
-    >
-      <StackConsiderFlow />
-    </PortalShell>
+    <div id="app-portal" className="flow-page">
+      <PortalTopbar
+        pageTitle={t("considerStack.pageTitle")}
+        pageSub={t("considerStack.pageSub")}
+        backHref="/portal"
+      />
+      <div className="flow-body">
+        <StackConsiderFlow />
+      </div>
+    </div>
   );
 }
