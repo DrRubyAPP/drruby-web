@@ -581,7 +581,7 @@
   },
   "portal": {
     "brand": "DrRuby",
-    "brandSub": "健康智能",
+    "brandSub": "认识你的身体",
     "nav": {
       "myHealth": "我的健康",
       "aiTools": "AI 工具",
@@ -599,7 +599,8 @@
     "topbar": {
       "sourcesConnected": "已连接 {count} 个数据源",
       "primaryAction": "运行新分析",
-      "onboarding": "引导设置"
+      "onboarding": "引导设置",
+      "backToPortal": "返回门户"
     },
     "dashboard": {
       "title": "仪表盘",
@@ -633,12 +634,12 @@
         }
       },
       "tabs": {
-        "today": "首页",
-        "health": "我的健康",
-        "decisions": "我的决策",
-        "library": "图书馆",
-        "research": "研究",
-        "privacy": "个人资料"
+        "today": { "label": "首页", "sub": "今日动态" },
+        "health": { "label": "我的健康", "sub": "你的数据与变化" },
+        "decisions": { "label": "我的决策", "sub": "你正在权衡的事" },
+        "library": { "label": "图书馆", "sub": "从真实经历中学习" },
+        "research": { "label": "研究", "sub": "可参与的研究" },
+        "privacy": { "label": "个人资料", "sub": "账号与隐私" }
       }
     },
     "common": {

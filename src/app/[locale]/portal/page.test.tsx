@@ -51,14 +51,12 @@ vi.mock("next-intl", () => ({
 }));
 
 // ── 子组件 stub：避免拉起整棵树 ──
-vi.mock("@/components/layout/PortalShell", () => ({
-  default: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="shell">{children}</div>
-  ),
-}));
-vi.mock("@/components/sections/portal/decisions/ActiveDecisionsSummary", () => ({
-  ActiveDecisionsSummary: () => <div data-testid="ads" />,
-}));
+vi.mock(
+  "@/components/sections/portal/decisions/ActiveDecisionsSummary",
+  () => ({
+    ActiveDecisionsSummary: () => <div data-testid="ads" />,
+  }),
+);
 vi.mock("@/components/sections/portal/decisions/DecisionsView", () => ({
   DecisionsView: () => <div data-testid="decisions" />,
 }));
@@ -112,6 +110,48 @@ beforeEach(() => {
 });
 
 describe("PortalPage /portal 仪表盘", () => {
+  it("侧边栏：6 个卡片式菜单项（含副标），用户区显示 /api/me 数据", () => {
+    const { container } = render(<PortalPage />);
+
+    const items = container.querySelectorAll(".nav-item");
+    expect(items.length).toBe(6);
+
+    // 主标 + 副标（My Health 等）
+    expect(screen.getByText("dashboard.tabs.today.label")).toBeInTheDocument();
+    expect(screen.getByText("dashboard.tabs.today.sub")).toBeInTheDocument();
+    expect(screen.getByText("dashboard.tabs.health.label")).toBeInTheDocument();
+    expect(screen.getByText("dashboard.tabs.health.sub")).toBeInTheDocument();
+    expect(
+      screen.getByText("dashboard.tabs.decisions.sub"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("dashboard.tabs.library.sub")).toBeInTheDocument();
+    expect(screen.getByText("dashboard.tabs.research.sub")).toBeInTheDocument();
+    expect(screen.getByText("dashboard.tabs.privacy.sub")).toBeInTheDocument();
+
+    // 旧深色侧边栏菜单（skin/healthspan）不出现
+    expect(screen.queryByText("nav.skinAnalysis")).toBeNull();
+    expect(screen.queryByText("nav.healthspan")).toBeNull();
+
+    // 底部用户区：头像 initials + 姓名 + email（/api/me）
+    expect(container.querySelector(".avatar")?.textContent).toBe("AL");
+    expect(container.querySelector(".pname")?.textContent).toBe("Alice Lee");
+    expect(container.querySelector(".pmail")?.textContent).toBe("alice@x.com");
+  });
+
+  it("侧边栏：点击菜单切换视图（active 态 + .ufv on）", () => {
+    const { container } = render(<PortalPage />);
+
+    expect(container.querySelector("#v-today")?.className).toContain("on");
+
+    fireEvent.click(screen.getByText("dashboard.tabs.health.label"));
+    expect(container.querySelector("#v-health")?.className).toContain("on");
+    expect(container.querySelector("#v-today")?.className).not.toContain("on");
+    expect(container.querySelector("#n-health")?.className).toContain("active");
+    expect(container.querySelector("#n-today")?.className).not.toContain(
+      "active",
+    );
+  });
+
   it("Ask DrRuby：输入 + 点击 → POST /api/ask 携带正确 body", async () => {
     postMock.mockResolvedValueOnce({
       choices: [{ message: { role: "assistant", content: "answer" } }],
@@ -156,7 +196,7 @@ describe("PortalPage /portal 仪表盘", () => {
   it("Profile sub-row：Your profile / Account security 链接正确；Manage billing 不在 DOM", () => {
     render(<PortalPage />);
     // 切到 Profile 视图
-    const profileTab = screen.getByText("dashboard.tabs.privacy");
+    const profileTab = screen.getByText("dashboard.tabs.privacy.label");
     fireEvent.click(profileTab);
 
     const profileLink = screen.getByText("Your profile").closest("a");
@@ -177,7 +217,12 @@ describe("PortalPage /portal 仪表盘", () => {
     render(<PortalPage />);
     // 时辰 key 形如 dashboard.greeting.{morning|afternoon|evening}
     const hour = new Date().getHours();
-    const tod = hour >= 5 && hour < 12 ? "morning" : hour >= 12 && hour < 18 ? "afternoon" : "evening";
+    const tod =
+      hour >= 5 && hour < 12
+        ? "morning"
+        : hour >= 12 && hour < 18
+          ? "afternoon"
+          : "evening";
     expect(screen.getByText(`dashboard.greeting.${tod}`)).toBeInTheDocument();
   });
 });

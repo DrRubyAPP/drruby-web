@@ -575,7 +575,7 @@
   },
   "portal": {
     "brand": "DrRuby",
-    "brandSub": "Health Intelligence",
+    "brandSub": "Know your body",
     "nav": {
       "myHealth": "My Health",
       "aiTools": "AI Tools",
@@ -593,7 +593,8 @@
     "topbar": {
       "sourcesConnected": "{count} sources connected",
       "primaryAction": "Run New Analysis",
-      "onboarding": "Onboarding"
+      "onboarding": "Onboarding",
+      "backToPortal": "Back to portal"
     },
     "dashboard": {
       "title": "Dashboard",
@@ -627,12 +628,12 @@
         }
       },
       "tabs": {
-        "today": "Home",
-        "health": "My Health",
-        "decisions": "My Decisions",
-        "library": "Library",
-        "research": "Research",
-        "privacy": "Profile"
+        "today": { "label": "Home", "sub": "Today's feed" },
+        "health": { "label": "My Health", "sub": "Your data & changes" },
+        "decisions": { "label": "My Decisions", "sub": "What you're weighing" },
+        "library": { "label": "Library", "sub": "Learn from real journeys" },
+        "research": { "label": "Research", "sub": "Studies you can join" },
+        "privacy": { "label": "Profile", "sub": "Account & privacy" }
       }
     },
     "common": {

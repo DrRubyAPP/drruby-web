@@ -1,28 +1,28 @@
 "use client";
 
-import { Link, useRouter } from "@/i18n/navigation";
-import { useState } from "react";
 import { useTranslations } from "next-intl";
-import PortalShell from "@/components/layout/PortalShell";
-import LogoutButton from "@/components/auth/LogoutButton";
+import { useState } from "react";
 import { ErrorState } from "@/components/api/ErrorState";
+import LogoutButton from "@/components/auth/LogoutButton";
+import PortalTopbar from "@/components/layout/PortalTopbar";
+import { ActiveDecisionsSummary } from "@/components/sections/portal/decisions/ActiveDecisionsSummary";
+import { DecisionsView } from "@/components/sections/portal/decisions/DecisionsView";
+import { HealthView } from "@/components/sections/portal/health/HealthView";
+import { PrivacyView } from "@/components/sections/portal/privacy/PrivacyView";
+import { ResearchView } from "@/components/sections/portal/research/ResearchView";
 import { DeleteAccountDialog } from "@/components/sections/portal/settings/DeleteAccountDialog";
 import { ExportDataButton } from "@/components/sections/portal/settings/ExportDataButton";
+import { TodayView } from "@/components/sections/portal/today/TodayView";
 import { useApi } from "@/hooks/useApi";
-import { apiClient } from "@/lib/api/client";
 import { useMutation } from "@/hooks/useMutation";
+import { Link, useRouter } from "@/i18n/navigation";
+import { apiClient } from "@/lib/api/client";
 import {
   getFirstName,
   getGreetingKey,
   getInitials,
   getTierKey,
 } from "@/lib/portal/dashboard";
-import { ActiveDecisionsSummary } from "@/components/sections/portal/decisions/ActiveDecisionsSummary";
-import { DecisionsView } from "@/components/sections/portal/decisions/DecisionsView";
-import { HealthView } from "@/components/sections/portal/health/HealthView";
-import { PrivacyView } from "@/components/sections/portal/privacy/PrivacyView";
-import { ResearchView } from "@/components/sections/portal/research/ResearchView";
-import { TodayView } from "@/components/sections/portal/today/TodayView";
 import "./portal.css";
 
 interface MeResponse {
@@ -55,10 +55,16 @@ type View =
   | "research"
   | "privacy";
 
-const NAV: { id: View; titleKey: string; icon: React.ReactNode }[] = [
+const NAV: {
+  id: View;
+  titleKey: string;
+  subKey: string;
+  icon: React.ReactNode;
+}[] = [
   {
     id: "today",
-    titleKey: "dashboard.tabs.today",
+    titleKey: "dashboard.tabs.today.label",
+    subKey: "dashboard.tabs.today.sub",
     icon: (
       <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
         <path d="M4 11l8-7 8 7" />
@@ -68,7 +74,8 @@ const NAV: { id: View; titleKey: string; icon: React.ReactNode }[] = [
   },
   {
     id: "health",
-    titleKey: "dashboard.tabs.health",
+    titleKey: "dashboard.tabs.health.label",
+    subKey: "dashboard.tabs.health.sub",
     icon: (
       <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 20s-7.5-4.35-9.5-8.5C.8 8 2.3 4.5 6 4.5c2 0 3.6 1.2 6 3.8 2.4-2.6 4-3.8 6-3.8 3.7 0 5.2 3.5 3.5 7C19.5 15.65 12 20 12 20z" />
@@ -77,7 +84,8 @@ const NAV: { id: View; titleKey: string; icon: React.ReactNode }[] = [
   },
   {
     id: "decisions",
-    titleKey: "dashboard.tabs.decisions",
+    titleKey: "dashboard.tabs.decisions.label",
+    subKey: "dashboard.tabs.decisions.sub",
     icon: (
       <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
         <path d="M9 11l3 3 8-8" />
@@ -87,7 +95,8 @@ const NAV: { id: View; titleKey: string; icon: React.ReactNode }[] = [
   },
   {
     id: "library",
-    titleKey: "dashboard.tabs.library",
+    titleKey: "dashboard.tabs.library.label",
+    subKey: "dashboard.tabs.library.sub",
     icon: (
       <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
         <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
@@ -99,7 +108,8 @@ const NAV: { id: View; titleKey: string; icon: React.ReactNode }[] = [
   },
   {
     id: "research",
-    titleKey: "dashboard.tabs.research",
+    titleKey: "dashboard.tabs.research.label",
+    subKey: "dashboard.tabs.research.sub",
     icon: (
       <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
         <path d="M9 3h6" />
@@ -109,7 +119,8 @@ const NAV: { id: View; titleKey: string; icon: React.ReactNode }[] = [
   },
   {
     id: "privacy",
-    titleKey: "dashboard.tabs.privacy",
+    titleKey: "dashboard.tabs.privacy.label",
+    subKey: "dashboard.tabs.privacy.sub",
     icon: (
       <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="8" r="4" />
@@ -144,7 +155,9 @@ export default function PortalPage() {
       apiClient.post<AskResponse>("/api/ask", {
         messages: [{ role: "user", content: q }],
       }),
-    { onSuccess: (out) => setAnswer(out?.choices?.[0]?.message?.content ?? "") },
+    {
+      onSuccess: (out) => setAnswer(out?.choices?.[0]?.message?.content ?? ""),
+    },
   );
 
   function submitAsk() {
@@ -155,9 +168,11 @@ export default function PortalPage() {
   }
 
   // Timeline：最近 5 条（按 date 倒序）
-  const { data: timeline, error: tlErr, loading: tlLoading } = useApi<TimelineEventDTO[]>(
-    "/api/timeline",
-  );
+  const {
+    data: timeline,
+    error: tlErr,
+    loading: tlLoading,
+  } = useApi<TimelineEventDTO[]>("/api/timeline");
   const recentTimeline = (timeline ?? [])
     .slice()
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -177,23 +192,46 @@ export default function PortalPage() {
   const on = (v: View) => `ufv${view === v ? " on" : ""}`;
 
   return (
-    <PortalShell pageTitle={t("dashboard.title")} pageSub={t("dashboard.subtitle")}>
-      <div id="app-portal">
-        <div className="portal-tabs">
-          {NAV.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className={`portal-tab${view === item.id ? " active" : ""}`}
-              onClick={() => go(item.id)}
-            >
-              <span className="pt-ic">{item.icon}</span>
-              <span className="pt-tx">
-                <b>{t(item.titleKey)}</b>
-              </span>
-            </button>
-          ))}
-        </div>
+    <div id="app-portal">
+      <PortalTopbar
+        pageTitle={t("dashboard.title")}
+        pageSub={t("dashboard.subtitle")}
+      />
+      <div className="ufw">
+        <aside className="side">
+          <Link href="/" className="logo">
+            Dr<span>Ruby</span>
+          </Link>
+          <div className="logo-sub">{t("brandSub")}</div>
+          <nav className="nav">
+            {NAV.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                id={`n-${item.id}`}
+                className={`nav-item${view === item.id ? " active" : ""}`}
+                onClick={() => go(item.id)}
+              >
+                <span className="ni-ic">{item.icon}</span>
+                <span className="ni-tx">
+                  <b>{t(item.titleKey)}</b>
+                  <small>{t(item.subKey)}</small>
+                </span>
+              </button>
+            ))}
+          </nav>
+          <div className="side-foot">
+            <div className="profile">
+              <div className="avatar">
+                {me ? getInitials(meName) || "—" : "—"}
+              </div>
+              <div>
+                <div className="pname">{me ? meName || "—" : "—"}</div>
+                <div className="pmail">{me?.email ?? "—"}</div>
+              </div>
+            </div>
+          </div>
+        </aside>
 
         <div className="ufm">
           {/* ===== TODAY / HOME ===== */}
@@ -202,16 +240,23 @@ export default function PortalPage() {
               {me && greetingKey ? t(greetingKey, { name: meFirst }) : ""}
             </div>
             <h1>Home</h1>
-            <div className="lede">Here&rsquo;s what deserves your attention today.</div>
+            <div className="lede">
+              Here&rsquo;s what deserves your attention today.
+            </div>
             <TodayView onSeeAllSignals={() => go("health")} />
             <ActiveDecisionsSummary onClick={() => go("decisions")} />
             <div className="sec">
               <div className="sec-h">Your progress</div>
               <div className="card">
-                <div style={{ fontSize: 15, color: "#524d49", lineHeight: 1.65 }}>
-                  <b style={{ color: "#8C2635" }}>You&rsquo;re understanding yourself better.</b> You&rsquo;ve
-                  reflected on four important decisions this year &mdash; and two of your anonymous
-                  journeys are quietly helping other women.
+                <div
+                  style={{ fontSize: 15, color: "#524d49", lineHeight: 1.65 }}
+                >
+                  <b style={{ color: "#8C2635" }}>
+                    You&rsquo;re understanding yourself better.
+                  </b>{" "}
+                  You&rsquo;ve reflected on four important decisions this year
+                  &mdash; and two of your anonymous journeys are quietly helping
+                  other women.
                 </div>
               </div>
             </div>
@@ -236,10 +281,14 @@ export default function PortalPage() {
                     onClick={submitAsk}
                     disabled={askMut.loading || !question.trim()}
                   >
-                    {askMut.loading ? t("dashboard.ask.loading") : t("dashboard.ask.button")}
+                    {askMut.loading
+                      ? t("dashboard.ask.loading")
+                      : t("dashboard.ask.button")}
                   </button>
                 </div>
-                {askMut.error && <ErrorState message={t("dashboard.ask.error")} />}
+                {askMut.error && (
+                  <ErrorState message={t("dashboard.ask.error")} />
+                )}
                 {answer && <div className="ask-answer">{answer}</div>}
                 <div className="ask-ex">
                   {[
@@ -267,14 +316,20 @@ export default function PortalPage() {
               <div className="card">
                 <div className="tl">
                   {tlLoading && <div className="tl-empty">…</div>}
-                  {tlErr && <ErrorState message={t("dashboard.timeline.error")} />}
+                  {tlErr && (
+                    <ErrorState message={t("dashboard.timeline.error")} />
+                  )}
                   {!tlLoading && !tlErr && recentTimeline.length === 0 && (
-                    <div className="tl-empty">{t("dashboard.timeline.empty")}</div>
+                    <div className="tl-empty">
+                      {t("dashboard.timeline.empty")}
+                    </div>
                   )}
                   {recentTimeline.map((e) => (
                     <div className="tl-item" key={e.id}>
                       <span className="tl-dot" />
-                      <div className="tl-d">{new Date(e.date).toLocaleDateString()}</div>
+                      <div className="tl-d">
+                        {new Date(e.date).toLocaleDateString()}
+                      </div>
                       <div className="tl-t">{e.title}</div>
                     </div>
                   ))}
@@ -297,8 +352,9 @@ export default function PortalPage() {
           <div className={on("library")} id="v-library">
             <h1>Library</h1>
             <div className="lede">
-              A learning library, not a feed. Real women&rsquo;s decisions &mdash; structured,
-              consented, and relevant to you. Not strangers&rsquo; posts.
+              A learning library, not a feed. Real women&rsquo;s decisions
+              &mdash; structured, consented, and relevant to you. Not
+              strangers&rsquo; posts.
             </div>
             <div className="sec">
               <div className="sec-h">Where these experiences come from</div>
@@ -338,9 +394,10 @@ export default function PortalPage() {
                   </span>
                 </div>
                 <div className="cm2-note">
-                  Every experience is shared with explicit, revocable consent and anonymized before
-                  it appears here. The more rigorous the source, the more clearly it&rsquo;s labeled
-                  &mdash; never anonymous strangers&rsquo; posts.
+                  Every experience is shared with explicit, revocable consent
+                  and anonymized before it appears here. The more rigorous the
+                  source, the more clearly it&rsquo;s labeled &mdash; never
+                  anonymous strangers&rsquo; posts.
                 </div>
               </div>
             </div>
@@ -348,23 +405,32 @@ export default function PortalPage() {
               <div className="sec-h">Relevant to your decision</div>
               <div className="card">
                 <div className="ask-ex">
-                  <span className="coming-soon">{t("dashboard.comingSoon")}</span>
+                  <span className="coming-soon">
+                    {t("dashboard.comingSoon")}
+                  </span>
                 </div>
                 <div className="cm2-note">
-                  Matched by your <b>decision, goal, concerns, and timing</b> &mdash; not by age,
-                  ethnicity, or location. Similarity does not imply the same outcome.
+                  Matched by your <b>decision, goal, concerns, and timing</b>{" "}
+                  &mdash; not by age, ethnicity, or location. Similarity does
+                  not imply the same outcome.
                 </div>
                 <div className="cm2-counts">
                   <div className="cm2-stat">
-                    <span className="coming-soon">{t("dashboard.comingSoon")}</span>
+                    <span className="coming-soon">
+                      {t("dashboard.comingSoon")}
+                    </span>
                     <span>journeys</span>
                   </div>
                   <div className="cm2-stat">
-                    <span className="coming-soon">{t("dashboard.comingSoon")}</span>
+                    <span className="coming-soon">
+                      {t("dashboard.comingSoon")}
+                    </span>
                     <span>insights</span>
                   </div>
                   <div className="cm2-stat">
-                    <span className="coming-soon">{t("dashboard.comingSoon")}</span>
+                    <span className="coming-soon">
+                      {t("dashboard.comingSoon")}
+                    </span>
                     <span>with photos</span>
                   </div>
                 </div>
@@ -375,56 +441,95 @@ export default function PortalPage() {
               <div className="card matter">
                 <h3>Across Thermage journeys like yours</h3>
                 <p>
-                  Many describe results appearing gradually over 2&ndash;3 months; a few noticed
-                  little change. Experiences vary widely.
+                  Many describe results appearing gradually over 2&ndash;3
+                  months; a few noticed little change. Experiences vary widely.
                 </p>
                 <div style={{ fontSize: 12, color: "#a89a95", marginTop: 8 }}>
-                  Summarized from many consented experiences &mdash; what people report, not a
-                  statistic and not medical advice.
+                  Summarized from many consented experiences &mdash; what people
+                  report, not a statistic and not medical advice.
                 </div>
               </div>
             </div>
             <div className="sec">
-              <div className="sec-h">Photos within a journey &middot; with context</div>
+              <div className="sec-h">
+                Photos within a journey &middot; with context
+              </div>
               <div className="cm2-ba">
-                <div className="cm2-bacard" onClick={() => cmToast("Opening full Thermage journey")}>
+                <div
+                  className="cm2-bacard"
+                  onClick={() => cmToast("Opening full Thermage journey")}
+                >
                   <div className="cm2-ph">
-                    <div style={{ background: "linear-gradient(140deg,#d9cac4,#b9afa9)" }}>
+                    <div
+                      style={{
+                        background: "linear-gradient(140deg,#d9cac4,#b9afa9)",
+                      }}
+                    >
                       <span>Before</span>
                     </div>
-                    <div style={{ background: "linear-gradient(140deg,#d9c7c9,#cda8ad)" }}>
+                    <div
+                      style={{
+                        background: "linear-gradient(140deg,#d9c7c9,#cda8ad)",
+                      }}
+                    >
                       <span>Month 6</span>
                     </div>
                   </div>
                   <div className="cm2-bab">
                     <b>Thermage &middot; Age 42</b>
                     <span>Would do again</span>
-                    <span className="cm2-src">Verified member &middot; anonymized</span>
+                    <span className="cm2-src">
+                      Verified member &middot; anonymized
+                    </span>
                     <div className="cm2-view">View the full journey &rarr;</div>
                   </div>
                 </div>
-                <div className="cm2-bacard" onClick={() => cmToast("Opening full melasma journey")}>
+                <div
+                  className="cm2-bacard"
+                  onClick={() => cmToast("Opening full melasma journey")}
+                >
                   <div className="cm2-ph">
-                    <div style={{ background: "linear-gradient(140deg,#d9cac4,#c2b6ae)" }}>
+                    <div
+                      style={{
+                        background: "linear-gradient(140deg,#d9cac4,#c2b6ae)",
+                      }}
+                    >
                       <span>Before</span>
                     </div>
-                    <div style={{ background: "linear-gradient(140deg,#e0cfcf,#cdb1b3)" }}>
+                    <div
+                      style={{
+                        background: "linear-gradient(140deg,#e0cfcf,#cdb1b3)",
+                      }}
+                    >
                       <span>Month 12</span>
                     </div>
                   </div>
                   <div className="cm2-bab">
                     <b>Melasma &middot; Age 39</b>
                     <span>Mixed result</span>
-                    <span className="cm2-src">Founder interview &middot; consented</span>
+                    <span className="cm2-src">
+                      Founder interview &middot; consented
+                    </span>
                     <div className="cm2-view">View the full journey &rarr;</div>
                   </div>
                 </div>
-                <div className="cm2-bacard" onClick={() => cmToast("Opening hair-loss journey")}>
+                <div
+                  className="cm2-bacard"
+                  onClick={() => cmToast("Opening hair-loss journey")}
+                >
                   <div className="cm2-ph">
-                    <div style={{ background: "linear-gradient(140deg,#c9c3bb,#a69b92)" }}>
+                    <div
+                      style={{
+                        background: "linear-gradient(140deg,#c9c3bb,#a69b92)",
+                      }}
+                    >
                       <span>Week 1</span>
                     </div>
-                    <div style={{ background: "linear-gradient(140deg,#bcb2aa,#94867c)" }}>
+                    <div
+                      style={{
+                        background: "linear-gradient(140deg,#bcb2aa,#94867c)",
+                      }}
+                    >
                       <span>Month 9</span>
                     </div>
                   </div>
@@ -438,11 +543,15 @@ export default function PortalPage() {
               </div>
             </div>
             <div className="sec">
-              <div className="sec-h">Living journeys &middot; still updating</div>
+              <div className="sec-h">
+                Living journeys &middot; still updating
+              </div>
               <div className="card">
                 <div className="cm2-q">
                   <div className="cm2-qt">Thermage</div>
-                  <div className="cm2-qmeta">Month 9 &middot; last updated yesterday</div>
+                  <div className="cm2-qmeta">
+                    Month 9 &middot; last updated yesterday
+                  </div>
                 </div>
                 <div className="cm2-q">
                   <div className="cm2-qt">Started HRT</div>
@@ -454,8 +563,8 @@ export default function PortalPage() {
                 </div>
               </div>
               <div className="cm2-note">
-                A journey isn&rsquo;t shared once and forgotten. Journeys keep updating &mdash;
-                that&rsquo;s what makes them worth following.
+                A journey isn&rsquo;t shared once and forgotten. Journeys keep
+                updating &mdash; that&rsquo;s what makes them worth following.
               </div>
             </div>
             <div className="sec">
@@ -464,8 +573,9 @@ export default function PortalPage() {
                 <div className="cm2-q">
                   <div className="cm2-qt">Have a decision on your mind?</div>
                   <div className="cm2-qmeta">
-                    DrRuby answers with a Decision Brief first &mdash; your history, the evidence, and
-                    similar journeys. Browsing others&rsquo; experiences comes after that, not before.
+                    DrRuby answers with a Decision Brief first &mdash; your
+                    history, the evidence, and similar journeys. Browsing
+                    others&rsquo; experiences comes after that, not before.
                   </div>
                 </div>
                 <div style={{ marginTop: 14 }}>
@@ -477,29 +587,32 @@ export default function PortalPage() {
                   </button>
                 </div>
                 <div style={{ fontSize: 12, color: "#a89a95", marginTop: 10 }}>
-                  Your personal information is never shared. Contributing is optional and can be
-                  withdrawn anytime.
+                  Your personal information is never shared. Contributing is
+                  optional and can be withdrawn anytime.
                 </div>
               </div>
             </div>
             <div className="sec">
-              <div className="sec-h">Things I wish I knew &middot; regret stories</div>
+              <div className="sec-h">
+                Things I wish I knew &middot; regret stories
+              </div>
               <div className="card">
                 <div className="cm2-q">
                   <div className="cm2-qt">
-                    &ldquo;I regret doing it before asking what happens if it doesn&rsquo;t
-                    work.&rdquo;
+                    &ldquo;I regret doing it before asking what happens if it
+                    doesn&rsquo;t work.&rdquo;
                   </div>
                 </div>
                 <div className="cm2-q">
                   <div className="cm2-qt">
-                    &ldquo;I regret waiting so long &mdash; not for vanity, I just kept putting it
-                    off.&rdquo;
+                    &ldquo;I regret waiting so long &mdash; not for vanity, I
+                    just kept putting it off.&rdquo;
                   </div>
                 </div>
                 <div className="cm2-q">
                   <div className="cm2-qt">
-                    &ldquo;I regret choosing the clinic that pushed a package.&rdquo;
+                    &ldquo;I regret choosing the clinic that pushed a
+                    package.&rdquo;
                   </div>
                 </div>
               </div>
@@ -514,11 +627,14 @@ export default function PortalPage() {
                   <div className="cm2-qt">Don&rsquo;t judge by Week 1.</div>
                 </div>
                 <div className="cm2-q">
-                  <div className="cm2-qt">Ask what happens if it doesn&rsquo;t work.</div>
+                  <div className="cm2-qt">
+                    Ask what happens if it doesn&rsquo;t work.
+                  </div>
                 </div>
               </div>
               <div className="cm2-note">
-                Organized by DrRuby from real journeys &mdash; lessons, not advice.
+                Organized by DrRuby from real journeys &mdash; lessons, not
+                advice.
               </div>
             </div>
             <div className="sec">
@@ -526,29 +642,49 @@ export default function PortalPage() {
               <div className="card">
                 <div className="found">
                   <div>
-                    <div className="n"><span className="coming-soon">{t("dashboard.comingSoon")}</span></div>
+                    <div className="n">
+                      <span className="coming-soon">
+                        {t("dashboard.comingSoon")}
+                      </span>
+                    </div>
                     <div className="l">new journeys</div>
                   </div>
                   <div>
-                    <div className="n"><span className="coming-soon">{t("dashboard.comingSoon")}</span></div>
+                    <div className="n">
+                      <span className="coming-soon">
+                        {t("dashboard.comingSoon")}
+                      </span>
+                    </div>
                     <div className="l">long-term updates</div>
                   </div>
                   <div>
-                    <div className="n"><span className="coming-soon">{t("dashboard.comingSoon")}</span></div>
+                    <div className="n">
+                      <span className="coming-soon">
+                        {t("dashboard.comingSoon")}
+                      </span>
+                    </div>
                     <div className="l">most followed</div>
                   </div>
                   <div>
-                    <div className="n"><span className="coming-soon">{t("dashboard.comingSoon")}</span></div>
+                    <div className="n">
+                      <span className="coming-soon">
+                        {t("dashboard.comingSoon")}
+                      </span>
+                    </div>
                     <div className="l">top lesson</div>
                   </div>
                 </div>
               </div>
             </div>
             <div className="sec">
-              <div className="sec-h">Following &middot; journeys, not people</div>
+              <div className="sec-h">
+                Following &middot; journeys, not people
+              </div>
               <div className="card">
                 <div className="sub-row">
-                  <span className="coming-soon">{t("dashboard.comingSoon")}</span>
+                  <span className="coming-soon">
+                    {t("dashboard.comingSoon")}
+                  </span>
                 </div>
               </div>
             </div>
@@ -573,18 +709,22 @@ export default function PortalPage() {
           <div className={on("research")} id="v-research">
             <h1>Research</h1>
             <div className="lede">
-              Where women&rsquo;s health and healthspan science may be heading &mdash; early signals
-              from the research world, explained honestly. For learning, not medical advice.
+              Where women&rsquo;s health and healthspan science may be heading
+              &mdash; early signals from the research world, explained honestly.
+              For learning, not medical advice.
             </div>
             <div className="sec">
               <div className="priv-note">
-                <b>Emerging, not established.</b> These are directions researchers are exploring
-                &mdash; often promising, rarely settled. Today&rsquo;s signal isn&rsquo;t
-                tomorrow&rsquo;s guideline, and nothing here is a recommendation.
+                <b>Emerging, not established.</b> These are directions
+                researchers are exploring &mdash; often promising, rarely
+                settled. Today&rsquo;s signal isn&rsquo;t tomorrow&rsquo;s
+                guideline, and nothing here is a recommendation.
               </div>
             </div>
             <div className="sec">
-              <div className="sec-h">On the horizon &mdash; from the journals</div>
+              <div className="sec-h">
+                On the horizon &mdash; from the journals
+              </div>
               {[
                 {
                   h: "The gut microbiome and hormonal transitions",
@@ -604,11 +744,19 @@ export default function PortalPage() {
                   h: "The biology of cellular aging and skin",
                   tag: "Very early",
                   why: "a fast-moving field that may reshape how we think about skin over time.",
-                  unknown: "what, if anything, is safe and effective for people.",
+                  unknown:
+                    "what, if anything, is safe and effective for people.",
                 },
               ].map((c) => (
                 <div className="card matter" key={c.h}>
-                  <div style={{ display: "flex", justifyContent: "space-between", gap: 14, alignItems: "baseline" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      gap: 14,
+                      alignItems: "baseline",
+                    }}
+                  >
                     <h3>{c.h}</h3>
                     <span
                       style={{
@@ -626,13 +774,14 @@ export default function PortalPage() {
                     </span>
                   </div>
                   <p>
-                    <b>Why it may matter:</b> {c.why} <b>Still unknown:</b> {c.unknown}
+                    <b>Why it may matter:</b> {c.why} <b>Still unknown:</b>{" "}
+                    {c.unknown}
                   </p>
                 </div>
               ))}
               <div style={{ fontSize: 12, color: "#a89a95", marginTop: 6 }}>
-                Curated directions, not a paper feed &mdash; we summarize where the field is looking,
-                and what it still doesn&rsquo;t know.
+                Curated directions, not a paper feed &mdash; we summarize where
+                the field is looking, and what it still doesn&rsquo;t know.
               </div>
             </div>
             <ResearchView />
@@ -641,31 +790,47 @@ export default function PortalPage() {
               <div className="card matter">
                 <h3>Does a sleep headband help &mdash; or just add anxiety?</h3>
                 <p>
-                  An early question we&rsquo;re exploring with members who track sleep. Nothing
-                  concluded yet.
+                  An early question we&rsquo;re exploring with members who track
+                  sleep. Nothing concluded yet.
                 </p>
               </div>
               <div className="card matter">
                 <h3>How skin actually changes across a year</h3>
-                <p>Built from many individual timelines kept intact &mdash; not averages.</p>
+                <p>
+                  Built from many individual timelines kept intact &mdash; not
+                  averages.
+                </p>
               </div>
             </div>
             <div className="sec">
               <div className="sec-h">New products, independently evaluated</div>
               <div className="card">
                 <div className="sub-row">
-                  <span>Devices &amp; products we&rsquo;re independently evaluating</span>
+                  <span>
+                    Devices &amp; products we&rsquo;re independently evaluating
+                  </span>
                   <span className="arr">2 active</span>
                 </div>
-                <div style={{ fontSize: 13, color: "#7c746f", marginTop: 8, lineHeight: 1.5 }}>
-                  Independent, real-world evaluation &mdash; never an endorsement, never influenced by
-                  sponsorship.
+                <div
+                  style={{
+                    fontSize: 13,
+                    color: "#7c746f",
+                    marginTop: 8,
+                    lineHeight: 1.5,
+                  }}
+                >
+                  Independent, real-world evaluation &mdash; never an
+                  endorsement, never influenced by sponsorship.
                 </div>
               </div>
             </div>
             <div className="sec">
               <div className="card">
-                <div className="sub-row" onClick={() => go("privacy")} style={{ cursor: "pointer" }}>
+                <div
+                  className="sub-row"
+                  onClick={() => go("privacy")}
+                  style={{ cursor: "pointer" }}
+                >
                   <span>Your research participation</span>
                   <span className="arr">Manage in Consent Center &rsaquo;</span>
                 </div>
@@ -678,12 +843,17 @@ export default function PortalPage() {
             <h1>Profile &amp; Privacy</h1>
             <div className="pf-head">
               {meErr ? (
-                <ErrorState message={t("dashboard.profile.error")} onRetry={refetchMe} />
+                <ErrorState
+                  message={t("dashboard.profile.error")}
+                  onRetry={refetchMe}
+                />
               ) : (
                 <>
-                  <div className="pf-av">{me ? (getInitials(meName) || "—") : "—"}</div>
+                  <div className="pf-av">
+                    {me ? getInitials(meName) || "—" : "—"}
+                  </div>
                   <div>
-                    <div className="pf-name">{me ? (meName || "—") : "—"}</div>
+                    <div className="pf-name">{me ? meName || "—" : "—"}</div>
                     <div className="pf-meta">
                       {me
                         ? t("dashboard.profile.memberSince", {
@@ -697,11 +867,14 @@ export default function PortalPage() {
               )}
             </div>
             <div className="pf-status">
-              <span className="pf-pill"><span className="coming-soon">{t("dashboard.comingSoon")}</span></span>
+              <span className="pf-pill">
+                <span className="coming-soon">{t("dashboard.comingSoon")}</span>
+              </span>
             </div>
             <div className="lede">
-              <b>Your data. Your choice.</b> You control what DrRuby can access, where it&rsquo;s
-              processed, and what &mdash; if anything &mdash; is shared.
+              <b>Your data. Your choice.</b> You control what DrRuby can access,
+              where it&rsquo;s processed, and what &mdash; if anything &mdash;
+              is shared.
             </div>
             <PrivacyView />
             <div className="sec">
@@ -714,7 +887,11 @@ export default function PortalPage() {
                   </div>
                   <span className="arr">&rsaquo;</span>
                 </div>
-                <Link href="/pricing" className="sub-row" style={{ cursor: "pointer", color: "inherit" }}>
+                <Link
+                  href="/pricing"
+                  className="sub-row"
+                  style={{ cursor: "pointer", color: "inherit" }}
+                >
                   <span>View plans</span>
                   <span className="arr">&rsaquo;</span>
                 </Link>
@@ -724,11 +901,19 @@ export default function PortalPage() {
             <div className="sec">
               <div className="sec-h">Account</div>
               <div className="card">
-                <Link href="/portal/profile" className="sub-row" style={{ cursor: "pointer", color: "inherit" }}>
+                <Link
+                  href="/portal/profile"
+                  className="sub-row"
+                  style={{ cursor: "pointer", color: "inherit" }}
+                >
                   <span>Your profile</span>
                   <span className="arr">&rsaquo;</span>
                 </Link>
-                <Link href="/portal/settings" className="sub-row" style={{ cursor: "pointer", color: "inherit" }}>
+                <Link
+                  href="/portal/settings"
+                  className="sub-row"
+                  style={{ cursor: "pointer", color: "inherit" }}
+                >
                   <span>Account security</span>
                   <span className="arr">&rsaquo;</span>
                 </Link>
@@ -748,15 +933,27 @@ export default function PortalPage() {
               <div className="card">
                 <div className="sub-row">
                   <span>Connected data sources</span>
-                  <span className="arr"><span className="coming-soon">{t("dashboard.comingSoon")}</span></span>
+                  <span className="arr">
+                    <span className="coming-soon">
+                      {t("dashboard.comingSoon")}
+                    </span>
+                  </span>
                 </div>
                 <div className="sub-row">
                   <span>Permissions</span>
-                  <span className="arr"><span className="coming-soon">{t("dashboard.comingSoon")}</span></span>
+                  <span className="arr">
+                    <span className="coming-soon">
+                      {t("dashboard.comingSoon")}
+                    </span>
+                  </span>
                 </div>
                 <div className="sub-row">
                   <span>Where data is processed</span>
-                  <span className="arr"><span className="coming-soon">{t("dashboard.comingSoon")}</span></span>
+                  <span className="arr">
+                    <span className="coming-soon">
+                      {t("dashboard.comingSoon")}
+                    </span>
+                  </span>
                 </div>
               </div>
             </div>
@@ -764,11 +961,19 @@ export default function PortalPage() {
             <div className="sec">
               <div className="sec-h">Help</div>
               <div className="card">
-                <a href="mailto:support@drruby.ai" className="sub-row" style={{ cursor: "pointer", color: "inherit" }}>
+                <a
+                  href="mailto:support@drruby.ai"
+                  className="sub-row"
+                  style={{ cursor: "pointer", color: "inherit" }}
+                >
                   <span>Help &amp; support</span>
                   <span className="arr">&rsaquo;</span>
                 </a>
-                <a href="mailto:feedback@drruby.ai" className="sub-row" style={{ cursor: "pointer", color: "inherit" }}>
+                <a
+                  href="mailto:feedback@drruby.ai"
+                  className="sub-row"
+                  style={{ cursor: "pointer", color: "inherit" }}
+                >
                   <span>Report a problem</span>
                   <span className="arr">&rsaquo;</span>
                 </a>
@@ -777,12 +982,12 @@ export default function PortalPage() {
             {/* TODO: 静态页 /legal/tos 等 */}
           </div>
         </div>
+      </div>
 
       {/* ── Toast ── */}
       <div className="cm2-toast" style={{ display: toast ? "block" : "none" }}>
         {toast}
       </div>
-      </div>
-    </PortalShell>
+    </div>
   );
 }
