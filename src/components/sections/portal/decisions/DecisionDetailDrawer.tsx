@@ -19,7 +19,12 @@ import {
 } from "./drawerStyles";
 import type { DecisionDetailDto, DecisionStatus } from "./dto";
 import type { DecisionDetailView } from "./mappers";
-import { DECISION_STATUSES, mapDecisionDetail, statusToLabel } from "./mappers";
+import {
+  DECISION_STATUSES,
+  goalToLabel,
+  mapDecisionDetail,
+  statusToLabel,
+} from "./mappers";
 
 interface DecisionDetailDrawerProps {
   id: string;
@@ -163,6 +168,22 @@ function DetailContent({
       >
         {detail.statusLabel}
       </span>
+
+      {/* 所属 Goal（Spine 起点；旧数据可空则隐藏） */}
+      {detail.goal && (
+        <div style={{ marginBottom: 16 }}>
+          <div style={LABEL}>For your goal of</div>
+          <div
+            style={{
+              fontSize: 14,
+              fontFamily: "var(--p-serif)",
+              color: "var(--p-ink)",
+            }}
+          >
+            {goalToLabel(detail.goal)}
+          </div>
+        </div>
+      )}
 
       {/* status 切换器 */}
       <div style={{ marginBottom: 16 }}>

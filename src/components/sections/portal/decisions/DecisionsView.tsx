@@ -5,7 +5,12 @@ import { EmptyState, ErrorState, Skeleton } from "@/components/api";
 import { useApi } from "@/hooks/useApi";
 import { DecisionDetailDrawer } from "./DecisionDetailDrawer";
 import type { DecisionDto } from "./dto";
-import { DECISION_CHIPS, groupDecisions, statusToLabel } from "./mappers";
+import {
+  DECISION_CHIPS,
+  goalToLabel,
+  groupDecisions,
+  statusToLabel,
+} from "./mappers";
 import { NewDecisionDrawer } from "./NewDecisionDrawer";
 
 /**
@@ -170,6 +175,9 @@ function DecisionCard({
           <h4>{decision.question}</h4>
           <span className="dec-badge">{statusToLabel(decision.status)}</span>
         </div>
+        {decision.goal && (
+          <div className="st">For: {goalToLabel(decision.goal)}</div>
+        )}
         <div className="st">Updated {formatRelative(decision.updated)}</div>
       </div>
     </div>

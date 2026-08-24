@@ -28,6 +28,7 @@ describe("GET /api/me/export", () => {
 
     const myDecision = await decisionRepo.create(me.id, {
       question: "mine",
+      goal: "firmness",
       status: "considering",
     });
     await entryRepo.append({
@@ -51,6 +52,7 @@ describe("GET /api/me/export", () => {
     // 他人数据不应出现在我的导出中
     await decisionRepo.create(other.id, {
       question: "theirs",
+      goal: "firmness",
       status: "considering",
     });
 

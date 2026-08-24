@@ -35,11 +35,13 @@ describe("decision.repo", () => {
     const userId = await seedUser();
     const d = await create(userId, {
       question: "Try Thermage?",
+      goal: "firmness",
       status: "considering",
       type: "thermage",
       brief: BRIEF,
     });
     expect(d.brief).toEqual(BRIEF);
+    expect(d.goal).toBe("firmness");
 
     const rows = await listByUser(userId);
     expect(rows).toHaveLength(1);
@@ -49,6 +51,7 @@ describe("decision.repo", () => {
     const userId = await seedUser();
     const d = await create(userId, {
       question: "Try HRT?",
+      goal: "sleep-quality",
       status: "considering",
     });
     const updated = await update(d.id, {
@@ -65,6 +68,7 @@ describe("decision.repo", () => {
     const userId = await seedUser();
     const d = await create(userId, {
       question: "Botox?",
+      goal: "even-tone",
       status: "in-progress",
     });
     await append({
@@ -91,6 +95,7 @@ describe("decision.repo", () => {
     await expect(
       create(userId, {
         question: "x",
+        goal: "firmness",
         // @ts-expect-error 测试无效值
         status: "done",
       }),

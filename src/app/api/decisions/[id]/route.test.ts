@@ -23,6 +23,7 @@ describe("POST /api/decisions/[id]", () => {
     const intruder = await makeUser("dec-intruder@example.com");
     const decision = await decisionRepo.create(owner.id, {
       question: "q",
+      goal: "firmness",
       status: "considering",
     });
 
@@ -44,6 +45,7 @@ describe("POST /api/decisions/[id]", () => {
     const owner = await makeUser("dec-patch@example.com");
     const decision = await decisionRepo.create(owner.id, {
       question: "q",
+      goal: "firmness",
       status: "considering",
     });
 

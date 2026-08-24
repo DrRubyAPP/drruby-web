@@ -18,6 +18,8 @@ import {
   chipToQuestionTemplate,
   chipToType,
   DECISION_STATUSES,
+  GOAL_OPTIONS,
+  goalToLabel,
   statusToLabel,
 } from "./mappers";
 
@@ -29,6 +31,7 @@ interface NewDecisionDrawerProps {
 
 /**
  * 新建决策抽屉：由 DecisionsView 的 "Start a new decision" chips 触发。
+ * - 必选 Goal（Spine 起点：GOAL → CONSIDER → DECIDE → …）→ 预设 chips 或自定义输入
  * - 预填 question 模板（`chipToQuestionTemplate`）+ type（`chipToType`）+ status=considering
  * - POST /api/decisions → onSuccess 调 onCreated(out.id)（关抽屉 + 触发详情打开 + refetch 列表）
  * - 错误态：抽屉内 inline ErrorState，输入保留可重试
@@ -39,9 +42,15 @@ export function NewDecisionDrawer({
   onClose,
   onCreated,
 }: NewDecisionDrawerProps) {
+  const [goal, setGoal] = useState<string | null>(null);
+  const [customGoal, setCustomGoal] = useState("");
   const [question, setQuestion] = useState(chipToQuestionTemplate(chip));
   const [status, setStatus] = useState<DecisionStatus>("considering");
   const type: DecisionType = chipToType(chip);
+
+  /** 已选中的 goal：预设 chip 优先，否则取自定义输入 */
+  const effectiveGoal =
+    goal ?? (customGoal.trim().length > 0 ? customGoal.trim() : null);
 
   const create = useMutation(
     (input: CreateDecisionInput) =>
@@ -60,8 +69,13 @@ export function NewDecisionDrawer({
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (question.trim().length === 0) return;
-    create.mutate({ question: question.trim(), status, type });
+    if (question.trim().length === 0 || !effectiveGoal) return;
+    create.mutate({
+      question: question.trim(),
+      goal: effectiveGoal,
+      status,
+      type,
+    });
   }
 
   return (
@@ -95,6 +109,40 @@ export function NewDecisionDrawer({
         </h3>
 
         <form onSubmit={handleSubmit}>
+          <label style={LABEL}>What is this decision for?</label>
+          <div
+            style={{
+              display: "flex",
+              gap: 8,
+              flexWrap: "wrap",
+              marginBottom: 10,
+            }}
+          >
+            {GOAL_OPTIONS.map((g) => (
+              <button
+                key={g}
+                type="button"
+                className="ask-chip"
+                onClick={() => {
+                  setGoal(g);
+                  setCustomGoal("");
+                }}
+                style={goal === g ? ACTIVE_CHIP : undefined}
+              >
+                {goalToLabel(g)}
+              </button>
+            ))}
+          </div>
+          <input
+            value={customGoal}
+            onChange={(e) => {
+              setCustomGoal(e.target.value);
+              setGoal(null);
+            }}
+            placeholder="Or type your own goal"
+            style={{ ...TEXTAREA, height: 38, marginBottom: 16 }}
+          />
+
           <label style={LABEL}>Question</label>
           <textarea
             value={question}
@@ -151,7 +199,9 @@ export function NewDecisionDrawer({
 
           <button
             type="submit"
-            disabled={create.loading || question.trim().length === 0}
+            disabled={
+              create.loading || question.trim().length === 0 || !effectiveGoal
+            }
             style={SUBMIT_BTN}
           >
             {create.loading ? "Saving…" : "Save decision"}

@@ -25,6 +25,7 @@ export const DecisionEntryDTO = z.object({
 export const DecisionDTO = z.object({
   id: z.string(),
   question: z.string(),
+  goal: z.string().nullable(),
   status: decisionStatusSchema,
   updated: z.string(),
   brief: DecisionBriefDTO.optional(),
@@ -48,6 +49,7 @@ export function toDecisionDTO(
   return {
     id: row.id,
     question: row.question,
+    goal: row.goal,
     status: decisionStatusSchema.parse(row.status),
     updated: row.updatedAt.toISOString(),
     brief: opts.withBrief ? toBrief(row.brief) : undefined,

@@ -42,6 +42,8 @@ export interface DecisionEntryDto {
 export interface DecisionDto {
   id: string;
   question: string;
+  /** 该决策服务的目标（对齐 concern_goals 词汇；旧数据可空） */
+  goal: string | null;
   status: DecisionStatus;
   updated: string; // ISO
   brief?: DecisionBriefDto; // 列表省 brief；详情含 brief
@@ -55,6 +57,8 @@ export interface DecisionDetailDto extends DecisionDto {
 /** POST /api/decisions 入参 */
 export interface CreateDecisionInput {
   question: string;
+  /** 该决策服务的目标（必选，对齐 concern_goals 词汇） */
+  goal: string;
   status: DecisionStatus;
   type?: DecisionType | null;
 }

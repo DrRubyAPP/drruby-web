@@ -274,10 +274,13 @@ model Signal {
 /// 决策（My Decisions）— App getDecisions/getDecision
 /// brief（三源快照）存 JSON：{ yourHistory[], similarJourneys{summary,note},
 ///   evidence{known[],uncertain[]}, questionsForClinician[] }。P1 快照，P2 由引擎回填。
+/// goal：该决策服务的目标，取值对齐 user_baseline.concern_goals 词汇（自由文本，
+///   无 Goal 实体模型）；旧数据可空，新建必填（Spine: GOAL → CONSIDER → DECIDE → …）。
 model Decision {
   id        String    @id @default(cuid(2))
   userId    String    @map("user_id")
   question  String
+  goal      String?
   type      String?   // thermage|ultherapy|botox|laser|filler|hrt|skincare|clinic|not_sure
   status    String    // considering|in-progress|decided|paused
   brief     Json?

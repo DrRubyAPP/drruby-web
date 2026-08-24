@@ -13,6 +13,7 @@ async function seed(): Promise<{ userId: string; decisionId: string }> {
   });
   const d = await createDecision(u.id, {
     question: "Try filler?",
+    goal: "even-tone",
     status: "considering",
   });
   return { userId: u.id, decisionId: d.id };

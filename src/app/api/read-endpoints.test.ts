@@ -43,6 +43,7 @@ describe("SP2 read endpoints (spot checks)", () => {
     });
     const decision = await decisionRepo.create(owner.id, {
       question: "Should I restart retinol?",
+      goal: "even-tone",
       status: "considering",
     });
 

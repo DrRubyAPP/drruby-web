@@ -61,6 +61,7 @@ export default function MomentFeelContent() {
         question={moment3ToQuestion()}
         entryText={buildEntryText(3, moment3ChipsSummary())}
         momentN={3}
+        goal="mood"
       />
 
       <div className="flex items-center gap-4 flex-wrap">

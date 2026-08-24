@@ -6,6 +6,8 @@ import {
   chipToType,
   DECISION_CHIPS,
   DECISION_STATUSES,
+  GOAL_OPTIONS,
+  goalToLabel,
   groupDecisions,
   isActive,
   mapBrief,
@@ -42,6 +44,7 @@ describe("groupDecisions", () => {
   ): DecisionDto => ({
     id,
     question: `q-${id}`,
+    goal: null,
     status,
     updated: "2026-08-10T00:00:00.000Z",
   });
@@ -164,6 +167,7 @@ describe("mapDecisionDetail", () => {
   const detail: DecisionDetailDto = {
     id: "d1",
     question: "Should I do Thermage?",
+    goal: "firmness",
     status: "considering",
     updated: "2026-08-10T00:00:00.000Z",
     brief: {
@@ -192,6 +196,7 @@ describe("mapDecisionDetail", () => {
     const view = mapDecisionDetail(detail);
     expect(view.id).toBe("d1");
     expect(view.question).toBe("Should I do Thermage?");
+    expect(view.goal).toBe("firmness");
     expect(view.status).toBe("considering");
     expect(view.statusLabel).toBe("Considering");
     expect(view.entries.map((e) => e.id)).toEqual(["e1", "e2"]);
@@ -201,6 +206,11 @@ describe("mapDecisionDetail", () => {
   it("null brief → brief=null (整块隐藏)", () => {
     const view = mapDecisionDetail({ ...detail, brief: undefined });
     expect(view.brief).toBeNull();
+  });
+
+  it("null goal → goal=null (旧数据)", () => {
+    const view = mapDecisionDetail({ ...detail, goal: null });
+    expect(view.goal).toBeNull();
   });
 });
 
@@ -232,6 +242,31 @@ describe("chip mappers", () => {
     expect(chipToQuestionTemplate("A skincare product")).toBe(
       "Should I do A skincare product?",
     );
+  });
+});
+
+describe("goal mappers", () => {
+  it("GOAL_OPTIONS lists preset goal keys in stable order", () => {
+    expect(GOAL_OPTIONS).toEqual([
+      "firmness",
+      "even-tone",
+      "acne",
+      "sleep-quality",
+      "energy",
+      "mood",
+      "hot-flashes",
+    ]);
+  });
+
+  it("goalToLabel maps known goal keys to labels", () => {
+    expect(goalToLabel("firmness")).toBe("Firmer skin");
+    expect(goalToLabel("sleep-quality")).toBe("Better sleep");
+    expect(goalToLabel("mood")).toBe("Balanced mood");
+  });
+
+  it("goalToLabel humanizes unknown/custom goals", () => {
+    expect(goalToLabel("skin")).toBe("Skin");
+    expect(goalToLabel("supplements")).toBe("Supplements");
   });
 });
 

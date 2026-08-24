@@ -150,6 +150,7 @@ export default function Moment1Flow() {
         question={moment1ToQuestion(selectedLabels)}
         entryText={buildEntryText(1, moment1ChipsSummary(selectedLabels))}
         momentN={1}
+        goal="skin"
       />
     </>
   );

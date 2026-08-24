@@ -23,6 +23,7 @@ describe("POST /api/decisions/[id]/entries（append-only）", () => {
     const intruder = await makeUser("entry-intruder@example.com");
     const decision = await decisionRepo.create(owner.id, {
       question: "q",
+      goal: "sleep-quality",
       status: "considering",
     });
 
@@ -41,6 +42,7 @@ describe("POST /api/decisions/[id]/entries（append-only）", () => {
     const owner = await makeUser("entry-append@example.com");
     const decision = await decisionRepo.create(owner.id, {
       question: "q",
+      goal: "sleep-quality",
       status: "considering",
     });
 

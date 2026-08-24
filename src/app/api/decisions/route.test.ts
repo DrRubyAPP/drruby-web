@@ -29,7 +29,19 @@ describe("POST /api/decisions", () => {
     const { POST } = await import("./route");
     const user = await makeUser("dec-create-bad@example.com");
     asUser(user.id);
-    const res = await POST(jsonRequest({ question: "q", status: "bogus" }));
+    const res = await POST(
+      jsonRequest({ question: "q", goal: "firmness", status: "bogus" }),
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it("缺 goal → 400（每个决策必须绑定 Goal）", async () => {
+    const { POST } = await import("./route");
+    const user = await makeUser("dec-create-nogoal@example.com");
+    asUser(user.id);
+    const res = await POST(
+      jsonRequest({ question: "q", status: "considering" }),
+    );
     expect(res.status).toBe(400);
   });
 
@@ -39,11 +51,16 @@ describe("POST /api/decisions", () => {
     asUser(user.id);
 
     const created = await POST(
-      jsonRequest({ question: "Restart retinol?", status: "considering" }),
+      jsonRequest({
+        question: "Restart retinol?",
+        goal: "even-tone",
+        status: "considering",
+      }),
     );
     expect(created.status).toBe(201);
     const body = await created.json();
     expect(body.question).toBe("Restart retinol?");
+    expect(body.goal).toBe("even-tone");
     expect(body.status).toBe("considering");
 
     const list = await GET();

@@ -216,6 +216,7 @@ export default function Moment2Flow() {
             moment2ChipsSummary(supplementLabel, durationLabel),
           )}
           momentN={2}
+          goal="supplements"
         />
       )}
     </div>

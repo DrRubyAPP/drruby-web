@@ -164,6 +164,7 @@ async function main() {
     data: {
       userId,
       question: "Should I do Thermage for jawline firmness this year?",
+      goal: "firmness",
       type: "thermage",
       status: "in-progress",
       brief: {
@@ -196,6 +197,7 @@ async function main() {
     data: {
       userId,
       question: "Is HRT right for my sleep and skin changes?",
+      goal: "sleep-quality",
       type: "hrt",
       status: "considering",
       brief: {
@@ -216,6 +218,7 @@ async function main() {
     data: {
       userId,
       question: "Switch to prescription tretinoin 0.025%?",
+      goal: "even-tone",
       type: "skincare",
       status: "decided",
       decidedAt: daysAgo(20),

@@ -40,6 +40,7 @@ describe("timelineEvent.repo", () => {
     const userId = await seedUser();
     const decision = await createDecision(userId, {
       question: "Try HRT?",
+      goal: "sleep-quality",
       status: "considering",
     });
     await create(userId, {

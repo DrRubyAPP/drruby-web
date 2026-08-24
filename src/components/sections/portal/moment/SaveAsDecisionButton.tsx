@@ -20,6 +20,8 @@ interface SaveAsDecisionButtonProps {
   question: string;
   entryText: string;
   momentN: 1 | 2 | 3;
+  /** 该决策服务的目标（对齐 concern_goals 词汇，必填） */
+  goal: string;
 }
 
 /**
@@ -38,6 +40,7 @@ export function SaveAsDecisionButton({
   question,
   entryText,
   momentN,
+  goal,
 }: SaveAsDecisionButtonProps) {
   const router = useRouter();
   const t = useTranslations("portal.momentSaveCta");
@@ -53,6 +56,7 @@ export function SaveAsDecisionButton({
     try {
       const created = await apiClient.post<{ id: string }>("/api/decisions", {
         question,
+        goal,
         status: "considering",
         type: null,
       } satisfies CreateDecisionInput);

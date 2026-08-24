@@ -15,6 +15,10 @@ export const DecisionItemResponse = DecisionDTO;
 /** 新建决策入参 */
 export const CreateDecisionBody = z.object({
   question: z.string().min(1).describe("决策问题"),
+  goal: z
+    .string()
+    .min(1)
+    .describe("该决策服务的目标（对齐 concern_goals 词汇）"),
   status: decisionStatusSchema,
   type: decisionTypeSchema.optional().describe("预设决策类型（可空）"),
 });
@@ -48,6 +52,7 @@ export const POST = handle(async (req: Request) => {
   const body = CreateDecisionBody.parse(await req.json());
   const row = await decisionRepo.create(user.id, {
     question: body.question,
+    goal: body.goal,
     status: body.status,
     type: body.type ?? null,
   });

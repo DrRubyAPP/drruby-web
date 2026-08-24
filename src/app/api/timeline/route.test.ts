@@ -38,6 +38,7 @@ describe("POST /api/timeline", () => {
     const other = await makeUser("tl-other@example.com");
     const decision = await decisionRepo.create(other.id, {
       question: "q",
+      goal: "sleep-quality",
       status: "considering",
     });
     asUser(owner.id);

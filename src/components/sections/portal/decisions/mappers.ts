@@ -98,6 +98,7 @@ export function sortEntries(entries: DecisionEntryDto[]): DecisionEntryDto[] {
 export interface DecisionDetailView {
   id: string;
   question: string;
+  goal: string | null;
   status: DecisionStatus;
   statusLabel: string;
   updated: string;
@@ -111,6 +112,7 @@ export function mapDecisionDetail(
   return {
     id: detail.id,
     question: detail.question,
+    goal: detail.goal,
     status: detail.status,
     statusLabel: statusToLabel(detail.status),
     updated: detail.updated,
@@ -143,6 +145,29 @@ export function chipToType(chip: string): DecisionType {
 /** chip label → 预填 question 模板："Should I do <chip label>?" */
 export function chipToQuestionTemplate(chip: string): string {
   return `Should I do ${chip}?`;
+}
+
+// ===== Goal（Spine 起点：每个 Decision 绑定一个 Goal） =====
+
+/** goal → 展示 label（词汇对齐 user_baseline.concern_goals） */
+const GOAL_TO_LABEL: Record<string, string> = {
+  firmness: "Firmer skin",
+  "even-tone": "Even skin tone",
+  acne: "Clearer skin",
+  "sleep-quality": "Better sleep",
+  energy: "More energy",
+  mood: "Balanced mood",
+  "hot-flashes": "Fewer hot flashes",
+};
+
+/** 新建决策时可选的预设 goal chips */
+export const GOAL_OPTIONS = Object.keys(GOAL_TO_LABEL);
+
+/** goal key → label；自定义 goal 原样返回（首字母大写） */
+export function goalToLabel(goal: string): string {
+  const known = GOAL_TO_LABEL[goal];
+  if (known) return known;
+  return goal.charAt(0).toUpperCase() + goal.slice(1);
 }
 
 // ===== moment 文本构造（供 sub-plan-3 SaveAsDecisionButton 使用） =====
