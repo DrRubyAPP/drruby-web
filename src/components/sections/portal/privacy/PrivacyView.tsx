@@ -67,8 +67,8 @@ function ConsentSection() {
         ))}
       </div>
       <div style={{ fontSize: 12, color: "#a89a95", marginTop: 10 }}>
-        Three independent choices. Using DrRuby never implies community
-        contribution or research participation.
+        Three independent choices. Using DrRuby never implies sharing your experiences or research
+        participation.
       </div>
     </div>
   );

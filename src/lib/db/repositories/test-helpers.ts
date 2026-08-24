@@ -29,11 +29,9 @@ const TABLE_ORDER_FOR_CLEANUP = [
   "governanceDoc",
   "collaboratorProfile",
   "clinic",
-  // P2 社区 / Library / 通知
+  // P2 Library / 通知
   "journeyUpdate",
   "journey",
-  "communityReply",
-  "communityPost",
   "notification",
   "followUpTask",
   // P1 消费域

@@ -64,7 +64,7 @@ describe.skipIf(!hasKey)("POST /api/ask（真实上游 · live）", () => {
     expect(content.trim().length).toBeGreaterThan(0);
 
     // 运行时肉眼核对模型实际回复。
-    console.log("\n[Ask DrRuby · live reply]\n", content, "\n");
+    console.log("\n[Ask DrRuby · live response]\n", content, "\n");
   }, 30_000); // 客户端默认 20s 超时 + 网络余量
 
   it("护栏生效：疑似紧急症状 → 回复引导就医（宽松语义断言）", async () => {
@@ -89,6 +89,6 @@ describe.skipIf(!hasKey)("POST /api/ask（真实上游 · live）", () => {
     expect(content.toLowerCase()).toMatch(
       /doctor|clinician|emergency|911|医生|急诊|就医/,
     );
-    console.log("\n[Ask DrRuby · urgent-guardrail reply]\n", content, "\n");
+    console.log("\n[Ask DrRuby · urgent-guardrail response]\n", content, "\n");
   }, 30_000);
 });

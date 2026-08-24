@@ -66,8 +66,6 @@ model UserAccount {
 
   // P2（sub-plan-2 §4）
   journeys            Journey[]        @relation("JourneyAuthor")
-  communityPosts      CommunityPost[]  @relation("CommunityPostAuthor")
-  communityReplies    CommunityReply[] @relation("CommunityReplyAuthor")
   notifications       Notification[]
   followUpTasks       FollowUpTask[]
 
@@ -586,40 +584,6 @@ model JourneyUpdate {
 
   @@index([journeyId, version], map: "journey_update_journey_version_idx")
   @@map("journey_update")
-}
-
-/// 社区帖（可选 Q&A）
-model CommunityPost {
-  id           String   @id @default(cuid(2))
-  authorUserId String?  @map("author_user_id")
-  title        String
-  body         String
-  isExpert     Boolean  @default(false) @map("is_expert")
-  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz
-
-  author       UserAccount? @relation("CommunityPostAuthor", fields: [authorUserId], references: [id], onDelete: SetNull)
-  replies      CommunityReply[]
-
-  @@index([authorUserId], map: "community_post_author_idx")
-  @@map("community_post")
-}
-
-/// 社区回复
-model CommunityReply {
-  id           String   @id @default(cuid(2))
-  postId       String   @map("post_id")
-  authorUserId String?  @map("author_user_id")
-  body         String
-  isExpert     Boolean  @default(false) @map("is_expert")
-  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz
-
-  post         CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  author       UserAccount?  @relation("CommunityReplyAuthor", fields: [authorUserId], references: [id], onDelete: SetNull)
-
-  @@index([postId], map: "community_reply_post_id_idx")
-  @@map("community_reply")
 }
 
 /// 通知 — backend_v5 §3 Notification

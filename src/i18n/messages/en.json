@@ -630,21 +630,9 @@
         "today": "Home",
         "health": "My Body",
         "decisions": "My Decisions",
-        "community": "Library",
+        "library": "Library",
         "research": "Research",
         "privacy": "Profile"
-      },
-      "modal": {
-        "eyebrow": "Ask a question",
-        "title": "What are you trying to do?",
-        "subtitle": "Choosing a starting point makes your question — and the answers — more useful.",
-        "choices": {
-          "decision": "Make a decision",
-          "understand": "Understand something",
-          "others": "Ask for others' experience",
-          "share": "Share my experience",
-          "results": "Show my results"
-        }
       }
     },
     "common": {
@@ -749,7 +737,7 @@
       "pageTitle": "Personal Coach",
       "pageSub": "AI Tools · Powered by your data",
       "title": "Ask DrRuby. <em>It already knows you.</em>",
-      "sub": "This isn't a generic chatbot. Every reply is grounded in your own longitudinal data — scans, wearables, intervention log — translated to plain language by the Insight Engine. Chat is also how you log: say \"I started magnesium\" and it's tracked.",
+      "sub": "This isn't a generic chatbot. Every answer is grounded in your own longitudinal data — scans, wearables, intervention log — translated to plain language by the Insight Engine. Chat is also how you log: say \"I started magnesium\" and it's tracked.",
       "headerTitle": "DrRuby AI",
       "headerSub": "Powered by your data · Not a chatbot",
       "live": "● Live",

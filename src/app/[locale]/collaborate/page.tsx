@@ -379,7 +379,7 @@ function CollaborativePublic({ onSignIn }: { onSignIn: () => void }) {
                   </button>
                 </form>
                 <div className="cnote">
-                  For collaborators and prospective partners. We reply personally &mdash; no
+                  For collaborators and prospective partners. We respond personally &mdash; no
                   marketing list.
                 </div>
               </>

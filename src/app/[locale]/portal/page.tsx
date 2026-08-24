@@ -51,7 +51,7 @@ type View =
   | "today"
   | "health"
   | "decisions"
-  | "community"
+  | "library"
   | "research"
   | "privacy";
 
@@ -86,8 +86,8 @@ const NAV: { id: View; titleKey: string; icon: React.ReactNode }[] = [
     ),
   },
   {
-    id: "community",
-    titleKey: "dashboard.tabs.community",
+    id: "library",
+    titleKey: "dashboard.tabs.library",
     icon: (
       <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
         <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
@@ -123,7 +123,6 @@ export default function PortalPage() {
   const t = useTranslations("portal");
   const router = useRouter();
   const [view, setView] = useState<View>("today");
-  const [modalOpen, setModalOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   // 当前用户 profile（含 memberSince/subscriptionTier，session 不提供）
@@ -171,7 +170,6 @@ export default function PortalPage() {
   };
 
   const cmToast = (msg: string) => {
-    setModalOpen(false);
     setToast(msg);
     window.setTimeout(() => setToast(null), 2200);
   };
@@ -295,8 +293,8 @@ export default function PortalPage() {
             <DecisionsView />
           </div>
 
-          {/* ===== LIBRARY (community) ===== */}
-          <div className={on("community")} id="v-community">
+          {/* ===== LIBRARY (anonymous structured experiences) ===== */}
+          <div className={on("library")} id="v-library">
             <h1>Library</h1>
             <div className="lede">
               A learning library, not a feed. Real women&rsquo;s decisions &mdash; structured,
@@ -363,7 +361,7 @@ export default function PortalPage() {
                   </div>
                   <div className="cm2-stat">
                     <span className="coming-soon">{t("dashboard.comingSoon")}</span>
-                    <span>discussions</span>
+                    <span>insights</span>
                   </div>
                   <div className="cm2-stat">
                     <span className="coming-soon">{t("dashboard.comingSoon")}</span>
@@ -456,8 +454,8 @@ export default function PortalPage() {
                 </div>
               </div>
               <div className="cm2-note">
-                Others don&rsquo;t post once and disappear. Journeys keep updating &mdash; that&rsquo;s
-                what makes them worth following.
+                A journey isn&rsquo;t shared once and forgotten. Journeys keep updating &mdash;
+                that&rsquo;s what makes them worth following.
               </div>
             </div>
             <div className="sec">
@@ -467,7 +465,7 @@ export default function PortalPage() {
                   <div className="cm2-qt">Have a decision on your mind?</div>
                   <div className="cm2-qmeta">
                     DrRuby answers with a Decision Brief first &mdash; your history, the evidence, and
-                    similar journeys. Asking the community is the last step, not the first.
+                    similar journeys. Browsing others&rsquo; experiences comes after that, not before.
                   </div>
                 </div>
                 <div style={{ marginTop: 14 }}>
@@ -481,27 +479,6 @@ export default function PortalPage() {
                 <div style={{ fontSize: 12, color: "#a89a95", marginTop: 10 }}>
                   Your personal information is never shared. Contributing is optional and can be
                   withdrawn anytime.
-                </div>
-              </div>
-            </div>
-            <div className="sec">
-              <div className="sec-h">Ask others &middot; optional forum module (gated)</div>
-              <div className="card">
-                <div className="cm2-q" onClick={() => setModalOpen(true)}>
-                  <div className="cm2-qt">Should I start HRT?</div>
-                  <div className="cm2-qmeta">48 replies &middot; 12 similar journeys &middot; 2 expert comments</div>
-                </div>
-                <div className="cm2-q" onClick={() => setModalOpen(true)}>
-                  <div className="cm2-qt">Anyone regret Thermage?</div>
-                  <div className="cm2-qmeta">61 replies &middot; 18 similar journeys</div>
-                </div>
-                <div className="cm2-q" onClick={() => setModalOpen(true)}>
-                  <div className="cm2-qt">How did you choose your clinic?</div>
-                  <div className="cm2-qmeta">33 replies &middot; 9 similar journeys</div>
-                </div>
-                <div className="cm2-q" onClick={() => setModalOpen(true)}>
-                  <div className="cm2-qt">How long until you saw results?</div>
-                  <div className="cm2-qmeta">54 replies &middot; 21 similar journeys</div>
                 </div>
               </div>
             </div>
@@ -558,7 +535,7 @@ export default function PortalPage() {
                   </div>
                   <div>
                     <div className="n"><span className="coming-soon">{t("dashboard.comingSoon")}</span></div>
-                    <div className="l">most discussed</div>
+                    <div className="l">most followed</div>
                   </div>
                   <div>
                     <div className="n"><span className="coming-soon">{t("dashboard.comingSoon")}</span></div>
@@ -800,48 +777,6 @@ export default function PortalPage() {
             {/* TODO: 静态页 /legal/tos 等 */}
           </div>
         </div>
-
-      {/* ── Ask modal ── */}
-      <div
-        className={`cm2-modal${modalOpen ? " open" : ""}`}
-        onClick={(e) => {
-          if ((e.target as HTMLElement).classList.contains("cm2-modal")) setModalOpen(false);
-        }}
-      >
-        <div className="cm2-mbox">
-          <div style={{ fontSize: 11, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--p-red)", fontWeight: 700 }}>
-            {t("dashboard.modal.eyebrow")}
-          </div>
-          <div style={{ fontFamily: "var(--p-serif)", fontSize: 22, margin: "4px 0 4px" }}>
-            {t("dashboard.modal.title")}
-          </div>
-          <div style={{ fontSize: 13, color: "#999", marginBottom: 14 }}>
-            {t("dashboard.modal.subtitle")}
-          </div>
-          <div className="cm2-choices">
-            <button className="cm2-choice" onClick={() => go("decisions")}>
-              <b>{t("dashboard.modal.choices.decision")}</b>
-              <span>Should I do this?</span>
-            </button>
-            <button className="cm2-choice" onClick={() => router.push("/portal/coach")}>
-              <b>{t("dashboard.modal.choices.understand")}</b>
-              <span>What does this mean?</span>
-            </button>
-            <button className="cm2-choice" onClick={() => go("community")}>
-              <b>{t("dashboard.modal.choices.others")}</b>
-              <span>Has anyone been through this?</span>
-            </button>
-            <button className="cm2-choice" onClick={() => router.push("/portal/moment/feel")}>
-              <b>{t("dashboard.modal.choices.share")}</b>
-              <span>What happened to me</span>
-            </button>
-            <button className="cm2-choice" onClick={() => go("health")}>
-              <b>{t("dashboard.modal.choices.results")}</b>
-              <span>With interval &amp; context</span>
-            </button>
-          </div>
-        </div>
-      </div>
 
       {/* ── Toast ── */}
       <div className="cm2-toast" style={{ display: toast ? "block" : "none" }}>
