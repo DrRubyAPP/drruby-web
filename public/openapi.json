@@ -822,6 +822,29 @@
           "draftContent"
         ]
       },
+      "CreateContributionBody": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "shared": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "title",
+          "description"
+        ]
+      },
       "CreateCrmActivityBody": {
         "type": "object",
         "properties": {
@@ -1717,6 +1740,134 @@
           "void"
         ]
       },
+      "JourneyDetailDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "decisionType": {
+            "type": "string",
+            "nullable": true
+          },
+          "goal": {
+            "type": "string",
+            "nullable": true
+          },
+          "concern": {
+            "type": "string",
+            "nullable": true
+          },
+          "timingContext": {
+            "type": "string",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceType": {
+            "$ref": "#/components/schemas/journeySourceTypeSchema"
+          },
+          "version": {
+            "type": "integer"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "updates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JourneyUpdateDTO"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "decisionType",
+          "goal",
+          "concern",
+          "timingContext",
+          "summary",
+          "outcome",
+          "sourceType",
+          "version",
+          "createdAt",
+          "updatedAt",
+          "updates"
+        ]
+      },
+      "JourneyDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "decisionType": {
+            "type": "string",
+            "nullable": true
+          },
+          "goal": {
+            "type": "string",
+            "nullable": true
+          },
+          "concern": {
+            "type": "string",
+            "nullable": true
+          },
+          "timingContext": {
+            "type": "string",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string"
+          },
+          "outcome": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceType": {
+            "$ref": "#/components/schemas/journeySourceTypeSchema"
+          },
+          "version": {
+            "type": "integer"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "decisionType",
+          "goal",
+          "concern",
+          "timingContext",
+          "summary",
+          "outcome",
+          "sourceType",
+          "version",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "JourneyListResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/JourneyDTO"
+        }
+      },
+      "JourneyResponse": {
+        "$ref": "#/components/schemas/JourneyDetailDTO"
+      },
       "journeySourceTypeSchema": {
         "type": "string",
         "enum": [
@@ -1724,6 +1875,29 @@
           "verified_member",
           "partner_clinic",
           "research_study"
+        ]
+      },
+      "JourneyUpdateDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer"
+          },
+          "note": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "note",
+          "createdAt"
         ]
       },
       "ListQuery": {
@@ -1775,6 +1949,36 @@
           "role",
           "subscriptionTier"
         ]
+      },
+      "NotificationPrefDTO": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "$ref": "#/components/schemas/notificationPrefKeySchema"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "key",
+          "enabled"
+        ]
+      },
+      "notificationPrefKeySchema": {
+        "type": "string",
+        "enum": [
+          "weekly_digest",
+          "decision_followups",
+          "study_updates",
+          "product_updates"
+        ]
+      },
+      "NotificationPrefListResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/NotificationPrefDTO"
+        }
       },
       "ocrStatusSchema": {
         "type": "string",
@@ -2741,10 +2945,33 @@
             "type": "string",
             "minLength": 1,
             "description": "显示名"
+          },
+          "timezone": {
+            "type": "string",
+            "minLength": 1,
+            "description": "IANA 时区，如 Asia/Shanghai"
+          },
+          "image": {
+            "type": "string",
+            "minLength": 1,
+            "nullable": true,
+            "description": "头像 URL（null 清除）"
+          }
+        }
+      },
+      "UpdateNotificationPrefBody": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "$ref": "#/components/schemas/notificationPrefKeySchema"
+          },
+          "enabled": {
+            "type": "boolean"
           }
         },
         "required": [
-          "name"
+          "key",
+          "enabled"
         ]
       },
       "UpdateReferralBody": {
@@ -5052,6 +5279,53 @@
             "$ref": "#/components/responses/500"
           }
         }
+      },
+      "post": {
+        "operationId": "post-contributions",
+        "summary": "Create data contribution",
+        "description": "提交一条数据贡献（用户私有记录，默认不公开；shared=true 表示愿意公开，审核转 Journey 是后续链路）",
+        "tags": [
+          "Contributions"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateContributionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContributionDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
       }
     },
     "/contributions/{id}": {
@@ -5733,6 +6007,97 @@
         }
       }
     },
+    "/journeys": {
+      "get": {
+        "operationId": "get-journeys",
+        "summary": "List library journeys",
+        "description": "Library 已共享 journey 列表（匿名化，可按 decisionType 筛选，最近更新在前）",
+        "tags": [
+          "Journeys"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JourneyListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/journeys/{id}": {
+      "get": {
+        "operationId": "get-journeys-{id}",
+        "summary": "Get journey detail",
+        "description": "单个 library journey 详情（含 version 正序的 living updates）；未共享/已撤回按 404 处理",
+        "tags": [
+          "Journeys"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JourneyResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
     "/mailchimp/subscribe": {
       "post": {
         "operationId": "post-mailchimp-subscribe",
@@ -5813,7 +6178,7 @@
       "post": {
         "operationId": "post-me",
         "summary": "Update current user",
-        "description": "更新当前用户 profile（本轮仅 name）",
+        "description": "更新当前用户 profile（name/timezone/image）",
         "tags": [
           "Me"
         ],
@@ -5913,6 +6278,93 @@
           }
         ],
         "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/notification-preferences": {
+      "get": {
+        "operationId": "get-notification-preferences",
+        "summary": "List notification preferences",
+        "description": "当前用户的通知偏好（固定 4 项；未写过的 key 返回默认值 enabled=true，GET 不落库）",
+        "tags": [
+          "Notification-preferences"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationPrefListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "put": {
+        "operationId": "put-notification-preferences",
+        "summary": "Update notification preference",
+        "description": "更新单项通知偏好（upsert；幂等）",
+        "tags": [
+          "Notification-preferences"
+        ],
+        "parameters": [],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNotificationPrefBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationPrefDTO"
+                }
+              }
+            }
+          },
           "400": {
             "$ref": "#/components/responses/400"
           },
@@ -6285,10 +6737,16 @@
       "name": "Insights"
     },
     {
+      "name": "Journeys"
+    },
+    {
       "name": "Mailchimp"
     },
     {
       "name": "Me"
+    },
+    {
+      "name": "Notification-preferences"
     },
     {
       "name": "Signals"
