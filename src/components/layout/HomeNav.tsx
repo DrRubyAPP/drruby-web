@@ -1,3 +1,4 @@
+import Image from "next/image";
 import UserMenu from "@/components/auth/UserMenu";
 import { NavDownloadButton } from "@/components/DownloadWaitlist";
 import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
@@ -56,8 +57,24 @@ export default async function HomeNav({
           justifyContent: "space-between",
         }}
       >
-        <a className="logo" href="/">
-          Dr<span>Ruby</span>.ai
+        <a
+          className="logo"
+          href="/"
+          aria-label="DrRuby.ai home"
+          style={{ display: "flex", alignItems: "center", gap: 10 }}
+        >
+          <Image
+            src="/logo.png"
+            alt="DrRuby.ai"
+            width={120}
+            height={30}
+            className="h-[30px] w-auto"
+            priority
+          />
+          <span className="logo-word">
+            Dr<span className="logo-ruby">Ruby</span>
+            <span className="logo-tld">.ai</span>
+          </span>
         </a>
         <div className="navlinks">
           <a href={`${sectionPrefix}#how`}>How It Works</a>
