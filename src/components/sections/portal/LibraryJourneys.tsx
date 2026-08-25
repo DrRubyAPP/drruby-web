@@ -40,9 +40,8 @@ export function journeyTitle(j: JourneyDto): string {
  */
 export function LibraryJourneys() {
   const t = useTranslations("portal.library");
-  const { data, error, loading, refetch } = useApi<JourneyDto[]>(
-    "/api/journeys",
-  );
+  const { data, error, loading, refetch } =
+    useApi<JourneyDto[]>("/api/journeys");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [details, setDetails] = useState<Record<string, JourneyDetailDto>>({});
   const [detailError, setDetailError] = useState(false);
@@ -129,8 +128,8 @@ export function LibraryJourneys() {
                 {detail && (
                   <>
                     <div>
-                      <b>{t("journeys.detailGoal")}:</b> {detail.goal ?? "—"}
-                      　<b>{t("journeys.detailConcern")}:</b>{" "}
+                      <b>{t("journeys.detailGoal")}:</b> {detail.goal ?? "—"}　
+                      <b>{t("journeys.detailConcern")}:</b>{" "}
                       {detail.concern ?? "—"}
                     </div>
                     {detail.timingContext && (

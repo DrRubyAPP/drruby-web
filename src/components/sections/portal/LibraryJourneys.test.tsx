@@ -74,12 +74,12 @@ describe("LibraryJourneys", () => {
     render(<LibraryJourneys />);
 
     expect(screen.getByText("Thermage")).toBeInTheDocument();
-    expect(screen.getByText("Subtle firmness over 2-3 months.")).toBeInTheDocument();
+    expect(
+      screen.getByText("Subtle firmness over 2-3 months."),
+    ).toBeInTheDocument();
     expect(screen.getByText("Sleep improved after HRT.")).toBeInTheDocument();
     // sourceType 走 i18n key（测试环境返回 key 原样，meta 行含日期等拼接）
-    expect(
-      screen.getByText(/sourceType\.verified_member/),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/sourceType\.verified_member/)).toBeInTheDocument();
     expect(
       screen.getByText(/sourceType\.founder_interview/),
     ).toBeInTheDocument();
@@ -130,9 +130,7 @@ describe("LibraryJourneys", () => {
 
     // 再点收起
     fireEvent.click(screen.getByText("Thermage"));
-    expect(
-      screen.queryByText("Month 3: fine lines look softer."),
-    ).toBeNull();
+    expect(screen.queryByText("Month 3: fine lines look softer.")).toBeNull();
   });
 
   it("详情加载失败 → 展示错误文案但不崩", async () => {
@@ -146,6 +144,8 @@ describe("LibraryJourneys", () => {
     render(<LibraryJourneys />);
 
     fireEvent.click(screen.getByText("Thermage"));
-    await waitFor(() => expect(screen.getByText("journeys.error")).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText("journeys.error")).toBeInTheDocument(),
+    );
   });
 });

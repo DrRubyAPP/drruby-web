@@ -4,10 +4,10 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { ErrorState } from "@/components/api/ErrorState";
 import LogoutButton from "@/components/auth/LogoutButton";
+import { ContributeDialog } from "@/components/sections/portal/ContributeDialog";
 import { ActiveDecisionsSummary } from "@/components/sections/portal/decisions/ActiveDecisionsSummary";
 import { DecisionsView } from "@/components/sections/portal/decisions/DecisionsView";
 import { HealthView } from "@/components/sections/portal/health/HealthView";
-import { ContributeDialog } from "@/components/sections/portal/ContributeDialog";
 import { LibraryJourneys } from "@/components/sections/portal/LibraryJourneys";
 import { NotificationPrefs } from "@/components/sections/portal/NotificationPrefs";
 import { PrivacyView } from "@/components/sections/portal/privacy/PrivacyView";
@@ -1034,14 +1034,10 @@ export default function PortalPage() {
                 <div
                   className="sub-row"
                   style={{ cursor: "pointer" }}
-                  onClick={() =>
-                    setNotifExpanded((v) => !notifExpanded)
-                  }
+                  onClick={() => setNotifExpanded((v) => !notifExpanded)}
                 >
                   <span>Notification preferences</span>
-                  <span className="arr">
-                    {notifExpanded ? "▾" : "›"}
-                  </span>
+                  <span className="arr">{notifExpanded ? "▾" : "›"}</span>
                 </div>
                 {notifExpanded && <NotificationPrefs />}
                 <div className="sub-row">

@@ -31,9 +31,13 @@ export const UpdateMeBody = z
       .optional()
       .describe("头像 URL（null 清除）"),
   })
-  .refine((v) => v.name !== undefined || v.timezone !== undefined || v.image !== undefined, {
-    message: "至少提供 name/timezone/image 之一",
-  });
+  .refine(
+    (v) =>
+      v.name !== undefined || v.timezone !== undefined || v.image !== undefined,
+    {
+      message: "至少提供 name/timezone/image 之一",
+    },
+  );
 
 /** 软删脱敏结果 */
 export const DeleteMeResponse = z.object({
@@ -92,4 +96,3 @@ export const POST = handle(async (req: Request) => {
   });
   return NextResponse.json(MeResponse.parse(toMeDTO(account)));
 });
-

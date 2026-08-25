@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { requireUser } from "@/lib/auth/session";
 import { userAccountRepo } from "@/lib/db";
-import { DeleteMeResponse } from "../route";
 import { handle } from "@/lib/errors";
+import { DeleteMeResponse } from "../route";
 
 /**
  * Delete current user

@@ -35,7 +35,9 @@ export const UpdateNotificationPrefBody = z.object({
 export const GET = handle(async () => {
   const user = await requireUser();
   const rows = await notificationPreferenceRepo.listByUser(user.id);
-  const byKey = new Map(rows.map((r) => [r.key as NotificationPrefKey, r.enabled]));
+  const byKey = new Map(
+    rows.map((r) => [r.key as NotificationPrefKey, r.enabled]),
+  );
   // DB 行与内存默认合并：读路径无副作用，PUT 才落库
   const dto = ALL_KEYS.map((key) => ({
     key,

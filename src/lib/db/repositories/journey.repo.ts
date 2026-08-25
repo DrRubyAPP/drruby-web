@@ -1,7 +1,4 @@
-import {
-  type DecisionType,
-  decisionTypeSchema,
-} from "@/lib/db/enums";
+import { type DecisionType, decisionTypeSchema } from "@/lib/db/enums";
 import { prisma } from "@/lib/db/prisma";
 import type { Journey, Prisma } from "~prisma/client";
 

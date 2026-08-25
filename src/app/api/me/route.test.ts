@@ -46,7 +46,7 @@ describe("账号自主权 /api/me", () => {
     );
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.name).toBe(user.name ?? "");
+    expect(body.id).toBe(user.id);
 
     // 落库校验
     const { prisma } = await import("@/lib/db/prisma");

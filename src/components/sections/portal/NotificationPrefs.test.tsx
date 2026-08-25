@@ -36,7 +36,9 @@ describe("NotificationPrefs", () => {
       expect(getMock).toHaveBeenCalledWith("/api/notification-preferences"),
     );
     await waitFor(() =>
-      expect(screen.getByText("notifications.weeklyDigest")).toBeInTheDocument(),
+      expect(
+        screen.getByText("notifications.weeklyDigest"),
+      ).toBeInTheDocument(),
     );
     expect(
       screen.getByText("notifications.decisionFollowups"),
@@ -57,7 +59,9 @@ describe("NotificationPrefs", () => {
     putMock.mockResolvedValueOnce({ key: "weekly_digest", enabled: false });
     render(<NotificationPrefs />);
     await waitFor(() =>
-      expect(screen.getByText("notifications.weeklyDigest")).toBeInTheDocument(),
+      expect(
+        screen.getByText("notifications.weeklyDigest"),
+      ).toBeInTheDocument(),
     );
 
     const toggle = screen.getByLabelText("notifications.weeklyDigest");
@@ -82,14 +86,14 @@ describe("NotificationPrefs", () => {
     putMock.mockRejectedValueOnce(new ApiError("network_error", 0, "boom"));
     render(<NotificationPrefs />);
     await waitFor(() =>
-      expect(screen.getByText("notifications.weeklyDigest")).toBeInTheDocument(),
+      expect(
+        screen.getByText("notifications.weeklyDigest"),
+      ).toBeInTheDocument(),
     );
 
     const toggle = screen.getByLabelText("notifications.weeklyDigest");
     fireEvent.click(toggle);
-    await waitFor(() =>
-      expect(putMock).toHaveBeenCalledTimes(1),
-    );
+    await waitFor(() => expect(putMock).toHaveBeenCalledTimes(1));
     // 回滚：仍勾选
     await waitFor(() => expect(toggle).toHaveProperty("checked", true));
     expect(screen.getByText("notifications.error")).toBeInTheDocument();
@@ -110,7 +114,9 @@ describe("NotificationPrefs", () => {
     ]);
     fireEvent.click(screen.getByRole("button", { name: /retry/i }));
     await waitFor(() =>
-      expect(screen.getByText("notifications.weeklyDigest")).toBeInTheDocument(),
+      expect(
+        screen.getByText("notifications.weeklyDigest"),
+      ).toBeInTheDocument(),
     );
   });
 });

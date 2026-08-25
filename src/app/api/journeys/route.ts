@@ -19,8 +19,8 @@ export const JourneyListResponse = z.array(JourneyDTO);
 export const GET = handle(async (req: Request) => {
   await requireUser();
   const { searchParams } = new URL(req.url);
-  const decisionType = searchParams.get("decisionType") ?? undefined;
-  if (decisionType !== undefined) decisionTypeSchema.parse(decisionType);
+  const raw = searchParams.get("decisionType");
+  const decisionType = raw !== null ? decisionTypeSchema.parse(raw) : undefined;
   const rows = await journeyRepo.list({ decisionType });
   return NextResponse.json(JourneyListResponse.parse(rows.map(toJourneyDTO)));
 });
