@@ -128,4 +128,72 @@ describe("SP2 read endpoints (spot checks)", () => {
     // 未入组 + 已关闭：不展示
     expect(byId.has(closed.id)).toBe(false);
   });
+
+  it("GET /api/journeys：列表投影含 sourceType/decisionType，未命中详情 → 404", async () => {
+    const { create: createUser } = await import(
+      "@/lib/db/repositories/userAccount.repo"
+    );
+    const { prisma } = await import("@/lib/db/prisma");
+    const { GET: listJourneys } = await import("./journeys/route");
+    const { GET: getJourney } = await import("./journeys/[id]/route");
+
+    const user = await createUser({
+      email: "journeys@example.com",
+      authProvider: "email",
+      role: "user",
+    });
+    currentUserId = user.id;
+
+    await prisma.journey.createMany({
+      data: [
+        {
+          id: "j-spot-1",
+          decisionType: "thermage",
+          summary: "Subtle firmness at 3 months.",
+          sourceType: "verified_member",
+        },
+        {
+          id: "j-spot-unshared",
+          summary: "Unshared journey",
+          sourceType: "partner_clinic",
+          shared: false,
+        },
+      ],
+    });
+
+    // 列表：只含已共享行，投影含 sourceType/decisionType
+    const res = await listJourneys(new Request("http://test/api/journeys"));
+    expect(res.status).toBe(200);
+    const body: Array<{
+      id: string;
+      sourceType: string;
+      decisionType: string | null;
+    }> = await res.json();
+    expect(body).toHaveLength(1);
+    expect(body[0]).toMatchObject({
+      id: "j-spot-1",
+      sourceType: "verified_member",
+      decisionType: "thermage",
+    });
+
+    // 详情：未命中 → 404；未共享 → 404；命中 → 200 含 updates
+    const miss = await getJourney(new Request("http://test/api/journeys/x"), {
+      params: Promise.resolve({ id: "nope" }),
+    });
+    expect(miss.status).toBe(404);
+
+    const unshared = await getJourney(
+      new Request("http://test/api/journeys/x"),
+      { params: Promise.resolve({ id: "j-spot-unshared" }) },
+    );
+    expect(unshared.status).toBe(404);
+
+    const ok = await getJourney(new Request("http://test/api/journeys/x"), {
+      params: Promise.resolve({ id: "j-spot-1" }),
+    });
+    expect(ok.status).toBe(200);
+    const detail = await ok.json();
+    expect(detail.id).toBe("j-spot-1");
+    expect(Array.isArray(detail.updates)).toBe(true);
+  });
 });

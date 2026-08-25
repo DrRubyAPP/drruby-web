@@ -759,6 +759,110 @@ async function main() {
     ],
   });
 
+  // 19) Library journeys（全局内容，固定 id upsert 保证幂等；禁 deleteMany 全清防抹真实数据）
+  const journeys = [
+    {
+      id: "seed-journey-thermage",
+      decisionType: "thermage",
+      goal: "firmness",
+      concern: "sagging jawline",
+      timingContext: "postpartum",
+      summary:
+        "Noticed gradual tightening over 2–3 months; results were subtle, not dramatic.",
+      outcome: "would_do_again",
+      sourceType: "verified_member",
+    },
+    {
+      id: "seed-journey-hrt-sleep",
+      decisionType: "hrt",
+      goal: "sleep-quality",
+      concern: "night sweats",
+      timingContext: "perimenopausal",
+      summary:
+        "Sleep improved within 3 weeks of starting HRT; skin changes came later and were milder.",
+      outcome: "would_do_again",
+      sourceType: "founder_interview",
+    },
+    {
+      id: "seed-journey-tretinoin",
+      decisionType: "skincare",
+      goal: "even-tone",
+      concern: "texture",
+      timingContext: "anytime",
+      summary:
+        "Purge weeks 2–4 were rough, but tone evened out by month 3 on 0.025%.",
+      outcome: "would_do_again",
+      sourceType: "verified_member",
+    },
+    {
+      id: "seed-journey-botox",
+      decisionType: "botox",
+      goal: "expression lines",
+      concern: "forehead lines",
+      timingContext: "mid-30s",
+      summary:
+        "Preventative approach; movement preserved, lines softened. Repeated every 4 months.",
+      outcome: "mixed",
+      sourceType: "partner_clinic",
+    },
+    {
+      id: "seed-journey-laser",
+      decisionType: "laser",
+      goal: "pigmentation",
+      concern: "melasma",
+      timingContext: "summer",
+      summary:
+        "Two sessions helped pigmentation, but strict sun discipline was the real decider.",
+      outcome: "mixed",
+      sourceType: "research_study",
+    },
+    {
+      id: "seed-journey-ultherapy",
+      decisionType: "ultherapy",
+      goal: "firmness",
+      concern: "neck laxity",
+      timingContext: "post-40",
+      summary:
+        "More discomfort than expected and slow results; visible lift at month 4.",
+      outcome: "would_not_do_again",
+      sourceType: "founder_interview",
+    },
+  ];
+  for (const j of journeys) {
+    await prisma.journey.upsert({ where: { id: j.id }, update: {}, create: j });
+  }
+  // living journey 的版本更新（journeyId_version 是普通索引非唯一，upsert where 必须用主键 id）
+  const journeyUpdates = [
+    {
+      id: "seed-journey-thermage-u1",
+      journeyId: "seed-journey-thermage",
+      version: 1,
+      note: "Month 3: fine lines around eyes look softer.",
+      createdAt: daysAgo(90),
+    },
+    {
+      id: "seed-journey-thermage-u2",
+      journeyId: "seed-journey-thermage",
+      version: 2,
+      note: "Month 6: jawline firmness holding; would repeat.",
+      createdAt: daysAgo(30),
+    },
+    {
+      id: "seed-journey-tretinoin-u1",
+      journeyId: "seed-journey-tretinoin",
+      version: 1,
+      note: "Week 4: purge settled, no new breakouts.",
+      createdAt: daysAgo(60),
+    },
+  ];
+  for (const u of journeyUpdates) {
+    await prisma.journeyUpdate.upsert({
+      where: { id: u.id },
+      update: {},
+      create: u,
+    });
+  }
+
   // --- 汇总 ---
   const counts = {
     decisions: await prisma.decision.count({ where: { userId } }),
@@ -777,6 +881,8 @@ async function main() {
     wearableDaily: await prisma.wearableDaily.count({ where: { userId } }),
     notifications: await prisma.notification.count({ where: { userId } }),
     followUps: await prisma.followUpTask.count({ where: { userId } }),
+    journeys: await prisma.journey.count(),
+    journeyUpdates: await prisma.journeyUpdate.count(),
   };
   console.log("[seed] done. Row counts:");
   console.table(counts);
