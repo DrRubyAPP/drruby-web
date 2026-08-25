@@ -740,6 +740,45 @@
         "title": "Your active decisions"
       }
     },
+    "library": {
+      "journeys": {
+        "error": "Couldn't load journeys right now.",
+        "empty": "No journeys in the library yet — shared experiences will appear here.",
+        "updated": "updated {date}",
+        "detailGoal": "Goal",
+        "detailConcern": "Concern",
+        "detailTiming": "Timing",
+        "detailOutcome": "Outcome",
+        "updates": "Journey updates",
+        "noUpdates": "No updates yet."
+      },
+      "contribute": {
+        "title": "Contribute a journey anonymously",
+        "intro": "Share what you decided, how it went, and what you learned. Your contribution stays private to you — nothing appears in the Library without your consent and our review.",
+        "titleLabel": "Title",
+        "titlePlaceholder": "e.g. My Thermage experience",
+        "descriptionLabel": "What happened?",
+        "descriptionPlaceholder": "Goal, decision, outcome, and what you wish you'd known…",
+        "sharedLabel": "I'm willing to share this anonymously in the Library (after review)",
+        "submit": "Submit",
+        "submitting": "Submitting…",
+        "cancel": "Cancel",
+        "success": "Thank you — your journey has been recorded.",
+        "successHint": "It stays private to you. Shared journeys appear in the Library only after review, always anonymized.",
+        "done": "Done"
+      },
+      "sourceType": {
+        "founder_interview": "Founder interview",
+        "verified_member": "Verified member",
+        "partner_clinic": "Partner clinic",
+        "research_study": "Research study"
+      },
+      "outcome": {
+        "would_do_again": "Would do again",
+        "mixed": "Mixed result",
+        "would_not_do_again": "Would not do again"
+      }
+    },
     "saveCta": {
       "label": "Save as decision",
       "submitting": "Saving…",

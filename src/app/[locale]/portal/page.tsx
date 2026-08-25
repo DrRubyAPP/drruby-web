@@ -7,6 +7,8 @@ import LogoutButton from "@/components/auth/LogoutButton";
 import { ActiveDecisionsSummary } from "@/components/sections/portal/decisions/ActiveDecisionsSummary";
 import { DecisionsView } from "@/components/sections/portal/decisions/DecisionsView";
 import { HealthView } from "@/components/sections/portal/health/HealthView";
+import { ContributeDialog } from "@/components/sections/portal/ContributeDialog";
+import { LibraryJourneys } from "@/components/sections/portal/LibraryJourneys";
 import { PrivacyView } from "@/components/sections/portal/privacy/PrivacyView";
 import { ResearchView } from "@/components/sections/portal/research/ResearchView";
 import { DeleteAccountDialog } from "@/components/sections/portal/settings/DeleteAccountDialog";
@@ -14,7 +16,7 @@ import { ExportDataButton } from "@/components/sections/portal/settings/ExportDa
 import { TodayView } from "@/components/sections/portal/today/TodayView";
 import { useApi } from "@/hooks/useApi";
 import { useMutation } from "@/hooks/useMutation";
-import { Link, useRouter } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
 import { apiClient } from "@/lib/api/client";
 import {
   getFirstName,
@@ -131,9 +133,9 @@ const NAV: {
 
 export default function PortalPage() {
   const t = useTranslations("portal");
-  const router = useRouter();
   const [view, setView] = useState<View>("today");
   const [toast, setToast] = useState<string | null>(null);
+  const [contributeOpen, setContributeOpen] = useState(false);
 
   // 当前用户 profile（含 memberSince/subscriptionTier，session 不提供）
   const {
@@ -571,22 +573,7 @@ export default function PortalPage() {
               <div className="sec-h">
                 Living journeys &middot; still updating
               </div>
-              <div className="card">
-                <div className="cm2-q">
-                  <div className="cm2-qt">Thermage</div>
-                  <div className="cm2-qmeta">
-                    Month 9 &middot; last updated yesterday
-                  </div>
-                </div>
-                <div className="cm2-q">
-                  <div className="cm2-qt">Started HRT</div>
-                  <div className="cm2-qmeta">Week 4</div>
-                </div>
-                <div className="cm2-q">
-                  <div className="cm2-qt">Hair loss</div>
-                  <div className="cm2-qmeta">Month 12</div>
-                </div>
-              </div>
+              <LibraryJourneys />
               <div className="cm2-note">
                 A journey isn&rsquo;t shared once and forgotten. Journeys keep
                 updating &mdash; that&rsquo;s what makes them worth following.
@@ -606,7 +593,7 @@ export default function PortalPage() {
                 <div style={{ marginTop: 14 }}>
                   <button
                     className="cm2-ghost"
-                    onClick={() => router.push("/portal/observe/feel")}
+                    onClick={() => setContributeOpen(true)}
                   >
                     Contribute a journey anonymously
                   </button>
@@ -777,6 +764,10 @@ export default function PortalPage() {
                 &middot; &ldquo;here&rsquo;s my outcome&rdquo;.
               </div>
             </div>
+            <ContributeDialog
+              open={contributeOpen}
+              onClose={() => setContributeOpen(false)}
+            />
           </div>
 
           {/* ===== RESEARCH ===== */}

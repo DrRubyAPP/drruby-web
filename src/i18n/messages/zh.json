@@ -746,6 +746,45 @@
         "title": "你进行中的决策"
       }
     },
+    "library": {
+      "journeys": {
+        "error": "暂时无法加载旅程。",
+        "empty": "经验库还没有内容——经过同意与审核的真实经历会出现在这里。",
+        "updated": "更新于 {date}",
+        "detailGoal": "目标",
+        "detailConcern": "困扰",
+        "detailTiming": "时机",
+        "detailOutcome": "结果",
+        "updates": "旅程更新",
+        "noUpdates": "暂无更新。"
+      },
+      "contribute": {
+        "title": "匿名分享一段旅程",
+        "intro": "记录你做了什么决定、进展如何、学到了什么。内容默认仅你自己可见——未经你同意与平台审核，不会出现在经验库。",
+        "titleLabel": "标题",
+        "titlePlaceholder": "例如：我的 Thermage 体验",
+        "descriptionLabel": "经历了什么？",
+        "descriptionPlaceholder": "目标、决定、结果，以及你希望当时就知道的事……",
+        "sharedLabel": "我愿意在审核后匿名分享到经验库",
+        "submit": "提交",
+        "submitting": "提交中…",
+        "cancel": "取消",
+        "success": "谢谢——你的旅程已记录。",
+        "successHint": "它默认仅你自己可见。只有审核通过后才会匿名出现在经验库。",
+        "done": "完成"
+      },
+      "sourceType": {
+        "founder_interview": "创始人访谈",
+        "verified_member": "认证成员",
+        "partner_clinic": "合作诊所",
+        "research_study": "研究参与者"
+      },
+      "outcome": {
+        "would_do_again": "会再做一次",
+        "mixed": "效果不一",
+        "would_not_do_again": "不会再做"
+      }
+    },
     "saveCta": {
       "label": "保存为决策",
       "submitting": "保存中…",
