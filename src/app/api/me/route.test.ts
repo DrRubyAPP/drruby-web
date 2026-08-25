@@ -33,4 +33,33 @@ describe("账号自主权 /api/me", () => {
     const body = await res.json();
     expect(body.name).toBe("Ruby");
   });
+
+  it("POST 更新 timezone / image（task-35 扩展）", async () => {
+    const { POST } = await import("./route");
+    const user = await makeUser("me-tz@example.com");
+    asUser(user.id);
+    const res = await POST(
+      jsonRequest(
+        { timezone: "Asia/Shanghai", image: "https://cdn.example.com/a.png" },
+        { method: "POST" },
+      ),
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.name).toBe(user.name ?? "");
+
+    // 落库校验
+    const { prisma } = await import("@/lib/db/prisma");
+    const row = await prisma.userAccount.findUnique({ where: { id: user.id } });
+    expect(row?.timezone).toBe("Asia/Shanghai");
+    expect(row?.image).toBe("https://cdn.example.com/a.png");
+  });
+
+  it("POST 空 body（无任何字段）→ 400", async () => {
+    const { POST } = await import("./route");
+    const user = await makeUser("me-empty@example.com");
+    asUser(user.id);
+    const res = await POST(jsonRequest({}, { method: "POST" }));
+    expect(res.status).toBe(400);
+  });
 });

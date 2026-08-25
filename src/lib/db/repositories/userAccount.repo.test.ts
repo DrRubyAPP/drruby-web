@@ -174,6 +174,22 @@ describe("userAccount.repo", () => {
       expect(updated.name).toBe("Ruby");
       expect(updated.email).toBe(VALID_INPUT.email);
     });
+
+    it("更新 timezone / image（task-35 扩展）", async () => {
+      const created = await create(VALID_INPUT);
+      const updated = await updateProfile(created.id, {
+        timezone: "Asia/Shanghai",
+        image: "https://cdn.example.com/avatar.png",
+      });
+      expect(updated.timezone).toBe("Asia/Shanghai");
+      expect(updated.image).toBe("https://cdn.example.com/avatar.png");
+      expect(updated.name).toBe(created.name); // 未传字段不动
+
+      // image: null 清除
+      const cleared = await updateProfile(created.id, { image: null });
+      expect(cleared.image).toBeNull();
+      expect(cleared.timezone).toBe("Asia/Shanghai");
+    });
   });
 
   describe("softDeleteAndAnonymize", () => {

@@ -15,10 +15,25 @@ export const MeResponse = z.object({
   subscriptionTier: subscriptionTierSchema,
 });
 
-/** 更新 profile 入参（email 变更走 better-auth 验证流程，本轮仅 name） */
-export const UpdateMeBody = z.object({
-  name: z.string().min(1).describe("显示名"),
-});
+/** 更新 profile 入参（email 变更走 better-auth 验证流程；timezone/image 为 task-35 扩展） */
+export const UpdateMeBody = z
+  .object({
+    name: z.string().min(1).optional().describe("显示名"),
+    timezone: z
+      .string()
+      .min(1)
+      .optional()
+      .describe("IANA 时区，如 Asia/Shanghai"),
+    image: z
+      .string()
+      .min(1)
+      .nullable()
+      .optional()
+      .describe("头像 URL（null 清除）"),
+  })
+  .refine((v) => v.name !== undefined || v.timezone !== undefined || v.image !== undefined, {
+    message: "至少提供 name/timezone/image 之一",
+  });
 
 /** 软删脱敏结果 */
 export const DeleteMeResponse = z.object({
@@ -60,7 +75,7 @@ export const GET = handle(async () => {
 
 /**
  * Update current user
- * @description 更新当前用户 profile（本轮仅 name）
+ * @description 更新当前用户 profile（name/timezone/image）
  * @body UpdateMeBody
  * @response MeResponse
  * @auth bearer
@@ -72,6 +87,8 @@ export const POST = handle(async (req: Request) => {
   const body = UpdateMeBody.parse(await req.json());
   const account = await userAccountRepo.updateProfile(user.id, {
     name: body.name,
+    timezone: body.timezone,
+    image: body.image,
   });
   return NextResponse.json(MeResponse.parse(toMeDTO(account)));
 });

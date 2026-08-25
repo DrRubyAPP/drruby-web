@@ -745,7 +745,17 @@
       "todayPreview": {
         "title": "你进行中的决策"
       }
+    },    "privacy": {
+      "notifications": {
+        "weeklyDigest": "每周摘要",
+        "decisionFollowups": "决策跟进提醒",
+        "studyUpdates": "研究进展更新",
+        "productUpdates": "产品更新",
+        "error": "出了点问题，请重试。",
+        "retry": "重试"
+      }
     },
+
     "library": {
       "journeys": {
         "error": "暂时无法加载旅程。",

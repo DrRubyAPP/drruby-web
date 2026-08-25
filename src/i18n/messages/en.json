@@ -739,7 +739,17 @@
       "todayPreview": {
         "title": "Your active decisions"
       }
+    },    "privacy": {
+      "notifications": {
+        "weeklyDigest": "Weekly digest",
+        "decisionFollowups": "Decision follow-ups",
+        "studyUpdates": "Study updates",
+        "productUpdates": "Product updates",
+        "error": "Something went wrong. Please try again.",
+        "retry": "Retry"
+      }
     },
+
     "library": {
       "journeys": {
         "error": "Couldn't load journeys right now.",

@@ -9,6 +9,7 @@ import { DecisionsView } from "@/components/sections/portal/decisions/DecisionsV
 import { HealthView } from "@/components/sections/portal/health/HealthView";
 import { ContributeDialog } from "@/components/sections/portal/ContributeDialog";
 import { LibraryJourneys } from "@/components/sections/portal/LibraryJourneys";
+import { NotificationPrefs } from "@/components/sections/portal/NotificationPrefs";
 import { PrivacyView } from "@/components/sections/portal/privacy/PrivacyView";
 import { ResearchView } from "@/components/sections/portal/research/ResearchView";
 import { DeleteAccountDialog } from "@/components/sections/portal/settings/DeleteAccountDialog";
@@ -136,6 +137,7 @@ export default function PortalPage() {
   const [view, setView] = useState<View>("today");
   const [toast, setToast] = useState<string | null>(null);
   const [contributeOpen, setContributeOpen] = useState(false);
+  const [notifExpanded, setNotifExpanded] = useState(false);
 
   // 当前用户 profile（含 memberSince/subscriptionTier，session 不提供）
   const {
@@ -1029,10 +1031,19 @@ export default function PortalPage() {
             <div className="sec">
               <div className="sec-h">Notifications &amp; Appearance</div>
               <div className="card">
-                <div className="sub-row">
+                <div
+                  className="sub-row"
+                  style={{ cursor: "pointer" }}
+                  onClick={() =>
+                    setNotifExpanded((v) => !notifExpanded)
+                  }
+                >
                   <span>Notification preferences</span>
-                  <span className="arr">&rsaquo;</span>
+                  <span className="arr">
+                    {notifExpanded ? "▾" : "›"}
+                  </span>
                 </div>
+                {notifExpanded && <NotificationPrefs />}
                 <div className="sub-row">
                   <span>Appearance &amp; language</span>
                   <span className="arr">&rsaquo;</span>

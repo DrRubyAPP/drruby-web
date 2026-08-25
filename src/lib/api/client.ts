@@ -20,4 +20,12 @@ export const apiClient = {
       body: body === undefined ? undefined : JSON.stringify(body),
       headers: { "Content-Type": "application/json", ...init?.headers },
     }),
+
+  put: <T>(path: string, body?: unknown, init?: RequestInit) =>
+    fetchJson<T>(path, {
+      ...init,
+      method: "PUT",
+      body: body === undefined ? undefined : JSON.stringify(body),
+      headers: { "Content-Type": "application/json", ...init?.headers },
+    }),
 };

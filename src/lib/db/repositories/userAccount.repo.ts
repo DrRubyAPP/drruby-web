@@ -83,16 +83,20 @@ export async function update(
 }
 
 /**
- * 更新账号 profile（仅 name）。
+ * 更新账号 profile（name/timezone/image）。
  * email 变更须走 better-auth 验证流程，不在此处理。
  */
 export async function updateProfile(
   id: string,
-  data: { name?: string },
+  data: { name?: string; timezone?: string; image?: string | null },
 ): Promise<UserAccount> {
   return prisma.userAccount.update({
     where: { id },
-    data: { name: data.name },
+    data: {
+      name: data.name,
+      timezone: data.timezone,
+      image: data.image,
+    },
   });
 }
 

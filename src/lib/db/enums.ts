@@ -245,6 +245,15 @@ export const journeySourceTypeSchema = z.enum([
 ]);
 export type JourneySourceType = z.infer<typeof journeySourceTypeSchema>;
 
+/** notification_preference.key — privacy 视图通知偏好开关（固定 4 项） */
+export const notificationPrefKeySchema = z.enum([
+  "weekly_digest",
+  "decision_followups",
+  "study_updates",
+  "product_updates",
+]);
+export type NotificationPrefKey = z.infer<typeof notificationPrefKeySchema>;
+
 /** follow_up_task.status */
 export const followUpStatusSchema = z.enum(["open", "done", "dismissed"]);
 export type FollowUpStatus = z.infer<typeof followUpStatusSchema>;

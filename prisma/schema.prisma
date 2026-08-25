@@ -68,6 +68,7 @@ model UserAccount {
   journeys            Journey[]        @relation("JourneyAuthor")
   notifications       Notification[]
   followUpTasks       FollowUpTask[]
+  notificationPreferences NotificationPreference[]
 
   // P3（B 端多关系需命名，与各 model 的 @relation 名一一对应）
   clinicStaff         ClinicStaff[]         @relation("ClinicStaffUser")
@@ -603,6 +604,21 @@ model Notification {
 
   @@index([userId, readAt], map: "notification_user_read_idx")
   @@map("notification")
+}
+
+/// 通知偏好（privacy 视图 Notification preferences 开关）— task-35
+model NotificationPreference {
+  id        String   @id @default(cuid(2))
+  userId    String   @map("user_id")
+  key       String   // weekly_digest|decision_followups|study_updates|product_updates
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, key], map: "notification_preference_user_key_uniq")
+  @@map("notification_preference")
 }
 
 /// 有意义待办（meaningful follow-ups）— backend_v5 §2.3e / §3 FollowUpTask

@@ -33,6 +33,7 @@ const TABLE_ORDER_FOR_CLEANUP = [
   "journeyUpdate",
   "journey",
   "notification",
+  "notificationPreference",
   "followUpTask",
   // P1 消费域
   "aiReport",
