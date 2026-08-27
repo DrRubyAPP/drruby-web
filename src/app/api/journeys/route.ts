@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/session";
 import { journeyRepo } from "@/lib/db";
-import { decisionTypeSchema } from "@/lib/db/enums";
+import { topicSlugSchema } from "@/lib/db/enums";
 import { handle } from "@/lib/errors";
 import { JourneyDTO, toJourneyDTO } from "./dto";
 
@@ -20,7 +20,7 @@ export const GET = handle(async (req: Request) => {
   await requireUser();
   const { searchParams } = new URL(req.url);
   const raw = searchParams.get("decisionType");
-  const decisionType = raw !== null ? decisionTypeSchema.parse(raw) : undefined;
+  const decisionType = raw !== null ? topicSlugSchema.parse(raw) : undefined;
   const rows = await journeyRepo.list({ decisionType });
   return NextResponse.json(JourneyListResponse.parse(rows.map(toJourneyDTO)));
 });
