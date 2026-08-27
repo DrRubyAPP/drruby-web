@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // getSessionCookie 控制登录态：null=未登录（仅检查 cookie 存在性，不查库）。
@@ -8,9 +8,10 @@ vi.mock("better-auth/cookies", () => ({
 }));
 
 // next-intl 中间件替身：放行分支会走到它，用哨兵头标记「已交给本地化路由」。
+// 必须返回 NextResponse（带 .cookies），否则 proxy 的 NEXT_LOCALE 重置会崩。
 vi.mock("next-intl/middleware", () => ({
   default: () => () =>
-    new Response(null, { status: 200, headers: { "x-intl": "1" } }),
+    new NextResponse(null, { status: 200, headers: { "x-intl": "1" } }),
 }));
 
 const { proxy } = await import("@/proxy");

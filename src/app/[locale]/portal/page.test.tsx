@@ -152,20 +152,37 @@ describe("PortalPage /portal 仪表盘", () => {
     );
   });
 
-  it("Ask DrRuby：输入 + 点击 → POST /api/ask 携带正确 body", async () => {
-    postMock.mockResolvedValueOnce({
-      choices: [{ message: { role: "assistant", content: "answer" } }],
-    });
+  it("Ask about your health：输入 + 点击 → POST /api/decisions 并跳转详情（缺省 not_sure）", async () => {
+    postMock.mockResolvedValueOnce({ id: "d1" });
     render(<PortalPage />);
 
     const input = screen.getByPlaceholderText("dashboard.ask.placeholder");
     fireEvent.change(input, { target: { value: "test question" } });
-    const askBtn = screen.getByRole("button", { name: "dashboard.ask.button" });
-    fireEvent.click(askBtn);
+    fireEvent.click(screen.getByRole("button", { name: "Ask" }));
 
     await waitFor(() => expect(postMock).toHaveBeenCalledTimes(1));
-    expect(postMock).toHaveBeenCalledWith("/api/ask", {
-      messages: [{ role: "user", content: "test question" }],
+    expect(postMock).toHaveBeenCalledWith("/api/decisions", {
+      question: "test question",
+      type: "not_sure",
+    });
+    await waitFor(() =>
+      expect(pushMock).toHaveBeenCalledWith("/portal/decisions/d1"),
+    );
+  });
+
+  it("Ask 类型 chip：选中 Botox 后提交 → type=botox", async () => {
+    postMock.mockResolvedValueOnce({ id: "d2" });
+    render(<PortalPage />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Botox" }));
+    const input = screen.getByPlaceholderText("dashboard.ask.placeholder");
+    fireEvent.change(input, { target: { value: "another question" } });
+    fireEvent.click(screen.getByRole("button", { name: "Ask" }));
+
+    await waitFor(() => expect(postMock).toHaveBeenCalledTimes(1));
+    expect(postMock).toHaveBeenCalledWith("/api/decisions", {
+      question: "another question",
+      type: "botox",
     });
   });
 
