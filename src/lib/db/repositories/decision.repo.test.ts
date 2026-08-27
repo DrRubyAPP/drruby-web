@@ -5,6 +5,7 @@ import {
   type DecisionBriefSnapshot,
   findByIdWithEntries,
   listByUser,
+  listByUserSaved,
   update,
 } from "./decision.repo";
 import { append } from "./decisionEntry.repo";
@@ -100,5 +101,38 @@ describe("decision.repo", () => {
         status: "done",
       }),
     ).rejects.toThrow();
+  });
+
+  it("create 缺 goal/status → goal=null、status=considering、saved=false", async () => {
+    const userId = await seedUser();
+    const d = await create(userId, { question: "Try Thermage?" });
+    expect(d.goal).toBeNull();
+    expect(d.status).toBe("considering");
+    expect(d.saved).toBe(false);
+    expect(d.yourselfContext).toBeNull();
+  });
+
+  it("update 可写 saved + yourselfContext", async () => {
+    const userId = await seedUser();
+    const d = await create(userId, { question: "Try HRT?" });
+    const updated = await update(d.id, {
+      saved: true,
+      yourselfContext: "Perimenopausal, considering HRT for sleep.",
+    });
+    expect(updated.saved).toBe(true);
+    expect(updated.yourselfContext).toBe(
+      "Perimenopausal, considering HRT for sleep.",
+    );
+  });
+
+  it("listByUserSaved 仅返回 saved=true", async () => {
+    const userId = await seedUser();
+    const a = await create(userId, { question: "kept" });
+    await create(userId, { question: "not-now" }); // saved=false
+    await update(a.id, { saved: true });
+
+    const rows = await listByUserSaved(userId);
+    expect(rows).toHaveLength(1);
+    expect(rows[0].question).toBe("kept");
   });
 });

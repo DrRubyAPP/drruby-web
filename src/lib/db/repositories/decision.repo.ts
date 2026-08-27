@@ -17,9 +17,10 @@ export interface DecisionBriefSnapshot {
 
 export interface CreateDecisionInput {
   question: string;
-  /** 该决策服务的目标（对齐 user_baseline.concern_goals 词汇，新建必填） */
-  goal: string;
-  status: DecisionStatus;
+  /** 该决策服务的目标（对齐 concern_goals 词汇；Slice 1 起可选） */
+  goal?: string | null;
+  /** 缺省 considering */
+  status?: DecisionStatus;
   type?: DecisionType | null;
   brief?: DecisionBriefSnapshot | null;
 }
@@ -28,6 +29,10 @@ export interface UpdateDecisionInput {
   question?: string;
   status?: DecisionStatus;
   type?: DecisionType | null;
+  /** Keep this 置 true；Not-now 不置（保持 false） */
+  saved?: boolean;
+  /** Yourself 轻量文字背景（可编辑，随 Keep 一并保存；不写入 brief） */
+  yourselfContext?: string | null;
   brief?: DecisionBriefSnapshot | null;
   decidedAt?: Date | null;
 }
@@ -49,8 +54,8 @@ export async function create(
     data: {
       userId,
       question: input.question,
-      goal: input.goal,
-      status: input.status,
+      goal: input.goal ?? null,
+      status: input.status ?? "considering",
       type: input.type ?? null,
       brief: (input.brief ?? undefined) as Prisma.InputJsonValue | undefined,
     },
@@ -79,6 +84,14 @@ export async function update(
 export async function listByUser(userId: string): Promise<Decision[]> {
   return prisma.decision.findMany({
     where: { userId },
+    orderBy: { updatedAt: "desc" },
+  });
+}
+
+/** 仅 saved=true（"可检索 = saved"；Not-now 落库但不出现在任何列表） */
+export async function listByUserSaved(userId: string): Promise<Decision[]> {
+  return prisma.decision.findMany({
+    where: { userId, saved: true },
     orderBy: { updatedAt: "desc" },
   });
 }
