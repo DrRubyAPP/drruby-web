@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import type { DecisionType } from "@/components/sections/portal/decisions/dto";
+import type { TopicSlug } from "@/components/sections/portal/decisions/dto";
 import { getDecisionCorpus } from "./decision-corpus";
 
-const TYPES: DecisionType[] = [
+const SLUGS: TopicSlug[] = [
   "thermage",
   "ultherapy",
   "botox",
@@ -11,12 +11,11 @@ const TYPES: DecisionType[] = [
   "hrt",
   "skincare",
   "clinic",
-  "not_sure",
 ];
 
 describe("getDecisionCorpus", () => {
-  it.each(TYPES)("%s → others 四维非空 + science 三块非空且带来源", (t) => {
-    const c = getDecisionCorpus(t);
+  it.each(SLUGS)("%s → others 四维非空 + science 三块非空且带来源", (slug) => {
+    const c = getDecisionCorpus(slug);
     expect(c.others.helpful.length).toBeGreaterThan(0);
     expect(c.others.difficult.length).toBeGreaterThan(0);
     expect(c.others.varied.length).toBeGreaterThan(0);
@@ -34,7 +33,8 @@ describe("getDecisionCorpus", () => {
     expect(getDecisionCorpus(null).others.helpful.length).toBeGreaterThan(0);
   });
 
-  it("not_sure → 通用占位（与 null 同源，B5）", () => {
-    expect(getDecisionCorpus("not_sure")).toBe(getDecisionCorpus(null));
+  it("未命中 slug → 通用占位（fallback GENERIC）", () => {
+    // @ts-expect-error 测试未知 slug（非已知语料 key）
+    expect(getDecisionCorpus("unknown-slug")).toBe(getDecisionCorpus(null));
   });
 });

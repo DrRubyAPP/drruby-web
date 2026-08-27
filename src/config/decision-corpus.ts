@@ -1,4 +1,4 @@
-import type { DecisionType } from "@/components/sections/portal/decisions/dto";
+import type { TopicSlug } from "@/components/sections/portal/decisions/dto";
 
 /**
  * Others / Science 预置静态语料（Slice 1 种子，内容团队后续扩充）。
@@ -65,8 +65,8 @@ const GENERIC: DecisionCorpus = {
   },
 };
 
-/** 各 type 占位语料（B5：缺失时回退 GENERIC） */
-const CORPUS: Partial<Record<DecisionType, DecisionCorpus>> = {
+/** 各 topicSlug 占位语料（B5：缺失/未命中时回退 GENERIC） */
+const CORPUS: Partial<Record<TopicSlug, DecisionCorpus>> = {
   thermage: {
     others: {
       helpful: [
@@ -377,10 +377,11 @@ const CORPUS: Partial<Record<DecisionType, DecisionCorpus>> = {
   },
 };
 
-/** type → 语料；null / not_sure / 缺失 → 通用占位（B5/B9） */
+/** topicSlug → 语料；null / 未命中 → 通用占位（B5/B9）
+ *  检索维度已从 type 迁到 topicSlug；type 只影响 Science 措辞框架，不决定检索哪份语料。 */
 export function getDecisionCorpus(
-  type: DecisionType | null | undefined,
+  slug: TopicSlug | null | undefined,
 ): DecisionCorpus {
-  if (!type || type === "not_sure") return GENERIC;
-  return CORPUS[type] ?? GENERIC;
+  if (slug == null) return GENERIC;
+  return CORPUS[slug] ?? GENERIC;
 }
