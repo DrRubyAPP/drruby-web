@@ -136,8 +136,9 @@ export const decisionStatusSchema = z.enum([
 ]);
 export type DecisionStatus = z.infer<typeof decisionStatusSchema>;
 
-/** decision.type — 预设决策类型 chips（可空） */
-export const decisionTypeSchema = z.enum([
+/** decision.topicSlug — 已知语料实体 slug（可空；null=无 topic 或未命中）
+ *  仅驱动语料检索；与粗粒度 decisionType 正交。Journey.decisionType 亦复用此集。 */
+export const topicSlugSchema = z.enum([
   "thermage",
   "ultherapy",
   "botox",
@@ -146,6 +147,18 @@ export const decisionTypeSchema = z.enum([
   "hrt",
   "skincare",
   "clinic",
+]);
+export type TopicSlug = z.infer<typeof topicSlugSchema>;
+
+/** decision.type — 粗粒度决策种类（可空；缺省 not_sure，只影响 Science 措辞框架） */
+export const decisionTypeSchema = z.enum([
+  "procedure",
+  "medication",
+  "treatment",
+  "test",
+  "supplement",
+  "lifestyle",
+  "product",
   "not_sure",
 ]);
 export type DecisionType = z.infer<typeof decisionTypeSchema>;

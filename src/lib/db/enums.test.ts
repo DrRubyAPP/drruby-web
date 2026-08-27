@@ -31,6 +31,7 @@ import {
   subscriptionStatusSchema,
   subscriptionTierSchema,
   timelineKindSchema,
+  topicSlugSchema,
   trendSchema,
   userRoleSchema,
   userStatusSchema,
@@ -145,7 +146,24 @@ describe("消费决策域枚举 - 有效值通过", () => {
     expect(() => decisionStatusSchema.parse("in_progress")).toThrow();
   });
 
-  it("decisionTypeSchema 接受 9 类", () => {
+  it("decisionTypeSchema 接受 8 类粗粒度种类", () => {
+    for (const v of [
+      "procedure",
+      "medication",
+      "treatment",
+      "test",
+      "supplement",
+      "lifestyle",
+      "product",
+      "not_sure",
+    ]) {
+      expect(decisionTypeSchema.parse(v)).toBe(v);
+    }
+    // 实体值（旧 type）不再是合法 type
+    expect(() => decisionTypeSchema.parse("thermage")).toThrow();
+  });
+
+  it("topicSlugSchema 接受 8 类实体 slug", () => {
     for (const v of [
       "thermage",
       "ultherapy",
@@ -155,10 +173,11 @@ describe("消费决策域枚举 - 有效值通过", () => {
       "hrt",
       "skincare",
       "clinic",
-      "not_sure",
     ]) {
-      expect(decisionTypeSchema.parse(v)).toBe(v);
+      expect(topicSlugSchema.parse(v)).toBe(v);
     }
+    // not_sure 是粗粒度 type，不是 topicSlug
+    expect(() => topicSlugSchema.parse("not_sure")).toThrow();
   });
 
   it("studyRecruitmentStatusSchema = recruiting/closed/completed", () => {
@@ -310,6 +329,7 @@ describe("enum schemas - 无效值抛错", () => {
     ["signalTrendSchema", "sideways", "trend"],
     ["decisionStatusSchema", "in_progress", "status（连字符）"],
     ["decisionTypeSchema", "surgery", "type"],
+    ["topicSlugSchema", "surgery", "topic_slug"],
     ["studyRecruitmentStatusSchema", "paused", "recruitment_status"],
     ["studyEnrollmentStatusSchema", "withdrawn", "status"],
     ["consentKeySchema", "public", "key"],
@@ -346,6 +366,7 @@ describe("enum schemas - 无效值抛错", () => {
     signalTrendSchema,
     decisionStatusSchema,
     decisionTypeSchema,
+    topicSlugSchema,
     studyRecruitmentStatusSchema,
     studyEnrollmentStatusSchema,
     consentKeySchema,
