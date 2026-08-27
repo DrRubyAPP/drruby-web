@@ -18,9 +18,10 @@ export const CreateDecisionBody = z.object({
   goal: z
     .string()
     .min(1)
-    .describe("该决策服务的目标（对齐 concern_goals 词汇）"),
-  status: decisionStatusSchema,
-  type: decisionTypeSchema.optional().describe("预设决策类型（可空）"),
+    .optional()
+    .describe("该决策服务的目标（对齐 concern_goals 词汇；Slice 1 起可选）"),
+  status: decisionStatusSchema.optional().describe("缺省 considering"),
+  type: decisionTypeSchema.optional().describe("预设决策类型（缺省 not_sure）"),
 });
 
 /**
@@ -33,7 +34,7 @@ export const CreateDecisionBody = z.object({
  */
 export const GET = handle(async () => {
   const user = await requireUser();
-  const rows = await decisionRepo.listByUser(user.id);
+  const rows = await decisionRepo.listByUserSaved(user.id);
   const dto = rows.map((r) => toDecisionDTO(r, { withBrief: false }));
   return NextResponse.json(DecisionListResponse.parse(dto));
 });
@@ -52,9 +53,9 @@ export const POST = handle(async (req: Request) => {
   const body = CreateDecisionBody.parse(await req.json());
   const row = await decisionRepo.create(user.id, {
     question: body.question,
-    goal: body.goal,
-    status: body.status,
-    type: body.type ?? null,
+    goal: body.goal ?? null,
+    status: body.status ?? "considering",
+    type: body.type ?? "not_sure",
   });
   return NextResponse.json(toDecisionDTO(row, { withBrief: false }), {
     status: 201,

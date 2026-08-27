@@ -56,7 +56,7 @@ export async function create(
       question: input.question,
       goal: input.goal ?? null,
       status: input.status ?? "considering",
-      type: input.type ?? null,
+      type: input.type ?? "not_sure",
       brief: (input.brief ?? undefined) as Prisma.InputJsonValue | undefined,
     },
   });

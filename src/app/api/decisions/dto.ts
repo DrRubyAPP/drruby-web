@@ -26,7 +26,10 @@ export const DecisionDTO = z.object({
   id: z.string(),
   question: z.string(),
   goal: z.string().nullable(),
+  type: z.string().nullable(),
   status: decisionStatusSchema,
+  saved: z.boolean(),
+  yourselfContext: z.string().nullable(),
   updated: z.string(),
   brief: DecisionBriefDTO.optional(),
 });
@@ -50,7 +53,10 @@ export function toDecisionDTO(
     id: row.id,
     question: row.question,
     goal: row.goal,
+    type: row.type,
     status: decisionStatusSchema.parse(row.status),
+    saved: row.saved,
+    yourselfContext: row.yourselfContext,
     updated: row.updatedAt.toISOString(),
     brief: opts.withBrief ? toBrief(row.brief) : undefined,
   };

@@ -5,6 +5,7 @@ import {
   disconnectDb,
   jsonRequest,
   makeUser,
+  params,
   resetDb,
 } from "@/lib/test/route-helpers";
 
@@ -35,36 +36,45 @@ describe("POST /api/decisions", () => {
     expect(res.status).toBe(400);
   });
 
-  it("缺 goal → 400（每个决策必须绑定 Goal）", async () => {
+  it("缺 goal/status → 201，缺省 status=considering、type=not_sure、saved=false", async () => {
     const { POST } = await import("./route");
     const user = await makeUser("dec-create-nogoal@example.com");
     asUser(user.id);
-    const res = await POST(
-      jsonRequest({ question: "q", status: "considering" }),
-    );
-    expect(res.status).toBe(400);
+    const res = await POST(jsonRequest({ question: "Should I do Thermage?" }));
+    expect(res.status).toBe(201);
+    const body = await res.json();
+    expect(body.goal).toBeNull();
+    expect(body.status).toBe("considering");
+    expect(body.type).toBe("not_sure");
+    expect(body.saved).toBe(false);
   });
 
-  it("创建后归属当前用户，且可被 GET 列表读到", async () => {
+  it("saved 过滤：创建后不可见，Keep 后出现在列表（Not-now 不可检索）", async () => {
     const { POST, GET } = await import("./route");
     const user = await makeUser("dec-create@example.com");
     asUser(user.id);
 
-    const created = await POST(
-      jsonRequest({
-        question: "Restart retinol?",
-        goal: "even-tone",
-        status: "considering",
-      }),
-    );
+    const created = await POST(jsonRequest({ question: "Restart retinol?" }));
     expect(created.status).toBe(201);
-    const body = await created.json();
-    expect(body.question).toBe("Restart retinol?");
-    expect(body.goal).toBe("even-tone");
-    expect(body.status).toBe("considering");
+    const createdBody = await created.json();
 
-    const list = await GET();
-    const rows: Array<{ id: string }> = await list.json();
-    expect(rows.some((r) => r.id === body.id)).toBe(true);
+    // 刚创建（saved=false）→ 不在列表
+    const before = await GET();
+    const rowsBefore: Array<{ id: string }> = await before.json();
+    expect(rowsBefore.some((r) => r.id === createdBody.id)).toBe(false);
+
+    // Keep this → saved=true → 出现在列表
+    const { POST: POST_ID } = await import("./[id]/route");
+    const keep = await POST_ID(
+      jsonRequest({ saved: true }, { method: "POST" }),
+      params(createdBody.id),
+    );
+    expect(keep.status).toBe(200);
+
+    const after = await GET();
+    const rowsAfter: Array<{ id: string; saved: boolean }> = await after.json();
+    const hit = rowsAfter.find((r) => r.id === createdBody.id);
+    expect(hit).toBeDefined();
+    expect(hit?.saved).toBe(true);
   });
 });

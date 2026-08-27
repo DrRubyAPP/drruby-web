@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   asUser,
+  bareRequest,
   disconnectDb,
   jsonRequest,
   makeUser,
@@ -60,5 +61,33 @@ describe("POST /api/decisions/[id]", () => {
 
     const row = await decisionRepo.findById(decision.id);
     expect(row?.decidedAt).not.toBeNull();
+  });
+
+  it("Keep this：saved + yourselfContext 持久化并随 GET 读回（A5 契约）", async () => {
+    const { POST, GET } = await import("./route");
+    const decisionRepo = await import("@/lib/db/repositories/decision.repo");
+    const owner = await makeUser("dec-keep@example.com");
+    const decision = await decisionRepo.create(owner.id, {
+      question: "Should I try HRT?",
+    });
+
+    asUser(owner.id);
+    const res = await POST(
+      jsonRequest(
+        { saved: true, yourselfContext: "42, poor sleep, considering HRT" },
+        { method: "POST" },
+      ),
+      params(decision.id),
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.saved).toBe(true);
+    expect(body.yourselfContext).toBe("42, poor sleep, considering HRT");
+
+    const detail = await GET(bareRequest("GET"), params(decision.id));
+    const detailBody = await detail.json();
+    expect(detailBody.saved).toBe(true);
+    expect(detailBody.yourselfContext).toBe("42, poor sleep, considering HRT");
+    expect(detailBody.type).toBe("not_sure"); // DTO 含 type（req 调整清单第 4 项）
   });
 });

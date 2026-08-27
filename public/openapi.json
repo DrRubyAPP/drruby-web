@@ -889,10 +889,15 @@
           "goal": {
             "type": "string",
             "minLength": 1,
-            "description": "该决策服务的目标（对齐 concern_goals 词汇）"
+            "description": "该决策服务的目标（对齐 concern_goals 词汇；Slice 1 起可选）"
           },
           "status": {
-            "$ref": "#/components/schemas/decisionStatusSchema"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/decisionStatusSchema"
+              }
+            ],
+            "description": "缺省 considering"
           },
           "type": {
             "allOf": [
@@ -900,13 +905,11 @@
                 "$ref": "#/components/schemas/decisionTypeSchema"
               }
             ],
-            "description": "预设决策类型（可空）"
+            "description": "预设决策类型（缺省 not_sure）"
           }
         },
         "required": [
-          "question",
-          "goal",
-          "status"
+          "question"
         ]
       },
       "CreateExperimentBody": {
@@ -1278,8 +1281,19 @@
             "type": "string",
             "nullable": true
           },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
           "status": {
             "$ref": "#/components/schemas/decisionStatusSchema"
+          },
+          "saved": {
+            "type": "boolean"
+          },
+          "yourselfContext": {
+            "type": "string",
+            "nullable": true
           },
           "updated": {
             "type": "string"
@@ -1302,7 +1316,10 @@
           "id",
           "question",
           "goal",
+          "type",
           "status",
+          "saved",
+          "yourselfContext",
           "updated",
           "entries"
         ]
@@ -1320,8 +1337,19 @@
             "type": "string",
             "nullable": true
           },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
           "status": {
             "$ref": "#/components/schemas/decisionStatusSchema"
+          },
+          "saved": {
+            "type": "boolean"
+          },
+          "yourselfContext": {
+            "type": "string",
+            "nullable": true
           },
           "updated": {
             "type": "string"
@@ -1338,7 +1366,10 @@
           "id",
           "question",
           "goal",
+          "type",
           "status",
+          "saved",
+          "yourselfContext",
           "updated"
         ]
       },
@@ -2924,6 +2955,14 @@
           "type": {
             "$ref": "#/components/schemas/decisionTypeSchema",
             "nullable": true
+          },
+          "saved": {
+            "type": "boolean",
+            "description": "Keep this 置 true；Not-now 不传"
+          },
+          "yourselfContext": {
+            "type": "string",
+            "description": "Yourself 轻量文字背景（随 Keep 一并保存）"
           }
         }
       },
