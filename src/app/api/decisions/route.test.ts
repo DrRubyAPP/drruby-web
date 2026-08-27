@@ -36,7 +36,7 @@ describe("POST /api/decisions", () => {
     expect(res.status).toBe(400);
   });
 
-  it("缺 goal/status → 201，缺省 status=considering、type=not_sure、saved=false", async () => {
+  it("缺 goal/status → 201，缺省 status=considering、type=not_sure、topic/topicSlug=null、saved=false", async () => {
     const { POST } = await import("./route");
     const user = await makeUser("dec-create-nogoal@example.com");
     asUser(user.id);
@@ -46,7 +46,38 @@ describe("POST /api/decisions", () => {
     expect(body.goal).toBeNull();
     expect(body.status).toBe("considering");
     expect(body.type).toBe("not_sure");
+    expect(body.topic).toBeNull();
+    expect(body.topicSlug).toBeNull();
     expect(body.saved).toBe(false);
+  });
+
+  it("带 topic/topicSlug/type 三元组（chip）→ 201 并回填", async () => {
+    const { POST } = await import("./route");
+    const user = await makeUser("dec-create-topic@example.com");
+    asUser(user.id);
+    const res = await POST(
+      jsonRequest({
+        question: "Should I do Thermage?",
+        topic: "Thermage",
+        topicSlug: "thermage",
+        type: "procedure",
+      }),
+    );
+    expect(res.status).toBe(201);
+    const body = await res.json();
+    expect(body.topic).toBe("Thermage");
+    expect(body.topicSlug).toBe("thermage");
+    expect(body.type).toBe("procedure");
+  });
+
+  it("非法 topicSlug → 400", async () => {
+    const { POST } = await import("./route");
+    const user = await makeUser("dec-create-badslug@example.com");
+    asUser(user.id);
+    const res = await POST(
+      jsonRequest({ question: "q", topicSlug: "surgery" }),
+    );
+    expect(res.status).toBe(400);
   });
 
   it("saved 过滤：创建后不可见，Keep 后出现在列表（Not-now 不可检索）", async () => {

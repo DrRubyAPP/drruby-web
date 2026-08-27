@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/session";
 import { decisionRepo } from "@/lib/db";
-import { decisionStatusSchema, decisionTypeSchema } from "@/lib/db/enums";
+import {
+  decisionStatusSchema,
+  decisionTypeSchema,
+  topicSlugSchema,
+} from "@/lib/db/enums";
 import { AppError, handle } from "@/lib/errors";
 import {
   DecisionDetailDTO,
@@ -19,6 +23,8 @@ export const UpdateDecisionBody = z.object({
   status: decisionStatusSchema.optional(),
   question: z.string().min(1).optional(),
   type: decisionTypeSchema.nullable().optional(),
+  topic: z.string().max(200).nullable().optional(),
+  topicSlug: topicSlugSchema.nullable().optional(),
   saved: z.boolean().optional().describe("Keep this 置 true；Not-now 不传"),
   yourselfContext: z
     .string()
@@ -78,6 +84,8 @@ export const POST = handle(async (req: Request, ctx: Ctx) => {
     status: body.status,
     question: body.question,
     type: body.type,
+    topic: body.topic,
+    topicSlug: body.topicSlug,
     saved: body.saved,
     yourselfContext: body.yourselfContext,
     // 进入 decided 且此前未记录时，落定决策时间

@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/session";
 import { decisionRepo } from "@/lib/db";
-import { decisionStatusSchema, decisionTypeSchema } from "@/lib/db/enums";
+import {
+  decisionStatusSchema,
+  decisionTypeSchema,
+  topicSlugSchema,
+} from "@/lib/db/enums";
 import { handle } from "@/lib/errors";
 import { DecisionDTO, toDecisionDTO } from "./dto";
 
@@ -21,7 +25,17 @@ export const CreateDecisionBody = z.object({
     .optional()
     .describe("该决策服务的目标（对齐 concern_goals 词汇；Slice 1 起可选）"),
   status: decisionStatusSchema.optional().describe("缺省 considering"),
-  type: decisionTypeSchema.optional().describe("预设决策类型（缺省 not_sure）"),
+  type: decisionTypeSchema
+    .optional()
+    .describe("粗粒度决策种类（缺省 not_sure）"),
+  topic: z
+    .string()
+    .max(200)
+    .optional()
+    .describe("决策针对的实体/主题（自由文本）"),
+  topicSlug: topicSlugSchema
+    .optional()
+    .describe("topic 归一化 slug（驱动语料检索）"),
 });
 
 /**
@@ -56,6 +70,8 @@ export const POST = handle(async (req: Request) => {
     goal: body.goal ?? null,
     status: body.status ?? "considering",
     type: body.type ?? "not_sure",
+    topic: body.topic ?? null,
+    topicSlug: body.topicSlug ?? null,
   });
   return NextResponse.json(toDecisionDTO(row, { withBrief: false }), {
     status: 201,
