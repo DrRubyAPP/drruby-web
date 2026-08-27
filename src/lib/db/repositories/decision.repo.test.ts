@@ -38,11 +38,16 @@ describe("decision.repo", () => {
       question: "Try Thermage?",
       goal: "firmness",
       status: "considering",
-      type: "thermage",
+      type: "procedure",
+      topic: "Thermage",
+      topicSlug: "thermage",
       brief: BRIEF,
     });
     expect(d.brief).toEqual(BRIEF);
     expect(d.goal).toBe("firmness");
+    expect(d.type).toBe("procedure");
+    expect(d.topic).toBe("Thermage");
+    expect(d.topicSlug).toBe("thermage");
 
     const rows = await listByUser(userId);
     expect(rows).toHaveLength(1);

@@ -46,7 +46,7 @@ const SCIENCE_BLOCKS: { key: ScienceBlockKey; label: string }[] = [
  * 决策详情页（Slice 1 核心）：
  * - 三视角自由切换，无强制顺序；Yourself 草稿存客户端 state，切换不丢（A2）
  * - Yourself 草稿随 "Keep this" 一并落库（F4）；Not now 仅不置 saved，无任何提醒 UI（A4）
- * - Others / Science 读预置语料（type 驱动）；type 可改（B9）
+ * - Others / Science 读预置语料（topicSlug 驱动检索）；type 为粗粒度可改，只影响 Science 措辞框架（B9）
  * - Observation 追加（迁移自 DecisionDetailDrawer，append-only）
  */
 export function DecisionDetailView({ id }: { id: string }) {
@@ -65,7 +65,7 @@ export function DecisionDetailView({ id }: { id: string }) {
     { onSuccess: () => refetch() },
   );
 
-  // 改 type → 切换语料（B9）；改 status（迁移自 drawer）
+  // 改 type（粗粒度，只影响 Science 措辞框架，不切换检索语料）；改 status（迁移自 drawer）
   const update = useMutation(
     (input: { type?: DecisionType; status?: DecisionStatus }) =>
       apiClient.post(`/api/decisions/${id}`, input),
@@ -92,7 +92,8 @@ export function DecisionDetailView({ id }: { id: string }) {
 
   // A5：yourselfDraft 仅在用户编辑后覆盖；未编辑时展示服务端已存值
   const yourselfValue = yourselfDraft ?? data.yourselfContext ?? "";
-  const corpus = getDecisionCorpus(data.type);
+  // 语料检索按 topicSlug（B9）：命中→专题语料，null/未命中→通用占位；type 不参与检索
+  const corpus = getDecisionCorpus(data.topicSlug);
   const entries = sortEntries(data.entries);
 
   return (
@@ -107,8 +108,13 @@ export function DecisionDetailView({ id }: { id: string }) {
         {data.question}
       </h1>
       <span className="dec-badge">{statusToLabel(data.status)}</span>
+      {data.topic && (
+        <span style={{ fontSize: 13, color: "#a89a95", marginLeft: 8 }}>
+          {data.topic}
+        </span>
+      )}
 
-      {/* type 切换 chips（B9：改 type 换取对应语料） */}
+      {/* type 切换 chips（B9：粗粒度 type 只影响 Science 措辞框架，不切换检索语料） */}
       <div className="sec">
         <div className="sec-h">Type</div>
         <div className="ask-ex">
