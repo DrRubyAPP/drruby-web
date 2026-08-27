@@ -3,6 +3,8 @@ import {
   type DecisionType,
   decisionStatusSchema,
   decisionTypeSchema,
+  type TopicSlug,
+  topicSlugSchema,
 } from "@/lib/db/enums";
 import { prisma } from "@/lib/db/prisma";
 import type { Decision, Prisma } from "~prisma/client";
@@ -21,7 +23,12 @@ export interface CreateDecisionInput {
   goal?: string | null;
   /** 缺省 considering */
   status?: DecisionStatus;
+  /** 粗粒度决策种类（缺省 not_sure） */
   type?: DecisionType | null;
+  /** 决策针对的实体/主题（自由文本） */
+  topic?: string | null;
+  /** topic 归一化 slug（驱动语料检索；须在已知集内） */
+  topicSlug?: TopicSlug | null;
   brief?: DecisionBriefSnapshot | null;
 }
 
@@ -29,6 +36,8 @@ export interface UpdateDecisionInput {
   question?: string;
   status?: DecisionStatus;
   type?: DecisionType | null;
+  topic?: string | null;
+  topicSlug?: TopicSlug | null;
   /** Keep this 置 true；Not-now 不置（保持 false） */
   saved?: boolean;
   /** Yourself 轻量文字背景（可编辑，随 Keep 一并保存；不写入 brief） */
@@ -43,6 +52,9 @@ function validateStatus(s?: DecisionStatus): void {
 function validateType(t?: DecisionType | null): void {
   if (t !== undefined && t !== null) decisionTypeSchema.parse(t);
 }
+function validateTopicSlug(s?: TopicSlug | null): void {
+  if (s !== undefined && s !== null) topicSlugSchema.parse(s);
+}
 
 export async function create(
   userId: string,
@@ -50,6 +62,7 @@ export async function create(
 ): Promise<Decision> {
   validateStatus(input.status);
   validateType(input.type);
+  validateTopicSlug(input.topicSlug);
   return prisma.decision.create({
     data: {
       userId,
@@ -57,6 +70,8 @@ export async function create(
       goal: input.goal ?? null,
       status: input.status ?? "considering",
       type: input.type ?? "not_sure",
+      topic: input.topic ?? null,
+      topicSlug: input.topicSlug ?? null,
       brief: (input.brief ?? undefined) as Prisma.InputJsonValue | undefined,
     },
   });
@@ -68,6 +83,7 @@ export async function update(
 ): Promise<Decision> {
   validateStatus(input.status);
   validateType(input.type);
+  validateTopicSlug(input.topicSlug);
   const { brief, ...rest } = input;
   return prisma.decision.update({
     where: { id },
