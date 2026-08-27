@@ -75,7 +75,7 @@ export function TodayView({ onSeeAllSignals }: TodayViewProps) {
 
   return (
     <div className="sec">
-      <div className="sec-h">What matters now</div>
+      <div className="sec-h">Your body signals</div>
 
       {/* refresh 失败但有旧数据：顶部小条重试 */}
       {refreshFailedWithOldData && (

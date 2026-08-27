@@ -7,6 +7,11 @@ import LogoutButton from "@/components/auth/LogoutButton";
 import { ContributeDialog } from "@/components/sections/portal/ContributeDialog";
 import { ActiveDecisionsSummary } from "@/components/sections/portal/decisions/ActiveDecisionsSummary";
 import { DecisionsView } from "@/components/sections/portal/decisions/DecisionsView";
+import type { DecisionType } from "@/components/sections/portal/decisions/dto";
+import {
+  ALL_DECISION_TYPES,
+  typeToLabel,
+} from "@/components/sections/portal/decisions/mappers";
 import { HealthView } from "@/components/sections/portal/health/HealthView";
 import { LibraryJourneys } from "@/components/sections/portal/LibraryJourneys";
 import { NotificationPrefs } from "@/components/sections/portal/NotificationPrefs";
@@ -17,7 +22,7 @@ import { ExportDataButton } from "@/components/sections/portal/settings/ExportDa
 import { TodayView } from "@/components/sections/portal/today/TodayView";
 import { useApi } from "@/hooks/useApi";
 import { useMutation } from "@/hooks/useMutation";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { apiClient } from "@/lib/api/client";
 import {
   getFirstName,
@@ -43,10 +48,6 @@ interface TimelineEventDTO {
   title: string;
   detail?: string;
   source?: string;
-}
-
-interface AskResponse {
-  choices: { message: { role: string; content: string } }[];
 }
 
 type View =
@@ -134,6 +135,7 @@ const NAV: {
 
 export default function PortalPage() {
   const t = useTranslations("portal");
+  const router = useRouter();
   const [view, setView] = useState<View>("today");
   const [toast, setToast] = useState<string | null>(null);
   const [contributeOpen, setContributeOpen] = useState(false);
@@ -150,24 +152,25 @@ export default function PortalPage() {
   const meFirst = getFirstName(meName) || "—";
   const greetingKey = me ? getGreetingKey(new Date()) : null;
 
-  // Ask DrRuby：受控输入 + useMutation POST /api/ask，结果就地展示
+  // Ask about your health：提交 → 创建 Decision（A1：仅创建一个）→ 跳转详情（F2）
   const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState<string | null>(null);
-  const askMut = useMutation<string, AskResponse>(
-    (q: string) =>
-      apiClient.post<AskResponse>("/api/ask", {
-        messages: [{ role: "user", content: q }],
-      }),
+  const [askType, setAskType] = useState<DecisionType | null>(null);
+  const createAsk = useMutation(
+    (input: { question: string; type?: DecisionType }) =>
+      apiClient.post<{ id: string }>("/api/decisions", input),
     {
-      onSuccess: (out) => setAnswer(out?.choices?.[0]?.message?.content ?? ""),
+      onSuccess: (out) => {
+        setQuestion("");
+        setAskType(null);
+        router.push(`/portal/decisions/${out.id}`);
+      },
     },
   );
 
   function submitAsk() {
     const q = question.trim();
-    if (!q || askMut.loading) return;
-    setAnswer(null);
-    askMut.mutate(q);
+    if (!q || createAsk.loading) return;
+    createAsk.mutate({ question: q, type: askType ?? "not_sure" });
   }
 
   // Timeline：最近 5 条（按 date 倒序）
@@ -243,8 +246,8 @@ export default function PortalPage() {
             <div className="lede">
               Here&rsquo;s what deserves your attention today.
             </div>
+            <ActiveDecisionsSummary />
             <TodayView onSeeAllSignals={() => go("health")} />
-            <ActiveDecisionsSummary onClick={() => go("decisions")} />
             <div className="sec">
               <div className="sec-h">Learn from your past self</div>
               <div className="card matter">
@@ -281,10 +284,28 @@ export default function PortalPage() {
               </div>
             </div>
             <div className="sec">
-              <div className="sec-h">Ask DrRuby</div>
+              <div className="sec-h">Ask about your health</div>
               <div className="ask">
                 <div style={{ fontSize: 15, color: "var(--p-ink)" }}>
-                  Ask about your results, history or decisions.
+                  What are you weighing? Ask a question &mdash; you don&rsquo;t
+                  need a complete history to start.
+                </div>
+                <div className="ask-ex" style={{ marginBottom: 10 }}>
+                  {ALL_DECISION_TYPES.map((t2) => (
+                    <button
+                      key={t2}
+                      type="button"
+                      className="ask-chip"
+                      onClick={() => setAskType(askType === t2 ? null : t2)}
+                      style={
+                        askType === t2
+                          ? { borderColor: "var(--p-ink)" }
+                          : undefined
+                      }
+                    >
+                      {typeToLabel(t2)}
+                    </button>
+                  ))}
                 </div>
                 <div className="ask-in">
                   <input
@@ -299,33 +320,14 @@ export default function PortalPage() {
                   <button
                     className="ask-btn"
                     onClick={submitAsk}
-                    disabled={askMut.loading || !question.trim()}
+                    disabled={createAsk.loading || !question.trim()}
                   >
-                    {askMut.loading
-                      ? t("dashboard.ask.loading")
-                      : t("dashboard.ask.button")}
+                    {createAsk.loading ? t("dashboard.ask.loading") : "Ask"}
                   </button>
                 </div>
-                {askMut.error && (
+                {createAsk.error && (
                   <ErrorState message={t("dashboard.ask.error")} />
                 )}
-                {answer && <div className="ask-answer">{answer}</div>}
-                <div className="ask-ex">
-                  {[
-                    "Has my sleep changed?",
-                    "Is this skin change consistent?",
-                    "What should I ask at my next appointment?",
-                  ].map((chip) => (
-                    <button
-                      type="button"
-                      key={chip}
-                      className="ask-chip"
-                      onClick={() => setQuestion(chip)}
-                    >
-                      &ldquo;{chip}&rdquo;
-                    </button>
-                  ))}
-                </div>
                 <div style={{ fontSize: 12, color: "#a89a95", marginTop: 12 }}>
                   {t("dashboard.ask.disclaimer")}
                 </div>
