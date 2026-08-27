@@ -170,7 +170,7 @@ describe("PortalPage /portal 仪表盘", () => {
     );
   });
 
-  it("Ask 类型 chip：选中 Botox 后提交 → type=botox", async () => {
+  it("Ask topic chip：选中 Botox 后提交 → { topic, topicSlug, type } 三元组", async () => {
     postMock.mockResolvedValueOnce({ id: "d2" });
     render(<PortalPage />);
 
@@ -182,7 +182,9 @@ describe("PortalPage /portal 仪表盘", () => {
     await waitFor(() => expect(postMock).toHaveBeenCalledTimes(1));
     expect(postMock).toHaveBeenCalledWith("/api/decisions", {
       question: "another question",
-      type: "botox",
+      topic: "Botox",
+      topicSlug: "botox",
+      type: "procedure",
     });
   });
 

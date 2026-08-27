@@ -7,10 +7,10 @@ import LogoutButton from "@/components/auth/LogoutButton";
 import { ContributeDialog } from "@/components/sections/portal/ContributeDialog";
 import { ActiveDecisionsSummary } from "@/components/sections/portal/decisions/ActiveDecisionsSummary";
 import { DecisionsView } from "@/components/sections/portal/decisions/DecisionsView";
-import type { DecisionType } from "@/components/sections/portal/decisions/dto";
+import type { CreateDecisionInput } from "@/components/sections/portal/decisions/dto";
 import {
-  ALL_DECISION_TYPES,
-  typeToLabel,
+  chipToTopic,
+  DECISION_CHIPS,
 } from "@/components/sections/portal/decisions/mappers";
 import { HealthView } from "@/components/sections/portal/health/HealthView";
 import { LibraryJourneys } from "@/components/sections/portal/LibraryJourneys";
@@ -153,15 +153,16 @@ export default function PortalPage() {
   const greetingKey = me ? getGreetingKey(new Date()) : null;
 
   // Ask about your health：提交 → 创建 Decision（A1：仅创建一个）→ 跳转详情（F2）
+  // chip 语义 = 选 topic：预填 { topic, topicSlug, type } 三元组；自由 Ask 不选 chip
   const [question, setQuestion] = useState("");
-  const [askType, setAskType] = useState<DecisionType | null>(null);
+  const [askChip, setAskChip] = useState<string | null>(null);
   const createAsk = useMutation(
-    (input: { question: string; type?: DecisionType }) =>
+    (input: CreateDecisionInput) =>
       apiClient.post<{ id: string }>("/api/decisions", input),
     {
       onSuccess: (out) => {
         setQuestion("");
-        setAskType(null);
+        setAskChip(null);
         router.push(`/portal/decisions/${out.id}`);
       },
     },
@@ -170,7 +171,17 @@ export default function PortalPage() {
   function submitAsk() {
     const q = question.trim();
     if (!q || createAsk.loading) return;
-    createAsk.mutate({ question: q, type: askType ?? "not_sure" });
+    const topic = askChip ? chipToTopic(askChip) : undefined;
+    createAsk.mutate(
+      topic
+        ? {
+            question: q,
+            topic: topic.topic,
+            topicSlug: topic.topicSlug,
+            type: topic.type,
+          }
+        : { question: q, type: "not_sure" }, // 自由 Ask：topic/topicSlug 省略 → null
+    );
   }
 
   // Timeline：最近 5 条（按 date 倒序）
@@ -291,19 +302,19 @@ export default function PortalPage() {
                   need a complete history to start.
                 </div>
                 <div className="ask-ex" style={{ marginBottom: 10 }}>
-                  {ALL_DECISION_TYPES.map((t2) => (
+                  {DECISION_CHIPS.map((chip) => (
                     <button
-                      key={t2}
+                      key={chip}
                       type="button"
                       className="ask-chip"
-                      onClick={() => setAskType(askType === t2 ? null : t2)}
+                      onClick={() => setAskChip(askChip === chip ? null : chip)}
                       style={
-                        askType === t2
+                        askChip === chip
                           ? { borderColor: "var(--p-ink)" }
                           : undefined
                       }
                     >
-                      {typeToLabel(t2)}
+                      {chip}
                     </button>
                   ))}
                 </div>
