@@ -285,6 +285,10 @@ model Decision {
   type      String?   // thermage|ultherapy|botox|laser|filler|hrt|skincare|clinic|not_sure
   status    String    // considering|in-progress|decided|paused
   brief     Json?
+  /// Keep this 置 true（可检索）；Not-now 落库但不出现在任何列表（task-37 Slice 1）
+  saved           Boolean   @default(false) @map("saved")
+  /// Yourself 轻量文字背景（可编辑、非 append-only，随 Keep 一并保存；不写入 brief）
+  yourselfContext String?   @map("yourself_context")
   decidedAt DateTime? @map("decided_at") @db.Timestamptz
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
@@ -294,6 +298,7 @@ model Decision {
   timelineEvents TimelineEvent[]
 
   @@index([userId, status], map: "decision_user_status_idx")
+  @@index([userId, saved], map: "decision_user_saved_idx")
   @@map("decision")
 }
 
