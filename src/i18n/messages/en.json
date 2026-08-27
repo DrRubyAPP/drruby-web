@@ -742,7 +742,8 @@
       "todayPreview": {
         "title": "Your active decisions"
       }
-    },    "privacy": {
+    },
+    "privacy": {
       "notifications": {
         "weeklyDigest": "Weekly digest",
         "decisionFollowups": "Decision follow-ups",

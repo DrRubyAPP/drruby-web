@@ -5,7 +5,11 @@ import type { DecisionType } from "@/components/sections/portal/decisions/dto";
  * 护栏（A6/A7）：不排序、不计数、不暗示共识；Science 无个性化推荐用语。
  */
 
-export type OthersDimensionKey = "helpful" | "difficult" | "varied" | "may-matter";
+export type OthersDimensionKey =
+  | "helpful"
+  | "difficult"
+  | "varied"
+  | "may-matter";
 export type ScienceBlockKey = "benefits" | "risks" | "uncertainty";
 
 export interface ScienceItem {
@@ -116,7 +120,10 @@ const CORPUS: Partial<Record<DecisionType, DecisionCorpus>> = {
       varied: [
         "Some saw lifting over months; others saw little visible change.",
       ],
-      "may-matter": ["Degree of skin laxity may matter.", "Practitioner experience may matter."],
+      "may-matter": [
+        "Degree of skin laxity may matter.",
+        "Practitioner experience may matter.",
+      ],
     },
     science: {
       benefits: [
@@ -149,8 +156,13 @@ const CORPUS: Partial<Record<DecisionType, DecisionCorpus>> = {
         "Some found the recurring cost and maintenance difficult to plan.",
         "Some worried about looking 'frozen'.",
       ],
-      varied: ["Some loved the softening effect; others preferred a natural look without it."],
-      "may-matter": ["Injector technique may matter.", "Dose and placement may matter."],
+      varied: [
+        "Some loved the softening effect; others preferred a natural look without it.",
+      ],
+      "may-matter": [
+        "Injector technique may matter.",
+        "Dose and placement may matter.",
+      ],
     },
     science: {
       benefits: [
@@ -184,7 +196,10 @@ const CORPUS: Partial<Record<DecisionType, DecisionCorpus>> = {
         "Some found post-treatment sensitivity hard to manage.",
       ],
       varied: ["Results and healing seemed to differ widely between people."],
-      "may-matter": ["Skin type and tone may matter.", "Type of laser may matter."],
+      "may-matter": [
+        "Skin type and tone may matter.",
+        "Type of laser may matter.",
+      ],
     },
     science: {
       benefits: [
@@ -217,7 +232,9 @@ const CORPUS: Partial<Record<DecisionType, DecisionCorpus>> = {
         "Some worried about reversibility and what happens as it wears off.",
         "Some found swelling in the first days concerning.",
       ],
-      varied: ["Some loved the volume restoration; others felt it wasn't worth maintaining."],
+      varied: [
+        "Some loved the volume restoration; others felt it wasn't worth maintaining.",
+      ],
       "may-matter": ["Product type may matter.", "Injection area may matter."],
     },
     science: {
@@ -251,8 +268,13 @@ const CORPUS: Partial<Record<DecisionType, DecisionCorpus>> = {
         "Some found conflicting headlines hard to weigh.",
         "Some described the decision as feeling higher-stakes than others.",
       ],
-      varied: ["Experiences with the same regimen differed widely between people."],
-      "may-matter": ["Symptom profile may matter.", "Personal and family history may matter."],
+      varied: [
+        "Experiences with the same regimen differed widely between people.",
+      ],
+      "may-matter": [
+        "Symptom profile may matter.",
+        "Personal and family history may matter.",
+      ],
     },
     science: {
       benefits: [
@@ -285,8 +307,13 @@ const CORPUS: Partial<Record<DecisionType, DecisionCorpus>> = {
         "Some found the purge phase of actives discouraging.",
         "Some found marketing claims hard to evaluate.",
       ],
-      varied: ["The same ingredient worked beautifully for some and not others."],
-      "may-matter": ["Skin barrier state may matter.", "Consistency over months may matter."],
+      varied: [
+        "The same ingredient worked beautifully for some and not others.",
+      ],
+      "may-matter": [
+        "Skin barrier state may matter.",
+        "Consistency over months may matter.",
+      ],
     },
     science: {
       benefits: [
@@ -319,8 +346,13 @@ const CORPUS: Partial<Record<DecisionType, DecisionCorpus>> = {
         "Some found clinics pushing package deals difficult to navigate.",
         "Some found it hard to judge credentials.",
       ],
-      varied: ["Experiences at the same clinic were described differently by different people."],
-      "may-matter": ["Who performs the treatment may matter.", "Aftercare arrangements may matter."],
+      varied: [
+        "Experiences at the same clinic were described differently by different people.",
+      ],
+      "may-matter": [
+        "Who performs the treatment may matter.",
+        "Aftercare arrangements may matter.",
+      ],
     },
     science: {
       benefits: [

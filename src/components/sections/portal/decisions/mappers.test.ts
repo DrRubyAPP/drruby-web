@@ -1,24 +1,24 @@
 import { describe, expect, it } from "vitest";
 import type { DecisionDetailDto, DecisionDto } from "./dto";
 import {
+  ALL_DECISION_TYPES,
   buildEntryText,
   chipToQuestionTemplate,
   chipToType,
   DECISION_CHIPS,
   DECISION_STATUSES,
+  feelObserveToQuestion,
   GOAL_OPTIONS,
   goalToLabel,
   groupDecisions,
   isActive,
   mapBrief,
   mapDecisionDetail,
-  feelObserveToQuestion,
   skinConsiderToQuestion,
-  stackConsiderToQuestion,
   sortEntries,
+  stackConsiderToQuestion,
   statusToLabel,
   typeToLabel,
-  ALL_DECISION_TYPES,
 } from "./mappers";
 
 describe("statusToLabel", () => {
@@ -340,9 +340,9 @@ describe("spine flow text builders", () => {
     expect(buildEntryText("skin-analysis", "Dryness, Redness")).toBe(
       "Created from Skin analysis · Dryness, Redness",
     );
-    expect(buildEntryText("supplement-evaluation", "Magnesium · 1–2 months")).toBe(
-      "Created from Supplement evaluation · Magnesium · 1–2 months",
-    );
+    expect(
+      buildEntryText("supplement-evaluation", "Magnesium · 1–2 months"),
+    ).toBe("Created from Supplement evaluation · Magnesium · 1–2 months");
     expect(buildEntryText("feel-check-in", "How I've been feeling")).toBe(
       "Created from Feel check-in · How I've been feeling",
     );

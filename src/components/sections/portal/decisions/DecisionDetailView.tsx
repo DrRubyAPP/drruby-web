@@ -2,18 +2,17 @@
 
 import { useState } from "react";
 import { EmptyState, ErrorState, Skeleton } from "@/components/api";
+import type {
+  OthersDimensionKey,
+  ScienceBlockKey,
+} from "@/config/decision-corpus";
+import { getDecisionCorpus } from "@/config/decision-corpus";
 import { useApi } from "@/hooks/useApi";
 import { useMutation } from "@/hooks/useMutation";
 import { useRouter } from "@/i18n/navigation";
 import { apiClient } from "@/lib/api/client";
-import { getDecisionCorpus } from "@/config/decision-corpus";
-import type { OthersDimensionKey, ScienceBlockKey } from "@/config/decision-corpus";
 import { ACTIVE_CHIP, SUBMIT_BTN, TEXTAREA } from "./drawerStyles";
-import type {
-  DecisionDetailDto,
-  DecisionStatus,
-  DecisionType,
-} from "./dto";
+import type { DecisionDetailDto, DecisionStatus, DecisionType } from "./dto";
 import {
   ALL_DECISION_TYPES,
   DECISION_STATUSES,
@@ -127,7 +126,10 @@ export function DecisionDetailView({ id }: { id: string }) {
           ))}
         </div>
         {update.error && (
-          <ErrorState message={update.error.message} onRetry={() => update.reset()} />
+          <ErrorState
+            message={update.error.message}
+            onRetry={() => update.reset()}
+          />
         )}
       </div>
 

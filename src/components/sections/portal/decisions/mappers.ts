@@ -195,7 +195,10 @@ export function goalToLabel(goal: string): string {
 //   skin flow = CONSIDER+DECIDE(skin)，stack flow = CONSIDER+DECIDE(supplement)，feel flow = OBSERVE+LEARN
 
 /** flow 来源（写入决策首条 entry 的来源标注） */
-export type FlowSource = "skin-analysis" | "supplement-evaluation" | "feel-check-in";
+export type FlowSource =
+  | "skin-analysis"
+  | "supplement-evaluation"
+  | "feel-check-in";
 
 const FLOW_SOURCE_TO_LABEL: Record<FlowSource, string> = {
   "skin-analysis": "Skin analysis",
