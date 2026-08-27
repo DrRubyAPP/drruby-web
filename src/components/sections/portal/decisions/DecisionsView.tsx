@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ErrorState, Skeleton } from "@/components/api";
 import { useApi } from "@/hooks/useApi";
-import { DecisionDetailDrawer } from "./DecisionDetailDrawer";
+import { useRouter } from "@/i18n/navigation";
 import type { DecisionDto } from "./dto";
 import {
   DECISION_CHIPS,
@@ -16,22 +16,22 @@ import { NewDecisionDrawer } from "./NewDecisionDrawer";
 /**
  * My Decisions 视图：4 个 section 常驻（设计稿结构）。
  * - Start a new decision chips → 打开 NewDecisionDrawer（预填 chip）
- * - Active decisions / Saved & completed ← GET /api/decisions 按 status 分组
+ * - Active decisions / Saved & completed ← GET /api/decisions（仅 saved=true）
  * - Inside a decision 为静态示例区块
- * - 列表卡片点击 → 打开 DecisionDetailDrawer（GET /api/decisions/[id]）
+ * - 列表卡片点击 → 路由到 /portal/decisions/[id]（task-37，drawer 退役）
  */
 export function DecisionsView() {
+  const router = useRouter();
   const { data, error, loading, refetch } =
     useApi<DecisionDto[]>("/api/decisions");
   const [newDrawerChip, setNewDrawerChip] = useState<string | null>(null);
-  const [detailId, setDetailId] = useState<string | null>(null);
 
   const { active, saved } = groupDecisions(data ?? []);
 
   function handleCreated(id: string) {
     setNewDrawerChip(null);
-    setDetailId(id);
     refetch();
+    router.push(`/portal/decisions/${id}`);
   }
 
   return (
@@ -86,7 +86,7 @@ export function DecisionsView() {
             <DecisionCard
               key={d.id}
               decision={d}
-              onClick={() => setDetailId(d.id)}
+              onClick={() => router.push(`/portal/decisions/${d.id}`)}
             />
           ))
         )}
@@ -144,11 +144,11 @@ export function DecisionsView() {
                 <div
                   key={d.id}
                   className="sub-row"
-                  onClick={() => setDetailId(d.id)}
+                  onClick={() => router.push(`/portal/decisions/${d.id}`)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
-                      setDetailId(d.id);
+                      router.push(`/portal/decisions/${d.id}`);
                     }
                   }}
                   role="button"
@@ -172,13 +172,6 @@ export function DecisionsView() {
           chip={newDrawerChip}
           onClose={() => setNewDrawerChip(null)}
           onCreated={handleCreated}
-        />
-      )}
-      {detailId !== null && (
-        <DecisionDetailDrawer
-          id={detailId}
-          onClose={() => setDetailId(null)}
-          onChanged={refetch}
         />
       )}
     </>

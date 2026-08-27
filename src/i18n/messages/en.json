@@ -652,6 +652,9 @@
       "step3CtaTitle": "Save your insights",
       "step3CtaSub": "Create a free account to track your progress and get proactive insights."
     },
+    "decisionsDetail": {
+      "pageTitle": "Your decision"
+    },
     "considerSkin": {
       "pageTitle": "My skin changed",
       "pageSub": "Consider · Skin Analysis",
