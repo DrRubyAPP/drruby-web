@@ -17,6 +17,8 @@ import {
   stackConsiderToQuestion,
   sortEntries,
   statusToLabel,
+  typeToLabel,
+  ALL_DECISION_TYPES,
 } from "./mappers";
 
 describe("statusToLabel", () => {
@@ -45,7 +47,10 @@ describe("groupDecisions", () => {
     id,
     question: `q-${id}`,
     goal: null,
+    type: null,
     status,
+    saved: true,
+    yourselfContext: null,
     updated: "2026-08-10T00:00:00.000Z",
   });
 
@@ -168,7 +173,10 @@ describe("mapDecisionDetail", () => {
     id: "d1",
     question: "Should I do Thermage?",
     goal: "firmness",
+    type: "thermage",
     status: "considering",
+    saved: true,
+    yourselfContext: "some context",
     updated: "2026-08-10T00:00:00.000Z",
     brief: {
       yourHistory: ["h1"],
@@ -278,6 +286,35 @@ describe("DECISION_STATUSES", () => {
       "decided",
       "paused",
     ]);
+  });
+});
+
+describe("type mappers", () => {
+  it("ALL_DECISION_TYPES lists 9 types in stable order", () => {
+    expect(ALL_DECISION_TYPES).toEqual([
+      "thermage",
+      "ultherapy",
+      "botox",
+      "laser",
+      "filler",
+      "hrt",
+      "skincare",
+      "clinic",
+      "not_sure",
+    ]);
+    expect(ALL_DECISION_TYPES).toHaveLength(9);
+  });
+
+  it("typeToLabel maps each type to a label", () => {
+    expect(typeToLabel("thermage")).toBe("Thermage");
+    expect(typeToLabel("ultherapy")).toBe("Ultherapy");
+    expect(typeToLabel("botox")).toBe("Botox");
+    expect(typeToLabel("laser")).toBe("Laser");
+    expect(typeToLabel("filler")).toBe("Filler");
+    expect(typeToLabel("hrt")).toBe("HRT");
+    expect(typeToLabel("skincare")).toBe("Skincare");
+    expect(typeToLabel("clinic")).toBe("Clinic");
+    expect(typeToLabel("not_sure")).toBe("Not sure yet");
   });
 });
 

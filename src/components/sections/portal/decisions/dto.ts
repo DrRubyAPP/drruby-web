@@ -44,7 +44,12 @@ export interface DecisionDto {
   question: string;
   /** 该决策服务的目标（对齐 concern_goals 词汇；旧数据可空） */
   goal: string | null;
+  type: DecisionType | null;
   status: DecisionStatus;
+  /** Keep this 落库后 true（F4：saved = 可被检索） */
+  saved: boolean;
+  /** Yourself 视角轻量背景（随 Keep this 一并落库，F3/B8） */
+  yourselfContext: string | null;
   updated: string; // ISO
   brief?: DecisionBriefDto; // 列表省 brief；详情含 brief
 }
@@ -54,20 +59,22 @@ export interface DecisionDetailDto extends DecisionDto {
   entries: DecisionEntryDto[];
 }
 
-/** POST /api/decisions 入参 */
+/** POST /api/decisions 入参（goal/status 可选，对齐 server CreateDecisionBody） */
 export interface CreateDecisionInput {
   question: string;
-  /** 该决策服务的目标（必选，对齐 concern_goals 词汇） */
-  goal: string;
-  status: DecisionStatus;
-  type?: DecisionType | null;
+  goal?: string;
+  status?: DecisionStatus; // 缺省 considering（B1）
+  type?: DecisionType | null; // 缺省 not_sure（F2）
 }
 
-/** POST /api/decisions/[id] 入参（PATCH 语义，状态推进） */
+/** POST /api/decisions/[id] 入参（PATCH 语义，状态推进 + Save） */
 export interface UpdateDecisionInput {
   status?: DecisionStatus;
   question?: string;
   type?: DecisionType | null;
+  /** Keep this：saved + yourselfContext 一次提交（F4） */
+  saved?: boolean;
+  yourselfContext?: string;
 }
 
 /** POST /api/decisions/[id]/entries 入参（append-only） */

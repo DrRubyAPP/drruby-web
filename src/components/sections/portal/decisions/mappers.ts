@@ -142,6 +142,26 @@ export function chipToType(chip: string): DecisionType {
   return CHIP_TO_TYPE[chip];
 }
 
+/** type → 展示 label（详情页 type 切换 chips / Home Ask 类型 chip 用） */
+const TYPE_TO_LABEL: Record<DecisionType, string> = {
+  thermage: "Thermage",
+  ultherapy: "Ultherapy",
+  botox: "Botox",
+  laser: "Laser",
+  filler: "Filler",
+  hrt: "HRT",
+  skincare: "Skincare",
+  clinic: "Clinic",
+  not_sure: "Not sure yet",
+};
+
+export const ALL_DECISION_TYPES = Object.keys(TYPE_TO_LABEL) as DecisionType[];
+
+/** type → 展示 label */
+export function typeToLabel(t: DecisionType): string {
+  return TYPE_TO_LABEL[t];
+}
+
 /** chip label → 预填 question 模板："Should I do <chip label>?" */
 export function chipToQuestionTemplate(chip: string): string {
   return `Should I do ${chip}?`;
