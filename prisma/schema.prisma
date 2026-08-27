@@ -282,7 +282,12 @@ model Decision {
   userId    String    @map("user_id")
   question  String
   goal      String?
-  type      String?   // thermage|ultherapy|botox|laser|filler|hrt|skincare|clinic|not_sure
+  // 决策粗粒度种类：procedure|medication|treatment|test|supplement|lifestyle|product|not_sure
+  type      String?
+  /// 决策针对的实体/主题（自由文本，如 "Thermage" / "gallbladder removal"）
+  topic     String?   @map("topic")
+  /// topic 归一化 slug（可空；命中已知语料 key → 专题语料，否则通用占位）
+  topicSlug String?   @map("topic_slug")
   status    String    // considering|in-progress|decided|paused
   brief     Json?
   /// Keep this 置 true（可检索）；Not-now 落库但不出现在任何列表（task-37 Slice 1）
@@ -299,6 +304,7 @@ model Decision {
 
   @@index([userId, status], map: "decision_user_status_idx")
   @@index([userId, saved], map: "decision_user_saved_idx")
+  @@index([userId, topicSlug], map: "decision_user_topic_slug_idx")
   @@map("decision")
 }
 
