@@ -13,10 +13,10 @@ import {
   SUBMIT_BTN,
   TEXTAREA,
 } from "./drawerStyles";
-import type { CreateDecisionInput, DecisionType } from "./dto";
+import type { CreateDecisionInput } from "./dto";
 import {
   chipToQuestionTemplate,
-  chipToType,
+  chipToTopic,
   GOAL_OPTIONS,
   goalToLabel,
 } from "./mappers";
@@ -30,7 +30,7 @@ interface NewDecisionDrawerProps {
 /**
  * 新建决策抽屉：由 DecisionsView 的 "Start a new decision" chips 触发。
  * - Goal 可选（task-37 B1 放宽：最小循环只问问题）
- * - 预填 question 模板（`chipToQuestionTemplate`）+ type（`chipToType`）
+ * - 预填 question 模板（`chipToQuestionTemplate`）+ topic 三元组（`chipToTopic`）
  * - status 缺省 considering（服务端默认，不再要求用户选）
  * - POST /api/decisions → onSuccess 调 onCreated(out.id)（关抽屉 + 跳详情 + refetch 列表）
  * - 错误态：抽屉内 inline ErrorState，输入保留可重试
@@ -44,7 +44,8 @@ export function NewDecisionDrawer({
   const [goal, setGoal] = useState<string | null>(null);
   const [customGoal, setCustomGoal] = useState("");
   const [question, setQuestion] = useState(chipToQuestionTemplate(chip));
-  const type: DecisionType = chipToType(chip);
+  // chip 语义 = 选 topic：预填 { topic, topicSlug, type } 三元组（未知 chip → not_sure）
+  const topicChip = chipToTopic(chip);
 
   /** 已选中的 goal：预设 chip 优先，否则取自定义输入 */
   const effectiveGoal =
@@ -71,7 +72,9 @@ export function NewDecisionDrawer({
     create.mutate({
       question: question.trim(),
       goal: effectiveGoal ?? undefined,
-      type,
+      topic: topicChip?.topic,
+      topicSlug: topicChip?.topicSlug,
+      type: topicChip?.type ?? "not_sure",
     });
   }
 

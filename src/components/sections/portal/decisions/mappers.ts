@@ -5,6 +5,7 @@ import type {
   DecisionEntryDto,
   DecisionStatus,
   DecisionType,
+  TopicSlug,
 } from "./dto";
 
 /** status 枚举列表（用于详情抽屉的 chips 渲染） */
@@ -121,29 +122,62 @@ export function mapDecisionDetail(
   };
 }
 
-/** chip label → DecisionType 映射（用于"Start a new decision"chips） */
-const CHIP_TO_TYPE: Record<string, DecisionType> = {
-  Thermage: "thermage",
-  Ultherapy: "ultherapy",
-  Botox: "botox",
-  Laser: "laser",
-  Filler: "filler",
-  HRT: "hrt",
-  "A skincare product": "skincare",
-  "A doctor or clinic": "clinic",
-  "Not sure yet": "not_sure",
-};
-
-/** chips 列表（与 portal/page.tsx mock 保持一致） */
-export const DECISION_CHIPS = Object.keys(CHIP_TO_TYPE);
-
-/** chip label → type 枚举 */
-export function chipToType(chip: string): DecisionType {
-  return CHIP_TO_TYPE[chip];
+/** topic chip 三元组：一个 Home chip 预填 { topic, topicSlug, type } */
+export interface TopicChip {
+  topic: string;
+  topicSlug: TopicSlug;
+  type: DecisionType;
 }
 
-/** type → 展示 label（详情页 type 切换 chips / Home Ask 类型 chip 用） */
+/** chip label → topic 三元组（Home "Ask about your health" chips；chip 语义=选 topic） */
+const CHIP_TO_TOPIC: Record<string, TopicChip> = {
+  Thermage: { topic: "Thermage", topicSlug: "thermage", type: "procedure" },
+  Ultherapy: { topic: "Ultherapy", topicSlug: "ultherapy", type: "procedure" },
+  Botox: { topic: "Botox", topicSlug: "botox", type: "procedure" },
+  Laser: { topic: "Laser", topicSlug: "laser", type: "procedure" },
+  Filler: { topic: "Filler", topicSlug: "filler", type: "procedure" },
+  HRT: { topic: "HRT", topicSlug: "hrt", type: "medication" },
+  "A skincare product": {
+    topic: "Skincare",
+    topicSlug: "skincare",
+    type: "product",
+  },
+  "A doctor or clinic": {
+    topic: "Clinic",
+    topicSlug: "clinic",
+    type: "not_sure",
+  },
+};
+
+/** chips 列表（与 portal/page.tsx 保持一致；chip 语义 = 选 topic） */
+export const DECISION_CHIPS = Object.keys(CHIP_TO_TOPIC);
+
+/** chip label → topic 三元组（未知 chip → undefined） */
+export function chipToTopic(chip: string): TopicChip | undefined {
+  return CHIP_TO_TOPIC[chip];
+}
+
+/** 粗粒度 type → 展示 label（详情页 type 切换 chips 用） */
 const TYPE_TO_LABEL: Record<DecisionType, string> = {
+  procedure: "Procedure",
+  medication: "Medication",
+  treatment: "Treatment",
+  test: "Test",
+  supplement: "Supplement",
+  lifestyle: "Lifestyle",
+  product: "Product",
+  not_sure: "Not sure yet",
+};
+
+export const ALL_DECISION_TYPES = Object.keys(TYPE_TO_LABEL) as DecisionType[];
+
+/** 粗粒度 type → 展示 label */
+export function typeToLabel(t: DecisionType): string {
+  return TYPE_TO_LABEL[t];
+}
+
+/** topicSlug → 展示 label（详情/展示用） */
+const TOPIC_SLUG_TO_LABEL: Record<TopicSlug, string> = {
   thermage: "Thermage",
   ultherapy: "Ultherapy",
   botox: "Botox",
@@ -152,14 +186,11 @@ const TYPE_TO_LABEL: Record<DecisionType, string> = {
   hrt: "HRT",
   skincare: "Skincare",
   clinic: "Clinic",
-  not_sure: "Not sure yet",
 };
 
-export const ALL_DECISION_TYPES = Object.keys(TYPE_TO_LABEL) as DecisionType[];
-
-/** type → 展示 label */
-export function typeToLabel(t: DecisionType): string {
-  return TYPE_TO_LABEL[t];
+/** topicSlug → 展示 label */
+export function topicSlugToLabel(s: TopicSlug): string {
+  return TOPIC_SLUG_TO_LABEL[s];
 }
 
 /** chip label → 预填 question 模板："Should I do <chip label>?" */

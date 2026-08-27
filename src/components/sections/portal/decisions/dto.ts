@@ -10,8 +10,19 @@ export type DecisionStatus =
   | "decided"
   | "paused";
 
-/** decision.type — 9 值（参考 src/lib/db/enums.ts:135-146），可空 */
+/** decision.type — 粗粒度 8 值（对齐 enums decisionTypeSchema），可空 */
 export type DecisionType =
+  | "procedure"
+  | "medication"
+  | "treatment"
+  | "test"
+  | "supplement"
+  | "lifestyle"
+  | "product"
+  | "not_sure";
+
+/** topic 归一化 slug（对齐 enums topicSlugSchema），可空 */
+export type TopicSlug =
   | "thermage"
   | "ultherapy"
   | "botox"
@@ -19,8 +30,7 @@ export type DecisionType =
   | "filler"
   | "hrt"
   | "skincare"
-  | "clinic"
-  | "not_sure";
+  | "clinic";
 
 /** 三源 Decision Brief 快照（对齐 server DecisionBriefDTO） */
 export interface DecisionBriefDto {
@@ -44,7 +54,12 @@ export interface DecisionDto {
   question: string;
   /** 该决策服务的目标（对齐 concern_goals 词汇；旧数据可空） */
   goal: string | null;
+  /** 粗粒度决策种类（只影响 Science 措辞框架） */
   type: DecisionType | null;
+  /** 决策针对的实体/主题（自由文本，展示用） */
+  topic: string | null;
+  /** topic 归一化 slug（驱动语料检索） */
+  topicSlug: TopicSlug | null;
   status: DecisionStatus;
   /** Keep this 落库后 true（F4：saved = 可被检索） */
   saved: boolean;
@@ -64,7 +79,11 @@ export interface CreateDecisionInput {
   question: string;
   goal?: string;
   status?: DecisionStatus; // 缺省 considering（B1）
-  type?: DecisionType | null; // 缺省 not_sure（F2）
+  type?: DecisionType | null; // 缺省 not_sure（粗粒度）
+  /** 决策针对的实体/主题（自由文本；chip 预填，自由 Ask 省略 → null） */
+  topic?: string;
+  /** topic 归一化 slug（chip 预填；驱动语料检索） */
+  topicSlug?: TopicSlug;
 }
 
 /** POST /api/decisions/[id] 入参（PATCH 语义，状态推进 + Save） */
@@ -72,6 +91,8 @@ export interface UpdateDecisionInput {
   status?: DecisionStatus;
   question?: string;
   type?: DecisionType | null;
+  topic?: string;
+  topicSlug?: TopicSlug;
   /** Keep this：saved + yourselfContext 一次提交（F4） */
   saved?: boolean;
   yourselfContext?: string;

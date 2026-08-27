@@ -4,7 +4,7 @@ import {
   ALL_DECISION_TYPES,
   buildEntryText,
   chipToQuestionTemplate,
-  chipToType,
+  chipToTopic,
   DECISION_CHIPS,
   DECISION_STATUSES,
   feelObserveToQuestion,
@@ -18,6 +18,7 @@ import {
   sortEntries,
   stackConsiderToQuestion,
   statusToLabel,
+  topicSlugToLabel,
   typeToLabel,
 } from "./mappers";
 
@@ -48,6 +49,8 @@ describe("groupDecisions", () => {
     question: `q-${id}`,
     goal: null,
     type: null,
+    topic: null,
+    topicSlug: null,
     status,
     saved: true,
     yourselfContext: null,
@@ -173,7 +176,9 @@ describe("mapDecisionDetail", () => {
     id: "d1",
     question: "Should I do Thermage?",
     goal: "firmness",
-    type: "thermage",
+    type: "procedure",
+    topic: "Thermage",
+    topicSlug: "thermage",
     status: "considering",
     saved: true,
     yourselfContext: "some context",
@@ -223,7 +228,7 @@ describe("mapDecisionDetail", () => {
 });
 
 describe("chip mappers", () => {
-  it("DECISION_CHIPS lists 9 chips in stable order", () => {
+  it("DECISION_CHIPS lists 8 topic chips in stable order", () => {
     expect(DECISION_CHIPS).toEqual([
       "Thermage",
       "Ultherapy",
@@ -233,16 +238,35 @@ describe("chip mappers", () => {
       "HRT",
       "A skincare product",
       "A doctor or clinic",
-      "Not sure yet",
     ]);
-    expect(DECISION_CHIPS).toHaveLength(9);
+    expect(DECISION_CHIPS).toHaveLength(8);
   });
 
-  it("chipToType maps each chip to DecisionType", () => {
-    expect(chipToType("Thermage")).toBe("thermage");
-    expect(chipToType("HRT")).toBe("hrt");
-    expect(chipToType("A skincare product")).toBe("skincare");
-    expect(chipToType("Not sure yet")).toBe("not_sure");
+  it("chipToTopic maps each chip to { topic, topicSlug, type } 三元组", () => {
+    expect(chipToTopic("Thermage")).toEqual({
+      topic: "Thermage",
+      topicSlug: "thermage",
+      type: "procedure",
+    });
+    expect(chipToTopic("HRT")).toEqual({
+      topic: "HRT",
+      topicSlug: "hrt",
+      type: "medication",
+    });
+    expect(chipToTopic("A skincare product")).toEqual({
+      topic: "Skincare",
+      topicSlug: "skincare",
+      type: "product",
+    });
+    expect(chipToTopic("A doctor or clinic")).toEqual({
+      topic: "Clinic",
+      topicSlug: "clinic",
+      type: "not_sure",
+    });
+  });
+
+  it("chipToTopic returns undefined for unknown chip", () => {
+    expect(chipToTopic("Not a chip")).toBeUndefined();
   });
 
   it("chipToQuestionTemplate wraps chip in 'Should I do X?'", () => {
@@ -290,31 +314,42 @@ describe("DECISION_STATUSES", () => {
 });
 
 describe("type mappers", () => {
-  it("ALL_DECISION_TYPES lists 9 types in stable order", () => {
+  it("ALL_DECISION_TYPES lists 8 coarse types in stable order", () => {
     expect(ALL_DECISION_TYPES).toEqual([
-      "thermage",
-      "ultherapy",
-      "botox",
-      "laser",
-      "filler",
-      "hrt",
-      "skincare",
-      "clinic",
+      "procedure",
+      "medication",
+      "treatment",
+      "test",
+      "supplement",
+      "lifestyle",
+      "product",
       "not_sure",
     ]);
-    expect(ALL_DECISION_TYPES).toHaveLength(9);
+    expect(ALL_DECISION_TYPES).toHaveLength(8);
   });
 
-  it("typeToLabel maps each type to a label", () => {
-    expect(typeToLabel("thermage")).toBe("Thermage");
-    expect(typeToLabel("ultherapy")).toBe("Ultherapy");
-    expect(typeToLabel("botox")).toBe("Botox");
-    expect(typeToLabel("laser")).toBe("Laser");
-    expect(typeToLabel("filler")).toBe("Filler");
-    expect(typeToLabel("hrt")).toBe("HRT");
-    expect(typeToLabel("skincare")).toBe("Skincare");
-    expect(typeToLabel("clinic")).toBe("Clinic");
+  it("typeToLabel maps each coarse type to a label", () => {
+    expect(typeToLabel("procedure")).toBe("Procedure");
+    expect(typeToLabel("medication")).toBe("Medication");
+    expect(typeToLabel("treatment")).toBe("Treatment");
+    expect(typeToLabel("test")).toBe("Test");
+    expect(typeToLabel("supplement")).toBe("Supplement");
+    expect(typeToLabel("lifestyle")).toBe("Lifestyle");
+    expect(typeToLabel("product")).toBe("Product");
     expect(typeToLabel("not_sure")).toBe("Not sure yet");
+  });
+});
+
+describe("topicSlug mappers", () => {
+  it("topicSlugToLabel maps each entity slug to a label", () => {
+    expect(topicSlugToLabel("thermage")).toBe("Thermage");
+    expect(topicSlugToLabel("ultherapy")).toBe("Ultherapy");
+    expect(topicSlugToLabel("botox")).toBe("Botox");
+    expect(topicSlugToLabel("laser")).toBe("Laser");
+    expect(topicSlugToLabel("filler")).toBe("Filler");
+    expect(topicSlugToLabel("hrt")).toBe("HRT");
+    expect(topicSlugToLabel("skincare")).toBe("Skincare");
+    expect(topicSlugToLabel("clinic")).toBe("Clinic");
   });
 });
 
