@@ -1,13 +1,19 @@
 import {
-  type DecisionStatus,
+  assertOutcomeForKind,
+  type DecisionKind,
+  type DecisionLifecycle,
+  type DecisionOutcome,
   type DecisionType,
-  decisionStatusSchema,
+  decisionKindSchema,
   decisionTypeSchema,
   type TopicSlug,
   topicSlugSchema,
 } from "@/lib/db/enums";
 import { prisma } from "@/lib/db/prisma";
 import type { Decision, Prisma } from "~prisma/client";
+
+/** §31 幂等去重窗口（同 userId+question 复用），常量便于调整 */
+export const CREATE_DEDUP_WINDOW_MS = 60_000;
 
 /** 四源 brief 快照（P1 存 JSON，结构对齐 App DecisionBrief） */
 export interface DecisionBriefSnapshot {
@@ -21,8 +27,14 @@ export interface CreateDecisionInput {
   question: string;
   /** 该决策服务的目标（对齐 concern_goals 词汇；Slice 1 起可选） */
   goal?: string | null;
-  /** 缺省 considering */
-  status?: DecisionStatus;
+  /** 缺省 ACTIVE（§5） */
+  lifecycle?: DecisionLifecycle;
+  /** Type A/B（缺省 unconfirmed，§3） */
+  decisionKind?: DecisionKind | null;
+  /** 按 kind 分组的 outcome（可空=未决） */
+  outcome?: DecisionOutcome | null;
+  /** Type B decided_on_next_step 必带 */
+  nextStep?: string | null;
   /** 粗粒度决策种类（缺省 not_sure） */
   type?: DecisionType | null;
   /** 决策针对的实体/主题（自由文本） */
@@ -34,11 +46,14 @@ export interface CreateDecisionInput {
 
 export interface UpdateDecisionInput {
   question?: string;
-  status?: DecisionStatus;
+  lifecycle?: DecisionLifecycle;
+  decisionKind?: DecisionKind | null;
+  outcome?: DecisionOutcome | null;
+  nextStep?: string | null;
   type?: DecisionType | null;
   topic?: string | null;
   topicSlug?: TopicSlug | null;
-  /** Keep this 置 true；Not-now 不置（保持 false） */
+  /** Keep this 置 true；Not-now 不置（保持 false）—— §11 纯书签 */
   saved?: boolean;
   /** Yourself 轻量文字背景（可编辑，随 Keep 一并保存；不写入 brief） */
   yourselfContext?: string | null;
@@ -46,29 +61,61 @@ export interface UpdateDecisionInput {
   decidedAt?: Date | null;
 }
 
-function validateStatus(s?: DecisionStatus): void {
-  if (s !== undefined) decisionStatusSchema.parse(s);
-}
+/** §8 meaningful activity：写入这些字段才刷新 lastUserActivityAt（saved/brief/decidedAt 不算） */
+const MEANINGFUL_UPDATE_KEYS = [
+  "question",
+  "type",
+  "topic",
+  "topicSlug",
+  "yourselfContext",
+  "decisionKind",
+  "outcome",
+  "nextStep",
+  "lifecycle",
+] as const;
+
 function validateType(t?: DecisionType | null): void {
   if (t !== undefined && t !== null) decisionTypeSchema.parse(t);
 }
 function validateTopicSlug(s?: TopicSlug | null): void {
   if (s !== undefined && s !== null) topicSlugSchema.parse(s);
 }
+function validateKindOutcome(
+  kind?: DecisionKind | null,
+  outcome?: DecisionOutcome | null,
+): void {
+  if (kind != null) decisionKindSchema.parse(kind);
+  if (outcome !== undefined) {
+    // outcome 合法性依赖 kind；kind 未给时按 unconfirmed 兜底校验
+    assertOutcomeForKind(kind ?? "unconfirmed", outcome);
+  }
+}
 
 export async function create(
   userId: string,
   input: CreateDecisionInput,
 ): Promise<Decision> {
-  validateStatus(input.status);
   validateType(input.type);
   validateTopicSlug(input.topicSlug);
+  validateKindOutcome(input.decisionKind, input.outcome);
+
+  // §31：60s 内同 userId+question 的重复创建 → 返回既有行，不新建
+  const since = new Date(Date.now() - CREATE_DEDUP_WINDOW_MS);
+  const dup = await prisma.decision.findFirst({
+    where: { userId, question: input.question, createdAt: { gte: since } },
+    orderBy: { createdAt: "desc" },
+  });
+  if (dup) return dup;
+
   return prisma.decision.create({
     data: {
       userId,
       question: input.question,
       goal: input.goal ?? null,
-      status: input.status ?? "considering",
+      lifecycle: input.lifecycle ?? "ACTIVE",
+      decisionKind: input.decisionKind ?? "unconfirmed",
+      outcome: input.outcome ?? null,
+      nextStep: input.nextStep ?? null,
       type: input.type ?? "not_sure",
       topic: input.topic ?? null,
       topicSlug: input.topicSlug ?? null,
@@ -81,14 +128,16 @@ export async function update(
   id: string,
   input: UpdateDecisionInput,
 ): Promise<Decision> {
-  validateStatus(input.status);
   validateType(input.type);
   validateTopicSlug(input.topicSlug);
+  validateKindOutcome(input.decisionKind, input.outcome);
   const { brief, ...rest } = input;
+  const touched = MEANINGFUL_UPDATE_KEYS.some((k) => input[k] !== undefined);
   return prisma.decision.update({
     where: { id },
     data: {
       ...rest,
+      ...(touched ? { lastUserActivityAt: new Date() } : {}),
       brief:
         brief === undefined
           ? undefined
@@ -104,11 +153,29 @@ export async function listByUser(userId: string): Promise<Decision[]> {
   });
 }
 
-/** 仅 saved=true（"可检索 = saved"；Not-now 落库但不出现在任何列表） */
-export async function listByUserSaved(userId: string): Promise<Decision[]> {
+/** Actionable：lifecycle ∉ {CLOSED, COMPLETED}（§6），按最近活动倒序（§8） */
+export async function listByUserActionable(
+  userId: string,
+): Promise<Decision[]> {
   return prisma.decision.findMany({
-    where: { userId, saved: true },
-    orderBy: { updatedAt: "desc" },
+    where: { userId, lifecycle: { notIn: ["CLOSED", "COMPLETED"] } },
+    orderBy: { lastUserActivityAt: "desc" },
+  });
+}
+
+/** History：Closed/Completed（列表 UI 消费在 task-40） */
+export async function listByUserHistory(userId: string): Promise<Decision[]> {
+  return prisma.decision.findMany({
+    where: { userId, lifecycle: { in: ["CLOSED", "COMPLETED"] } },
+    orderBy: { lastUserActivityAt: "desc" },
+  });
+}
+
+/** 新增 Observation 等外部 meaningful activity 时刷新排序键（§8） */
+export async function bumpActivity(id: string): Promise<void> {
+  await prisma.decision.update({
+    where: { id },
+    data: { lastUserActivityAt: new Date() },
   });
 }
 
