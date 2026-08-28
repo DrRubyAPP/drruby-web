@@ -39,12 +39,13 @@ export function computeAttention(data: InsightInput): CreateBodyInsightInput[] {
   }
 
   for (const d of data.decisions) {
-    if (d.status === "considering" || d.status === "paused") {
+    // 未决 = lifecycle 仍在 ACTIVE（尚未 DECIDED/OBSERVING/…）
+    if (d.lifecycle === "ACTIVE") {
       out.push({
         kind: "attention",
         tag: "decision",
         title: `继续推进：${d.question}`,
-        body: `该决策仍在 ${d.status}。`,
+        body: "该决策仍在推进中。",
         accent: "purple",
       });
     }

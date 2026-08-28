@@ -6,7 +6,7 @@ const MAX_ITEMS = 5;
 /**
  * 构建注入 LLM 的紧凑个人史摘要（仅供参考、不得据此下结论）。
  *
- * 纯规则抽取：近期 decisions（问题+状态）、关键 signals（label=value(trend)[confidence]）、
+ * 纯规则抽取：近期 decisions（问题+生命周期）、关键 signals（label=value(trend)[confidence]）、
  * 近期 timeline（标题）。历史仅进 LLM 请求体、不出服务端、不落日志明文。
  * 无任何数据时返回 `null`——调用方据此省略该 system 消息。
  */
@@ -24,7 +24,7 @@ export async function buildHistorySummary(
     parts.push(
       `近期决策：${decisions
         .slice(0, MAX_ITEMS)
-        .map((d) => `${d.question}(${d.status})`)
+        .map((d) => `${d.question}(${d.lifecycle})`)
         .join("；")}`,
     );
   }
