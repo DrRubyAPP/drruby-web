@@ -127,14 +127,67 @@ export type SignalConfidence = z.infer<typeof signalConfidenceSchema>;
 export const signalTrendSchema = z.enum(["up", "down", "flat"]);
 export type SignalTrend = z.infer<typeof signalTrendSchema>;
 
-/** decision.status — App Decision.status（注意连字符 in-progress） */
-export const decisionStatusSchema = z.enum([
-  "considering",
-  "in-progress",
-  "decided",
-  "paused",
+/** decision.lifecycle — Contract §5 生命周期 6 值（默认 ACTIVE） */
+export const decisionLifecycleSchema = z.enum([
+  "ACTIVE",
+  "DECIDED",
+  "OBSERVING",
+  "LEARNING",
+  "COMPLETED",
+  "CLOSED",
 ]);
-export type DecisionStatus = z.infer<typeof decisionStatusSchema>;
+export type DecisionLifecycle = z.infer<typeof decisionLifecycleSchema>;
+
+/** decision.decisionKind — Contract §3 Type A/B（用户永不见字面；默认 unconfirmed） */
+export const decisionKindSchema = z.enum([
+  "action",
+  "exploration",
+  "unconfirmed",
+]);
+export type DecisionKind = z.infer<typeof decisionKindSchema>;
+
+/** Type A outcome 集（action） */
+export const TYPE_A_OUTCOMES = [
+  "still_considering",
+  "decided_to_do_it",
+  "decided_not_to",
+  "talk_with_clinician_first",
+] as const;
+/** Type B outcome 集（exploration） */
+export const TYPE_B_OUTCOMES = [
+  "keep_exploring",
+  "discuss_with_clinician",
+  "come_back_later",
+  "decided_on_next_step",
+] as const;
+
+/** decision.outcome — 8 值并集，可空（未决） */
+export const outcomeSchema = z.enum([...TYPE_A_OUTCOMES, ...TYPE_B_OUTCOMES]);
+export type DecisionOutcome = z.infer<typeof outcomeSchema>;
+
+/**
+ * 分组校验：给定 decisionKind 校验 outcome 是否合法。
+ * - unconfirmed → outcome 必须为 null/undefined
+ * - action → 仅 TYPE_A_OUTCOMES；exploration → 仅 TYPE_B_OUTCOMES
+ * 非法组合抛错（调用方在 API 层映射为 422）。
+ */
+export function assertOutcomeForKind(
+  kind: DecisionKind,
+  outcome?: DecisionOutcome | null,
+): void {
+  if (kind === "unconfirmed") {
+    if (outcome != null) {
+      throw new Error("unconfirmed decision must not carry an outcome");
+    }
+    return;
+  }
+  if (outcome == null) return; // 未决合法
+  const set: readonly string[] =
+    kind === "action" ? TYPE_A_OUTCOMES : TYPE_B_OUTCOMES;
+  if (!set.includes(outcome)) {
+    throw new Error(`outcome "${outcome}" is not valid for kind "${kind}"`);
+  }
+}
 
 /** decision.topicSlug — 已知语料实体 slug（可空；null=无 topic 或未命中）
  *  仅驱动语料检索；与粗粒度 decisionType 正交。Journey.decisionType 亦复用此集。 */
