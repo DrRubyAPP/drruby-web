@@ -3,52 +3,46 @@ import type {
   DecisionDetailDto,
   DecisionDto,
   DecisionEntryDto,
-  DecisionStatus,
+  DecisionLifecycle,
   DecisionType,
   TopicSlug,
 } from "./dto";
 
-/** status 枚举列表（用于详情抽屉的 chips 渲染） */
-export const DECISION_STATUSES: DecisionStatus[] = [
-  "considering",
-  "in-progress",
-  "decided",
-  "paused",
-];
-
-/** status → badge label 直接映射（4 值，无 Did not proceed/Completed/faded） */
-const STATUS_TO_LABEL: Record<DecisionStatus, string> = {
-  considering: "Considering",
-  "in-progress": "In progress",
-  decided: "Decided",
-  paused: "Paused",
+/** lifecycle → badge label（Contract §5 6 值） */
+const LIFECYCLE_TO_LABEL: Record<DecisionLifecycle, string> = {
+  ACTIVE: "Active",
+  DECIDED: "Decided",
+  OBSERVING: "Observing",
+  LEARNING: "Learning",
+  COMPLETED: "Completed",
+  CLOSED: "Closed",
 };
 
-/** status → badge label */
-export function statusToLabel(status: DecisionStatus): string {
-  return STATUS_TO_LABEL[status];
+/** lifecycle → badge label */
+export function lifecycleToLabel(l: DecisionLifecycle): string {
+  return LIFECYCLE_TO_LABEL[l];
 }
 
-/** Active 组 = status !== 'decided'；Saved 组 = status === 'decided' */
-export function isActive(status: DecisionStatus): boolean {
-  return status !== "decided";
+/** Actionable = lifecycle ∉ {CLOSED, COMPLETED}（§6） */
+export function isActionable(l: DecisionLifecycle): boolean {
+  return l !== "CLOSED" && l !== "COMPLETED";
 }
 
-/** 列表 DTO → { active, saved } 两组 */
+/** 列表 DTO → { actionable, history } 两组 */
 export interface DecisionGroups {
-  active: DecisionDto[];
-  saved: DecisionDto[]; // status === 'decided'
+  actionable: DecisionDto[];
+  history: DecisionDto[]; // lifecycle ∈ {CLOSED, COMPLETED}
 }
 
-/** 把扁平列表分组为 active/saved 两组（保留原顺序） */
+/** 按 lifecycle 分 Actionable / History（保留原顺序） */
 export function groupDecisions(items: DecisionDto[]): DecisionGroups {
-  const active: DecisionDto[] = [];
-  const saved: DecisionDto[] = [];
+  const actionable: DecisionDto[] = [];
+  const history: DecisionDto[] = [];
   for (const d of items) {
-    if (isActive(d.status)) active.push(d);
-    else saved.push(d);
+    if (isActionable(d.lifecycle)) actionable.push(d);
+    else history.push(d);
   }
-  return { active, saved };
+  return { actionable, history };
 }
 
 /** Brief DTO → BriefView（hasXxx flags for 条件渲染） */
@@ -100,8 +94,8 @@ export interface DecisionDetailView {
   id: string;
   question: string;
   goal: string | null;
-  status: DecisionStatus;
-  statusLabel: string;
+  lifecycle: DecisionLifecycle;
+  lifecycleLabel: string;
   updated: string;
   brief: BriefView | null;
   entries: DecisionEntryDto[]; // 已排序
@@ -114,8 +108,8 @@ export function mapDecisionDetail(
     id: detail.id,
     question: detail.question,
     goal: detail.goal,
-    status: detail.status,
-    statusLabel: statusToLabel(detail.status),
+    lifecycle: detail.lifecycle,
+    lifecycleLabel: lifecycleToLabel(detail.lifecycle),
     updated: detail.updated,
     brief: mapBrief(detail.brief),
     entries: sortEntries(detail.entries),

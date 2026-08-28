@@ -55,7 +55,6 @@ export function SaveAsDecisionButton({
       const created = await apiClient.post<{ id: string }>("/api/decisions", {
         question,
         goal,
-        status: "considering",
         type: null,
       } satisfies CreateDecisionInput);
       setCreatedId(created.id);

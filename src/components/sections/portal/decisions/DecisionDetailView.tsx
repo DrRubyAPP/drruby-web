@@ -12,12 +12,11 @@ import { useMutation } from "@/hooks/useMutation";
 import { useRouter } from "@/i18n/navigation";
 import { apiClient } from "@/lib/api/client";
 import { ACTIVE_CHIP, SUBMIT_BTN, TEXTAREA } from "./drawerStyles";
-import type { DecisionDetailDto, DecisionStatus, DecisionType } from "./dto";
+import type { DecisionDetailDto, DecisionType } from "./dto";
 import {
   ALL_DECISION_TYPES,
-  DECISION_STATUSES,
+  lifecycleToLabel,
   sortEntries,
-  statusToLabel,
   typeToLabel,
 } from "./mappers";
 
@@ -65,9 +64,9 @@ export function DecisionDetailView({ id }: { id: string }) {
     { onSuccess: () => refetch() },
   );
 
-  // 改 type（粗粒度，只影响 Science 措辞框架，不切换检索语料）；改 status（迁移自 drawer）
+  // 改 type（粗粒度，只影响 Science 措辞框架，不切换检索语料）
   const update = useMutation(
-    (input: { type?: DecisionType; status?: DecisionStatus }) =>
+    (input: { type?: DecisionType }) =>
       apiClient.post(`/api/decisions/${id}`, input),
     { onSuccess: () => refetch() },
   );
@@ -107,7 +106,7 @@ export function DecisionDetailView({ id }: { id: string }) {
       >
         {data.question}
       </h1>
-      <span className="dec-badge">{statusToLabel(data.status)}</span>
+      <span className="dec-badge">{lifecycleToLabel(data.lifecycle)}</span>
       {data.topic && (
         <span style={{ fontSize: 13, color: "#a89a95", marginLeft: 8 }}>
           {data.topic}
@@ -318,25 +317,6 @@ export function DecisionDetailView({ id }: { id: string }) {
             {appendEntry.loading ? "Saving…" : "Add observation"}
           </button>
         </form>
-      </div>
-
-      {/* status 推进（迁移自 DecisionDetailDrawer） */}
-      <div className="sec">
-        <div className="sec-h">Status</div>
-        <div className="ask-ex">
-          {DECISION_STATUSES.map((s) => (
-            <button
-              key={s}
-              type="button"
-              className="ask-chip"
-              disabled={update.loading}
-              onClick={() => update.mutate({ status: s })}
-              style={data.status === s ? ACTIVE_CHIP : undefined}
-            >
-              {statusToLabel(s)}
-            </button>
-          ))}
-        </div>
       </div>
     </div>
   );

@@ -9,7 +9,7 @@ import {
   DECISION_CHIPS,
   goalToLabel,
   groupDecisions,
-  statusToLabel,
+  lifecycleToLabel,
 } from "./mappers";
 import { NewDecisionDrawer } from "./NewDecisionDrawer";
 
@@ -26,7 +26,7 @@ export function DecisionsView() {
     useApi<DecisionDto[]>("/api/decisions");
   const [newDrawerChip, setNewDrawerChip] = useState<string | null>(null);
 
-  const { active, saved } = groupDecisions(data ?? []);
+  const { actionable, history } = groupDecisions(data ?? []);
 
   function handleCreated(id: string) {
     setNewDrawerChip(null);
@@ -77,12 +77,12 @@ export function DecisionsView() {
           <Skeleton lines={3} />
         ) : error ? (
           <ErrorState message={error.message} onRetry={refetch} />
-        ) : active.length === 0 ? (
+        ) : actionable.length === 0 ? (
           <div className="cm2-note">
             Nothing being weighed right now &mdash; start one above.
           </div>
         ) : (
-          active.map((d) => (
+          actionable.map((d) => (
             <DecisionCard
               key={d.id}
               decision={d}
@@ -135,12 +135,12 @@ export function DecisionsView() {
       {/* Saved & completed：section 常驻，行数据来自 API */}
       <div className="sec">
         <div className="sec-h">Saved &amp; completed</div>
-        {!loading && !error && saved.length === 0 ? (
+        {!loading && !error && history.length === 0 ? (
           <div className="cm2-note">Nothing saved or completed yet.</div>
         ) : (
-          saved.length > 0 && (
+          history.length > 0 && (
             <div className="card">
-              {saved.map((d) => (
+              {history.map((d) => (
                 <div
                   key={d.id}
                   className="sub-row"
@@ -157,7 +157,7 @@ export function DecisionsView() {
                 >
                   <span>
                     {d.question} &middot;{" "}
-                    {statusToLabel(d.status).toLowerCase()}
+                    {lifecycleToLabel(d.lifecycle).toLowerCase()}
                   </span>
                   <span className="arr">&rsaquo;</span>
                 </div>
@@ -213,7 +213,9 @@ function DecisionCard({
       <div className="dcard-main">
         <div className="dcard-top">
           <h4>{decision.question}</h4>
-          <span className="dec-badge">{statusToLabel(decision.status)}</span>
+          <span className="dec-badge">
+            {lifecycleToLabel(decision.lifecycle)}
+          </span>
         </div>
         {decision.goal && (
           <div className="st">For: {goalToLabel(decision.goal)}</div>
