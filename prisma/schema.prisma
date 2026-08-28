@@ -288,7 +288,16 @@ model Decision {
   topic     String?   @map("topic")
   /// topic 归一化 slug（可空；命中已知语料 key → 专题语料，否则通用占位）
   topicSlug String?   @map("topic_slug")
-  status    String    // considering|in-progress|decided|paused
+  /// Contract §5 生命周期：ACTIVE|DECIDED|OBSERVING|LEARNING|COMPLETED|CLOSED
+  lifecycle          String    @default("ACTIVE")
+  /// Contract §3 Type A/B：action|exploration|unconfirmed（用户永不见字面；默认 unconfirmed）
+  decisionKind       String?   @map("decision_kind")
+  /// 按 kind 分组的 8 值，可空=未决
+  outcome            String?
+  /// Type B decided_on_next_step 必带（§3）
+  nextStep           String?   @map("next_step")
+  /// §8 What Matters Now 排序键 + meaningful activity 刷新
+  lastUserActivityAt DateTime  @default(now()) @map("last_user_activity_at") @db.Timestamptz
   brief     Json?
   /// Keep this 置 true（可检索）；Not-now 落库但不出现在任何列表（task-37 Slice 1）
   saved           Boolean   @default(false) @map("saved")
@@ -302,7 +311,7 @@ model Decision {
   entries        DecisionEntry[]
   timelineEvents TimelineEvent[]
 
-  @@index([userId, status], map: "decision_user_status_idx")
+  @@index([userId, lastUserActivityAt], map: "decision_user_activity_idx")
   @@index([userId, saved], map: "decision_user_saved_idx")
   @@index([userId, topicSlug], map: "decision_user_topic_slug_idx")
   @@map("decision")
@@ -315,7 +324,7 @@ model DecisionEntry {
   decisionId     String   @map("decision_id")
   userId         String   @map("user_id")
   text           String
-  statusSnapshot String   @map("status_snapshot") // 记录当时决策状态
+  lifecycleSnapshot String @map("lifecycle_snapshot") // 记录当时决策生命周期
   occurredAt     DateTime @map("occurred_at") @db.Timestamptz
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
 
