@@ -3,12 +3,28 @@
  * 不复用 server 端文件（避免拉入 prisma 依赖），独立声明同构 interface。
  */
 
-/** decision.status — 4 值（参考 src/lib/db/enums.ts:125-132） */
-export type DecisionStatus =
-  | "considering"
-  | "in-progress"
-  | "decided"
-  | "paused";
+/** decision.lifecycle — Contract §5 生命周期 6 值（默认 ACTIVE） */
+export type DecisionLifecycle =
+  | "ACTIVE"
+  | "DECIDED"
+  | "OBSERVING"
+  | "LEARNING"
+  | "COMPLETED"
+  | "CLOSED";
+
+/** decision.decisionKind — Contract §3 Type A/B（用户永不见字面；默认 unconfirmed） */
+export type DecisionKind = "action" | "exploration" | "unconfirmed";
+
+/** decision.outcome — 按 kind 分组的 8 值，可空=未决 */
+export type DecisionOutcome =
+  | "still_considering"
+  | "decided_to_do_it"
+  | "decided_not_to"
+  | "talk_with_clinician_first"
+  | "keep_exploring"
+  | "discuss_with_clinician"
+  | "come_back_later"
+  | "decided_on_next_step";
 
 /** decision.type — 粗粒度 8 值（对齐 enums decisionTypeSchema），可空 */
 export type DecisionType =
@@ -44,7 +60,7 @@ export interface DecisionBriefDto {
 export interface DecisionEntryDto {
   id: string;
   text: string;
-  statusSnapshot: DecisionStatus;
+  lifecycleSnapshot: DecisionLifecycle;
   occurredAt: string; // ISO
 }
 
@@ -60,12 +76,21 @@ export interface DecisionDto {
   topic: string | null;
   /** topic 归一化 slug（驱动语料检索） */
   topicSlug: TopicSlug | null;
-  status: DecisionStatus;
-  /** Keep this 落库后 true（F4：saved = 可被检索） */
+  /** Contract §5 生命周期（默认 ACTIVE） */
+  lifecycle: DecisionLifecycle;
+  /** Contract §3 Type A/B（用户永不见字面） */
+  decisionKind: DecisionKind | null;
+  /** 按 kind 分组的 outcome（可空=未决） */
+  outcome: DecisionOutcome | null;
+  /** Type B decided_on_next_step 必带 */
+  nextStep: string | null;
+  /** Keep this 落库后 true（§11：saved = 纯书签，不影响可见性） */
   saved: boolean;
   /** Yourself 视角轻量背景（随 Keep this 一并落库，F3/B8） */
   yourselfContext: string | null;
   updated: string; // ISO
+  /** §8 What Matters Now 排序键 */
+  lastUserActivityAt: string; // ISO
   brief?: DecisionBriefDto; // 列表省 brief；详情含 brief
 }
 
@@ -74,11 +99,10 @@ export interface DecisionDetailDto extends DecisionDto {
   entries: DecisionEntryDto[];
 }
 
-/** POST /api/decisions 入参（goal/status 可选，对齐 server CreateDecisionBody） */
+/** POST /api/decisions 入参（goal 可选，对齐 server CreateDecisionBody；幂等走服务端 60s 去重，不传 requestId） */
 export interface CreateDecisionInput {
   question: string;
   goal?: string;
-  status?: DecisionStatus; // 缺省 considering（B1）
   type?: DecisionType | null; // 缺省 not_sure（粗粒度）
   /** 决策针对的实体/主题（自由文本；chip 预填，自由 Ask 省略 → null） */
   topic?: string;
@@ -86,21 +110,23 @@ export interface CreateDecisionInput {
   topicSlug?: TopicSlug;
 }
 
-/** POST /api/decisions/[id] 入参（PATCH 语义，状态推进 + Save） */
+/** POST /api/decisions/[id] 入参（PATCH 语义，lifecycle 三维 + Save） */
 export interface UpdateDecisionInput {
-  status?: DecisionStatus;
   question?: string;
   type?: DecisionType | null;
   topic?: string;
   topicSlug?: TopicSlug;
-  /** Keep this：saved + yourselfContext 一次提交（F4） */
+  lifecycle?: DecisionLifecycle;
+  decisionKind?: DecisionKind;
+  outcome?: DecisionOutcome | null;
+  nextStep?: string | null;
+  /** Keep this：saved + yourselfContext 一次提交（§11 纯书签） */
   saved?: boolean;
   yourselfContext?: string;
 }
 
-/** POST /api/decisions/[id]/entries 入参（append-only） */
+/** POST /api/decisions/[id]/entries 入参（append-only；lifecycle 快照由服务端沿用，前端不传） */
 export interface AppendEntryInput {
   text: string;
-  status?: DecisionStatus; // 缺省沿用决策当前 status，前端不传
   occurredAt?: string; // ISO，缺省 now
 }
