@@ -168,7 +168,8 @@ async function main() {
       type: "procedure",
       topic: "Thermage",
       topicSlug: "thermage",
-      status: "in-progress",
+      lifecycle: "ACTIVE",
+      decisionKind: "unconfirmed",
       brief: {
         yourHistory: [
           "Noticed lower-face laxity over the past 8 months",
@@ -203,7 +204,8 @@ async function main() {
       type: "medication",
       topic: "HRT",
       topicSlug: "hrt",
-      status: "considering",
+      lifecycle: "ACTIVE",
+      decisionKind: "unconfirmed",
       brief: {
         yourHistory: ["Sleep quality dropped ~15% over 3 months"],
         similarJourneys: {
@@ -226,7 +228,8 @@ async function main() {
       type: "product",
       topic: "Skincare",
       topicSlug: "skincare",
-      status: "decided",
+      lifecycle: "DECIDED",
+      decisionKind: "unconfirmed",
       decidedAt: daysAgo(20),
       brief: {
         yourHistory: ["Used OTC retinol 6 months with mild results"],
@@ -249,28 +252,28 @@ async function main() {
         decisionId: thermage.id,
         userId,
         text: "Started researching clinics and pricing.",
-        statusSnapshot: "considering",
+        lifecycleSnapshot: "ACTIVE",
         occurredAt: daysAgo(40),
       },
       {
         decisionId: thermage.id,
         userId,
         text: "Booked a consultation; moving forward.",
-        statusSnapshot: "in-progress",
+        lifecycleSnapshot: "ACTIVE",
         occurredAt: daysAgo(12),
       },
       {
         decisionId: hrt.id,
         userId,
         text: "Logged sleep decline; want clinician input.",
-        statusSnapshot: "considering",
+        lifecycleSnapshot: "ACTIVE",
         occurredAt: daysAgo(9),
       },
       {
         decisionId: retinoid.id,
         userId,
         text: "Filled prescription and started 2x/week.",
-        statusSnapshot: "decided",
+        lifecycleSnapshot: "DECIDED",
         occurredAt: daysAgo(20),
       },
     ],
