@@ -3,8 +3,10 @@ import { z } from "zod";
 import { requireUser } from "@/lib/auth/session";
 import { decisionRepo } from "@/lib/db";
 import {
-  decisionStatusSchema,
+  decisionKindSchema,
+  decisionLifecycleSchema,
   decisionTypeSchema,
+  outcomeSchema,
   topicSlugSchema,
 } from "@/lib/db/enums";
 import { AppError, handle } from "@/lib/errors";
@@ -18,13 +20,16 @@ import {
 /** 决策详情（含 brief 快照 + append-only entries） */
 export const DecisionResponse = DecisionDetailDTO;
 
-/** 更新决策入参（状态推进 + question/type/saved/yourselfContext；decided 时可写 decidedAt） */
+/** 更新决策入参（lifecycle 三维 + question/type/saved/yourselfContext） */
 export const UpdateDecisionBody = z.object({
-  status: decisionStatusSchema.optional(),
   question: z.string().min(1).optional(),
   type: decisionTypeSchema.nullable().optional(),
   topic: z.string().max(200).nullable().optional(),
   topicSlug: topicSlugSchema.nullable().optional(),
+  lifecycle: decisionLifecycleSchema.optional(),
+  decisionKind: decisionKindSchema.optional(),
+  outcome: outcomeSchema.nullable().optional(),
+  nextStep: z.string().max(500).nullable().optional(),
   saved: z.boolean().optional().describe("Keep this 置 true；Not-now 不传"),
   yourselfContext: z
     .string()
@@ -63,7 +68,7 @@ export const GET = handle(async (_req: Request, ctx: Ctx) => {
 
 /**
  * Update decision
- * @description 推进决策状态（可选改 question/type）；decided 时自动记 decidedAt。越权按 404 处理
+ * @description 更新决策 lifecycle 三维（decisionKind/outcome/nextStep/lifecycle）与 question/type/saved/yourselfContext。非法 kind↔outcome 组合 422；越权按 404 处理
  * @body UpdateDecisionBody
  * @response DecisionItemResponse
  * @auth bearer
@@ -80,17 +85,29 @@ export const POST = handle(async (req: Request, ctx: Ctx) => {
   }
 
   const body = UpdateDecisionBody.parse(await req.json());
-  const row = await decisionRepo.update(id, {
-    status: body.status,
-    question: body.question,
-    type: body.type,
-    topic: body.topic,
-    topicSlug: body.topicSlug,
-    saved: body.saved,
-    yourselfContext: body.yourselfContext,
-    // 进入 decided 且此前未记录时，落定决策时间
-    decidedAt:
-      body.status === "decided" && !existing.decidedAt ? new Date() : undefined,
-  });
+  let row: Awaited<ReturnType<typeof decisionRepo.update>>;
+  try {
+    row = await decisionRepo.update(id, {
+      question: body.question,
+      type: body.type,
+      topic: body.topic,
+      topicSlug: body.topicSlug,
+      lifecycle: body.lifecycle,
+      decisionKind: body.decisionKind,
+      outcome: body.outcome,
+      nextStep: body.nextStep,
+      saved: body.saved,
+      yourselfContext: body.yourselfContext,
+    });
+  } catch (err) {
+    // repo 的 assertOutcomeForKind 抛普通 Error → 非法 kind↔outcome 组合（B1）
+    if (err instanceof AppError) throw err;
+    throw new AppError(
+      "UNPROCESSABLE_ENTITY",
+      err instanceof Error ? err.message : "非法的 outcome 组合",
+      422,
+      { cause: err },
+    );
+  }
   return NextResponse.json(toDecisionDTO(row, { withBrief: false }));
 });

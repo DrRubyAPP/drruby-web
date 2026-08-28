@@ -2,11 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/session";
 import { decisionRepo } from "@/lib/db";
-import {
-  decisionStatusSchema,
-  decisionTypeSchema,
-  topicSlugSchema,
-} from "@/lib/db/enums";
+import { decisionTypeSchema, topicSlugSchema } from "@/lib/db/enums";
 import { handle } from "@/lib/errors";
 import { DecisionDTO, toDecisionDTO } from "./dto";
 
@@ -24,7 +20,6 @@ export const CreateDecisionBody = z.object({
     .min(1)
     .optional()
     .describe("该决策服务的目标（对齐 concern_goals 词汇；Slice 1 起可选）"),
-  status: decisionStatusSchema.optional().describe("缺省 considering"),
   type: decisionTypeSchema
     .optional()
     .describe("粗粒度决策种类（缺省 not_sure）"),
@@ -48,7 +43,7 @@ export const CreateDecisionBody = z.object({
  */
 export const GET = handle(async () => {
   const user = await requireUser();
-  const rows = await decisionRepo.listByUserSaved(user.id);
+  const rows = await decisionRepo.listByUserActionable(user.id);
   const dto = rows.map((r) => toDecisionDTO(r, { withBrief: false }));
   return NextResponse.json(DecisionListResponse.parse(dto));
 });
@@ -68,7 +63,6 @@ export const POST = handle(async (req: Request) => {
   const row = await decisionRepo.create(user.id, {
     question: body.question,
     goal: body.goal ?? null,
-    status: body.status ?? "considering",
     type: body.type ?? "not_sure",
     topic: body.topic ?? null,
     topicSlug: body.topicSlug ?? null,

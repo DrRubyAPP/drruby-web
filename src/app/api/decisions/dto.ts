@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { decisionStatusSchema } from "@/lib/db/enums";
+import { decisionLifecycleSchema } from "@/lib/db/enums";
 import type { Decision, DecisionEntry } from "~prisma/client";
 
 /** 三源 Decision Brief 快照（对齐 App `types.ts` DecisionBrief） */
@@ -17,7 +17,7 @@ export const DecisionBriefDTO = z.object({
 export const DecisionEntryDTO = z.object({
   id: z.string(),
   text: z.string(),
-  statusSnapshot: decisionStatusSchema,
+  lifecycleSnapshot: decisionLifecycleSchema,
   occurredAt: z.string(),
 });
 
@@ -29,10 +29,14 @@ export const DecisionDTO = z.object({
   type: z.string().nullable(),
   topic: z.string().nullable(),
   topicSlug: z.string().nullable(),
-  status: decisionStatusSchema,
+  lifecycle: decisionLifecycleSchema,
+  decisionKind: z.string().nullable(),
+  outcome: z.string().nullable(),
+  nextStep: z.string().nullable(),
   saved: z.boolean(),
   yourselfContext: z.string().nullable(),
   updated: z.string(),
+  lastUserActivityAt: z.string(),
   brief: DecisionBriefDTO.optional(),
 });
 
@@ -58,10 +62,14 @@ export function toDecisionDTO(
     type: row.type,
     topic: row.topic,
     topicSlug: row.topicSlug,
-    status: decisionStatusSchema.parse(row.status),
+    lifecycle: decisionLifecycleSchema.parse(row.lifecycle),
+    decisionKind: row.decisionKind,
+    outcome: row.outcome,
+    nextStep: row.nextStep,
     saved: row.saved,
     yourselfContext: row.yourselfContext,
     updated: row.updatedAt.toISOString(),
+    lastUserActivityAt: row.lastUserActivityAt.toISOString(),
     brief: opts.withBrief ? toBrief(row.brief) : undefined,
   };
 }
@@ -72,7 +80,7 @@ export function toEntryDTO(
   return {
     id: row.id,
     text: row.text,
-    statusSnapshot: decisionStatusSchema.parse(row.statusSnapshot),
+    lifecycleSnapshot: decisionLifecycleSchema.parse(row.lifecycleSnapshot),
     occurredAt: row.occurredAt.toISOString(),
   };
 }
