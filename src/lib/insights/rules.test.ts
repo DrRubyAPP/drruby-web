@@ -28,7 +28,10 @@ function decision(overrides: Partial<Decision>): Decision {
     id: "d1",
     userId: "u1",
     question: "是否开始 HRT?",
-    status: "considering",
+    lifecycle: "ACTIVE",
+    decisionKind: "unconfirmed",
+    outcome: null,
+    nextStep: null,
     type: null,
     brief: null,
     decidedAt: null,
@@ -69,13 +72,13 @@ describe("computeAttention", () => {
     expect(out).toHaveLength(0);
   });
 
-  it("considering / paused 决策 → purple 提示，含 question", () => {
+  it("ACTIVE 决策 → purple 提示，含 question（DECIDED 不产出）", () => {
     const out = computeAttention(
       input({
         decisions: [
-          decision({ status: "considering", question: "做不做超声炮?" }),
-          decision({ status: "paused" }),
-          decision({ status: "decided" }),
+          decision({ lifecycle: "ACTIVE", question: "做不做超声炮?" }),
+          decision({ lifecycle: "ACTIVE" }),
+          decision({ lifecycle: "DECIDED" }),
         ],
       }),
     );
@@ -98,7 +101,7 @@ describe("computeAttention", () => {
           signal({ trend: "down", confidence: "observed" }),
           signal({ trend: "down", confidence: "not-assessable" }),
         ],
-        decisions: [decision({ status: "considering" })],
+        decisions: [decision({ lifecycle: "ACTIVE" })],
       }),
     );
     for (const a of out) {

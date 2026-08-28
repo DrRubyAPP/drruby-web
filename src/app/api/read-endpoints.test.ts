@@ -44,7 +44,6 @@ describe("SP2 read endpoints (spot checks)", () => {
     const decision = await decisionRepo.create(owner.id, {
       question: "Should I restart retinol?",
       goal: "even-tone",
-      status: "considering",
     });
 
     // 入侵者请求 owner 的决策 → 按「不存在」处理
@@ -62,7 +61,7 @@ describe("SP2 read endpoints (spot checks)", () => {
     expect(ok.status).toBe(200);
     const body = await ok.json();
     expect(body.id).toBe(decision.id);
-    expect(body.status).toBe("considering");
+    expect(body.lifecycle).toBe("ACTIVE");
     expect(Array.isArray(body.entries)).toBe(true);
   });
 

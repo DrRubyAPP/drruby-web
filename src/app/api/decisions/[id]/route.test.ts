@@ -25,42 +25,57 @@ describe("POST /api/decisions/[id]", () => {
     const decision = await decisionRepo.create(owner.id, {
       question: "q",
       goal: "firmness",
-      status: "considering",
     });
 
     asUser(intruder.id);
     const res = await POST(
-      jsonRequest({ status: "decided" }, { method: "POST" }),
+      jsonRequest({ lifecycle: "DECIDED" }, { method: "POST" }),
       params(decision.id),
     );
     expect(res.status).toBe(404);
 
     // 库未被越权修改
     const still = await decisionRepo.findById(decision.id);
-    expect(still?.status).toBe("considering");
+    expect(still?.lifecycle).toBe("ACTIVE");
   });
 
-  it("owner 推进到 decided → 落定 decidedAt", async () => {
+  it("owner 推进 lifecycle → DECIDED", async () => {
     const { POST } = await import("./route");
     const decisionRepo = await import("@/lib/db/repositories/decision.repo");
     const owner = await makeUser("dec-patch@example.com");
     const decision = await decisionRepo.create(owner.id, {
       question: "q",
       goal: "firmness",
-      status: "considering",
     });
 
     asUser(owner.id);
     const res = await POST(
-      jsonRequest({ status: "decided" }, { method: "POST" }),
+      jsonRequest({ lifecycle: "DECIDED" }, { method: "POST" }),
       params(decision.id),
     );
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.status).toBe("decided");
+    expect(body.lifecycle).toBe("DECIDED");
+  });
 
-    const row = await decisionRepo.findById(decision.id);
-    expect(row?.decidedAt).not.toBeNull();
+  it("非法 kind↔outcome 组合 → 422（B1）", async () => {
+    const { POST } = await import("./route");
+    const decisionRepo = await import("@/lib/db/repositories/decision.repo");
+    const owner = await makeUser("dec-422@example.com");
+    const decision = await decisionRepo.create(owner.id, {
+      question: "q",
+      goal: "firmness",
+    });
+
+    asUser(owner.id);
+    const res = await POST(
+      jsonRequest(
+        { decisionKind: "action", outcome: "keep_exploring" },
+        { method: "POST" },
+      ),
+      params(decision.id),
+    );
+    expect(res.status).toBe(422);
   });
 
   it("Keep this：saved + yourselfContext 持久化并随 GET 读回（A5 契约）", async () => {

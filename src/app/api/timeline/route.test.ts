@@ -39,7 +39,6 @@ describe("POST /api/timeline", () => {
     const decision = await decisionRepo.create(other.id, {
       question: "q",
       goal: "sleep-quality",
-      status: "considering",
     });
     asUser(owner.id);
     const res = await POST(

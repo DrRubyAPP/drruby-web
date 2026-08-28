@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   appointmentStatusSchema,
+  assertOutcomeForKind,
   authorizationActionSchema,
   authorizationStatusSchema,
   authProviderSchema,
@@ -9,7 +10,8 @@ import {
   connectionStatusSchema,
   consentKeySchema,
   dataQualitySchema,
-  decisionStatusSchema,
+  decisionKindSchema,
+  decisionLifecycleSchema,
   decisionTypeSchema,
   experimentStatusSchema,
   fitzpatrickScaleSchema,
@@ -141,9 +143,47 @@ describe("消费决策域枚举 - 有效值通过", () => {
     }
   });
 
-  it("decisionStatus 含连字符 in-progress", () => {
-    expect(decisionStatusSchema.parse("in-progress")).toBe("in-progress");
-    expect(() => decisionStatusSchema.parse("in_progress")).toThrow();
+  it("decisionLifecycleSchema 接受 6 值生命周期", () => {
+    for (const v of [
+      "ACTIVE",
+      "DECIDED",
+      "OBSERVING",
+      "LEARNING",
+      "COMPLETED",
+      "CLOSED",
+    ]) {
+      expect(decisionLifecycleSchema.parse(v)).toBe(v);
+    }
+    expect(() => decisionLifecycleSchema.parse("active")).toThrow();
+  });
+
+  it("decisionKindSchema 接受 action/exploration/unconfirmed", () => {
+    for (const v of ["action", "exploration", "unconfirmed"]) {
+      expect(decisionKindSchema.parse(v)).toBe(v);
+    }
+    expect(() => decisionKindSchema.parse("typeA")).toThrow();
+  });
+
+  it("assertOutcomeForKind 按 kind 校验 outcome（分组）", () => {
+    // unconfirmed → outcome 必须为 null/undefined
+    expect(() => assertOutcomeForKind("unconfirmed", null)).not.toThrow();
+    expect(() =>
+      assertOutcomeForKind("unconfirmed", "still_considering"),
+    ).toThrow();
+    // action → 仅 A 集
+    expect(() =>
+      assertOutcomeForKind("action", "decided_to_do_it"),
+    ).not.toThrow();
+    expect(() => assertOutcomeForKind("action", "keep_exploring")).toThrow();
+    // exploration → 仅 B 集
+    expect(() =>
+      assertOutcomeForKind("exploration", "keep_exploring"),
+    ).not.toThrow();
+    expect(() =>
+      assertOutcomeForKind("exploration", "decided_to_do_it"),
+    ).toThrow();
+    // 未决（outcome=null）对 action/exploration 均合法
+    expect(() => assertOutcomeForKind("action", null)).not.toThrow();
   });
 
   it("decisionTypeSchema 接受 8 类粗粒度种类", () => {
@@ -327,7 +367,8 @@ describe("enum schemas - 无效值抛错", () => {
     ["timelineKindSchema", "misc", "kind"],
     ["signalConfidenceSchema", "unknown", "confidence"],
     ["signalTrendSchema", "sideways", "trend"],
-    ["decisionStatusSchema", "in_progress", "status（连字符）"],
+    ["decisionLifecycleSchema", "active", "lifecycle（大写）"],
+    ["decisionKindSchema", "typeA", "decision_kind"],
     ["decisionTypeSchema", "surgery", "type"],
     ["topicSlugSchema", "surgery", "topic_slug"],
     ["studyRecruitmentStatusSchema", "paused", "recruitment_status"],
@@ -364,7 +405,8 @@ describe("enum schemas - 无效值抛错", () => {
     timelineKindSchema,
     signalConfidenceSchema,
     signalTrendSchema,
-    decisionStatusSchema,
+    decisionLifecycleSchema,
+    decisionKindSchema,
     decisionTypeSchema,
     topicSlugSchema,
     studyRecruitmentStatusSchema,

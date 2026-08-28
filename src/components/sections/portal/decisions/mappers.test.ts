@@ -6,44 +6,47 @@ import {
   chipToQuestionTemplate,
   chipToTopic,
   DECISION_CHIPS,
-  DECISION_STATUSES,
   feelObserveToQuestion,
   GOAL_OPTIONS,
   goalToLabel,
   groupDecisions,
-  isActive,
+  isActionable,
+  lifecycleToLabel,
   mapBrief,
   mapDecisionDetail,
   skinConsiderToQuestion,
   sortEntries,
   stackConsiderToQuestion,
-  statusToLabel,
   topicSlugToLabel,
   typeToLabel,
 } from "./mappers";
 
-describe("statusToLabel", () => {
-  it("maps 4 statuses to badge labels", () => {
-    expect(statusToLabel("considering")).toBe("Considering");
-    expect(statusToLabel("in-progress")).toBe("In progress");
-    expect(statusToLabel("decided")).toBe("Decided");
-    expect(statusToLabel("paused")).toBe("Paused");
+describe("lifecycleToLabel", () => {
+  it("maps 6 lifecycles to badge labels", () => {
+    expect(lifecycleToLabel("ACTIVE")).toBe("Active");
+    expect(lifecycleToLabel("DECIDED")).toBe("Decided");
+    expect(lifecycleToLabel("OBSERVING")).toBe("Observing");
+    expect(lifecycleToLabel("LEARNING")).toBe("Learning");
+    expect(lifecycleToLabel("COMPLETED")).toBe("Completed");
+    expect(lifecycleToLabel("CLOSED")).toBe("Closed");
   });
 });
 
-describe("isActive", () => {
-  it("returns true for considering/in-progress/paused, false for decided", () => {
-    expect(isActive("considering")).toBe(true);
-    expect(isActive("in-progress")).toBe(true);
-    expect(isActive("paused")).toBe(true);
-    expect(isActive("decided")).toBe(false);
+describe("isActionable", () => {
+  it("returns true unless lifecycle is CLOSED or COMPLETED (§6)", () => {
+    expect(isActionable("ACTIVE")).toBe(true);
+    expect(isActionable("DECIDED")).toBe(true);
+    expect(isActionable("OBSERVING")).toBe(true);
+    expect(isActionable("LEARNING")).toBe(true);
+    expect(isActionable("COMPLETED")).toBe(false);
+    expect(isActionable("CLOSED")).toBe(false);
   });
 });
 
 describe("groupDecisions", () => {
   const mkDecision = (
     id: string,
-    status: DecisionDto["status"],
+    lifecycle: DecisionDto["lifecycle"],
   ): DecisionDto => ({
     id,
     question: `q-${id}`,
@@ -51,42 +54,46 @@ describe("groupDecisions", () => {
     type: null,
     topic: null,
     topicSlug: null,
-    status,
+    lifecycle,
+    decisionKind: "unconfirmed",
+    outcome: null,
+    nextStep: null,
     saved: true,
     yourselfContext: null,
     updated: "2026-08-10T00:00:00.000Z",
+    lastUserActivityAt: "2026-08-10T00:00:00.000Z",
   });
 
   it("empty array → both groups empty", () => {
-    expect(groupDecisions([])).toEqual({ active: [], saved: [] });
+    expect(groupDecisions([])).toEqual({ actionable: [], history: [] });
   });
 
-  it("splits mixed list into active and saved preserving order", () => {
+  it("splits mixed list into actionable and history preserving order", () => {
     const items = [
-      mkDecision("a1", "considering"),
-      mkDecision("s1", "decided"),
-      mkDecision("a2", "in-progress"),
-      mkDecision("s2", "decided"),
-      mkDecision("a3", "paused"),
+      mkDecision("a1", "ACTIVE"),
+      mkDecision("h1", "CLOSED"),
+      mkDecision("a2", "DECIDED"),
+      mkDecision("h2", "COMPLETED"),
+      mkDecision("a3", "OBSERVING"),
     ];
     expect(groupDecisions(items)).toEqual({
-      active: [
-        mkDecision("a1", "considering"),
-        mkDecision("a2", "in-progress"),
-        mkDecision("a3", "paused"),
+      actionable: [
+        mkDecision("a1", "ACTIVE"),
+        mkDecision("a2", "DECIDED"),
+        mkDecision("a3", "OBSERVING"),
       ],
-      saved: [mkDecision("s1", "decided"), mkDecision("s2", "decided")],
+      history: [mkDecision("h1", "CLOSED"), mkDecision("h2", "COMPLETED")],
     });
   });
 
-  it("all decided → active empty", () => {
-    const items = [mkDecision("s1", "decided"), mkDecision("s2", "decided")];
-    expect(groupDecisions(items).active).toEqual([]);
+  it("all closed/completed → actionable empty", () => {
+    const items = [mkDecision("h1", "CLOSED"), mkDecision("h2", "COMPLETED")];
+    expect(groupDecisions(items).actionable).toEqual([]);
   });
 
-  it("all active → saved empty", () => {
-    const items = [mkDecision("a1", "considering"), mkDecision("a2", "paused")];
-    expect(groupDecisions(items).saved).toEqual([]);
+  it("all actionable → history empty", () => {
+    const items = [mkDecision("a1", "ACTIVE"), mkDecision("a2", "LEARNING")];
+    expect(groupDecisions(items).history).toEqual([]);
   });
 });
 
@@ -143,7 +150,7 @@ describe("sortEntries", () => {
   const mk = (id: string, ts: string) => ({
     id,
     text: `t-${id}`,
-    statusSnapshot: "considering" as const,
+    lifecycleSnapshot: "ACTIVE" as const,
     occurredAt: ts,
   });
 
@@ -179,10 +186,14 @@ describe("mapDecisionDetail", () => {
     type: "procedure",
     topic: "Thermage",
     topicSlug: "thermage",
-    status: "considering",
+    lifecycle: "ACTIVE",
+    decisionKind: "unconfirmed",
+    outcome: null,
+    nextStep: null,
     saved: true,
     yourselfContext: "some context",
     updated: "2026-08-10T00:00:00.000Z",
+    lastUserActivityAt: "2026-08-10T00:00:00.000Z",
     brief: {
       yourHistory: ["h1"],
       similarJourneys: { summary: "s", note: "n" },
@@ -193,25 +204,25 @@ describe("mapDecisionDetail", () => {
       {
         id: "e2",
         text: "second",
-        statusSnapshot: "considering",
+        lifecycleSnapshot: "ACTIVE",
         occurredAt: "2026-08-05T00:00:00.000Z",
       },
       {
         id: "e1",
         text: "first",
-        statusSnapshot: "considering",
+        lifecycleSnapshot: "ACTIVE",
         occurredAt: "2026-08-01T00:00:00.000Z",
       },
     ],
   };
 
-  it("merges question + statusLabel + sorted entries + brief", () => {
+  it("merges question + lifecycleLabel + sorted entries + brief", () => {
     const view = mapDecisionDetail(detail);
     expect(view.id).toBe("d1");
     expect(view.question).toBe("Should I do Thermage?");
     expect(view.goal).toBe("firmness");
-    expect(view.status).toBe("considering");
-    expect(view.statusLabel).toBe("Considering");
+    expect(view.lifecycle).toBe("ACTIVE");
+    expect(view.lifecycleLabel).toBe("Active");
     expect(view.entries.map((e) => e.id)).toEqual(["e1", "e2"]);
     expect(view.brief?.hasYourHistory).toBe(true);
   });
@@ -299,17 +310,6 @@ describe("goal mappers", () => {
   it("goalToLabel humanizes unknown/custom goals", () => {
     expect(goalToLabel("skin")).toBe("Skin");
     expect(goalToLabel("supplements")).toBe("Supplements");
-  });
-});
-
-describe("DECISION_STATUSES", () => {
-  it("has 4 values in stable order", () => {
-    expect(DECISION_STATUSES).toEqual([
-      "considering",
-      "in-progress",
-      "decided",
-      "paused",
-    ]);
   });
 });
 

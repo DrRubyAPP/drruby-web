@@ -41,7 +41,6 @@ describe("timelineEvent.repo", () => {
     const decision = await createDecision(userId, {
       question: "Try HRT?",
       goal: "sleep-quality",
-      status: "considering",
     });
     await create(userId, {
       kind: "decision",

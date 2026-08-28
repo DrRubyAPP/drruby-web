@@ -20,23 +20,21 @@ describe("POST /api/decisions", () => {
   it("未登录 → 401", async () => {
     const { POST } = await import("./route");
     asAnonymous();
-    const res = await POST(
-      jsonRequest({ question: "q", status: "considering" }),
-    );
+    const res = await POST(jsonRequest({ question: "q" }));
     expect(res.status).toBe(401);
   });
 
-  it("非法 status 枚举 → 400", async () => {
+  it("非法 type 枚举 → 400", async () => {
     const { POST } = await import("./route");
     const user = await makeUser("dec-create-bad@example.com");
     asUser(user.id);
     const res = await POST(
-      jsonRequest({ question: "q", goal: "firmness", status: "bogus" }),
+      jsonRequest({ question: "q", goal: "firmness", type: "bogus" }),
     );
     expect(res.status).toBe(400);
   });
 
-  it("缺 goal/status → 201，缺省 status=considering、type=not_sure、topic/topicSlug=null、saved=false", async () => {
+  it("缺 goal → 201，缺省 lifecycle=ACTIVE、decisionKind=unconfirmed、type=not_sure、topic/topicSlug=null、saved=false", async () => {
     const { POST } = await import("./route");
     const user = await makeUser("dec-create-nogoal@example.com");
     asUser(user.id);
@@ -44,7 +42,9 @@ describe("POST /api/decisions", () => {
     expect(res.status).toBe(201);
     const body = await res.json();
     expect(body.goal).toBeNull();
-    expect(body.status).toBe("considering");
+    expect(body.lifecycle).toBe("ACTIVE");
+    expect(body.decisionKind).toBe("unconfirmed");
+    expect(body.outcome).toBeNull();
     expect(body.type).toBe("not_sure");
     expect(body.topic).toBeNull();
     expect(body.topicSlug).toBeNull();
@@ -80,7 +80,7 @@ describe("POST /api/decisions", () => {
     expect(res.status).toBe(400);
   });
 
-  it("saved 过滤：创建后不可见，Keep 后出现在列表（Not-now 不可检索）", async () => {
+  it("Ask 创建即 Actionable：无需 Keep 就出现在列表（§6 saved 纠偏）", async () => {
     const { POST, GET } = await import("./route");
     const user = await makeUser("dec-create@example.com");
     asUser(user.id);
@@ -89,12 +89,15 @@ describe("POST /api/decisions", () => {
     expect(created.status).toBe(201);
     const createdBody = await created.json();
 
-    // 刚创建（saved=false）→ 不在列表
+    // 刚创建（saved=false）→ 已是 Actionable，直接出现在列表
     const before = await GET();
-    const rowsBefore: Array<{ id: string }> = await before.json();
-    expect(rowsBefore.some((r) => r.id === createdBody.id)).toBe(false);
+    const rowsBefore: Array<{ id: string; saved: boolean }> =
+      await before.json();
+    const hit = rowsBefore.find((r) => r.id === createdBody.id);
+    expect(hit).toBeDefined();
+    expect(hit?.saved).toBe(false); // saved 仍 false，但可见性不受影响（§11）
 
-    // Keep this → saved=true → 出现在列表
+    // Keep this → saved=true（纯书签），列表仍含该条
     const { POST: POST_ID } = await import("./[id]/route");
     const keep = await POST_ID(
       jsonRequest({ saved: true }, { method: "POST" }),
@@ -104,8 +107,8 @@ describe("POST /api/decisions", () => {
 
     const after = await GET();
     const rowsAfter: Array<{ id: string; saved: boolean }> = await after.json();
-    const hit = rowsAfter.find((r) => r.id === createdBody.id);
-    expect(hit).toBeDefined();
-    expect(hit?.saved).toBe(true);
+    const kept = rowsAfter.find((r) => r.id === createdBody.id);
+    expect(kept).toBeDefined();
+    expect(kept?.saved).toBe(true);
   });
 });

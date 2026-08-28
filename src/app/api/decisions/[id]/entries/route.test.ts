@@ -24,7 +24,6 @@ describe("POST /api/decisions/[id]/entries（append-only）", () => {
     const decision = await decisionRepo.create(owner.id, {
       question: "q",
       goal: "sleep-quality",
-      status: "considering",
     });
 
     asUser(intruder.id);
@@ -43,7 +42,6 @@ describe("POST /api/decisions/[id]/entries（append-only）", () => {
     const decision = await decisionRepo.create(owner.id, {
       question: "q",
       goal: "sleep-quality",
-      status: "considering",
     });
 
     asUser(owner.id);

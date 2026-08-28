@@ -14,7 +14,6 @@ async function seed(): Promise<{ userId: string; decisionId: string }> {
   const d = await createDecision(u.id, {
     question: "Try filler?",
     goal: "even-tone",
-    status: "considering",
   });
   return { userId: u.id, decisionId: d.id };
 }
@@ -29,14 +28,14 @@ describe("decisionEntry.repo", () => {
       decisionId,
       userId,
       text: "Initial thought",
-      statusSnapshot: "considering",
+      lifecycleSnapshot: "ACTIVE",
       occurredAt: new Date("2026-06-01T00:00:00Z"),
     });
     await append({
       decisionId,
       userId,
       text: "Changed my mind",
-      statusSnapshot: "paused",
+      lifecycleSnapshot: "ACTIVE",
       occurredAt: new Date("2026-06-08T00:00:00Z"),
     });
     const rows = await listByDecision(decisionId);
@@ -45,7 +44,7 @@ describe("decisionEntry.repo", () => {
     expect(rows[1].text).toBe("Changed my mind");
   });
 
-  it("拒绝非法 statusSnapshot", async () => {
+  it("拒绝非法 lifecycleSnapshot", async () => {
     const { userId, decisionId } = await seed();
     await expect(
       append({
@@ -53,7 +52,7 @@ describe("decisionEntry.repo", () => {
         userId,
         text: "x",
         // @ts-expect-error 测试无效值
-        statusSnapshot: "archived",
+        lifecycleSnapshot: "archived",
         occurredAt: new Date(),
       }),
     ).rejects.toThrow();

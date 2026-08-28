@@ -26,7 +26,7 @@ describe("buildHistorySummary", () => {
 
   it("拼接 decisions/signals/timeline 三段", async () => {
     listDecisions.mockResolvedValue([
-      { question: "要不要停用避孕药", status: "considering" },
+      { question: "要不要停用避孕药", lifecycle: "ACTIVE" },
     ]);
     listSignals.mockResolvedValue([
       {
@@ -42,7 +42,7 @@ describe("buildHistorySummary", () => {
     const out = await buildHistorySummary("u1");
     expect(out).not.toBeNull();
     expect(out).toContain("用户个人史");
-    expect(out).toContain("近期决策：要不要停用避孕药(considering)");
+    expect(out).toContain("近期决策：要不要停用避孕药(ACTIVE)");
     expect(out).toContain("关键信号：雌激素=42(up)[high]");
     expect(out).toContain("近期记录：开始记录周期");
   });
@@ -60,7 +60,7 @@ describe("buildHistorySummary", () => {
     listDecisions.mockResolvedValue(
       Array.from({ length: 8 }, (_, i) => ({
         question: `q${i}`,
-        status: "considering",
+        lifecycle: "ACTIVE",
       })),
     );
     const out = await buildHistorySummary("u1");

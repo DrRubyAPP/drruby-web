@@ -29,13 +29,12 @@ describe("GET /api/me/export", () => {
     const myDecision = await decisionRepo.create(me.id, {
       question: "mine",
       goal: "firmness",
-      status: "considering",
     });
     await entryRepo.append({
       decisionId: myDecision.id,
       userId: me.id,
       text: "note",
-      statusSnapshot: "considering",
+      lifecycleSnapshot: "ACTIVE",
       occurredAt: new Date("2026-01-01T00:00:00.000Z"),
     });
     await timelineRepo.create(me.id, {
@@ -53,7 +52,6 @@ describe("GET /api/me/export", () => {
     await decisionRepo.create(other.id, {
       question: "theirs",
       goal: "firmness",
-      status: "considering",
     });
 
     asUser(me.id);
