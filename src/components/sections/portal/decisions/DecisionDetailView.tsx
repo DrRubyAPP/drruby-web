@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { EmptyState, ErrorState, Skeleton } from "@/components/api";
 import type {
@@ -9,7 +10,6 @@ import type {
 import { getDecisionCorpus } from "@/config/decision-corpus";
 import { useApi } from "@/hooks/useApi";
 import { useMutation } from "@/hooks/useMutation";
-import { useRouter } from "@/i18n/navigation";
 import { apiClient } from "@/lib/api/client";
 import { ACTIVE_CHIP, SUBMIT_BTN, TEXTAREA } from "./drawerStyles";
 import type { DecisionDetailDto, DecisionType } from "./dto";
@@ -44,12 +44,13 @@ const SCIENCE_BLOCKS: { key: ScienceBlockKey; label: string }[] = [
 /**
  * 决策详情页（Slice 1 核心）：
  * - 三视角自由切换，无强制顺序；Yourself 草稿存客户端 state，切换不丢（A2）
- * - Yourself 草稿随 "Keep this" 一并落库（F4）；Not now 仅不置 saved，无任何提醒 UI（A4）
+ * - ☆ Save 书签化（§11 纯书签）：右上角低强调 toggle，仅"更易找到"；不创建 Active、
+ *   不影响 lifecycle/WMN 排序（saved 不在 MEANINGFUL_UPDATE_KEYS）；Yourself 草稿随 Save 一并落库
  * - Others / Science 读预置语料（topicSlug 驱动检索）；type 为粗粒度可改，只影响 Science 措辞框架（B9）
  * - Observation 追加（迁移自 DecisionDetailDrawer，append-only）
  */
 export function DecisionDetailView({ id }: { id: string }) {
-  const router = useRouter();
+  const t = useTranslations("portal.decisionsDetail.save");
   const { data, error, loading, refetch } = useApi<DecisionDetailDto>(
     `/api/decisions/${id}`,
   );
@@ -57,8 +58,9 @@ export function DecisionDetailView({ id }: { id: string }) {
   const [yourselfDraft, setYourselfDraft] = useState<string | null>(null); // null = 未编辑，展示已存值
   const [entryText, setEntryText] = useState("");
 
-  // Keep this：saved + yourselfContext 一次提交（F4）
-  const keep = useMutation(
+  // ☆ Save 书签化（§11 纯书签）：saved 不刷新 lastUserActivityAt → 不进 WMN 排序；
+  // Yourself 草稿随 Save 一并落库（保持 A5 行为不回退）
+  const toggleSave = useMutation(
     (input: { saved: boolean; yourselfContext?: string }) =>
       apiClient.post(`/api/decisions/${id}`, input),
     { onSuccess: () => refetch() },
@@ -97,15 +99,46 @@ export function DecisionDetailView({ id }: { id: string }) {
 
   return (
     <div>
-      <h1
+      {/* 标题行：question + 右上角 ☆ Save（§11 纯书签，低强调；与 come_back_later 等 Outcome 语义分离） */}
+      <div
         style={{
-          fontFamily: "var(--p-serif)",
-          fontWeight: 400,
-          margin: "0 0 8px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          gap: 12,
         }}
       >
-        {data.question}
-      </h1>
+        <h1
+          style={{
+            fontFamily: "var(--p-serif)",
+            fontWeight: 400,
+            margin: "0 0 8px",
+          }}
+        >
+          {data.question}
+        </h1>
+        <button
+          type="button"
+          className="save-star"
+          aria-pressed={data.saved}
+          aria-label={data.saved ? t("ariaSavedLabel") : t("ariaSaveLabel")}
+          disabled={toggleSave.loading}
+          onClick={() =>
+            toggleSave.mutate({
+              saved: !data.saved,
+              yourselfContext: yourselfValue.trim() || undefined,
+            })
+          }
+        >
+          {data.saved ? t("saved") : t("save")}
+        </button>
+      </div>
+      {toggleSave.error && (
+        <ErrorState
+          message={toggleSave.error.message}
+          onRetry={() => toggleSave.reset()}
+        />
+      )}
       <span className="dec-badge">{lifecycleToLabel(data.lifecycle)}</span>
       {data.topic && (
         <span style={{ fontSize: 13, color: "#a89a95", marginLeft: 8 }}>
@@ -159,8 +192,8 @@ export function DecisionDetailView({ id }: { id: string }) {
             <div className="sec-h">Yourself</div>
             <p style={{ fontSize: 13.5, color: "#7c746f", marginTop: 8 }}>
               You don&apos;t need a complete medical history to start — a few
-              lines of context are enough. This is saved only if you keep this
-              decision.
+              lines of context are enough. This is saved when you tap ☆ Save
+              above.
             </p>
             <textarea
               value={yourselfValue}
@@ -229,48 +262,6 @@ export function DecisionDetailView({ id }: { id: string }) {
           </div>
         )}
       </div>
-
-      {/* Save 区（A4：两选项视觉权重相等；Not now 无任何阻拦） */}
-      {!data.saved ? (
-        <div className="sec">
-          <div className="sec-h">Keep this?</div>
-          <div style={{ display: "flex", gap: 12 }}>
-            <button
-              type="button"
-              className="ask-btn"
-              disabled={keep.loading}
-              onClick={() =>
-                keep.mutate({
-                  saved: true,
-                  yourselfContext: yourselfValue.trim() || undefined,
-                })
-              }
-            >
-              {keep.loading ? "Saving…" : "Keep this"}
-            </button>
-            <button
-              type="button"
-              className="ask-btn"
-              onClick={() => router.push("/portal")}
-            >
-              Not now
-            </button>
-          </div>
-          {keep.error && (
-            <ErrorState
-              message={keep.error.message}
-              onRetry={() => keep.reset()}
-            />
-          )}
-        </div>
-      ) : (
-        <div className="sec">
-          <span className="dec-badge">Kept</span>
-          <span style={{ fontSize: 12, color: "#a89a95", marginLeft: 8 }}>
-            Saved — you can come back to this anytime.
-          </span>
-        </div>
-      )}
 
       {/* Observation：append-only 时间线 + 追加表单（迁移自 DecisionDetailDrawer） */}
       <div className="sec">

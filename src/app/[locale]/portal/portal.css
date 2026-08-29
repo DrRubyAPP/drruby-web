@@ -263,6 +263,28 @@
 #app-portal .nav-item--more.active {
   opacity: 1;
 }
+/* ☆ Save 书签（§11 纯书签，低强调；与 come_back_later 等 Outcome 语义分离） */
+#app-portal .save-star {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--p-line, #e7e0dc);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  color: #7c746f;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
+}
+#app-portal .save-star[aria-pressed="true"] {
+  color: #8c2635;
+  border-color: #e7cfd3;
+}
+#app-portal .save-star:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 #app-portal .side-foot {
   border-top: 1px solid var(--p-border);
   padding: 14px;

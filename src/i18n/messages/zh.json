@@ -593,6 +593,15 @@
         "empty": "暂无活动",
         "error": "无法加载时间线"
       },
+      "home": {
+        "wmnTitle": "当前要务",
+        "newTitle": "问问你的健康",
+        "newSub": "从一个问题开始 —— 你不需要完整的病史。",
+        "newAddHealth": "添加到我的健康 →",
+        "emptyTitle": "现在没有需要你关注的事。",
+        "emptySub": "提出新问题、添加到我的健康，或回顾最近的事项。",
+        "updated": "更新于 {date}"
+      },
       "ask": {
         "placeholder": "我的血检结果对我意味着什么？",
         "button": "提问",
@@ -660,7 +669,13 @@
       "step3CtaSub": "创建免费账户，追踪你的进展并获得主动洞见。"
     },
     "decisionsDetail": {
-      "pageTitle": "你的决策"
+      "pageTitle": "你的决策",
+      "save": {
+        "save": "☆ 收藏",
+        "saved": "★ 已收藏",
+        "ariaSaveLabel": "收藏 — 方便日后查找",
+        "ariaSavedLabel": "已收藏 — 点击取消书签"
+      }
     },
     "considerSkin": {
       "pageTitle": "我的肌肤变了",
@@ -722,6 +737,8 @@
       "startHint": "DrRuby 帮你在做出决定前理清这件事 —— 它不是让你写日记。",
       "active": "进行中的决策",
       "saved": "已保存与已完成",
+      "savedOnly": "☆ 仅收藏",
+      "savedEmpty": "进行中的决策里还没有收藏。",
       "empty": "暂无决策",
       "emptyHint": "在上方开始一个新决策。",
       "newDrawer": {

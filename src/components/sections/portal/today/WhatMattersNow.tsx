@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/api";
 import type { WmnResponse } from "@/components/sections/portal/decisions/dto";
 import { useApi } from "@/hooks/useApi";
@@ -16,6 +17,7 @@ interface WhatMattersNowProps {
  * B1：cards<3 按实际数量显示，不占位填充。
  */
 export function WhatMattersNow({ data }: WhatMattersNowProps) {
+  const t = useTranslations("portal.dashboard.home");
   const router = useRouter();
   // 父级传入则复用；否则自取（loading 兜底）
   const self = useApi<WmnResponse>(
@@ -28,7 +30,7 @@ export function WhatMattersNow({ data }: WhatMattersNowProps) {
 
   return (
     <div className="sec">
-      <div className="sec-h">What matters now</div>
+      <div className="sec-h">{t("wmnTitle")}</div>
       <div className="card">
         {envelope.cards.map((d, i) => (
           <div
@@ -47,7 +49,9 @@ export function WhatMattersNow({ data }: WhatMattersNowProps) {
             <div>
               <h4>{d.question}</h4>
               <div className="st">
-                Updated {new Date(d.lastUserActivityAt).toLocaleDateString()}
+                {t("updated", {
+                  date: new Date(d.lastUserActivityAt).toLocaleDateString(),
+                })}
               </div>
             </div>
           </div>

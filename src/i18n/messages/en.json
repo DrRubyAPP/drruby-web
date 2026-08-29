@@ -587,6 +587,15 @@
         "empty": "No activity yet",
         "error": "Couldn't load timeline"
       },
+      "home": {
+        "wmnTitle": "What matters now",
+        "newTitle": "Ask about your health",
+        "newSub": "Start with a question — you don't need a complete history.",
+        "newAddHealth": "Add to My Health →",
+        "emptyTitle": "Nothing needs your attention right now.",
+        "emptySub": "Ask something new, add to My Health, or revisit recent items.",
+        "updated": "Updated {date}"
+      },
       "ask": {
         "placeholder": "What does my blood test mean for me?",
         "button": "Ask",
@@ -654,7 +663,13 @@
       "step3CtaSub": "Create a free account to track your progress and get proactive insights."
     },
     "decisionsDetail": {
-      "pageTitle": "Your decision"
+      "pageTitle": "Your decision",
+      "save": {
+        "save": "☆ Save",
+        "saved": "★ Saved",
+        "ariaSaveLabel": "Save — easier to find later",
+        "ariaSavedLabel": "Saved — click to remove bookmark"
+      }
     },
     "considerSkin": {
       "pageTitle": "My skin changed",
@@ -716,6 +731,8 @@
       "startHint": "DrRuby helps you understand the decision before you make it — it doesn't ask you to start a diary.",
       "active": "Active decisions",
       "saved": "Saved & completed",
+      "savedOnly": "☆ Saved only",
+      "savedEmpty": "No saved decisions among the active ones.",
       "empty": "No decisions yet",
       "emptyHint": "Start a new decision above.",
       "newDrawer": {

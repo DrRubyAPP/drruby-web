@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { ErrorState, Skeleton } from "@/components/api";
 import { useApi } from "@/hooks/useApi";
@@ -16,17 +17,23 @@ import { NewDecisionDrawer } from "./NewDecisionDrawer";
 /**
  * My Decisions 视图：4 个 section 常驻（设计稿结构）。
  * - Start a new decision chips → 打开 NewDecisionDrawer（预填 chip）
- * - Active decisions / Saved & completed ← GET /api/decisions（仅 saved=true）
+ * - Active decisions / Saved & completed ← GET /api/decisions
+ * - Saved 为次要筛选（§11 纯书签：客户端过滤 d.saved，不改数据层）
  * - Inside a decision 为静态示例区块
  * - 列表卡片点击 → 路由到 /portal/decisions/[id]（task-37，drawer 退役）
  */
 export function DecisionsView() {
   const router = useRouter();
+  const t = useTranslations("portal.decisions");
   const { data, error, loading, refetch } =
     useApi<DecisionDto[]>("/api/decisions");
   const [newDrawerChip, setNewDrawerChip] = useState<string | null>(null);
+  const [savedOnly, setSavedOnly] = useState(false); // Saved 次要筛选（F4）
 
   const { actionable, history } = groupDecisions(data ?? []);
+  const shownActionable = savedOnly
+    ? actionable.filter((d) => d.saved)
+    : actionable;
 
   function handleCreated(id: string) {
     setNewDrawerChip(null);
@@ -70,19 +77,39 @@ export function DecisionsView() {
         </div>
       </div>
 
-      {/* Active decisions：API 四态（section 常驻） */}
+      {/* Active decisions：API 四态（section 常驻）；Saved 次要筛选 toggle（§11 纯书签） */}
       <div className="sec">
-        <div className="sec-h">Active decisions</div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 12,
+          }}
+        >
+          <div className="sec-h">Active decisions</div>
+          <button
+            type="button"
+            className="ask-chip"
+            aria-pressed={savedOnly}
+            onClick={() => setSavedOnly((s) => !s)}
+            style={savedOnly ? { borderColor: "var(--p-ink)" } : undefined}
+          >
+            {t("savedOnly")}
+          </button>
+        </div>
         {loading ? (
           <Skeleton lines={3} />
         ) : error ? (
           <ErrorState message={error.message} onRetry={refetch} />
-        ) : actionable.length === 0 ? (
+        ) : shownActionable.length === 0 ? (
           <div className="cm2-note">
-            Nothing being weighed right now &mdash; start one above.
+            {savedOnly && actionable.length > 0
+              ? t("savedEmpty")
+              : "Nothing being weighed right now — start one above."}
           </div>
         ) : (
-          actionable.map((d) => (
+          shownActionable.map((d) => (
             <DecisionCard
               key={d.id}
               decision={d}

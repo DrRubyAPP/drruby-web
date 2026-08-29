@@ -295,12 +295,11 @@ export default function PortalPage() {
             {homeState === "new" && (
               <div className="sec">
                 <div className="card matter">
-                  <h3>Ask about your health</h3>
-                  <p>
-                    Start with a question &mdash; you don&rsquo;t need a
-                    complete history.
-                  </p>
-                  <div className="matter-next">Add to My Health &rarr;</div>
+                  <h3>{t("dashboard.home.newTitle")}</h3>
+                  <p>{t("dashboard.home.newSub")}</p>
+                  <div className="matter-next">
+                    {t("dashboard.home.newAddHealth")}
+                  </div>
                 </div>
               </div>
             )}
@@ -310,11 +309,8 @@ export default function PortalPage() {
             {homeState === "empty" && (
               <div className="sec">
                 <div className="card">
-                  <b>Nothing needs your attention right now.</b>
-                  <p>
-                    Ask something new, add to My Health, or revisit recent
-                    items.
-                  </p>
+                  <b>{t("dashboard.home.emptyTitle")}</b>
+                  <p>{t("dashboard.home.emptySub")}</p>
                 </div>
               </div>
             )}
