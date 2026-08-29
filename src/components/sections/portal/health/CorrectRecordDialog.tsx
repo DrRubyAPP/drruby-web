@@ -51,6 +51,7 @@ export function CorrectRecordDialog({
   onCorrected,
 }: CorrectRecordDialogProps) {
   const t = useTranslations("myHealth");
+  const tr = useTranslations("records");
   const initialValues = useMemo(
     () => JSON.stringify(record.parsedValues ?? { items: [] }, null, 2),
     [record.parsedValues],
@@ -78,7 +79,7 @@ export function CorrectRecordDialog({
     try {
       parsedValues = JSON.parse(valuesText);
     } catch {
-      setErrMsg("Invalid JSON in corrected values");
+      setErrMsg(tr("invalidJson"));
       setSubmitting(false);
       return;
     }

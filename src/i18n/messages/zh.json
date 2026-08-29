@@ -1304,6 +1304,37 @@
       "medication": "用药",
       "symptom": "症状",
       "treatment": "治疗"
-    }
+    },
+    "loading": "加载中…",
+    "signalsEmptyTitle": "暂无信号",
+    "signalsEmptyHint": "连接设备或上传化验结果即可开始。"
+  },
+  "records": {
+    "status": {
+      "SOURCE_UPLOADED": "已上传",
+      "PROCESSING": "处理中…",
+      "EXTRACTED_DRAFT": "草稿——待复核",
+      "USER_REVIEW": "复核中",
+      "CONFIRMED": "已确认"
+    },
+    "confidence": {
+      "High": "高置信",
+      "Low": "低置信——请确认",
+      "Unrecognized": "未识别",
+      "Conflicting": "数值冲突——请确认"
+    },
+    "documentClass": {
+      "Lab": "化验",
+      "Imaging": "影像",
+      "Pathology": "病理",
+      "Procedure": "操作",
+      "VisitSummary": "就诊小结",
+      "Unknown": "未知"
+    },
+    "notFound": {
+      "title": "记录未找到",
+      "hint": "可能已被删除。"
+    },
+    "invalidJson": "纠正内容 JSON 格式无效"
   }
 }

@@ -82,58 +82,25 @@ export function mapSkin(dto: SkinScanDto | null): SkinView | null {
 // task-42 T6: Source→Record 状态机 + 置信 + Please confirm（Contract §12/§13）
 // =============================================================================
 
-const STATUS_LABEL: Record<HealthRecordStatus, string> = {
-  SOURCE_UPLOADED: "Uploaded",
-  PROCESSING: "Processing…",
-  EXTRACTED_DRAFT: "Draft — review needed",
-  USER_REVIEW: "In review",
-  CONFIRMED: "Confirmed",
-};
-
-const CONFIDENCE_LABEL: Record<ExtractionConfidence, string> = {
-  High: "High confidence",
-  Low: "Low confidence — please confirm",
-  Unrecognized: "Unrecognized",
-  Conflicting: "Conflicting values — please confirm",
-};
-
-const KIND_LABEL: Record<HealthRecordKind, string> = {
-  lab: "Lab",
-  imaging: "Imaging",
-  checkup: "Checkup",
-  vitals: "Vitals",
-  medication: "Medication",
-  symptom: "Symptom",
-  treatment: "Treatment",
-};
-
-const DOCUMENT_CLASS_LABEL: Record<DocumentClass, string> = {
-  Lab: "Lab",
-  Imaging: "Imaging",
-  Pathology: "Pathology",
-  Procedure: "Procedure",
-  VisitSummary: "Visit summary",
-  Unknown: "Unknown",
-};
-
-/** §12 状态机：status → 用户可读 label（如 "Draft — review needed"）。 */
-export function statusLabel(s: HealthRecordStatus): string {
-  return STATUS_LABEL[s] ?? s;
+/**
+ * §12 状态机：status → i18n key（相对 `records` namespace，由调用方 t() 解析）。
+ * 例：statusKey("EXTRACTED_DRAFT") → "status.EXTRACTED_DRAFT" → t() → "Draft — review needed"
+ */
+export function statusKey(s: HealthRecordStatus): string {
+  return `status.${s}`;
 }
 
-/** §13 抽取置信：confidence → 用户可读 label（Low/Conflicting 含 please confirm）。 */
-export function confidenceLabel(c: ExtractionConfidence): string {
-  return CONFIDENCE_LABEL[c] ?? c;
+/**
+ * §13 抽取置信：confidence → i18n key（相对 `records` namespace）。
+ * Low/Conflicting 的文案含 "please confirm"（不确定性不得隐藏，由 i18n value 承载）。
+ */
+export function confidenceKey(c: ExtractionConfidence): string {
+  return `confidence.${c}`;
 }
 
-/** HealthRecord.kind → 用户可读 label。 */
-export function kindLabel(k: HealthRecordKind): string {
-  return KIND_LABEL[k] ?? k;
-}
-
-/** documentClass → 用户可读 label。 */
-export function documentClassLabel(d: DocumentClass): string {
-  return DOCUMENT_CLASS_LABEL[d] ?? d;
+/** documentClass → i18n key（相对 `records` namespace）。 */
+export function documentClassKey(d: DocumentClass): string {
+  return `documentClass.${d}`;
 }
 
 /**
@@ -173,17 +140,20 @@ export function mapParsedValues(parsed: unknown): ParsedValueItem[] {
   );
 }
 
-/** HealthRecord DTO → 视图行（带 parsedValues items + source + status label）。 */
+/** HealthRecord DTO → 视图行（带 parsedValues items + source + status i18n key）。 */
 export interface HealthRecordRow {
   id: string;
   title: string;
   kind: HealthRecordKind;
   status: HealthRecordStatus;
-  statusText: string;
+  /** i18n key（相对 `records` namespace）：t(row.statusKey) → 可读 label。 */
+  statusKey: string;
   confidence?: ExtractionConfidence | null;
-  confidenceText?: string;
+  /** i18n key（相对 `records` namespace）。 */
+  confidenceKey?: string;
   documentClass?: DocumentClass | null;
-  documentClassText?: string;
+  /** i18n key（相对 `records` namespace）。 */
+  documentClassKey?: string;
   items: ParsedValueItem[];
   pleaseConfirm: string[];
   needsConfirm: boolean;
@@ -200,14 +170,12 @@ export function mapHealthRecord(dto: HealthRecordDto): HealthRecordRow {
     title: dto.title,
     kind: dto.kind,
     status: dto.status,
-    statusText: statusLabel(dto.status),
+    statusKey: statusKey(dto.status),
     confidence: dto.confidence ?? null,
-    confidenceText: dto.confidence
-      ? confidenceLabel(dto.confidence)
-      : undefined,
+    confidenceKey: dto.confidence ? confidenceKey(dto.confidence) : undefined,
     documentClass: dto.documentClass ?? null,
-    documentClassText: dto.documentClass
-      ? documentClassLabel(dto.documentClass)
+    documentClassKey: dto.documentClass
+      ? documentClassKey(dto.documentClass)
       : undefined,
     items,
     pleaseConfirm,

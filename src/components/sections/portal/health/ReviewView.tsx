@@ -11,10 +11,10 @@ import { CorrectRecordDialog } from "./CorrectRecordDialog";
 import type { HealthRecordDto } from "./dto";
 import {
   canConfirm,
-  confidenceLabel,
+  confidenceKey,
   mapHealthRecord,
   needsConfirm,
-  statusLabel,
+  statusKey,
 } from "./mappers";
 import { RecordItem } from "./RecordItem";
 
@@ -47,6 +47,7 @@ const BTN_PRIMARY: React.CSSProperties = {
  */
 export function ReviewView({ recordId }: { recordId: string }) {
   const t = useTranslations("myHealth");
+  const tr = useTranslations("records");
   const { data, error, loading, refetch } = useApi<HealthRecordDto>(
     `/api/health/records/${recordId}`,
   );
@@ -73,7 +74,7 @@ export function ReviewView({ recordId }: { recordId: string }) {
   if (error) return <ErrorState message={error.message} onRetry={refetch} />;
   if (!data)
     return (
-      <EmptyState title="Record not found" hint="It may have been removed." />
+      <EmptyState title={tr("notFound.title")} hint={tr("notFound.hint")} />
     );
 
   const row = mapHealthRecord(data);
@@ -110,7 +111,7 @@ export function ReviewView({ recordId }: { recordId: string }) {
               color: "#7c746f",
             }}
           >
-            {statusLabel(data.status)}
+            {tr(statusKey(data.status))}
           </span>
           {data.confidence && (
             <span
@@ -119,7 +120,7 @@ export function ReviewView({ recordId }: { recordId: string }) {
                 color: recordNeedsConfirm ? "#a87422" : "#7c746f",
               }}
             >
-              {confidenceLabel(data.confidence)}
+              {tr(confidenceKey(data.confidence))}
             </span>
           )}
         </div>

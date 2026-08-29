@@ -1298,6 +1298,37 @@
       "medication": "Medication",
       "symptom": "Symptom",
       "treatment": "Treatment"
-    }
+    },
+    "loading": "Loading…",
+    "signalsEmptyTitle": "No signals yet",
+    "signalsEmptyHint": "Connect a device or upload a lab result to begin."
+  },
+  "records": {
+    "status": {
+      "SOURCE_UPLOADED": "Uploaded",
+      "PROCESSING": "Processing…",
+      "EXTRACTED_DRAFT": "Draft — review needed",
+      "USER_REVIEW": "In review",
+      "CONFIRMED": "Confirmed"
+    },
+    "confidence": {
+      "High": "High confidence",
+      "Low": "Low confidence — please confirm",
+      "Unrecognized": "Unrecognized",
+      "Conflicting": "Conflicting values — please confirm"
+    },
+    "documentClass": {
+      "Lab": "Lab",
+      "Imaging": "Imaging",
+      "Pathology": "Pathology",
+      "Procedure": "Procedure",
+      "VisitSummary": "Visit summary",
+      "Unknown": "Unknown"
+    },
+    "notFound": {
+      "title": "Record not found",
+      "hint": "It may have been removed."
+    },
+    "invalidJson": "Invalid JSON in corrected values"
   }
 }

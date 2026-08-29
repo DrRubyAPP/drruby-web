@@ -135,10 +135,7 @@ export function HealthView() {
   return (
     <>
       <h1>{t("title")}</h1>
-      <div className="lede">
-        Bring your data in. DrRuby helps you see what&rsquo;s relevant &mdash;
-        not another dashboard to maintain.
-      </div>
+      <div className="lede">{t("lede")}</div>
 
       {/* ===== Your data（C1 录入入口：Log / Upload / Photos）===== */}
       <div className="sec">
@@ -194,8 +191,8 @@ export function HealthView() {
           />
         ) : signalRows.length === 0 ? (
           <EmptyState
-            title="No signals yet"
-            hint="Connect a device or upload a lab result to begin."
+            title={t("signalsEmptyTitle")}
+            hint={t("signalsEmptyHint")}
           />
         ) : (
           <div className="card">

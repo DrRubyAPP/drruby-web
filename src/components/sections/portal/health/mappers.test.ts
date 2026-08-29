@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import type { ExtractionConfidence, HealthRecordStatus } from "@/lib/db/enums";
 import {
-  confidenceLabel,
+  confidenceKey,
   mapHormones,
   mapSignals,
   mapSkin,
   needsConfirm,
-  statusLabel,
+  statusKey,
 } from "./mappers";
 
 describe("mapSignals", () => {
@@ -140,40 +140,42 @@ const ALL_CONFIDENCES: ExtractionConfidence[] = [
   "Conflicting",
 ];
 
-describe("statusLabel", () => {
+describe("statusKey", () => {
   it("covers every status of the Source→Record state machine", () => {
-    // 不漏 status：所有状态机值都要有可读 label
+    // 不漏 status：所有状态机值都要有可读 key
     for (const s of ALL_STATUSES) {
-      const label = statusLabel(s);
-      expect(typeof label).toBe("string");
-      expect(label.length).toBeGreaterThan(0);
+      const key = statusKey(s);
+      expect(typeof key).toBe("string");
+      expect(key.length).toBeGreaterThan(0);
     }
   });
 
-  it("returns expected copy for each status", () => {
-    expect(statusLabel("SOURCE_UPLOADED")).toBe("Uploaded");
-    expect(statusLabel("PROCESSING")).toBe("Processing…");
-    expect(statusLabel("EXTRACTED_DRAFT")).toBe("Draft — review needed");
-    expect(statusLabel("USER_REVIEW")).toBe("In review");
-    expect(statusLabel("CONFIRMED")).toBe("Confirmed");
+  it("returns i18n key path (relative to `records` namespace) for each status", () => {
+    // task-42 T9：mappers 返回 i18n key（非英文字面量），由调用方 t() 解析
+    expect(statusKey("SOURCE_UPLOADED")).toBe("status.SOURCE_UPLOADED");
+    expect(statusKey("PROCESSING")).toBe("status.PROCESSING");
+    expect(statusKey("EXTRACTED_DRAFT")).toBe("status.EXTRACTED_DRAFT");
+    expect(statusKey("USER_REVIEW")).toBe("status.USER_REVIEW");
+    expect(statusKey("CONFIRMED")).toBe("status.CONFIRMED");
   });
 });
 
-describe("confidenceLabel", () => {
+describe("confidenceKey", () => {
   it("covers every confidence value", () => {
     for (const c of ALL_CONFIDENCES) {
-      const label = confidenceLabel(c);
-      expect(typeof label).toBe("string");
-      expect(label.length).toBeGreaterThan(0);
+      const key = confidenceKey(c);
+      expect(typeof key).toBe("string");
+      expect(key.length).toBeGreaterThan(0);
     }
   });
 
-  it("marks Low and Conflicting as needing user confirmation (Contract §13)", () => {
-    // §13：需核实字段明确标 please confirm，不确定性不得隐藏
-    expect(confidenceLabel("High")).toBe("High confidence");
-    expect(confidenceLabel("Low")).toContain("please confirm");
-    expect(confidenceLabel("Conflicting")).toContain("please confirm");
-    expect(confidenceLabel("Unrecognized")).toBe("Unrecognized");
+  it("returns i18n key path (relative to `records` namespace) for each confidence", () => {
+    // §13：Low/Conflicting 的文案含 "please confirm"——该语义由 i18n value 承载
+    // （见 src/i18n/messages/en.json 的 records.confidence.Low / .Conflicting）
+    expect(confidenceKey("High")).toBe("confidence.High");
+    expect(confidenceKey("Low")).toBe("confidence.Low");
+    expect(confidenceKey("Conflicting")).toBe("confidence.Conflicting");
+    expect(confidenceKey("Unrecognized")).toBe("confidence.Unrecognized");
   });
 });
 

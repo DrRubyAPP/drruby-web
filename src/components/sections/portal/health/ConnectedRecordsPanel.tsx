@@ -28,6 +28,7 @@ const BTN_BASE: React.CSSProperties = {
  */
 export function ConnectedRecordsPanel({ decisionId }: { decisionId: string }) {
   const t = useTranslations("myHealth");
+  const tr = useTranslations("records");
   const { data, error, loading, refetch } = useApi<DecisionHealthRecordDto[]>(
     `/api/decisions/${decisionId}/health-records`,
   );
@@ -85,7 +86,7 @@ export function ConnectedRecordsPanel({ decisionId }: { decisionId: string }) {
               {row.healthRecord.title}
             </div>
             <div style={{ fontSize: 11, color: "#a89a95", marginTop: 2 }}>
-              {row.healthRecord.statusText} ·{" "}
+              {tr(row.healthRecord.statusKey)} ·{" "}
               {new Date(row.connectedAt).toLocaleDateString()}
             </div>
           </div>

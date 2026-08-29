@@ -110,7 +110,7 @@ export function ConnectToDecisionDialog({
 
         {loading ? (
           <p style={{ fontSize: 13, color: "#a89a95", padding: "14px 0" }}>
-            Loading…
+            {t("loading")}
           </p>
         ) : !decisions || decisions.length === 0 ? (
           <p style={{ fontSize: 13, color: "#a89a95", padding: "14px 0" }}>
