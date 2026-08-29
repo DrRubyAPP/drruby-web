@@ -130,3 +130,15 @@ export interface AppendEntryInput {
   text: string;
   occurredAt?: string; // ISO，缺省 now
 }
+
+/** GET /api/decisions/wmn 信封（对齐 server WmnResponse；前端只消费不重排） */
+export interface WmnResponse {
+  /** ≤3 张，服务端已 P1/P2/P3 排序、去重 */
+  cards: DecisionDto[];
+  /** 全部 Decision 数（含 CLOSED/COMPLETED），驱动 Home 三态 */
+  total: number;
+  /** isActionable 计数 */
+  actionableCount: number;
+  /** P1 check-in due 计数（task-44 前恒 0） */
+  checkInDueCount: number;
+}

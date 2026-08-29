@@ -6,6 +6,7 @@ import {
   chipToQuestionTemplate,
   chipToTopic,
   DECISION_CHIPS,
+  deriveHomeState,
   feelObserveToQuestion,
   GOAL_OPTIONS,
   goalToLabel,
@@ -350,6 +351,32 @@ describe("topicSlug mappers", () => {
     expect(topicSlugToLabel("hrt")).toBe("HRT");
     expect(topicSlugToLabel("skincare")).toBe("Skincare");
     expect(topicSlugToLabel("clinic")).toBe("Clinic");
+  });
+});
+
+describe("deriveHomeState", () => {
+  it("total=0 → new（全新用户）", () => {
+    expect(
+      deriveHomeState({ total: 0, actionableCount: 0, checkInDueCount: 0 }),
+    ).toBe("new");
+  });
+
+  it("actionableCount>0 → actionable", () => {
+    expect(
+      deriveHomeState({ total: 3, actionableCount: 2, checkInDueCount: 0 }),
+    ).toBe("actionable");
+  });
+
+  it("checkInDueCount>0（actionable=0）→ actionable（P1 到期也算有事）", () => {
+    expect(
+      deriveHomeState({ total: 3, actionableCount: 0, checkInDueCount: 1 }),
+    ).toBe("actionable");
+  });
+
+  it("total>0 且 actionable=0 且无 check-in → empty（老用户空，非新用户，§10）", () => {
+    expect(
+      deriveHomeState({ total: 5, actionableCount: 0, checkInDueCount: 0 }),
+    ).toBe("empty");
   });
 });
 

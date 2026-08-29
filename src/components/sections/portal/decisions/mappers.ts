@@ -6,6 +6,7 @@ import type {
   DecisionLifecycle,
   DecisionType,
   TopicSlug,
+  WmnResponse,
 } from "./dto";
 
 /** lifecycle → badge label（Contract §5 6 值） */
@@ -213,6 +214,25 @@ export function goalToLabel(goal: string): string {
   const known = GOAL_TO_LABEL[goal];
   if (known) return known;
   return goal.charAt(0).toUpperCase() + goal.slice(1);
+}
+
+// ===== Home 三态（§1/§10，由 WMN 信封计数推导） =====
+
+/** Home 三态（§1/§10）：new=全新用户 / actionable=有事要办 / empty=老用户空状态 */
+export type HomeState = "new" | "actionable" | "empty";
+
+/**
+ * 由 WMN 信封计数推导 Home 三态（§10）：
+ * - total===0 → new（全新用户）
+ * - actionableCount>0 或 checkInDueCount>0 → actionable（优先 WMN）
+ * - 否则 → empty（老用户空状态；绝不当作全新用户）
+ */
+export function deriveHomeState(
+  w: Pick<WmnResponse, "total" | "actionableCount" | "checkInDueCount">,
+): HomeState {
+  if (w.total === 0) return "new";
+  if (w.actionableCount > 0 || w.checkInDueCount > 0) return "actionable";
+  return "empty";
 }
 
 // ===== Spine flow 文本构造（供 flows/SaveAsDecisionButton 使用） =====
