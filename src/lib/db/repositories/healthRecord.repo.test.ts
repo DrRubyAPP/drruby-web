@@ -172,6 +172,20 @@ describe("healthRecord.repo", () => {
     expect(c.status).toBe("CONFIRMED");
   });
 
+  it("advanceStatus 允许 EXTRACTED_DRAFT→CONFIRMED 跳过 USER_REVIEW（req D3 允许直接 confirm）", async () => {
+    // req 验收 1：用户可直接从 Draft 跳到 Confirmed，不必先走 USER_REVIEW
+    const userId = await seedUser();
+    const rec = await create(userId, {
+      kind: "lab",
+      title: "skip review",
+      recordedAt: new Date(),
+    });
+    await advanceStatus(rec.id, "PROCESSING");
+    await advanceStatus(rec.id, "EXTRACTED_DRAFT");
+    const c = await advanceStatus(rec.id, "CONFIRMED");
+    expect(c.status).toBe("CONFIRMED");
+  });
+
   it("advanceStatus 拒绝非法 status", async () => {
     const userId = await seedUser();
     const rec = await create(userId, {

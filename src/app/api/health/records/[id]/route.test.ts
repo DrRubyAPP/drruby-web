@@ -86,6 +86,27 @@ describe("GET/PATCH/POST /api/health/records/[id]", () => {
     expect(res.status).toBe(400);
   });
 
+  it("PATCH action=advance EXTRACTED_DRAFT→CONFIRMED 跳过 USER_REVIEW（req D3 允许直接 confirm）", async () => {
+    const { PATCH } = await import("./route");
+    const user = await makeUser("rec-skip@example.com");
+    asUser(user.id);
+    const rec = await seedRecord(user.id);
+    const { healthRecordRepo } = await import("@/lib/db");
+    await healthRecordRepo.advanceStatus(rec.id, "PROCESSING");
+    await healthRecordRepo.advanceStatus(rec.id, "EXTRACTED_DRAFT");
+
+    const res = await PATCH(
+      jsonRequest(
+        { action: "advance", status: "CONFIRMED" },
+        { method: "PATCH" },
+      ),
+      params(rec.id),
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.status).toBe("CONFIRMED");
+  });
+
   it("PATCH action=correct 追加 Revision + 同步更新 parsedValues（current 指针）", async () => {
     const { PATCH, GET } = await import("./route");
     const user = await makeUser("rec-correct@example.com");

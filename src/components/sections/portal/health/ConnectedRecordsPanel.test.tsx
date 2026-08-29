@@ -104,6 +104,19 @@ describe("ConnectedRecordsPanel · C9 软删除留痕（task-42）", () => {
     expect(screen.getByText("connected.empty")).toBeInTheDocument();
   });
 
+  it("renders status label via i18n key path (task-42 T9 records.* namespace)", () => {
+    useApiMock.mockReturnValue({
+      data: LINKS,
+      error: null,
+      loading: false,
+      refetch: vi.fn(),
+    });
+    render(<ConnectedRecordsPanel decisionId="d1" />);
+    // LINKS 两条均为 CONFIRMED → tr(statusKey) → "status.CONFIRMED"
+    // 状态文本与连接日期同处一个 div（"status.CONFIRMED · 6/13/2026"），用子串匹配
+    expect(screen.getAllByText(/status\.CONFIRMED/)).toHaveLength(2);
+  });
+
   it("Remove → DELETE /api/decisions/[id]/health-records?healthRecordId=X (软删除留痕)", async () => {
     const refetch = vi.fn();
     useApiMock.mockReturnValue({

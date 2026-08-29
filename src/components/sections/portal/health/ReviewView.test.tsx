@@ -164,4 +164,22 @@ describe("ReviewView · C2/C3/C4（task-42）", () => {
     // 已确认提示
     expect(screen.getByText("review.confirmed")).toBeInTheDocument();
   });
+
+  it("renders status label via i18n key path (task-42 T9 records.* namespace)", () => {
+    // t() mock 返回 key 原样；tr(statusKey("EXTRACTED_DRAFT")) → "status.EXTRACTED_DRAFT"
+    renderReview();
+    expect(screen.getByText("status.EXTRACTED_DRAFT")).toBeInTheDocument();
+  });
+
+  it("renders confidence label via i18n key path when confidence present", () => {
+    // RECORD has confidence: "High" → tr(confidenceKey("High")) → "confidence.High"
+    renderReview();
+    expect(screen.getByText("confidence.High")).toBeInTheDocument();
+  });
+
+  it("renders not-found EmptyState via i18n when record is missing", () => {
+    renderReview(null);
+    expect(screen.getByText("notFound.title")).toBeInTheDocument();
+    expect(screen.getByText("notFound.hint")).toBeInTheDocument();
+  });
 });
