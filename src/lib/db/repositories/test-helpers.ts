@@ -38,7 +38,10 @@ const TABLE_ORDER_FOR_CLEANUP = [
   // P1 消费域
   "aiReport",
   "photo",
+  "decisionHealthRecord", // 引用 decision + healthRecord，先于两者
+  "healthRecordRevision", // 引用 healthRecord
   "healthRecord",
+  "healthSource",
   "subscription",
   "bodyInsight",
   "skinScan",
