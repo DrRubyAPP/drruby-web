@@ -612,6 +612,7 @@
         }
       },
       "tabs": {
+        "more": "更多",
         "today": { "label": "首页", "sub": "今日动态" },
         "health": { "label": "我的健康", "sub": "你的数据与变化" },
         "decisions": { "label": "我的决策", "sub": "你正在权衡的事" },

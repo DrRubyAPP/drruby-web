@@ -246,6 +246,23 @@
 #app-portal .nav-item.active .ni-tx small {
   color: #c98c8f;
 }
+/* more 次级分组（D1 视觉降级：次级标题 + 弱化，仍可点） */
+#app-portal .nav-more-label {
+  margin: 18px 0 6px 12px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #a89a95;
+}
+#app-portal .nav-item--more {
+  opacity: 0.72;
+}
+#app-portal .nav-item--more:hover {
+  opacity: 1;
+}
+#app-portal .nav-item--more.active {
+  opacity: 1;
+}
 #app-portal .side-foot {
   border-top: 1px solid var(--p-border);
   padding: 14px;
@@ -1045,6 +1062,10 @@
 #app-portal .dec .st {
   font-size: 12.5px;
   color: #999;
+}
+/* WMN 首卡（P1/P2 最高优先级）轻微强调 */
+#app-portal .dec.mn-primary h4 {
+  font-weight: 600;
 }
 #app-portal .dec-badge {
   font-size: 11px;

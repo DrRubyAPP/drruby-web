@@ -606,6 +606,7 @@
         }
       },
       "tabs": {
+        "more": "More",
         "today": { "label": "Home", "sub": "Today's feed" },
         "health": { "label": "My Health", "sub": "Your data & changes" },
         "decisions": { "label": "My Decisions", "sub": "What you're weighing" },

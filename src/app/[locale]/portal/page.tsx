@@ -5,12 +5,15 @@ import { useState } from "react";
 import { ErrorState } from "@/components/api/ErrorState";
 import LogoutButton from "@/components/auth/LogoutButton";
 import { ContributeDialog } from "@/components/sections/portal/ContributeDialog";
-import { ActiveDecisionsSummary } from "@/components/sections/portal/decisions/ActiveDecisionsSummary";
 import { DecisionsView } from "@/components/sections/portal/decisions/DecisionsView";
-import type { CreateDecisionInput } from "@/components/sections/portal/decisions/dto";
+import type {
+  CreateDecisionInput,
+  WmnResponse,
+} from "@/components/sections/portal/decisions/dto";
 import {
   chipToTopic,
   DECISION_CHIPS,
+  deriveHomeState,
 } from "@/components/sections/portal/decisions/mappers";
 import { HealthView } from "@/components/sections/portal/health/HealthView";
 import { LibraryJourneys } from "@/components/sections/portal/LibraryJourneys";
@@ -19,7 +22,7 @@ import { PrivacyView } from "@/components/sections/portal/privacy/PrivacyView";
 import { ResearchView } from "@/components/sections/portal/research/ResearchView";
 import { DeleteAccountDialog } from "@/components/sections/portal/settings/DeleteAccountDialog";
 import { ExportDataButton } from "@/components/sections/portal/settings/ExportDataButton";
-import { TodayView } from "@/components/sections/portal/today/TodayView";
+import { WhatMattersNow } from "@/components/sections/portal/today/WhatMattersNow";
 import { useApi } from "@/hooks/useApi";
 import { useMutation } from "@/hooks/useMutation";
 import { Link, useRouter } from "@/i18n/navigation";
@@ -58,12 +61,15 @@ type View =
   | "research"
   | "privacy";
 
-const NAV: {
+type NavItem = {
   id: View;
   titleKey: string;
   subKey: string;
   icon: React.ReactNode;
-}[] = [
+};
+
+/** 主导航：Home / My Health / My Decisions（§1 三顶级） */
+const MAIN_NAV: NavItem[] = [
   {
     id: "today",
     titleKey: "dashboard.tabs.today.label",
@@ -96,6 +102,10 @@ const NAV: {
       </svg>
     ),
   },
+];
+
+/** 次级 more 分组（D1）：Library / Research / Privacy — 视觉降级、仍可达 */
+const MORE_NAV: NavItem[] = [
   {
     id: "library",
     titleKey: "dashboard.tabs.library.label",
@@ -151,6 +161,10 @@ export default function PortalPage() {
   const meName = me?.name?.trim() || "";
   const meFirst = getFirstName(meName) || "—";
   const greetingKey = me ? getGreetingKey(new Date()) : null;
+
+  // What Matters Now 信封：Home 三态 + WMN 卡片单次取数（§7–§10）
+  const { data: wmn } = useApi<WmnResponse>("/api/decisions/wmn");
+  const homeState = wmn ? deriveHomeState(wmn) : null;
 
   // Ask about your health：提交 → 创建 Decision（A1：仅创建一个）→ 跳转详情（F2）
   // chip 语义 = 选 topic：预填 { topic, topicSlug, type } 三元组；自由 Ask 不选 chip
@@ -217,12 +231,32 @@ export default function PortalPage() {
           </Link>
           <div className="logo-sub">{t("brandSub")}</div>
           <nav className="nav">
-            {NAV.map((item) => (
+            {MAIN_NAV.map((item) => (
               <button
                 key={item.id}
                 type="button"
                 id={`n-${item.id}`}
                 className={`nav-item${view === item.id ? " active" : ""}`}
+                onClick={() => go(item.id)}
+              >
+                <span className="ni-ic">{item.icon}</span>
+                <span className="ni-tx">
+                  <b>{t(item.titleKey)}</b>
+                  <small>{t(item.subKey)}</small>
+                </span>
+              </button>
+            ))}
+
+            {/* more 分组：视觉降级（次级标题 + 弱化样式），置于主三项之下（D1） */}
+            <div className="nav-more-label">{t("dashboard.tabs.more")}</div>
+            {MORE_NAV.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                id={`n-${item.id}`}
+                className={`nav-item nav-item--more${
+                  view === item.id ? " active" : ""
+                }`}
                 onClick={() => go(item.id)}
               >
                 <span className="ni-ic">{item.icon}</span>
@@ -257,43 +291,33 @@ export default function PortalPage() {
             <div className="lede">
               Here&rsquo;s what deserves your attention today.
             </div>
-            <ActiveDecisionsSummary />
-            <TodayView onSeeAllSignals={() => go("health")} />
-            <div className="sec">
-              <div className="sec-h">Learn from your past self</div>
-              <div className="card matter">
-                <h3>A note from your past self</h3>
-                <p>
-                  &ldquo;I almost stopped retinol in week 2 &mdash; glad I
-                  didn&rsquo;t.&rdquo; &mdash; you, 3 months ago. You&rsquo;re
-                  weighing a similar call now.
-                </p>
-                <div className="matter-next">Revisit that decision &rarr;</div>
-              </div>
-              <div className="card matter">
-                <h3>A pattern worth noticing</h3>
-                <p>
-                  Your sleep has slipped the week before your period in each of
-                  the last three cycles.
-                </p>
-                <div style={{ fontSize: 12, color: "#a89a95", marginTop: 8 }}>
-                  Observed across your own history &mdash; a pattern, not a
-                  diagnosis.
+            {/* 三态区（§10）：new / actionable / empty；加载中（null）先不渲染避免闪烁 */}
+            {homeState === "new" && (
+              <div className="sec">
+                <div className="card matter">
+                  <h3>Ask about your health</h3>
+                  <p>
+                    Start with a question &mdash; you don&rsquo;t need a
+                    complete history.
+                  </p>
+                  <div className="matter-next">Add to My Health &rarr;</div>
                 </div>
               </div>
-              <div className="card">
-                <div
-                  style={{ fontSize: 15, color: "#524d49", lineHeight: 1.65 }}
-                >
-                  <b style={{ color: "#8C2635" }}>
-                    You&rsquo;re understanding yourself better.
-                  </b>{" "}
-                  You&rsquo;ve reflected on four important decisions this year
-                  &mdash; and two of your anonymous journeys are quietly helping
-                  other women.
+            )}
+
+            {homeState === "actionable" && <WhatMattersNow data={wmn} />}
+
+            {homeState === "empty" && (
+              <div className="sec">
+                <div className="card">
+                  <b>Nothing needs your attention right now.</b>
+                  <p>
+                    Ask something new, add to My Health, or revisit recent
+                    items.
+                  </p>
                 </div>
               </div>
-            </div>
+            )}
             <div className="sec">
               <div className="sec-h">Ask about your health</div>
               <div className="ask">
