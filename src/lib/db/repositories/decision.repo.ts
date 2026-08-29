@@ -59,6 +59,8 @@ export interface UpdateDecisionInput {
   yourselfContext?: string | null;
   brief?: DecisionBriefSnapshot | null;
   decidedAt?: Date | null;
+  /** §6 freshness gate 时间戳；仅 /check-freshness 端点写，通用 PATCH 不写 */
+  freshnessCheckedAt?: Date | null;
 }
 
 /** §8 meaningful activity：写入这些字段才刷新 lastUserActivityAt（saved/brief/decidedAt 不算） */
@@ -181,6 +183,54 @@ export async function bumpActivity(id: string): Promise<void> {
 
 export async function findById(id: string): Promise<Decision | null> {
   return prisma.decision.findUnique({ where: { id } });
+}
+
+/**
+ * D3/D6 Reopen 原子事务：归档 entry + 清空 outcome/nextStep + 置 ACTIVE。
+ * 前置条件（ownership + lifecycle=CLOSED）由 route 预检；此处只做事务，
+ * 事务内重新 findUniqueOrThrow 保证原子性（避免 read-then-write 竞态）。
+ * D6：**不写 freshnessCheckedAt**（仅 /check-freshness 端点写）。
+ */
+export async function reopenAtomic(
+  id: string,
+  userId: string,
+): Promise<Decision> {
+  return prisma.$transaction(async (tx) => {
+    const existing = await tx.decision.findUniqueOrThrow({ where: { id } });
+
+    // D3：结构化归档 entry；synthesis 含原 outcome/nextStep + brief 深拷贝（若有）
+    const synthesis: Record<string, unknown> = {
+      outcome: existing.outcome,
+      nextStep: existing.nextStep,
+    };
+    if (existing.brief != null) {
+      synthesis.brief = existing.brief;
+    }
+
+    await tx.decisionEntry.create({
+      data: {
+        decisionId: id,
+        userId,
+        text: `Archived: ${existing.outcome ?? "undecided"}${existing.nextStep ? ` — ${existing.nextStep}` : ""}`,
+        lifecycleSnapshot: "CLOSED",
+        kind: "archived_outcome",
+        synthesis: synthesis as Prisma.InputJsonValue,
+        occurredAt: new Date(),
+      },
+    });
+
+    // D6：清空 outcome/nextStep/decidedAt + 置 ACTIVE；不写 freshnessCheckedAt
+    return tx.decision.update({
+      where: { id },
+      data: {
+        outcome: null,
+        nextStep: null,
+        decidedAt: null,
+        lifecycle: "ACTIVE",
+        lastUserActivityAt: new Date(),
+      },
+    });
+  });
 }
 
 /** 详情：含 append-only entries（时间正序） */
