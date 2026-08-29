@@ -327,23 +327,59 @@ export type InsightTone = z.infer<typeof insightToneSchema>;
 export const experimentStatusSchema = z.enum(["running", "planned", "done"]);
 export type ExperimentStatus = z.infer<typeof experimentStatusSchema>;
 
-/** health_record.kind */
+/** health_record.kind — task-42 D6：manual log 实体统一承载，扩展 medication/symptom/treatment */
 export const healthRecordKindSchema = z.enum([
   "lab",
   "imaging",
   "checkup",
   "vitals",
+  "medication",
+  "symptom",
+  "treatment",
 ]);
 export type HealthRecordKind = z.infer<typeof healthRecordKindSchema>;
 
-/** health_record.ocr_status */
-export const ocrStatusSchema = z.enum([
-  "pending",
-  "processing",
-  "done",
-  "manual",
-]);
+/**
+ * health_record.ocr_status — 旧字段，task-42 起由 status/confidence 替代。
+ * @deprecated task-42 起 status/confidence 替代；存量 ocrStatus 仅用于迁移映射。
+ *  pending/processing → status=PROCESSING；done/manual → status=CONFIRMED
+ */
+export const ocrStatusSchema = z.enum(["pending", "processing", "done", "manual"]);
 export type OcrStatus = z.infer<typeof ocrStatusSchema>;
+
+// =============================================================================
+// My Health 摄入域（Contract §2/§12-§14）— task-42
+// =============================================================================
+
+/** health_record.status — Contract §12 Source→Record 状态机 */
+export const healthRecordStatusSchema = z.enum([
+  "SOURCE_UPLOADED",
+  "PROCESSING",
+  "EXTRACTED_DRAFT",
+  "USER_REVIEW",
+  "CONFIRMED",
+]);
+export type HealthRecordStatus = z.infer<typeof healthRecordStatusSchema>;
+
+/** Contract §13 抽取置信（替换 ocrStatus 的置信语义） */
+export const extractionConfidenceSchema = z.enum([
+  "High",
+  "Low",
+  "Unrecognized",
+  "Conflicting",
+]);
+export type ExtractionConfidence = z.infer<typeof extractionConfidenceSchema>;
+
+/** 文档分类（task-36 A4，细化现有粗粒度 kind） */
+export const documentClassSchema = z.enum([
+  "Lab",
+  "Imaging",
+  "Pathology",
+  "Procedure",
+  "VisitSummary",
+  "Unknown",
+]);
+export type DocumentClass = z.infer<typeof documentClassSchema>;
 
 /** ai_report.type — task-26 AI 报告域 */
 export const aiReportTypeSchema = z.enum(["skin", "hormone", "body"]);

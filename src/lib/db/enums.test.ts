@@ -13,10 +13,13 @@ import {
   decisionKindSchema,
   decisionLifecycleSchema,
   decisionTypeSchema,
+  documentClassSchema,
   experimentStatusSchema,
+  extractionConfidenceSchema,
   fitzpatrickScaleSchema,
   followUpStatusSchema,
   healthRecordKindSchema,
+  healthRecordStatusSchema,
   hormonalStatusSchema,
   insightAccentSchema,
   insightToneSchema,
@@ -267,8 +270,8 @@ describe("消费决策域枚举 - 有效值通过", () => {
     }
   });
 
-  it("healthRecordKindSchema = lab/imaging/checkup/vitals", () => {
-    for (const v of ["lab", "imaging", "checkup", "vitals"]) {
+  it("healthRecordKindSchema = lab/imaging/checkup/vitals/medication/symptom/treatment", () => {
+    for (const v of ["lab", "imaging", "checkup", "vitals", "medication", "symptom", "treatment"]) {
       expect(healthRecordKindSchema.parse(v)).toBe(v);
     }
   });
@@ -277,6 +280,29 @@ describe("消费决策域枚举 - 有效值通过", () => {
     for (const v of ["pending", "processing", "done", "manual"]) {
       expect(ocrStatusSchema.parse(v)).toBe(v);
     }
+  });
+
+  it("healthRecordStatusSchema 接受 5 值（Contract §12 状态机）", () => {
+    for (const v of ["SOURCE_UPLOADED", "PROCESSING", "EXTRACTED_DRAFT", "USER_REVIEW", "CONFIRMED"]) {
+      expect(healthRecordStatusSchema.parse(v)).toBe(v);
+    }
+    expect(() => healthRecordStatusSchema.parse("CONFIRM")).toThrow();
+  });
+
+  it("extractionConfidenceSchema 接受 4 值（Contract §13）", () => {
+    for (const v of ["High", "Low", "Unrecognized", "Conflicting"]) {
+      expect(extractionConfidenceSchema.parse(v)).toBe(v);
+    }
+    expect(() => extractionConfidenceSchema.parse("high")).toThrow(); // 大小写敏感
+    expect(() => extractionConfidenceSchema.parse("MEDIUM")).toThrow();
+  });
+
+  it("documentClassSchema 接受 6 值（task-36 A4）", () => {
+    for (const v of ["Lab", "Imaging", "Pathology", "Procedure", "VisitSummary", "Unknown"]) {
+      expect(documentClassSchema.parse(v)).toBe(v);
+    }
+    expect(() => documentClassSchema.parse("lab")).toThrow(); // 大小写敏感
+    expect(() => documentClassSchema.parse("GENETIC")).toThrow();
   });
 
   it("subscriptionStatusSchema = active/canceled/past_due/trialing", () => {
@@ -379,7 +405,14 @@ describe("enum schemas - 无效值抛错", () => {
     ["insightToneSchema", "red", "tone"],
     ["experimentStatusSchema", "aborted", "status"],
     ["healthRecordKindSchema", "note", "kind"],
+    ["healthRecordKindSchema", "bloodwork", "kind"],
     ["ocrStatusSchema", "failed", "ocr_status"],
+    ["healthRecordStatusSchema", "CONFIRM", "status（缩写非法）"],
+    ["healthRecordStatusSchema", "DRAFT", "status（缺 EXTRACTED_ 前缀）"],
+    ["extractionConfidenceSchema", "high", "confidence（小写非法）"],
+    ["extractionConfidenceSchema", "MEDIUM", "confidence"],
+    ["documentClassSchema", "lab", "document_class（小写非法）"],
+    ["documentClassSchema", "GENETIC", "document_class"],
     ["subscriptionStatusSchema", "expired", "status"],
     ["journeySourceTypeSchema", "blog", "source_type"],
     ["followUpStatusSchema", "closed", "status"],
@@ -418,6 +451,9 @@ describe("enum schemas - 无效值抛错", () => {
     experimentStatusSchema,
     healthRecordKindSchema,
     ocrStatusSchema,
+    healthRecordStatusSchema,
+    extractionConfidenceSchema,
+    documentClassSchema,
     subscriptionStatusSchema,
     journeySourceTypeSchema,
     followUpStatusSchema,
