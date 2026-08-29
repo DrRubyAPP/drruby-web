@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { mapHormones, mapSignals, mapSkin } from "./mappers";
+import type { ExtractionConfidence, HealthRecordStatus } from "@/lib/db/enums";
+import {
+  confidenceLabel,
+  mapHormones,
+  mapSignals,
+  mapSkin,
+  needsConfirm,
+  statusLabel,
+} from "./mappers";
 
 describe("mapSignals", () => {
   it("joins value+unit and normalizes trend", () => {
@@ -110,5 +118,76 @@ describe("mapSkin", () => {
       headline: "Improving",
       zones: [{ name: "T-zone", status: "clear" }],
     });
+  });
+});
+
+// =============================================================================
+// task-42 T6: Source→Record 状态机 + 置信 + Please confirm（Contract §12/§13）
+// =============================================================================
+
+const ALL_STATUSES: HealthRecordStatus[] = [
+  "SOURCE_UPLOADED",
+  "PROCESSING",
+  "EXTRACTED_DRAFT",
+  "USER_REVIEW",
+  "CONFIRMED",
+];
+
+const ALL_CONFIDENCES: ExtractionConfidence[] = [
+  "High",
+  "Low",
+  "Unrecognized",
+  "Conflicting",
+];
+
+describe("statusLabel", () => {
+  it("covers every status of the Source→Record state machine", () => {
+    // 不漏 status：所有状态机值都要有可读 label
+    for (const s of ALL_STATUSES) {
+      const label = statusLabel(s);
+      expect(typeof label).toBe("string");
+      expect(label.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("returns expected copy for each status", () => {
+    expect(statusLabel("SOURCE_UPLOADED")).toBe("Uploaded");
+    expect(statusLabel("PROCESSING")).toBe("Processing…");
+    expect(statusLabel("EXTRACTED_DRAFT")).toBe("Draft — review needed");
+    expect(statusLabel("USER_REVIEW")).toBe("In review");
+    expect(statusLabel("CONFIRMED")).toBe("Confirmed");
+  });
+});
+
+describe("confidenceLabel", () => {
+  it("covers every confidence value", () => {
+    for (const c of ALL_CONFIDENCES) {
+      const label = confidenceLabel(c);
+      expect(typeof label).toBe("string");
+      expect(label.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("marks Low and Conflicting as needing user confirmation (Contract §13)", () => {
+    // §13：需核实字段明确标 please confirm，不确定性不得隐藏
+    expect(confidenceLabel("High")).toBe("High confidence");
+    expect(confidenceLabel("Low")).toContain("please confirm");
+    expect(confidenceLabel("Conflicting")).toContain("please confirm");
+    expect(confidenceLabel("Unrecognized")).toBe("Unrecognized");
+  });
+});
+
+describe("needsConfirm", () => {
+  it("true when pleaseConfirm has entries", () => {
+    expect(needsConfirm({ pleaseConfirm: ["mock_field_unverified"] })).toBe(
+      true,
+    );
+    expect(needsConfirm({ pleaseConfirm: ["a", "b"] })).toBe(true);
+  });
+
+  it("false when pleaseConfirm empty / missing / undefined", () => {
+    expect(needsConfirm({ pleaseConfirm: [] })).toBe(false);
+    expect(needsConfirm({})).toBe(false);
+    expect(needsConfirm({ pleaseConfirm: undefined })).toBe(false);
   });
 });
