@@ -1196,5 +1196,114 @@
         }
       }
     }
+  },
+  "myHealth": {
+    "title": "我的健康",
+    "lede": "把数据交给 DrRuby，我们帮你看到真正相关的——这不是又一个需要维护的仪表盘。",
+    "section": {
+      "yourData": "你的数据",
+      "bodyNow": "此刻的身体",
+      "recentLabs": "近期化验",
+      "currentFocus": "当前关注 · 只看与你相关的",
+      "followUps": "有意义的后续",
+      "browseAll": "浏览所有健康信息 →"
+    },
+    "intake": {
+      "log": {
+        "label": "记录一条",
+        "sub": "症状、用药、生命体征"
+      },
+      "upload": {
+        "label": "上传文档",
+        "sub": "PDF 化验单、就诊小结"
+      },
+      "photos": {
+        "label": "上传照片",
+        "sub": "皮肤、身体变化"
+      }
+    },
+    "log": {
+      "title": "记录一条",
+      "intro": "快速记一笔。这会直接保存为已确认记录——之后还可以纠正。",
+      "titleLabel": "这是什么？",
+      "titlePlaceholder": "例如：每日维生素 D、头痛发作",
+      "kindLabel": "类型",
+      "dateLabel": "日期",
+      "dateDefault": "今天",
+      "valueLabel": "数值（可选）",
+      "valuePlaceholder": "例如：500 IU",
+      "notesLabel": "备注（可选）",
+      "save": "保存",
+      "saving": "保存中…",
+      "saved": "已保存",
+      "cancel": "取消"
+    },
+    "upload": {
+      "title": "上传文档",
+      "intro": "PDF 或照片。DrRuby 会先抽取内容——你确认后才会成为健康记录。",
+      "fileLabel": "文件名",
+      "filePlaceholder": "例如：june-lab-panel.pdf",
+      "kindLabel": "类型",
+      "dateLabel": "日期",
+      "upload": "上传",
+      "uploading": "上传中…",
+      "cancel": "取消"
+    },
+    "review": {
+      "title": "复核抽取结果",
+      "intro": "检查 DrRuby 抽取的内容。在你确认之前，这里的任何内容都不是已确认的事实。",
+      "fromReport": "查看原件",
+      "empty": "未识别出可抽取项。你可以纠正或重新上传。",
+      "confirm": "确认",
+      "confirming": "确认中…",
+      "markForReview": "标记待复核",
+      "retry": "重新抽取",
+      "retrying": "重新抽取中…",
+      "correct": "纠正这条记录",
+      "connect": "关联到决策",
+      "confirmed": "这条记录已确认。",
+      "inReview": "已标记待复核。"
+    },
+    "pleaseConfirm": "请确认",
+    "provenance": {
+      "title": "修正历史",
+      "empty": "暂无修正。",
+      "original": "原始抽取",
+      "correctedBy": "由 {by} 修正",
+      "correctedAt": "于 {at}"
+    },
+    "connect": {
+      "title": "关联到决策",
+      "intro": "把这条记录关联到某个决策。它会作为该决策的「你自己」语境的一部分——以引用方式组装，不会复制。",
+      "empty": "还没有决策。先创建一个。",
+      "confirm": "关联",
+      "connecting": "关联中…",
+      "cancel": "取消"
+    },
+    "correct": {
+      "title": "纠正这条记录",
+      "intro": "你的纠正会与原始抽取一并保存——不会静默覆盖任何内容。",
+      "valuesLabel": "纠正后的值",
+      "summaryLabel": "改了什么？（可选）",
+      "summaryPlaceholder": "例如：单位错误、字段缺失",
+      "save": "保存纠正",
+      "saving": "保存中…",
+      "cancel": "取消"
+    },
+    "connected": {
+      "title": "已关联记录",
+      "empty": "还没有记录关联到这个决策。",
+      "remove": "移除",
+      "removing": "移除中…"
+    },
+    "kindLabel": {
+      "lab": "化验",
+      "imaging": "影像",
+      "checkup": "体检",
+      "vitals": "体征",
+      "medication": "用药",
+      "symptom": "症状",
+      "treatment": "治疗"
+    }
   }
 }

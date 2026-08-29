@@ -1190,5 +1190,114 @@
         }
       }
     }
+  },
+  "myHealth": {
+    "title": "My Health",
+    "lede": "Bring your data in. DrRuby helps you see what's relevant — not another dashboard to maintain.",
+    "section": {
+      "yourData": "Your data",
+      "bodyNow": "Your body right now",
+      "recentLabs": "Recent labs",
+      "currentFocus": "Current focus · only what's relevant to you",
+      "followUps": "Meaningful follow-ups",
+      "browseAll": "Browse all health information →"
+    },
+    "intake": {
+      "log": {
+        "label": "Log something",
+        "sub": "Symptoms, meds, vitals"
+      },
+      "upload": {
+        "label": "Upload a document",
+        "sub": "PDF lab report, visit summary"
+      },
+      "photos": {
+        "label": "Upload photos",
+        "sub": "Skin, physical changes"
+      }
+    },
+    "log": {
+      "title": "Log something",
+      "intro": "Add a quick note. This is saved as a confirmed record — you can correct it later.",
+      "titleLabel": "What is this?",
+      "titlePlaceholder": "e.g., Daily vitamin D, headache episode",
+      "kindLabel": "Kind",
+      "dateLabel": "Date",
+      "dateDefault": "Today",
+      "valueLabel": "Value (optional)",
+      "valuePlaceholder": "e.g., 500 IU",
+      "notesLabel": "Notes (optional)",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Saved",
+      "cancel": "Cancel"
+    },
+    "upload": {
+      "title": "Upload a document",
+      "intro": "PDF or photo. DrRuby will extract what it can — you confirm before it becomes a health record.",
+      "fileLabel": "File name",
+      "filePlaceholder": "e.g., june-lab-panel.pdf",
+      "kindLabel": "Kind",
+      "dateLabel": "Date",
+      "upload": "Upload",
+      "uploading": "Uploading…",
+      "cancel": "Cancel"
+    },
+    "review": {
+      "title": "Review extraction",
+      "intro": "Check what DrRuby extracted. Nothing here is a confirmed fact until you confirm it.",
+      "fromReport": "From your report",
+      "empty": "No extractable items found. You can correct or re-upload.",
+      "confirm": "Confirm",
+      "confirming": "Confirming…",
+      "markForReview": "Mark for review",
+      "retry": "Retry extraction",
+      "retrying": "Retrying…",
+      "correct": "Correct this record",
+      "connect": "Connect to a decision",
+      "confirmed": "This record is confirmed.",
+      "inReview": "Marked for review."
+    },
+    "pleaseConfirm": "Please confirm",
+    "provenance": {
+      "title": "Correction history",
+      "empty": "No corrections yet.",
+      "original": "Original extraction",
+      "correctedBy": "Corrected by {by}",
+      "correctedAt": "at {at}"
+    },
+    "connect": {
+      "title": "Connect to a decision",
+      "intro": "Link this record to a decision. It becomes part of that decision's Yourself context — by reference, not copied.",
+      "empty": "No decisions yet. Create one first.",
+      "confirm": "Connect",
+      "connecting": "Connecting…",
+      "cancel": "Cancel"
+    },
+    "correct": {
+      "title": "Correct this record",
+      "intro": "Your correction is saved alongside the original extraction — nothing is silently overwritten.",
+      "valuesLabel": "Corrected values",
+      "summaryLabel": "What changed? (optional)",
+      "summaryPlaceholder": "e.g., wrong unit, missing field",
+      "save": "Save correction",
+      "saving": "Saving…",
+      "cancel": "Cancel"
+    },
+    "connected": {
+      "title": "Connected records",
+      "empty": "No records connected to this decision yet.",
+      "remove": "Remove",
+      "removing": "Removing…"
+    },
+    "kindLabel": {
+      "lab": "Lab",
+      "imaging": "Imaging",
+      "checkup": "Checkup",
+      "vitals": "Vitals",
+      "medication": "Medication",
+      "symptom": "Symptom",
+      "treatment": "Treatment"
+    }
   }
 }

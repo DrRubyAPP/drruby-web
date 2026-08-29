@@ -1,18 +1,28 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { EmptyState, ErrorState, Skeleton } from "@/components/api";
 import { useApi } from "@/hooks/useApi";
+import { useRouter } from "@/i18n/navigation";
 import type { SignalDto } from "./dto";
+import { LogForm } from "./LogForm";
 import { mapSignals } from "./mappers";
+import { UploadDialog } from "./UploadDialog";
 
 /** My Health（health）视图：对齐设计稿 v-health 结构。
  *  静态区块（Your data / Your body right now / Current focus / Meaningful
  *  follow-ups / Browse all）照设计稿渲染；Recent labs（signals）、Cycle &
- *  hormones、Skin observations 接真实 API。 */
+ *  hormones、Skin observations 接真实 API。
+ *
+ *  task-42 T7：C1 录入入口（Log / Upload / Photos）+ t()。
+ *  设备连接（Apple Health / wearable）属 Non-Scope，已剔除。
+ *  Current focus / Meaningful follow-ups 等区块属 Meaning 层（task-43），保留原状。 */
 const DATA_IMPORTS = [
   {
-    label: "Upload a lab result",
-    sub: "PDF or photo of a blood panel",
+    key: "log",
+    labelKey: "intake.log.label",
+    subKey: "intake.log.sub",
     icon: (
       <svg
         viewBox="0 0 24 24"
@@ -22,13 +32,14 @@ const DATA_IMPORTS = [
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        <path d="M9 3h6M10 3v6l-4.5 8.5A2 2 0 007.3 21h9.4a2 2 0 001.8-3.5L14 9V3" />
+        <path d="M5 3h14M7 3v18l5-4 5 4V3" />
       </svg>
     ),
   },
   {
-    label: "Connect Apple Health",
-    sub: "Sleep, activity, heart data",
+    key: "upload",
+    labelKey: "intake.upload.label",
+    subKey: "intake.upload.sub",
     icon: (
       <svg
         viewBox="0 0 24 24"
@@ -38,13 +49,14 @@ const DATA_IMPORTS = [
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        <path d="M12 20s-7-4.2-9.3-8.3C1 8.3 2.4 5 5.8 5c1.9 0 3.1 1.1 6.2 3.7C15.1 6.1 16.3 5 18.2 5c3.4 0 4.8 3.3 3.1 6.7C19 15.8 12 20 12 20z" />
+        <path d="M12 16V4M7 9l5-5 5 5M5 20h14" />
       </svg>
     ),
   },
   {
-    label: "Add a medical report",
-    sub: "Physical exam, imaging, notes",
+    key: "photos",
+    labelKey: "intake.photos.label",
+    subKey: "intake.photos.sub",
     icon: (
       <svg
         viewBox="0 0 24 24"
@@ -54,29 +66,13 @@ const DATA_IMPORTS = [
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        <path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z" />
-        <path d="M14 3v5h5M9 13h6M9 17h4" />
+        <rect x="3" y="5" width="18" height="14" rx="2.5" />
+        <circle cx="8.5" cy="10" r="1.5" />
+        <path d="M21 17l-5-5-7 7" />
       </svg>
     ),
   },
-  {
-    label: "Import a wearable summary",
-    sub: "Ring, watch, CGM",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1.8}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <rect x="7" y="7" width="10" height="10" rx="2.5" />
-        <path d="M9 7V4h6v3M9 17v3h6v-3" />
-      </svg>
-    ),
-  },
-];
+] as const;
 
 const BODY_NOW = [
   {
@@ -126,35 +122,48 @@ const BROWSE_CATEGORIES = [
 ];
 
 export function HealthView() {
+  const t = useTranslations("myHealth");
+  const router = useRouter();
   const signals = useApi<SignalDto[]>("/api/signals");
+
+  // C1 录入入口弹层状态
+  const [logOpen, setLogOpen] = useState(false);
+  const [uploadOpen, setUploadOpen] = useState(false);
 
   const signalRows = mapSignals(signals.data ?? []);
 
   return (
     <>
-      <h1>My Health</h1>
+      <h1>{t("title")}</h1>
       <div className="lede">
         Bring your data in. DrRuby helps you see what&rsquo;s relevant &mdash;
         not another dashboard to maintain.
       </div>
 
-      {/* ===== Your data（静态导入宫格，设计稿）===== */}
+      {/* ===== Your data（C1 录入入口：Log / Upload / Photos）===== */}
       <div className="sec">
-        <div className="sec-h">Your data</div>
+        <div className="sec-h">{t("section.yourData")}</div>
         <div className="data-grid">
           {DATA_IMPORTS.map((d) => (
-            <button key={d.label} type="button" className="data-btn">
+            <button
+              key={d.key}
+              type="button"
+              className="data-btn"
+              onClick={() =>
+                d.key === "log" ? setLogOpen(true) : setUploadOpen(true)
+              }
+            >
               <span className="data-ic">{d.icon}</span>
-              <b>{d.label}</b>
-              <span>{d.sub}</span>
+              <b>{t(d.labelKey)}</b>
+              <span>{t(d.subKey)}</span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* ===== Your body right now（静态 matter 卡，设计稿）===== */}
+      {/* ===== Your body right now（静态 matter 卡，设计稿；Meaning 层 task-43）===== */}
       <div className="sec">
-        <div className="sec-h">Your body right now</div>
+        <div className="sec-h">{t("section.bodyNow")}</div>
         {BODY_NOW.map((c) => (
           <div className="card matter" key={c.h}>
             <h3>{c.h}</h3>
@@ -175,7 +184,7 @@ export function HealthView() {
 
       {/* ===== Recent labs（signals API）===== */}
       <div className="sec">
-        <div className="sec-h">Recent labs</div>
+        <div className="sec-h">{t("section.recentLabs")}</div>
         {signals.loading ? (
           <Skeleton lines={3} />
         ) : signals.error ? (
@@ -200,11 +209,9 @@ export function HealthView() {
           </div>
         )}
       </div>
-      {/* ===== Current focus（静态，设计稿）===== */}
+      {/* ===== Current focus（静态，设计稿；Meaning 层 task-43）===== */}
       <div className="sec">
-        <div className="sec-h">
-          Current focus &middot; only what&rsquo;s relevant to you
-        </div>
+        <div className="sec-h">{t("section.currentFocus")}</div>
         <div className="card">
           <div style={{ fontFamily: "var(--p-serif)", fontSize: 19 }}>
             Strength &amp; muscle health
@@ -217,9 +224,9 @@ export function HealthView() {
         </div>
       </div>
 
-      {/* ===== Meaningful follow-ups（静态，设计稿）===== */}
+      {/* ===== Meaningful follow-ups（静态，设计稿；Meaning 层 task-43）===== */}
       <div className="sec">
-        <div className="sec-h">Meaningful follow-ups</div>
+        <div className="sec-h">{t("section.followUps")}</div>
         <div className="card">
           {FOLLOW_UPS.map((f) => (
             <div className="foll" key={f}>
@@ -233,7 +240,7 @@ export function HealthView() {
       {/* ===== Browse all（折叠列表，设计稿）===== */}
       <div className="sec">
         <details className="uf-browse">
-          <summary>Browse all health information &rarr;</summary>
+          <summary>{t("section.browseAll")}</summary>
           <div className="card" style={{ marginTop: 10 }}>
             {BROWSE_CATEGORIES.map((c) => (
               <div className="sub-row" key={c}>
@@ -244,6 +251,20 @@ export function HealthView() {
           </div>
         </details>
       </div>
+
+      {/* ===== C1 录入弹层（手动录入 + 上传）===== */}
+      <LogForm
+        open={logOpen}
+        onClose={() => setLogOpen(false)}
+        onSaved={() => signals.refetch()}
+      />
+      <UploadDialog
+        open={uploadOpen}
+        onClose={() => setUploadOpen(false)}
+        onUploaded={(recordId) =>
+          router.push(`/portal/health/review/${recordId}`)
+        }
+      />
     </>
   );
 }
