@@ -28,4 +28,7 @@ export const apiClient = {
       body: body === undefined ? undefined : JSON.stringify(body),
       headers: { "Content-Type": "application/json", ...init?.headers },
     }),
+
+  del: <T>(path: string, init?: RequestInit) =>
+    fetchJson<T>(path, { ...init, method: "DELETE" }),
 };

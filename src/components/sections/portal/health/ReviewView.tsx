@@ -1,10 +1,13 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { EmptyState, ErrorState, Skeleton } from "@/components/api";
 import { useApi } from "@/hooks/useApi";
 import { useMutation } from "@/hooks/useMutation";
 import { apiClient } from "@/lib/api/client";
+import { ConnectToDecisionDialog } from "./ConnectToDecisionDialog";
+import { CorrectRecordDialog } from "./CorrectRecordDialog";
 import type { HealthRecordDto } from "./dto";
 import {
   canConfirm,
@@ -47,6 +50,10 @@ export function ReviewView({ recordId }: { recordId: string }) {
   const { data, error, loading, refetch } = useApi<HealthRecordDto>(
     `/api/health/records/${recordId}`,
   );
+
+  // C6/C7：Correct + Connect 弹层状态
+  const [correctOpen, setCorrectOpen] = useState(false);
+  const [connectOpen, setConnectOpen] = useState(false);
 
   const advance = useMutation(
     (status: "USER_REVIEW" | "CONFIRMED") =>
@@ -231,6 +238,51 @@ export function ReviewView({ recordId }: { recordId: string }) {
           )}
         </div>
       )}
+
+      {/* C7 · Correct this record（每条 record 可纠错 + provenance 轨迹） */}
+      {data.status !== "SOURCE_UPLOADED" && data.status !== "PROCESSING" && (
+        <div style={{ marginTop: 8 }}>
+          <button
+            type="button"
+            onClick={() => setCorrectOpen(true)}
+            style={{
+              fontSize: 12,
+              color: "#7c746f",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              textDecoration: "underline",
+            }}
+          >
+            {t("review.correct")}
+          </button>
+        </div>
+      )}
+
+      {/* C6 · Connect to a decision（仅 CONFIRMED 后可用；显式 Connect 护栏） */}
+      {data.status === "CONFIRMED" && (
+        <div style={{ marginTop: 8 }}>
+          <button
+            type="button"
+            onClick={() => setConnectOpen(true)}
+            style={BTN_PRIMARY}
+          >
+            {t("review.connect")}
+          </button>
+        </div>
+      )}
+
+      <CorrectRecordDialog
+        record={data}
+        open={correctOpen}
+        onClose={() => setCorrectOpen(false)}
+        onCorrected={() => refetch()}
+      />
+      <ConnectToDecisionDialog
+        recordId={data.id}
+        open={connectOpen}
+        onClose={() => setConnectOpen(false)}
+      />
     </>
   );
 }

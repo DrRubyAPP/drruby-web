@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { EmptyState, ErrorState, Skeleton } from "@/components/api";
+import { ConnectedRecordsPanel } from "@/components/sections/portal/health/ConnectedRecordsPanel";
 import type {
   OthersDimensionKey,
   ScienceBlockKey,
@@ -243,6 +244,8 @@ export function DecisionDetailView({ id }: { id: string }) {
               placeholder="Anything relevant — age, symptoms, what you've already tried…"
               style={TEXTAREA}
             />
+            {/* task-42 B2：Connected Records 作为 Yourself 区块的新增子区块（不替换 yourselfContext 扁平字符串 fallback） */}
+            <ConnectedRecordsPanel decisionId={id} />
           </div>
         )}
 

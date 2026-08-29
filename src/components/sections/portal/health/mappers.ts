@@ -226,6 +226,7 @@ export function mapHealthRecords(dtos: HealthRecordDto[]): HealthRecordRow[] {
 export interface ConnectedRecordRow {
   id: string; // 连接记录 id（decision_health_record.id）
   decisionId: string;
+  healthRecordId: string;
   healthRecord: HealthRecordRow;
   connectedBy: string;
   connectedAt: string;
@@ -238,6 +239,7 @@ export function mapConnectedRecord(
   return {
     id: dto.id,
     decisionId: dto.decisionId,
+    healthRecordId: dto.healthRecordId,
     healthRecord: mapHealthRecord(dto.healthRecord),
     connectedBy: dto.connectedBy,
     connectedAt: dto.connectedAt,
