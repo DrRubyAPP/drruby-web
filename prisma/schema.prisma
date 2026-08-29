@@ -60,6 +60,7 @@ model UserAccount {
   hormoneReadings  HormoneReading[]
   contributions    Contribution[]
   healthRecords    HealthRecord[]
+  healthSources    HealthSource[]
   aiReports        AiReport[]
   photos           Photo[]
   subscription     Subscription?
@@ -312,6 +313,7 @@ model Decision {
   user           UserAccount     @relation(fields: [userId], references: [id], onDelete: Cascade)
   entries        DecisionEntry[]
   timelineEvents TimelineEvent[]
+  connectedHealthRecords DecisionHealthRecord[]
 
   @@index([userId, lastUserActivityAt], map: "decision_user_activity_idx")
   @@index([userId, saved], map: "decision_user_saved_idx")
@@ -494,25 +496,100 @@ model Contribution {
 
 // --- 以下 3 张：P1 消费域但本轮 schema only（无 repo） ---
 
-/// 健康记录/报告上传（lab/imaging/checkup/vitals）— backend_v5 §2.3a
+/// 健康记录/报告上传（lab/imaging/checkup/vitals/medication/symptom/treatment）— backend_v5 §2.3a + task-42 D6
+/// task-42 改造为 Record 层（Contract §12）：sourceId 指向 HealthSource 原件；status 走状态机；
+/// parsedValues 持有最新值（current 指针），修正历史见 HealthRecordRevision。
 model HealthRecord {
-  id           String   @id @default(cuid(2))
-  userId       String   @map("user_id")
-  kind         String   // lab|imaging|checkup|vitals
-  title        String
-  source       String?  // you|your doctor|clinic
-  objectKey    String?  @map("object_key")   // 对象存储 key（PDF/照片）
-  ocrStatus    String   @default("pending") @map("ocr_status") // pending|processing|done|manual
-  parsedValues Json?    @map("parsed_values")
-  recordedAt   DateTime @map("recorded_at") @db.Timestamptz
-  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz
+  id            String   @id @default(cuid(2))
+  userId        String   @map("user_id")
+  sourceId      String   @unique @map("source_id") // Source 1:1 Record（V1 简化）
+  kind          String   // lab|imaging|checkup|vitals|medication|symptom|treatment
+  documentClass String?  @map("document_class") // Lab|Imaging|Pathology|Procedure|VisitSummary|Unknown
+  title         String
+  status        String   @default("SOURCE_UPLOADED") // 状态机 SOURCE_UPLOADED→PROCESSING→EXTRACTED_DRAFT→USER_REVIEW→CONFIRMED
+  confidence    String?  // High|Low|Unrecognized|Conflicting
+  parsedValues  Json?    @map("parsed_values") // 带类型 + 逐项置信
+  recordedAt    DateTime @map("recorded_at") @db.Timestamptz
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz
 
-  user         UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // task-42 起保留兼容：source/objectKey/ocrStatus 不删，仅作迁移映射
+  // 旧字段在 schema 中显式标 `@deprecated`（Prisma 不支持注释移除）
+  /// @deprecated task-42 起改用 HealthSource.fileName/objectKey
+  source       String?  // you|your doctor|clinic
+  /// @deprecated task-42 起改用 HealthSource.objectKey
+  objectKey    String?  @map("object_key")
+  /// @deprecated task-42 起改用 status/confidence
+  ocrStatus    String   @default("pending") @map("ocr_status")
+
+  user         UserAccount           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  healthSource HealthSource          @relation(fields: [sourceId], references: [id], onDelete: Cascade)
   photos       Photo[]
+  revisions    HealthRecordRevision[]
+  decisions    DecisionHealthRecord[]
 
   @@index([userId, recordedAt], map: "health_record_user_recorded_idx")
+  @@index([userId, status], map: "health_record_user_status_idx")
   @@map("health_record")
+}
+
+/// 原件层（Contract §12 Source）— task-42 新建
+/// V1 占位存储：objectKey 为本地路径/字符串，S3/R2/GCS 延后（O3）
+model HealthSource {
+  id               String   @id @default(cuid(2))
+  userId           String   @map("user_id")
+  fileName         String   @map("file_name")
+  mime             String?
+  hash             String?
+  objectKey        String?  @map("object_key") // V1 占位（本地路径/字符串）
+  storageLifecycle String?  @map("storage_lifecycle")
+  provenance       Json?
+  uploadedAt       DateTime @default(now()) @map("uploaded_at") @db.Timestamptz
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  user   UserAccount   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  record HealthRecord? // 1:1
+
+  @@index([userId, uploadedAt], map: "health_source_user_uploaded_idx")
+  @@map("health_source")
+}
+
+/// 修正历史（append-only，Contract §14 provenance）— task-42
+/// 无 updatedAt：只增不改；与 DecisionEntry append-only 模式一致
+model HealthRecordRevision {
+  id                   String   @id @default(cuid(2))
+  recordId             String   @map("record_id")
+  parsedValuesSnapshot Json     @map("parsed_values_snapshot")
+  diffSummary          String?  @map("diff_summary")
+  correctedBy          String   @map("corrected_by")
+  correctedAt          DateTime @default(now()) @map("corrected_at") @db.Timestamptz
+  reason               String?
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  record HealthRecord @relation(fields: [recordId], references: [id], onDelete: Cascade)
+
+  @@index([recordId, correctedAt], map: "health_record_revision_record_corrected_idx")
+  @@map("health_record_revision")
+}
+
+/// Decision ⇄ HealthRecord 关联表（Contract §2 显式 Connect）— task-42
+/// 软删除留痕：removedAt 非空表示已移除（C9）；listByDecision 只返回 removedAt=null
+model DecisionHealthRecord {
+  id             String    @id @default(cuid(2))
+  decisionId     String    @map("decision_id")
+  healthRecordId String    @map("health_record_id")
+  connectedBy    String    @map("connected_by")
+  connectedAt    DateTime  @default(now()) @map("connected_at") @db.Timestamptz
+  removedAt      DateTime? @map("removed_at") @db.Timestamptz // 软删除留痕（C9）
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  decision     Decision     @relation(fields: [decisionId], references: [id], onDelete: Cascade)
+  healthRecord HealthRecord @relation(fields: [healthRecordId], references: [id], onDelete: Cascade)
+
+  @@index([decisionId], map: "decision_health_record_decision_idx")
+  @@index([healthRecordId], map: "decision_health_record_record_idx")
+  @@map("decision_health_record")
 }
 
 /// AI 生成报告（skin|hormone|body）— task-26；规则提炼 findings + LLM 仅润色

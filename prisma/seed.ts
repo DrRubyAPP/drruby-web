@@ -653,15 +653,24 @@ async function main() {
     ],
   });
 
-  // 16) 健康记录 + 照片
+  // 16) 健康记录 + 照片（task-42：先建 HealthSource 原件，再建 Record）
+  const bloodPanelSource = await prisma.healthSource.create({
+    data: {
+      userId,
+      fileName: "Comprehensive hormone panel.pdf",
+      objectKey: "mock/health-records/hormone-panel.pdf",
+    },
+  });
   const bloodPanel = await prisma.healthRecord.create({
     data: {
       userId,
+      sourceId: bloodPanelSource.id,
       kind: "lab",
       title: "Comprehensive hormone panel",
       source: "your doctor",
       objectKey: "mock/health-records/hormone-panel.pdf",
       ocrStatus: "done",
+      status: "CONFIRMED",
       parsedValues: {
         estradiol: "38 pg/mL",
         fsh: "18 mIU/mL",
@@ -670,14 +679,23 @@ async function main() {
       recordedAt: daysAgo(30),
     },
   });
+  const faceBaselineSource = await prisma.healthSource.create({
+    data: {
+      userId,
+      fileName: "face-baseline.jpg",
+      objectKey: "mock/health-records/face-baseline.jpg",
+    },
+  });
   await prisma.healthRecord.create({
     data: {
       userId,
+      sourceId: faceBaselineSource.id,
       kind: "imaging",
       title: "Baseline face photo set",
       source: "you",
       objectKey: "mock/health-records/face-baseline.jpg",
       ocrStatus: "manual",
+      status: "CONFIRMED",
       recordedAt: daysAgo(45),
     },
   });
