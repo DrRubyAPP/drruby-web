@@ -189,6 +189,70 @@ export function assertOutcomeForKind(
   }
 }
 
+/** outcome → 期望 lifecycle 映射（§3/§5）；B8：V1 中 decided_on_next_step 停在 DECIDED */
+export const LIFECYCLE_FOR_OUTCOME: Record<DecisionOutcome, DecisionLifecycle> =
+  {
+    // Type A (action)
+    still_considering: "ACTIVE",
+    decided_to_do_it: "DECIDED",
+    decided_not_to: "CLOSED",
+    talk_with_clinician_first: "ACTIVE",
+    // Type B (exploration)
+    keep_exploring: "ACTIVE",
+    discuss_with_clinician: "ACTIVE",
+    come_back_later: "ACTIVE",
+    decided_on_next_step: "DECIDED",
+  };
+
+/** 服务端按 outcome 派生 lifecycle（route 层调用） */
+export function lifecycleForOutcome(
+  outcome: DecisionOutcome,
+): DecisionLifecycle {
+  return LIFECYCLE_FOR_OUTCOME[outcome];
+}
+
+/**
+ * outcome↔lifecycle 一致性校验（与 assertOutcomeForKind 配对）。
+ * - outcome=null/undefined → lifecycle 不得为 DECIDED/CLOSED
+ * - outcome 非空 → lifecycle 必须 === LIFECYCLE_FOR_OUTCOME[outcome]
+ * 非法组合抛错（route 映射为 422）。
+ */
+export function assertLifecycleForOutcome(
+  outcome: DecisionOutcome | null | undefined,
+  lifecycle: DecisionLifecycle,
+): void {
+  if (outcome == null) {
+    if (lifecycle === "DECIDED" || lifecycle === "CLOSED") {
+      throw new Error(`lifecycle "${lifecycle}" requires a non-null outcome`);
+    }
+    return;
+  }
+  const expected = LIFECYCLE_FOR_OUTCOME[outcome];
+  if (lifecycle !== expected) {
+    throw new Error(
+      `outcome "${outcome}" expects lifecycle "${expected}", got "${lifecycle}"`,
+    );
+  }
+}
+
+/** 非抛出版：判定 outcome 是否属于给定 kind 的合法集（B6 reclassify 自动清空时用） */
+export function isValidOutcomeForKind(
+  kind: DecisionKind,
+  outcome: DecisionOutcome,
+): boolean {
+  if (kind === "unconfirmed") return false;
+  const set: readonly string[] =
+    kind === "action" ? TYPE_A_OUTCOMES : TYPE_B_OUTCOMES;
+  return set.includes(outcome);
+}
+
+/** DecisionEntry.kind — §6 append-only entry 类型；null=历史 observation（向后兼容） */
+export const decisionEntryKindSchema = z.enum([
+  "observation",
+  "archived_outcome",
+]);
+export type DecisionEntryKind = z.infer<typeof decisionEntryKindSchema>;
+
 /** decision.topicSlug — 已知语料实体 slug（可空；null=无 topic 或未命中）
  *  仅驱动语料检索；与粗粒度 decisionType 正交。Journey.decisionType 亦复用此集。 */
 export const topicSlugSchema = z.enum([
