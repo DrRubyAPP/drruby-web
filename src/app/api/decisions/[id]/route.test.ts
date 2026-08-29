@@ -39,7 +39,7 @@ describe("POST /api/decisions/[id]", () => {
     expect(still?.lifecycle).toBe("ACTIVE");
   });
 
-  it("owner 推进 lifecycle → DECIDED", async () => {
+  it("owner 提交合法 outcome → lifecycle 派生 DECIDED + decidedAt 落库", async () => {
     const { POST } = await import("./route");
     const decisionRepo = await import("@/lib/db/repositories/decision.repo");
     const owner = await makeUser("dec-patch@example.com");
@@ -50,12 +50,17 @@ describe("POST /api/decisions/[id]", () => {
 
     asUser(owner.id);
     const res = await POST(
-      jsonRequest({ lifecycle: "DECIDED" }, { method: "POST" }),
+      jsonRequest(
+        { decisionKind: "action", outcome: "decided_to_do_it" },
+        { method: "POST" },
+      ),
       params(decision.id),
     );
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.lifecycle).toBe("DECIDED");
+    expect(body.outcome).toBe("decided_to_do_it");
+    expect(body.decidedAt).not.toBe(null);
   });
 
   it("非法 kind↔outcome 组合 → 422（B1）", async () => {

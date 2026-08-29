@@ -19,6 +19,8 @@ export const DecisionEntryDTO = z.object({
   text: z.string(),
   lifecycleSnapshot: decisionLifecycleSchema,
   occurredAt: z.string(),
+  kind: z.string().nullable().optional(),
+  synthesis: z.unknown().nullable().optional(),
 });
 
 /** App `types.ts` Decision（`updated ← updatedAt`；列表省 brief，详情含 brief+entries） */
@@ -37,6 +39,8 @@ export const DecisionDTO = z.object({
   yourselfContext: z.string().nullable(),
   updated: z.string(),
   lastUserActivityAt: z.string(),
+  freshnessCheckedAt: z.string().nullable().optional(),
+  decidedAt: z.string().nullable().optional(),
   brief: DecisionBriefDTO.optional(),
 });
 
@@ -70,6 +74,10 @@ export function toDecisionDTO(
     yourselfContext: row.yourselfContext,
     updated: row.updatedAt.toISOString(),
     lastUserActivityAt: row.lastUserActivityAt.toISOString(),
+    freshnessCheckedAt: row.freshnessCheckedAt
+      ? row.freshnessCheckedAt.toISOString()
+      : null,
+    decidedAt: row.decidedAt ? row.decidedAt.toISOString() : null,
     brief: opts.withBrief ? toBrief(row.brief) : undefined,
   };
 }
@@ -82,5 +90,7 @@ export function toEntryDTO(
     text: row.text,
     lifecycleSnapshot: decisionLifecycleSchema.parse(row.lifecycleSnapshot),
     occurredAt: row.occurredAt.toISOString(),
+    kind: row.kind,
+    synthesis: row.synthesis,
   };
 }

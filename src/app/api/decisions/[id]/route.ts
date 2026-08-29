@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/session";
-import { decisionRepo } from "@/lib/db";
+import { decisionEntryRepo, decisionRepo } from "@/lib/db";
 import {
+  assertLifecycleForOutcome,
+  type DecisionKind,
+  type DecisionOutcome,
   decisionKindSchema,
   decisionLifecycleSchema,
   decisionTypeSchema,
+  isValidOutcomeForKind,
+  lifecycleForOutcome,
   outcomeSchema,
   topicSlugSchema,
 } from "@/lib/db/enums";
@@ -68,7 +73,7 @@ export const GET = handle(async (_req: Request, ctx: Ctx) => {
 
 /**
  * Update decision
- * @description 更新决策 lifecycle 三维（decisionKind/outcome/nextStep/lifecycle）与 question/type/saved/yourselfContext。非法 kind↔outcome 组合 422；越权按 404 处理
+ * @description 更新决策 lifecycle 三维（decisionKind/outcome/nextStep/lifecycle）与 question/type/saved/yourselfContext。B6 reclassify 自动清空非法 outcome；D4 freshness gate（存在 archived_outcome entry 时 freshnessCheckedAt 须新于该 entry）；B7 outcome=null 反悔回 ACTIVE；decidedAt 按 outcome 派生。非法组合 422；越权按 404 处理
  * @body UpdateDecisionBody
  * @response DecisionItemResponse
  * @auth bearer
@@ -85,6 +90,63 @@ export const POST = handle(async (req: Request, ctx: Ctx) => {
   }
 
   const body = UpdateDecisionBody.parse(await req.json());
+
+  // Prisma 行字段推断为 string | null；cast 到枚举 union 供校验函数使用
+  const existingKind = existing.decisionKind as DecisionKind | null;
+  const existingOutcome = existing.outcome as DecisionOutcome | null;
+
+  // B6 reclassify 自动清空：kind 变化且现有 outcome 不在新 kind 合法集 → 清空 outcome/nextStep + 必要时回退 ACTIVE
+  if (
+    body.decisionKind &&
+    body.decisionKind !== existingKind &&
+    existingOutcome &&
+    !isValidOutcomeForKind(body.decisionKind, existingOutcome)
+  ) {
+    body.outcome = null;
+    body.nextStep = null;
+    if (existing.lifecycle === "DECIDED" || existing.lifecycle === "CLOSED") {
+      body.lifecycle = "ACTIVE";
+    }
+    // decidedAt 由下方 outcome 派生逻辑统一处理（outcome=null → decidedAt=null）
+  }
+
+  // F3 + FRESHNESS GATE (D4) + decidedAt 派生：仅当提交非空 outcome 时
+  let derivedDecidedAt: Date | null | undefined = undefined;
+  if (body.outcome !== undefined && body.outcome != null) {
+    // D4 freshness gate：存在 archived_outcome entry 时，freshnessCheckedAt 必须新于该 entry
+    const archived = await decisionEntryRepo.findLastArchivedEntry(id);
+    if (archived) {
+      if (
+        !existing.freshnessCheckedAt ||
+        existing.freshnessCheckedAt <= archived.occurredAt
+      ) {
+        throw new AppError(
+          "FRESHNESS_GATE_REQUIRED",
+          "Reopen 后需先 Check now 刷新信息再决定",
+          422,
+        );
+      }
+    }
+
+    // F3 派生 lifecycle（覆盖客户端所传，按映射表强制）
+    body.lifecycle = lifecycleForOutcome(body.outcome);
+    // B8：V1 中 decided_on_next_step 停在 DECIDED，不主动转 COMPLETED
+    derivedDecidedAt =
+      body.lifecycle === "DECIDED" || body.lifecycle === "CLOSED"
+        ? new Date()
+        : null;
+  } else if (body.outcome === null) {
+    // outcome 显式清空 → ACTIVE + decidedAt=null（B7 反悔路径）
+    body.lifecycle = "ACTIVE";
+    derivedDecidedAt = null;
+  }
+
+  // outcome↔lifecycle 一致性双重校验（防客户端绕过）
+  if (body.lifecycle !== undefined) {
+    const outcomeForCheck = body.outcome ?? existingOutcome;
+    assertLifecycleForOutcome(outcomeForCheck, body.lifecycle);
+  }
+
   let row: Awaited<ReturnType<typeof decisionRepo.update>>;
   try {
     row = await decisionRepo.update(id, {
@@ -98,9 +160,10 @@ export const POST = handle(async (req: Request, ctx: Ctx) => {
       nextStep: body.nextStep,
       saved: body.saved,
       yourselfContext: body.yourselfContext,
+      decidedAt: derivedDecidedAt,
     });
   } catch (err) {
-    // repo 的 assertOutcomeForKind 抛普通 Error → 非法 kind↔outcome 组合（B1）
+    // repo 的 assertOutcomeForKind / route 的 assertLifecycleForOutcome 抛普通 Error → 非法组合
     if (err instanceof AppError) throw err;
     throw new AppError(
       "UNPROCESSABLE_ENTITY",
