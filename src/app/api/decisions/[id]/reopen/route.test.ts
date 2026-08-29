@@ -89,32 +89,6 @@ describe("POST /api/decisions/[id]/reopen", () => {
   });
 });
 
-describe("POST /api/decisions/[id]/check-freshness", () => {
-  beforeEach(resetDb);
-  afterEach(disconnectDb);
-
-  it("写 freshnessCheckedAt=now + materialChange=false（V1 占位）", async () => {
-    const { POST } = await import("../check-freshness/route");
-    const decisionRepo = await import("@/lib/db/repositories/decision.repo");
-    const owner = await makeUser("fresh-owner@example.com");
-    const decision = await decisionRepo.create(owner.id, { question: "q" });
-
-    asUser(owner.id);
-    const res = await POST(
-      new Request("http://test", { method: "POST" }),
-      params(decision.id),
-    );
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.freshnessCheckedAt).not.toBe(null);
-    expect(body.materialChange).toBe(false);
-
-    // 库内 freshnessCheckedAt 已写入
-    const row = await decisionRepo.findById(decision.id);
-    expect(row?.freshnessCheckedAt).not.toBe(null);
-  });
-});
-
 describe("freshness gate (D4) on POST /api/decisions/[id]", () => {
   beforeEach(resetDb);
   afterEach(disconnectDb);

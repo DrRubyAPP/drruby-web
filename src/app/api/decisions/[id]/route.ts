@@ -113,6 +113,14 @@ export const POST = handle(async (req: Request, ctx: Ctx) => {
   // F3 + FRESHNESS GATE (D4) + decidedAt 派生：仅当提交非空 outcome 时
   let derivedDecidedAt: Date | null | undefined = undefined;
   if (body.outcome !== undefined && body.outcome != null) {
+    // F3: decided_on_next_step 必须带 next_step（req 验收 3，前端禁用 + 服务端 422）
+    if (body.outcome === "decided_on_next_step" && !body.nextStep?.trim()) {
+      throw new AppError(
+        "UNPROCESSABLE_ENTITY",
+        "decided_on_next_step 必须带 next_step",
+        422,
+      );
+    }
     // D4 freshness gate：存在 archived_outcome entry 时，freshnessCheckedAt 必须新于该 entry
     const archived = await decisionEntryRepo.findLastArchivedEntry(id);
     if (archived) {

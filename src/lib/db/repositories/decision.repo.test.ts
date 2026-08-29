@@ -7,9 +7,10 @@ import {
   listByUser,
   listByUserActionable,
   listByUserHistory,
+  reopenAtomic,
   update,
 } from "./decision.repo";
-import { append } from "./decisionEntry.repo";
+import { append, listByDecision } from "./decisionEntry.repo";
 import { resetDatabase } from "./test-helpers";
 import { create as createUser } from "./userAccount.repo";
 
@@ -206,5 +207,77 @@ describe("decision.repo", () => {
     });
     const after = await findByIdWithEntries(d.id);
     expect(after?.lastUserActivityAt.getTime()).toBeGreaterThanOrEqual(t0);
+  });
+});
+
+describe("task-41 reopenAtomic", () => {
+  beforeEach(async () => await resetDatabase());
+  afterEach(async () => await prisma.$disconnect());
+
+  async function seedClosedWithBrief(
+    email: string,
+  ): Promise<{ userId: string; decisionId: string }> {
+    const userId = await seedUser();
+    // 直接造 CLOSED 决策并写 brief + decidedAt（不走 create 校验路径）
+    const d = await prisma.decision.create({
+      data: {
+        userId,
+        question: "Reopen me",
+        lifecycle: "CLOSED",
+        decisionKind: "action",
+        outcome: "decided_not_to",
+        decidedAt: new Date("2026-01-01T00:00:00Z"),
+        brief: {
+          yourHistory: ["fine lines"],
+          similarJourneys: { summary: "x", note: "y" },
+          evidence: { known: [], uncertain: [] },
+          questionsForClinician: [],
+        } as never,
+      },
+    });
+    return { userId, decisionId: d.id };
+  }
+
+  it("archives outcome + synthesis (deep brief copy) and clears outcome/nextStep/decidedAt, sets ACTIVE", async () => {
+    const { userId, decisionId } = await seedClosedWithBrief(
+      "reopen-1@example.com",
+    );
+
+    const row = await reopenAtomic(decisionId, userId);
+    expect(row.lifecycle).toBe("ACTIVE");
+    expect(row.outcome).toBeNull();
+    expect(row.nextStep).toBeNull();
+    expect(row.decidedAt).toBeNull();
+
+    const entries = await listByDecision(decisionId);
+    const archived = entries.find((e) => e.kind === "archived_outcome");
+    expect(archived).toBeTruthy();
+    expect(archived?.lifecycleSnapshot).toBe("CLOSED");
+    expect(archived?.synthesis).toMatchObject({
+      outcome: "decided_not_to",
+      nextStep: null,
+      brief: { yourHistory: ["fine lines"] },
+    });
+  });
+
+  it("D6: does NOT write freshnessCheckedAt（不主动 set；旧值保留）", async () => {
+    const userId = await seedUser();
+    const d = await create(userId, {
+      question: "freshness untouched",
+      decisionKind: "action",
+      outcome: "decided_not_to",
+      lifecycle: "CLOSED",
+    });
+    // 预置旧 freshnessCheckedAt
+    await update(d.id, {
+      freshnessCheckedAt: new Date("2026-01-01T00:00:00Z"),
+    });
+
+    const row = await reopenAtomic(d.id, userId);
+    // Reopen 不主动写；旧值保留（gate 校验仍会因 archived.occurredAt > 旧值而拒）
+    expect(row.freshnessCheckedAt).not.toBeNull();
+    expect(row.freshnessCheckedAt?.toISOString()).toBe(
+      "2026-01-01T00:00:00.000Z",
+    );
   });
 });
