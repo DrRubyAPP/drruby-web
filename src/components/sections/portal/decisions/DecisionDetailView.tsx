@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { EmptyState, ErrorState, Skeleton } from "@/components/api";
 import type {
   OthersDimensionKey,
@@ -12,10 +12,18 @@ import { useApi } from "@/hooks/useApi";
 import { useMutation } from "@/hooks/useMutation";
 import { apiClient } from "@/lib/api/client";
 import { ACTIVE_CHIP, SUBMIT_BTN, TEXTAREA } from "./drawerStyles";
-import type { DecisionDetailDto, DecisionType } from "./dto";
+import type {
+  DecisionDetailDto,
+  DecisionOutcome,
+  UpdateDecisionInput,
+} from "./dto";
 import {
   ALL_DECISION_TYPES,
+  archivedEntryLabel,
+  KIND_OPTIONS,
   lifecycleToLabel,
+  outcomesForKind,
+  outcomeToLabel,
   sortEntries,
   typeToLabel,
 } from "./mappers";
@@ -41,22 +49,53 @@ const SCIENCE_BLOCKS: { key: ScienceBlockKey; label: string }[] = [
   { key: "uncertainty", label: "Uncertainty" },
 ];
 
+/** §6 freshness gate 检查端点 V1 占位响应 */
+interface CheckFreshnessResponse {
+  freshnessCheckedAt: string;
+  materialChange: boolean;
+}
+
+/** useMutation 无参调用的占位 input（hook 签名要求传值） */
+const NO_INPUT = undefined as unknown as void;
+
 /**
- * 决策详情页（Slice 1 核心）：
+ * 决策详情页（Slice 1 核心 + task-41 Decide 环节）：
  * - 三视角自由切换，无强制顺序；Yourself 草稿存客户端 state，切换不丢（A2）
  * - ☆ Save 书签化（§11 纯书签）：右上角低强调 toggle，仅"更易找到"；不创建 Active、
  *   不影响 lifecycle/WMN 排序（saved 不在 MEANINGFUL_UPDATE_KEYS）；Yourself 草稿随 Save 一并落库
- * - Others / Science 读预置语料（topicSlug 驱动检索）；type 为粗粒度可改，只影响 Science 措辞框架（B9）
+ * - Others / Science 读预置语料（topicSlug 驱动检索）；粗粒度 type 已迁入 Science tab 底部（D2）
+ * - task-41 Decide section（三视角之后、Observations 之前）：
+ *   - F2 Type 确认用人话澄清（用户不见 "Type A/B" 字面）
+ *   - F3 outcome 选择驱动 lifecycle（含 decided_on_next_step 必填 next_step）
+ *   - F4 Closed→Reopen 原子归档 + freshness gate（D4 UI 提示 + D6 时序）
+ *   - B6 reclassify 自动清空非法 outcome
+ *   - D5 DECIDED 后 "Start observing" 禁用按钮占位（task-44 接真实逻辑）
  * - Observation 追加（迁移自 DecisionDetailDrawer，append-only）
  */
 export function DecisionDetailView({ id }: { id: string }) {
-  const t = useTranslations("portal.decisionsDetail.save");
+  const tr = useTranslations("portal.decisionsDetail");
   const { data, error, loading, refetch } = useApi<DecisionDetailDto>(
     `/api/decisions/${id}`,
   );
   const [tab, setTab] = useState<Perspective>("yourself");
   const [yourselfDraft, setYourselfDraft] = useState<string | null>(null); // null = 未编辑，展示已存值
   const [entryText, setEntryText] = useState("");
+
+  // task-41 Decide section 状态
+  const [decideOutcome, setDecideOutcome] = useState<DecisionOutcome | null>(
+    null, // 服务端 outcome 在 data.outcome；本地仅跟踪用户未提交的选择
+  );
+  const [nextStepDraft, setNextStepDraft] = useState("");
+  const [reclassifyConfirm, setReclassifyConfirm] = useState(false);
+
+  // D4 freshness gate 派生：最近 archived_outcome entry 存在且 freshnessCheckedAt 不新于该 entry → 需检查
+  const needsFreshnessCheck = useMemo(() => {
+    if (!data) return false;
+    const archived = data.entries.find((e) => e.kind === "archived_outcome");
+    if (!archived) return false;
+    if (!data.freshnessCheckedAt) return true;
+    return new Date(data.freshnessCheckedAt) <= new Date(archived.occurredAt);
+  }, [data]);
 
   // ☆ Save 书签化（§11 纯书签）：saved 不刷新 lastUserActivityAt → 不进 WMN 排序；
   // Yourself 草稿随 Save 一并落库（保持 A5 行为不回退）
@@ -66,9 +105,9 @@ export function DecisionDetailView({ id }: { id: string }) {
     { onSuccess: () => refetch() },
   );
 
-  // 改 type（粗粒度，只影响 Science 措辞框架，不切换检索语料）
+  // 改 type（粗粒度，只影响 Science 措辞框架，不切换检索语料）+ task-41 outcome/decisionKind/nextStep
   const update = useMutation(
-    (input: { type?: DecisionType }) =>
+    (input: UpdateDecisionInput) =>
       apiClient.post(`/api/decisions/${id}`, input),
     { onSuccess: () => refetch() },
   );
@@ -79,6 +118,28 @@ export function DecisionDetailView({ id }: { id: string }) {
     {
       onSuccess: () => {
         setEntryText("");
+        refetch();
+      },
+    },
+  );
+
+  // F4 Reopen：CLOSED → ACTIVE 原子归档（走专用端点）
+  const reopen = useMutation(
+    (_input: void) => apiClient.post<unknown>(`/api/decisions/${id}/reopen`),
+    { onSuccess: () => refetch() },
+  );
+
+  // D4 Check now：freshness gate 占位（V1 写 freshnessCheckedAt=now，task-43 接真实刷新）
+  const [checkFreshnessData, setCheckFreshnessData] =
+    useState<CheckFreshnessResponse | null>(null);
+  const checkFreshness = useMutation(
+    (_input: void) =>
+      apiClient.post<CheckFreshnessResponse>(
+        `/api/decisions/${id}/check-freshness`,
+      ),
+    {
+      onSuccess: (out) => {
+        setCheckFreshnessData(out ?? null);
         refetch();
       },
     },
@@ -96,6 +157,9 @@ export function DecisionDetailView({ id }: { id: string }) {
   // 语料检索按 topicSlug（B9）：命中→专题语料，null/未命中→通用占位；type 不参与检索
   const corpus = getDecisionCorpus(data.topicSlug);
   const entries = sortEntries(data.entries);
+  // Decide section 本地选择的 outcome（与 data.outcome 同步：用户改选后立即更新 state）
+  const currentOutcomeSelection = decideOutcome ?? data.outcome;
+  const nextStepValue = nextStepDraft || data.nextStep || "";
 
   return (
     <div>
@@ -121,7 +185,9 @@ export function DecisionDetailView({ id }: { id: string }) {
           type="button"
           className="save-star"
           aria-pressed={data.saved}
-          aria-label={data.saved ? t("ariaSavedLabel") : t("ariaSaveLabel")}
+          aria-label={
+            data.saved ? tr("save.ariaSavedLabel") : tr("save.ariaSaveLabel")
+          }
           disabled={toggleSave.loading}
           onClick={() =>
             toggleSave.mutate({
@@ -130,7 +196,7 @@ export function DecisionDetailView({ id }: { id: string }) {
             })
           }
         >
-          {data.saved ? t("saved") : t("save")}
+          {data.saved ? tr("save.saved") : tr("save.save")}
         </button>
       </div>
       {toggleSave.error && (
@@ -145,31 +211,6 @@ export function DecisionDetailView({ id }: { id: string }) {
           {data.topic}
         </span>
       )}
-
-      {/* type 切换 chips（B9：粗粒度 type 只影响 Science 措辞框架，不切换检索语料） */}
-      <div className="sec">
-        <div className="sec-h">Type</div>
-        <div className="ask-ex">
-          {ALL_DECISION_TYPES.map((t) => (
-            <button
-              key={t}
-              type="button"
-              className="ask-chip"
-              disabled={update.loading}
-              onClick={() => update.mutate({ type: t })}
-              style={data.type === t ? ACTIVE_CHIP : undefined}
-            >
-              {typeToLabel(t)}
-            </button>
-          ))}
-        </div>
-        {update.error && (
-          <ErrorState
-            message={update.error.message}
-            onRetry={() => update.reset()}
-          />
-        )}
-      </div>
 
       {/* 三视角 tab（切换不卸载 Yourself 草稿 state，A2） */}
       <div className="sec">
@@ -259,6 +300,262 @@ export function DecisionDetailView({ id }: { id: string }) {
             <div style={{ fontSize: 12, color: "#a89a95" }}>
               For learning, not medical advice.
             </div>
+
+            {/* F1/D2：粗粒度 type chips 迁入 Science tab（只影响 Science 措辞框架） */}
+            <div
+              style={{
+                marginTop: 18,
+                paddingTop: 14,
+                borderTop: "1px solid #eee",
+              }}
+            >
+              <div className="sec-h" style={{ fontSize: 13 }}>
+                {tr("scienceFraming")}
+              </div>
+              <div className="ask-ex" style={{ marginTop: 8 }}>
+                {ALL_DECISION_TYPES.map((t_) => (
+                  <button
+                    key={t_}
+                    type="button"
+                    className="ask-chip"
+                    disabled={update.loading}
+                    onClick={() => update.mutate({ type: t_ })}
+                    style={data.type === t_ ? ACTIVE_CHIP : undefined}
+                  >
+                    {typeToLabel(t_)}
+                  </button>
+                ))}
+              </div>
+              {update.error && (
+                <ErrorState
+                  message={update.error.message}
+                  onRetry={() => update.reset()}
+                />
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* F1/D1：Decide section（三视角之后、Observations 之前） */}
+      <div className="sec">
+        <div className="sec-h">{tr("decide.title")}</div>
+
+        {data.lifecycle === "CLOSED" ? (
+          // CLOSED 状态：Reopen 入口
+          <div className="card">
+            <p style={{ fontSize: 13.5, color: "#7c746f" }}>
+              {tr("decide.closedHint")}
+            </p>
+            <button
+              type="button"
+              onClick={() => reopen.mutate(NO_INPUT)}
+              disabled={reopen.loading}
+              style={SUBMIT_BTN}
+            >
+              {reopen.loading ? tr("decide.reopening") : tr("decide.reopen")}
+            </button>
+            {reopen.error && (
+              <ErrorState
+                message={reopen.error.message}
+                onRetry={() => reopen.reset()}
+              />
+            )}
+          </div>
+        ) : data.decisionKind === "action" ||
+          data.decisionKind === "exploration" ? (
+          <>
+            {/* D4 freshness gate：存在 archived entry 且 freshnessCheckedAt 不新于该 entry */}
+            {needsFreshnessCheck && (
+              <div
+                className="card"
+                style={{ background: "#fdf6ec", borderColor: "#f0c674" }}
+              >
+                <b style={{ fontSize: 13.5 }}>{tr("decide.freshnessPrompt")}</b>
+                <div style={{ marginTop: 8 }}>
+                  <button
+                    type="button"
+                    onClick={() => checkFreshness.mutate(NO_INPUT)}
+                    disabled={checkFreshness.loading}
+                    style={SUBMIT_BTN}
+                  >
+                    {checkFreshness.loading
+                      ? tr("decide.checking")
+                      : tr("decide.checkNow")}
+                  </button>
+                  {checkFreshnessData && !checkFreshnessData.materialChange && (
+                    <span
+                      style={{ fontSize: 12, color: "#7c746f", marginLeft: 10 }}
+                    >
+                      {tr("decide.upToDate")}
+                    </span>
+                  )}
+                </div>
+                {checkFreshness.error && (
+                  <ErrorState
+                    message={checkFreshness.error.message}
+                    onRetry={() => checkFreshness.reset()}
+                  />
+                )}
+              </div>
+            )}
+
+            {/* F3 outcome 选择 */}
+            <div className="ask-ex" style={{ marginBottom: 12 }}>
+              {outcomesForKind(data.decisionKind).map((o) => (
+                <button
+                  key={o}
+                  type="button"
+                  className="ask-chip"
+                  disabled={
+                    update.loading ||
+                    needsFreshnessCheck ||
+                    checkFreshness.loading
+                  }
+                  onClick={() => setDecideOutcome(o)}
+                  style={
+                    currentOutcomeSelection === o ? ACTIVE_CHIP : undefined
+                  }
+                >
+                  {outcomeToLabel(o)}
+                </button>
+              ))}
+            </div>
+
+            {/* F3 decided_on_next_step 必填 next_step */}
+            {currentOutcomeSelection === "decided_on_next_step" && (
+              <div style={{ marginBottom: 12 }}>
+                <label
+                  htmlFor="next-step"
+                  style={{ fontSize: 13, display: "block", marginBottom: 6 }}
+                >
+                  {tr("decide.nextStepLabel")}
+                </label>
+                <textarea
+                  id="next-step"
+                  value={nextStepValue}
+                  onChange={(e) => setNextStepDraft(e.target.value)}
+                  rows={2}
+                  placeholder={tr("decide.nextStepPlaceholder")}
+                  style={TEXTAREA}
+                />
+              </div>
+            )}
+
+            <button
+              type="button"
+              disabled={
+                update.loading ||
+                !currentOutcomeSelection ||
+                (currentOutcomeSelection === "decided_on_next_step" &&
+                  nextStepValue.trim().length === 0)
+              }
+              onClick={() => {
+                if (!currentOutcomeSelection) return;
+                update.mutate({
+                  outcome: currentOutcomeSelection,
+                  nextStep:
+                    currentOutcomeSelection === "decided_on_next_step"
+                      ? nextStepValue.trim()
+                      : null,
+                });
+              }}
+              style={SUBMIT_BTN}
+            >
+              {update.loading ? tr("decide.submitting") : tr("decide.submit")}
+            </button>
+            {update.error && (
+              <ErrorState
+                message={update.error.message}
+                onRetry={() => update.reset()}
+              />
+            )}
+
+            {/* B6 reclassify 入口 */}
+            <div style={{ marginTop: 12 }}>
+              {reclassifyConfirm ? (
+                <>
+                  <span style={{ fontSize: 12, color: "#7c746f" }}>
+                    {tr("decide.reclassifyConfirm")}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      update.mutate({ decisionKind: undefined });
+                      setReclassifyConfirm(false);
+                      setDecideOutcome(null);
+                      setNextStepDraft("");
+                    }}
+                    style={{ fontSize: 12, marginLeft: 8 }}
+                  >
+                    {tr("decide.reclassifyConfirmYes")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setReclassifyConfirm(false)}
+                    style={{ fontSize: 12, marginLeft: 8 }}
+                  >
+                    {tr("decide.reclassifyConfirmNo")}
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setReclassifyConfirm(true)}
+                  style={{ fontSize: 12, color: "#7c746f" }}
+                >
+                  {tr("decide.reclassify")}
+                </button>
+              )}
+            </div>
+
+            {/* D5/B4 DECIDED 后显示 Start observing 占位 */}
+            {data.lifecycle === "DECIDED" && (
+              <div
+                style={{
+                  marginTop: 14,
+                  paddingTop: 14,
+                  borderTop: "1px solid #eee",
+                }}
+              >
+                <button
+                  type="button"
+                  disabled
+                  style={{ ...SUBMIT_BTN, opacity: 0.5 }}
+                >
+                  {tr("decide.startObserving")}
+                </button>
+                <p style={{ fontSize: 12, color: "#a89a95", marginTop: 6 }}>
+                  {tr("decide.startObservingDisabled")}
+                </p>
+              </div>
+            )}
+          </>
+        ) : (
+          /* unconfirmed：F2 人话澄清问题 */
+          <div className="card">
+            <p style={{ fontSize: 14, fontWeight: 600 }}>
+              {tr("decide.clarifyQuestion")}
+            </p>
+            <div className="ask-ex" style={{ marginTop: 10 }}>
+              {KIND_OPTIONS.map((opt) => (
+                <button
+                  key={opt.kind}
+                  type="button"
+                  className="ask-chip"
+                  disabled={update.loading}
+                  onClick={() => update.mutate({ decisionKind: opt.kind })}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            {update.error && (
+              <ErrorState
+                message={update.error.message}
+                onRetry={() => update.reset()}
+              />
+            )}
           </div>
         )}
       </div>
@@ -269,15 +566,38 @@ export function DecisionDetailView({ id }: { id: string }) {
         {entries.length > 0 && (
           <div className="card">
             <div className="tl">
-              {entries.map((e) => (
-                <div className="tl-item" key={e.id}>
-                  <span className="tl-dot" />
-                  <div className="tl-d">
-                    {new Date(e.occurredAt).toLocaleDateString()}
+              {entries.map((e) => {
+                const isArchived = e.kind === "archived_outcome";
+                const archived = isArchived
+                  ? archivedEntryLabel(e.synthesis)
+                  : null;
+                return (
+                  <div className="tl-item" key={e.id}>
+                    <span
+                      className="tl-dot"
+                      style={isArchived ? { background: "#999" } : undefined}
+                    />
+                    <div className="tl-d">
+                      {new Date(e.occurredAt).toLocaleDateString()}
+                    </div>
+                    <div className="tl-t">
+                      {archived ? (
+                        <>
+                          <span
+                            className="dec-badge"
+                            style={{ marginRight: 6, background: "#e8e0d8" }}
+                          >
+                            {tr("decide.archivedBadge")}
+                          </span>
+                          {archived.body}
+                        </>
+                      ) : (
+                        e.text
+                      )}
+                    </div>
                   </div>
-                  <div className="tl-t">{e.text}</div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

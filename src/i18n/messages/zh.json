@@ -675,6 +675,40 @@
         "saved": "★ 已收藏",
         "ariaSaveLabel": "收藏 — 方便日后查找",
         "ariaSavedLabel": "已收藏 — 点击取消书签"
+      },
+      "scienceFraming": "科学视角框架",
+      "decide": {
+        "title": "做决定",
+        "clarifyQuestion": "你想决定的是什么？",
+        "clarifyOptionAction": "要不要做某件事",
+        "clarifyOptionExploration": "该理解或接下来做什么",
+        "outcomeStillConsidering": "还在考虑",
+        "outcomeDecidedToDoIt": "决定去做",
+        "outcomeDecidedNotTo": "决定不做",
+        "outcomeTalkWithClinicianFirst": "先和医生谈",
+        "outcomeKeepExploring": "继续探索",
+        "outcomeDiscussWithClinician": "和医生讨论",
+        "outcomeComeBackLater": "回头再说",
+        "outcomeDecidedOnNextStep": "已定下一步",
+        "nextStepLabel": "下一步",
+        "nextStepPlaceholder": "你决定的下一步是什么？",
+        "nextStepRequired": "下一步为必填",
+        "submit": "保存决定",
+        "submitting": "保存中…",
+        "reclassify": "换一个问题",
+        "reclassifyConfirm": "更换问题会清空当前 outcome。继续吗？",
+        "reclassifyConfirmYes": "好的，更换",
+        "reclassifyConfirmNo": "取消",
+        "closedHint": "这条决策已关闭。重新开启可再次斟酌——你之前的 outcome 会被归档到时间线。",
+        "reopen": "重新开启这条决策",
+        "reopening": "重新开启中…",
+        "freshnessPrompt": "再次决定前先检查最新信息",
+        "checkNow": "立即检查",
+        "checking": "检查中…",
+        "upToDate": "已是最新",
+        "startObserving": "开始观察",
+        "startObservingDisabled": "即将开放",
+        "archivedBadge": "已关闭"
       }
     },
     "considerSkin": {
@@ -766,7 +800,8 @@
       "todayPreview": {
         "title": "你进行中的决策"
       }
-    },    "privacy": {
+    },
+    "privacy": {
       "notifications": {
         "weeklyDigest": "每周摘要",
         "decisionFollowups": "决策跟进提醒",

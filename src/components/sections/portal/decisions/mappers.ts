@@ -3,7 +3,9 @@ import type {
   DecisionDetailDto,
   DecisionDto,
   DecisionEntryDto,
+  DecisionKind,
   DecisionLifecycle,
+  DecisionOutcome,
   DecisionType,
   TopicSlug,
   WmnResponse,
@@ -275,4 +277,96 @@ export function buildEntryText(
   chipsSummary: string,
 ): string {
   return `Created from ${FLOW_SOURCE_TO_LABEL[source]} · ${chipsSummary}`;
+}
+
+// ===== Decide 环节（task-41）=====
+// F2：人话澄清问题（用户不见 "Type A/B" 字面）
+export const KIND_QUESTION = "What are you trying to decide?";
+
+export const KIND_OPTIONS: { kind: DecisionKind; label: string }[] = [
+  { kind: "action", label: "Whether to do something" },
+  { kind: "exploration", label: "What to understand or do next" },
+];
+
+/** Type A outcome 人话 label */
+export const OUTCOME_A_LABELS: Record<
+  Extract<
+    DecisionOutcome,
+    | "still_considering"
+    | "decided_to_do_it"
+    | "decided_not_to"
+    | "talk_with_clinician_first"
+  >,
+  string
+> = {
+  still_considering: "Still considering",
+  decided_to_do_it: "Decided to do it",
+  decided_not_to: "Decided not to",
+  talk_with_clinician_first: "Talk with clinician first",
+};
+
+/** Type B outcome 人话 label */
+export const OUTCOME_B_LABELS: Record<
+  Extract<
+    DecisionOutcome,
+    | "keep_exploring"
+    | "discuss_with_clinician"
+    | "come_back_later"
+    | "decided_on_next_step"
+  >,
+  string
+> = {
+  keep_exploring: "Keep exploring",
+  discuss_with_clinician: "Discuss with clinician",
+  come_back_later: "Come back later",
+  decided_on_next_step: "Decided on next step",
+};
+
+/** outcome → 人话 label（不分 kind；未知原样返回） */
+export function outcomeToLabel(o: DecisionOutcome): string {
+  return (
+    (OUTCOME_A_LABELS as Record<string, string>)[o] ??
+    (OUTCOME_B_LABELS as Record<string, string>)[o] ??
+    o
+  );
+}
+
+/**
+ * F4 归档 entry timeline 重渲染（zh/en parity：从 synthesis 结构化重建，不读 text）。
+ * 返回 [前缀 badge 文本, 主体文本]。
+ */
+export function archivedEntryLabel(synthesis: DecisionEntryDto["synthesis"]): {
+  prefix: string;
+  body: string;
+} {
+  const outcome = synthesis?.outcome ?? null;
+  const nextStep = synthesis?.nextStep ?? null;
+  const o = outcome ? outcomeToLabel(outcome as DecisionOutcome) : "Undecided";
+  return {
+    prefix: "Closed",
+    body: nextStep ? `${o} — ${nextStep}` : o,
+  };
+}
+
+/** 给定 decisionKind → 对应 outcome 集合（UI 渲染 chips；unconfirmed 返回空数组） */
+export function outcomesForKind(
+  kind: DecisionKind,
+): readonly DecisionOutcome[] {
+  if (kind === "action") {
+    return [
+      "still_considering",
+      "decided_to_do_it",
+      "decided_not_to",
+      "talk_with_clinician_first",
+    ];
+  }
+  if (kind === "exploration") {
+    return [
+      "keep_exploring",
+      "discuss_with_clinician",
+      "come_back_later",
+      "decided_on_next_step",
+    ];
+  }
+  return [];
 }

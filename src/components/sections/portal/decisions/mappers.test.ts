@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { DecisionDetailDto, DecisionDto } from "./dto";
 import {
   ALL_DECISION_TYPES,
+  archivedEntryLabel,
   buildEntryText,
   chipToQuestionTemplate,
   chipToTopic,
@@ -12,9 +13,12 @@ import {
   goalToLabel,
   groupDecisions,
   isActionable,
+  KIND_OPTIONS,
   lifecycleToLabel,
   mapBrief,
   mapDecisionDetail,
+  outcomesForKind,
+  outcomeToLabel,
   skinConsiderToQuestion,
   sortEntries,
   stackConsiderToQuestion,
@@ -408,5 +412,68 @@ describe("spine flow text builders", () => {
     expect(buildEntryText("feel-check-in", "How I've been feeling")).toBe(
       "Created from Feel check-in · How I've been feeling",
     );
+  });
+});
+
+describe("task-41 decide mappers", () => {
+  it("outcomeToLabel covers all 8 outcomes", () => {
+    // Type A
+    expect(outcomeToLabel("still_considering")).toBe("Still considering");
+    expect(outcomeToLabel("decided_to_do_it")).toBe("Decided to do it");
+    expect(outcomeToLabel("decided_not_to")).toBe("Decided not to");
+    expect(outcomeToLabel("talk_with_clinician_first")).toBe(
+      "Talk with clinician first",
+    );
+    // Type B
+    expect(outcomeToLabel("keep_exploring")).toBe("Keep exploring");
+    expect(outcomeToLabel("discuss_with_clinician")).toBe(
+      "Discuss with clinician",
+    );
+    expect(outcomeToLabel("come_back_later")).toBe("Come back later");
+    expect(outcomeToLabel("decided_on_next_step")).toBe("Decided on next step");
+  });
+
+  it("outcomesForKind returns 4 per kind, empty for unconfirmed", () => {
+    expect(outcomesForKind("action")).toHaveLength(4);
+    expect(outcomesForKind("action")).toContain("decided_to_do_it");
+    expect(outcomesForKind("exploration")).toHaveLength(4);
+    expect(outcomesForKind("exploration")).toContain("decided_on_next_step");
+    expect(outcomesForKind("unconfirmed")).toHaveLength(0);
+  });
+
+  it("KIND_OPTIONS exposes action + exploration (no unconfirmed)", () => {
+    expect(KIND_OPTIONS.map((o) => o.kind)).toEqual(["action", "exploration"]);
+  });
+
+  it("archivedEntryLabel rebuilds from synthesis with nextStep", () => {
+    const { prefix, body } = archivedEntryLabel({
+      outcome: "decided_on_next_step",
+      nextStep: "Try topical retinol",
+    });
+    expect(prefix).toBe("Closed");
+    expect(body).toBe("Decided on next step — Try topical retinol");
+  });
+
+  it("archivedEntryLabel handles null outcome", () => {
+    const { prefix, body } = archivedEntryLabel({
+      outcome: null,
+      nextStep: null,
+    });
+    expect(prefix).toBe("Closed");
+    expect(body).toBe("Undecided");
+  });
+
+  it("archivedEntryLabel handles null synthesis entirely", () => {
+    const { prefix, body } = archivedEntryLabel(null);
+    expect(prefix).toBe("Closed");
+    expect(body).toBe("Undecided");
+  });
+
+  it("archivedEntryLabel omits nextStep when null", () => {
+    const { body } = archivedEntryLabel({
+      outcome: "decided_to_do_it",
+      nextStep: null,
+    });
+    expect(body).toBe("Decided to do it");
   });
 });

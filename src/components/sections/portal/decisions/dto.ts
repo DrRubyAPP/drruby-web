@@ -62,6 +62,14 @@ export interface DecisionEntryDto {
   text: string;
   lifecycleSnapshot: DecisionLifecycle;
   occurredAt: string; // ISO
+  /** §6 归档 entry 标记（如 "archived_outcome"）；普通 entry 为 null */
+  kind?: string | null;
+  /** D3 归档结构化数据（kind="archived_outcome" 时含原 outcome/nextStep/brief） */
+  synthesis?: {
+    outcome?: string | null;
+    nextStep?: string | null;
+    brief?: DecisionBriefDto;
+  } | null;
 }
 
 /** 列表项 / 单个决策（省 brief） */
@@ -91,6 +99,10 @@ export interface DecisionDto {
   updated: string; // ISO
   /** §8 What Matters Now 排序键 */
   lastUserActivityAt: string; // ISO
+  /** §6 freshness gate 时间戳；Reopen 后为 null，Check now 后置 now（服务端派生） */
+  freshnessCheckedAt?: string | null;
+  /** 决策定下时间（outcome→DECIDED/CLOSED 时派生；outcome→ACTIVE 或 null 时清空） */
+  decidedAt?: string | null;
   brief?: DecisionBriefDto; // 列表省 brief；详情含 brief
 }
 
