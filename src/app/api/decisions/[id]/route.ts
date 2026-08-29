@@ -142,20 +142,25 @@ export const POST = handle(async (req: Request, ctx: Ctx) => {
   }
 
   // outcome↔lifecycle 一致性双重校验（防客户端绕过）
+  // 注意：B6 清空后 body.outcome=null（合法），不能用 `?? existingOutcome` fallback
+  // —— 否则会用旧 outcome 校验新的 ACTIVE lifecycle，误抛错。
   if (body.lifecycle !== undefined) {
-    const outcomeForCheck = body.outcome ?? existingOutcome;
+    const outcomeForCheck =
+      body.outcome !== undefined ? body.outcome : existingOutcome;
     assertLifecycleForOutcome(outcomeForCheck, body.lifecycle);
   }
 
   let row: Awaited<ReturnType<typeof decisionRepo.update>>;
   try {
+    // 若 body 未传 decisionKind 但提交了 outcome，用 existing kind 兜底校验
+    // outcome↔kind 一致性（req F2：outcome 前须先 classify）。
     row = await decisionRepo.update(id, {
       question: body.question,
       type: body.type,
       topic: body.topic,
       topicSlug: body.topicSlug,
       lifecycle: body.lifecycle,
-      decisionKind: body.decisionKind,
+      decisionKind: body.decisionKind ?? existingKind,
       outcome: body.outcome,
       nextStep: body.nextStep,
       saved: body.saved,
