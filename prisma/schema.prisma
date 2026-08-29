@@ -304,6 +304,8 @@ model Decision {
   /// Yourself 轻量文字背景（可编辑、非 append-only，随 Keep 一并保存；不写入 brief）
   yourselfContext String?   @map("yourself_context")
   decidedAt DateTime? @map("decided_at") @db.Timestamptz
+  /// Contract §6 freshness gate 时间戳：Reopen 不写、Check now 才写
+  freshnessCheckedAt DateTime? @map("freshness_checked_at") @db.Timestamptz
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
 
@@ -325,6 +327,10 @@ model DecisionEntry {
   userId         String   @map("user_id")
   text           String
   lifecycleSnapshot String @map("lifecycle_snapshot") // 记录当时决策生命周期
+  /// §6 entry 类型；null=历史 observation（向后兼容）
+  kind       String? @map("kind")
+  /// D3 V1 = Decision.brief JSON 深拷贝 + 原 outcome/nextStep 打包；task-43 切 snapshotId 引用
+  synthesis  Json?
   occurredAt     DateTime @map("occurred_at") @db.Timestamptz
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
 
