@@ -320,6 +320,12 @@ model Decision {
   /// §18/D6 合并窗口时间戳 + lazy fire：新相关 Record 连入续期；用户打开 Decision 时按窗口触发或显示 STALE
   pendingRegenAt DateTime? @map("pending_regen_at") @db.Timestamptz
 
+  // ---- task-44 Observe / Learn（Contract §27–§30）----
+  /// §27/§30 下次 check-in 时间（OBSERVING 状态才有值；Start 时设、Stop/COMPLETED 时清）
+  nextCheckInAt  DateTime?  @map("next_check_in_at")  @db.Timestamptz
+  /// §27 观察计划 baseline：{ text: string, baselineRecordId?: string, freq: CheckInFrequency }
+  observeBaseline  Json?    @map("observe_baseline")
+
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
 
@@ -334,6 +340,8 @@ model Decision {
   @@index([userId, topicSlug], map: "decision_user_topic_slug_idx")
   /// §18/D6 lazy fire 扫描：按 (userId, pendingRegenAt) 检索到期 regen
   @@index([userId, pendingRegenAt], map: "decision_pending_regen_idx")
+  /// §30 WMN P1 查询：按 (userId, nextCheckInAt) 检索到期 check-in
+  @@index([userId, nextCheckInAt], map: "decision_next_checkin_idx")
   @@map("decision")
 }
 
@@ -373,6 +381,8 @@ model DecisionEntry {
   lifecycleSnapshot String @map("lifecycle_snapshot") // 记录当时决策生命周期
   /// §6 entry 类型；null=历史 observation（向后兼容）
   kind       String? @map("kind")
+  /// §28 task-44 方向评级：better|same|worse|not_sure（非必填，允许无方向描述）
+  direction  String?
   /// D3 V1 = Decision.brief JSON 深拷贝 + 原 outcome/nextStep 打包；task-43 切 snapshotId 引用
   synthesis  Json?
   occurredAt     DateTime @map("occurred_at") @db.Timestamptz
