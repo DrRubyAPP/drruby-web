@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import PortalTopbar from "@/components/layout/PortalTopbar";
 import { ReviewView } from "@/components/sections/portal/health/ReviewView";
-import "../../portal.css";
+import "../../../portal.css";
 
 /**
  * 复核抽取结果页（Contract §12/§13）。
