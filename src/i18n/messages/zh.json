@@ -709,6 +709,81 @@
         "startObserving": "开始观察",
         "startObservingDisabled": "即将开放",
         "archivedBadge": "已关闭"
+      },
+      "synthesis": {
+        "title": "当前理解",
+        "historyTitle": "变化记录"
+      },
+      "observe": {
+        "sectionTitle": "观察与学习",
+        "start": {
+          "description": "设定一个规律的 check-in 节奏，追踪变化。",
+          "baselineLabel": "基线",
+          "baselinePlaceholder": "起点是什么？（如：LDL=130，睡眠 6 小时）",
+          "baselineRecordLabel": "关联一条健康记录（可选）",
+          "baselineRecordPlaceholder": "记录 ID",
+          "freqLabel": "Check-in 频率",
+          "freq": {
+            "daily": "每天",
+            "3days": "每 3 天",
+            "weekly": "每周",
+            "2weeks": "每 2 周",
+            "monthly": "每月"
+          },
+          "suggestionHint": "常见节奏：每周。这是一个追踪工具，不是医学建议。",
+          "submit": "开始",
+          "submitting": "开始中…",
+          "errorBaselineRequired": "请描述基线"
+        },
+        "observing": {
+          "hint": "下次 check-in：{next}",
+          "baselineLabel": "基线"
+        },
+        "observation": {
+          "addCta": "添加观察",
+          "directionLabel": "自上次 check-in 以来，有什么变化？",
+          "directionHint": "方向为选填 —— 没有方向的变化描述完全可以。",
+          "direction": {
+            "better": "好转",
+            "same": "差不多",
+            "worse": "变差",
+            "not_sure": "不确定"
+          },
+          "textLabel": "笔记",
+          "textPlaceholder": "你注意到了什么？",
+          "submit": "保存观察",
+          "save": "保存",
+          "submitting": "保存中…",
+          "errorTextRequired": "请添加一条笔记",
+          "edit": "编辑",
+          "emptyNonObserving": "开始观察后可添加 check-in 笔记。"
+        },
+        "stop": {
+          "cta": "停止观察",
+          "confirm": "结束本次观察周期？你的记录会被保留。",
+          "submitting": "停止中…"
+        },
+        "learn": {
+          "prompt": "回顾下面的总结。可自由编辑 —— 这是你的反思，不是结论。",
+          "summaryLabel": "发生了什么？什么重复出现？还有什么不确定？",
+          "summaryPlaceholder": "总结你学到的",
+          "summaryHint": "本总结由你的观察自动生成。可自由编辑。我们不展示模式强度评分 —— 它们未经科学验证。",
+          "supportingLabel": "支撑本总结的观察",
+          "supportingEmpty": "尚未记录观察结果。",
+          "saveAndComplete": "保存并完成",
+          "submitting": "保存中…",
+          "errorTextRequired": "请添加总结"
+        },
+        "markCompleted": {
+          "cta": "标记为已完成",
+          "confirm": "在不观察的情况下将此决策标记为已完成？你随时可以开始新的决策。",
+          "submitting": "完成中…"
+        },
+        "learnHistory": {
+          "badge": "学习",
+          "title": "既往学习",
+          "empty": "尚无学习记录。"
+        }
       }
     },
     "considerSkin": {
@@ -1336,5 +1411,79 @@
       "hint": "可能已被删除。"
     },
     "invalidJson": "纠正内容 JSON 格式无效"
+  },
+  "aiState": {
+    "loading": "准备中…",
+    "ready": "就绪",
+    "insufficient": {
+      "yourself": "我们对你的了解还不够。",
+      "others": "我们还没有足够的相关经验可以展示。",
+      "science": "我们还没有足够的可靠证据来自信地总结。"
+    },
+    "insufficientCta": {
+      "addHealthContext": "补充健康语境"
+    },
+    "addHealthContext": "补充健康语境",
+    "failed": "准备时出了点问题。",
+    "retry": "重试",
+    "stale": {
+      "title": "有可用更新",
+      "updateNow": "立即更新",
+      "pendingUntil": "挂起至 {time}"
+    },
+    "updateNow": "立即更新",
+    "pendingHint": "有更新待处理。"
+  },
+  "decisions": {
+    "snapshot": {
+      "trigger": {
+        "new_record": "已更新：{date} —— 新增了一条记录",
+        "health_context_update": "已更新：{date} —— 你的健康语境有变化",
+        "others_refresh": "已更新：{date} —— 他人的经验已刷新",
+        "science_refresh": "已更新：{date} —— 科学证据已刷新",
+        "observation_update": "已更新：{date} —— 新增了一条观察",
+        "initial": "初始综合"
+      },
+      "loading": "正在准备当前理解…",
+      "empty": "尚无综合。",
+      "currentTitle": "当前理解",
+      "currentLabel": "当前理解",
+      "historyTitle": "变化记录",
+      "history": "历史",
+      "historyEmpty": "尚无历史。",
+      "viewAtTime": "当时我们所知",
+      "degradedHint": "使用有限 AI 生成；部分内容使用了降级模板",
+      "degradedNote": "使用有限 AI 生成；部分内容使用了降级模板",
+      "yourself": "你自己",
+      "others": "他人",
+      "science": "科学",
+      "collapse": "收起",
+      "expand": "展开"
+    },
+    "healthContext": {
+      "title": "你的健康语境",
+      "unconfirmedBanner": "已根据你的新健康信息更新。你当前的健康语境尚未确认。",
+      "saving": "保存中…",
+      "save": "保存修改",
+      "saveChanges": "保存修改",
+      "confirming": "确认中…",
+      "confirmNoChanges": "确认无变化",
+      "confirmedAt": "确认于 {date}",
+      "confirmQuestion": "做决定前 —— 有什么变化吗？",
+      "categories": {
+        "symptoms": "症状",
+        "medications_treatments": "用药 / 治疗",
+        "related_health_changes": "相关健康变化",
+        "current_health_state": "当前健康状态",
+        "goals_concerns": "目标 / 关注"
+      },
+      "placeholder": {
+        "symptoms": "如：头痛、疲劳",
+        "medications_treatments": "如：维生素 D、HRT",
+        "related_health_changes": "如：围绝经期、新诊断",
+        "current_health_state": "如：感觉好转、睡眠变差",
+        "goals_concerns": "如：肌肤更紧致、更有精力"
+      }
+    }
   }
 }

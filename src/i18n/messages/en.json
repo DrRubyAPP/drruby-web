@@ -707,6 +707,77 @@
         "startObserving": "Start observing",
         "startObservingDisabled": "Coming soon",
         "archivedBadge": "Closed"
+      },
+      "observe": {
+        "sectionTitle": "Observe & Learn",
+        "start": {
+          "description": "Set up a structured check-in cadence to track what changes.",
+          "baselineLabel": "Baseline",
+          "baselinePlaceholder": "What's the starting point? (e.g., LDL=130, sleep 6h)",
+          "baselineRecordLabel": "Reference a health record (optional)",
+          "baselineRecordPlaceholder": "Record ID",
+          "freqLabel": "Check-in frequency",
+          "freq": {
+            "daily": "Daily",
+            "3days": "Every 3 days",
+            "weekly": "Weekly",
+            "2weeks": "Every 2 weeks",
+            "monthly": "Monthly"
+          },
+          "suggestionHint": "Common cadence: weekly. This is a tracking tool, not medical advice.",
+          "submit": "Start",
+          "submitting": "Starting…",
+          "errorBaselineRequired": "Please describe the baseline"
+        },
+        "observing": {
+          "hint": "Next check-in: {next}",
+          "baselineLabel": "Baseline"
+        },
+        "observation": {
+          "addCta": "Add observation",
+          "directionLabel": "Since last check-in, what changed?",
+          "directionHint": "Direction is optional — descriptive observations without a direction are fine.",
+          "direction": {
+            "better": "Better",
+            "same": "About the same",
+            "worse": "Worse",
+            "not_sure": "Not sure"
+          },
+          "textLabel": "Notes",
+          "textPlaceholder": "What did you notice?",
+          "submit": "Save observation",
+          "save": "Save",
+          "submitting": "Saving…",
+          "errorTextRequired": "Please add a note",
+          "edit": "Edit",
+          "emptyNonObserving": "Start observing to add check-in notes."
+        },
+        "stop": {
+          "cta": "Stop observing",
+          "confirm": "Stop this observation cycle? Your records will be kept.",
+          "submitting": "Stopping…"
+        },
+        "learn": {
+          "prompt": "Review the summary below. Edit freely — this is your reflection, not a verdict.",
+          "summaryLabel": "What happened? What repeated? What's still uncertain?",
+          "summaryPlaceholder": "Summarize what you learned",
+          "summaryHint": "This summary is generated from your observations. Edit freely. We don't show pattern strength scores — they aren't scientifically validated.",
+          "supportingLabel": "Observations supporting this summary",
+          "supportingEmpty": "No observations recorded yet.",
+          "saveAndComplete": "Save and complete",
+          "submitting": "Saving…",
+          "errorTextRequired": "Please add a summary"
+        },
+        "markCompleted": {
+          "cta": "Mark as completed",
+          "confirm": "Mark this decision as completed without observing? You can always start a new decision.",
+          "submitting": "Completing…"
+        },
+        "learnHistory": {
+          "badge": "Learning",
+          "title": "Previous learnings",
+          "empty": "No learnings recorded yet."
+        }
       }
     },
     "considerSkin": {
