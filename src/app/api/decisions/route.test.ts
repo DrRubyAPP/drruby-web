@@ -13,6 +13,66 @@ vi.mock("@/lib/auth/session", async () =>
   (await import("@/lib/test/route-helpers")).sessionModuleMock(),
 );
 
+describe("GET /api/decisions", () => {
+  beforeEach(resetDb);
+  afterEach(disconnectDb);
+
+  it("未登录 → 401", async () => {
+    const { GET } = await import("./route");
+    asAnonymous();
+    const res = await GET();
+    expect(res.status).toBe(401);
+  });
+
+  it("含 History（COMPLETED/CLOSED）且 Actionable 在前、History 在后", async () => {
+    const { GET, POST } = await import("./route");
+    const { prisma } = await import("@/lib/db/prisma");
+    const user = await makeUser("dec-list@example.com");
+    asUser(user.id);
+
+    // Actionable：正常创建
+    const active = await POST(jsonRequest({ question: "Restart retinol?" }));
+    expect(active.status).toBe(201);
+    const activeBody = await active.json();
+
+    // History：直接落两条终态行
+    const completed = await prisma.decision.create({
+      data: {
+        userId: user.id,
+        question: "completed",
+        lifecycle: "COMPLETED",
+        decisionKind: "action",
+        outcome: "decided_to_do_it",
+        decidedAt: new Date(),
+      },
+    });
+    const closed = await prisma.decision.create({
+      data: {
+        userId: user.id,
+        question: "closed",
+        lifecycle: "CLOSED",
+        decisionKind: "action",
+        outcome: "decided_not_to",
+        decidedAt: new Date(),
+      },
+    });
+
+    const res = await GET();
+    expect(res.status).toBe(200);
+    const rows: Array<{ id: string; lifecycle: string }> = await res.json();
+    const ids = rows.map((r) => r.id);
+
+    // 三条都在（History 不再被过滤掉）
+    expect(ids).toContain(activeBody.id);
+    expect(ids).toContain(completed.id);
+    expect(ids).toContain(closed.id);
+
+    // Actionable 在前，History 在后
+    expect(ids.indexOf(activeBody.id)).toBeLessThan(ids.indexOf(completed.id));
+    expect(ids.indexOf(activeBody.id)).toBeLessThan(ids.indexOf(closed.id));
+  });
+});
+
 describe("POST /api/decisions", () => {
   beforeEach(resetDb);
   afterEach(disconnectDb);

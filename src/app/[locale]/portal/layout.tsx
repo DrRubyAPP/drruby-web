@@ -31,9 +31,9 @@ export default async function PortalLayout({
     redirect({ href: homeHrefForRole(role), locale });
   }
   return (
-    <>
+    <div className="user-portal">
       <UnauthorizedRedirect />
       {children}
-    </>
+    </div>
   );
 }

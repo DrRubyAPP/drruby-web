@@ -54,6 +54,9 @@ export function WhatMattersNow({ data }: WhatMattersNowProps) {
                 })}
               </div>
             </div>
+            <span className="arr" aria-hidden="true">
+              &rsaquo;
+            </span>
           </div>
         ))}
       </div>

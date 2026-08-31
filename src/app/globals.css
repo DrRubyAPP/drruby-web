@@ -170,7 +170,11 @@ body {
    own --user-fs-scale variable, so the two portals can be tuned
    independently. */
 .user-portal {
-  --user-fs-scale: 1.1;
+  --user-fs-scale: 1.2;
+  /* Lift body's font-weight:300 → 400 inside the portal so Jost reads
+     crisper; light weights on small caption/eyebrow text were rendering
+     fuzzy. Inline font-* utilities still override per-element. */
+  font-weight: 400;
 }
 
 .user-portal .text-\[8px\]  { font-size: calc(8px  * var(--user-fs-scale)) !important; }

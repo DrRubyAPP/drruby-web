@@ -4,9 +4,10 @@ import { Skeleton } from "@/components/api";
 import { useApi } from "@/hooks/useApi";
 import { useRouter } from "@/i18n/navigation";
 import type { DecisionDto } from "./dto";
+import { isActionable } from "./mappers";
 
 /**
- * Home "What matters now"（仅 saved=true——API 已过滤，F1/F5 Return 入口）。
+ * Home "What matters now"（仅 actionable——History 行不进 WMN，F1/F5 Return 入口）。
  * 点击 → 路由到 /portal/decisions/[id]。
  * 空时整段返回 null（不留空壳）；静默失败：error 时返回 null。
  */
@@ -17,7 +18,7 @@ export function ActiveDecisionsSummary() {
   if (loading) return <Skeleton lines={3} />;
   if (error || !data) return null;
 
-  const saved = data.slice(0, 3); // 最近一个或短列表
+  const saved = data.filter((d) => isActionable(d.lifecycle)).slice(0, 3); // 最近一个或短列表
   if (saved.length === 0) return null;
 
   return (

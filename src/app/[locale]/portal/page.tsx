@@ -521,6 +521,9 @@ export default function PortalPage() {
                   className="cm2-bacard"
                   onClick={() => cmToast("Opening full Thermage journey")}
                 >
+                  <span className="arr cm2-ba-arr" aria-hidden="true">
+                    &rsaquo;
+                  </span>
                   <div className="cm2-ph">
                     <div
                       style={{
@@ -550,6 +553,9 @@ export default function PortalPage() {
                   className="cm2-bacard"
                   onClick={() => cmToast("Opening full melasma journey")}
                 >
+                  <span className="arr cm2-ba-arr" aria-hidden="true">
+                    &rsaquo;
+                  </span>
                   <div className="cm2-ph">
                     <div
                       style={{
@@ -579,6 +585,9 @@ export default function PortalPage() {
                   className="cm2-bacard"
                   onClick={() => cmToast("Opening hair-loss journey")}
                 >
+                  <span className="arr cm2-ba-arr" aria-hidden="true">
+                    &rsaquo;
+                  </span>
                   <div className="cm2-ph">
                     <div
                       style={{

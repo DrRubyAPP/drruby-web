@@ -1392,6 +1392,18 @@
   overflow: hidden;
   background: var(--p-white);
   cursor: pointer;
+  position: relative;
+}
+#app-portal .cm2-ba-arr {
+  position: absolute;
+  top: 4px;
+  right: 10px;
+  font-size: 36px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.96);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+  z-index: 1;
+  pointer-events: none;
 }
 #app-portal .cm2-bacard:hover {
   border-color: var(--p-red);
@@ -2185,6 +2197,17 @@
 }
 #app-portal .ds.ev i {
   background: #3f7a58;
+}
+#app-portal .dcard-arr {
+  align-self: center;
+  font-size: 36px;
+  font-weight: 600;
+  color: #6f6762;
+}
+#app-portal .dec > .arr {
+  font-size: 33px;
+  font-weight: 600;
+  color: #6f6762;
 }
 /* portal decoration + breathing room */
 #app-portal .sec {

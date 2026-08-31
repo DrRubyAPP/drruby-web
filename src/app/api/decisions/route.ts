@@ -35,7 +35,7 @@ export const CreateDecisionBody = z.object({
 
 /**
  * List decisions
- * @description 当前用户的决策列表（省 brief，最新更新在前）
+ * @description 当前用户的决策列表（省 brief；Actionable 在前、History 在后，各组内按最近活动倒序）
  * @response DecisionListResponse
  * @auth bearer
  * @responseSet auth
@@ -43,7 +43,11 @@ export const CreateDecisionBody = z.object({
  */
 export const GET = handle(async () => {
   const user = await requireUser();
-  const rows = await decisionRepo.listByUserActionable(user.id);
+  const [actionable, history] = await Promise.all([
+    decisionRepo.listByUserActionable(user.id),
+    decisionRepo.listByUserHistory(user.id),
+  ]);
+  const rows = [...actionable, ...history];
   const dto = rows.map((r) => toDecisionDTO(r, { withBrief: false }));
   return NextResponse.json(DecisionListResponse.parse(dto));
 });

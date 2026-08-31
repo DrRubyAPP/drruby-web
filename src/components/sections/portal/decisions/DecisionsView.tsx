@@ -263,6 +263,9 @@ function DecisionCard({
           </span>
         </div>
       </div>
+      <span className="arr dcard-arr" aria-hidden="true">
+        &rsaquo;
+      </span>
     </div>
   );
 }

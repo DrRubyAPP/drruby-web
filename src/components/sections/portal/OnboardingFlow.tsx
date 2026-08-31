@@ -181,7 +181,7 @@ export default function OnboardingFlow() {
           </button>
         </div>
 
-        <div className="text-[10px] text-[#aaa] leading-[1.6] mt-4">
+        <div className="text-[11px] text-dr-mid leading-[1.6] mt-4">
           DrRuby provides health insights based on your personal data, not
           medical diagnoses. Always consult a qualified healthcare provider for
           medical concerns.

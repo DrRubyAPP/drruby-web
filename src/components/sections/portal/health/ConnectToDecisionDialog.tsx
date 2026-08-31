@@ -7,6 +7,7 @@ import { useApi } from "@/hooks/useApi";
 import { ApiError, apiClient } from "@/lib/api";
 import { SUBMIT_BTN } from "../decisions/drawerStyles";
 import type { DecisionDto } from "../decisions/dto";
+import { isActionable } from "../decisions/mappers";
 
 const CENTER_OVERLAY: CSSProperties = {
   position: "fixed",
@@ -56,6 +57,11 @@ export function ConnectToDecisionDialog({
   const { data: decisions, loading } = useApi<DecisionDto[]>("/api/decisions");
 
   if (!open) return null;
+
+  // 仅 actionable decision 可连接（History 行不进 Connect 列表）
+  const actionableDecisions = (decisions ?? []).filter((d) =>
+    isActionable(d.lifecycle),
+  );
 
   function close() {
     setDecisionId(null);
@@ -112,13 +118,13 @@ export function ConnectToDecisionDialog({
           <p style={{ fontSize: 13, color: "#a89a95", padding: "14px 0" }}>
             {t("loading")}
           </p>
-        ) : !decisions || decisions.length === 0 ? (
+        ) : actionableDecisions.length === 0 ? (
           <p style={{ fontSize: 13, color: "#a89a95", padding: "14px 0" }}>
             {t("connect.empty")}
           </p>
         ) : (
           <div style={{ marginTop: 12 }}>
-            {decisions.map((d) => (
+            {actionableDecisions.map((d) => (
               <label
                 key={d.id}
                 style={{
