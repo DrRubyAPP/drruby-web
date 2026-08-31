@@ -3,7 +3,6 @@ import { z } from "zod";
 import { requireUser } from "@/lib/auth/session";
 import { decisionRepo } from "@/lib/db";
 import { handle } from "@/lib/errors";
-import type { Decision } from "~prisma/client";
 import { DecisionDTO, toDecisionDTO } from "../dto";
 
 /** What Matters Now 信封：≤3 排序卡片 + 三态计数（前端只消费，不重排/不重算可见性） */
@@ -33,8 +32,8 @@ export const GET = handle(async () => {
     decisionRepo.listByUserActionable(user.id), // 已按 lastUserActivityAt DESC
   ]);
 
-  // P1 — Check-in Due（OBSERVING + 到期）：task-44 未就位 → 空（B2）
-  const checkInDue: Decision[] = [];
+  // P1 — Check-in Due（OBSERVING + nextCheckInAt<=now）：task-44 §30 真实查询
+  const checkInDue = await decisionRepo.listDueForCheckIn(user.id);
 
   // P1 → P2 → P3；同 decision_id 至多一次（§7）
   const seen = new Set<string>();
