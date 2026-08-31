@@ -95,6 +95,19 @@ export interface DecisionBriefDto {
   questionsForClinician: string[];
 }
 
+/** observation direction（§28 better/same/worse/not_sure，非必填） */
+export type ObservationDirection = "better" | "same" | "worse" | "not_sure";
+
+/** §27 Start Observing 时存的 baseline 结构（决策级，Stop/Learn 时归档到 learning entry synthesis） */
+export interface ObserveBaselineDto {
+  text: string;
+  baselineRecordId?: string | null;
+  freq: "daily" | "3days" | "weekly" | "2weeks" | "monthly";
+}
+
+/** check-in 频率（D6 固定 5 值） */
+export type CheckInFrequency = ObserveBaselineDto["freq"];
+
 /** append-only 时间线条目（详情附带） */
 export interface DecisionEntryDto {
   id: string;
@@ -103,11 +116,22 @@ export interface DecisionEntryDto {
   occurredAt: string; // ISO
   /** §6 归档 entry 标记（如 "archived_outcome"）；普通 entry 为 null */
   kind?: string | null;
-  /** D3 归档结构化数据（kind="archived_outcome" 时含原 outcome/nextStep/brief） */
+  /** task-44 §28 observation 方向（better/same/worse/not_sure，非必填；kind=observation 时存在） */
+  direction?: ObservationDirection | null;
+  /** D3 归档结构化数据（kind="archived_outcome" 时含原 outcome/nextStep/brief；
+   *  kind="observation" 时承载 {photos, recordRefs}；
+   *  kind="learning" 时承载 {text, supportingObservationIds, generatedAt}） */
   synthesis?: {
     outcome?: string | null;
     nextStep?: string | null;
     brief?: DecisionBriefDto;
+    // task-44 kind=observation 附件
+    photos?: { recordId: string; summary?: string }[];
+    recordRefs?: { recordId: string; summary?: string }[];
+    // task-44 kind=learning 附件
+    text?: string;
+    supportingObservationIds?: string[];
+    generatedAt?: string;
   } | null;
 }
 
@@ -154,6 +178,11 @@ export interface DecisionDto {
   healthContextConfirmedAt?: string | null;
   /** §18/D6 合并窗口到期时间戳；非空 → STALE_UPDATE_AVAILABLE */
   pendingRegenAt?: string | null;
+  // task-44 Observe / Learn（§27/§30）
+  /** §30 到期 check-in 时间戳（OBSERVING 状态下由 freq 顺延；Stop/Learn 时清空） */
+  nextCheckInAt?: string | null;
+  /** §27 Start Observing 时存的 baseline（{text, baselineRecordId?, freq}） */
+  observeBaseline?: ObserveBaselineDto | null;
 }
 
 // =============================================================================
@@ -265,6 +294,59 @@ export interface UpdateDecisionInput {
 export interface AppendEntryInput {
   text: string;
   occurredAt?: string; // ISO，缺省 now
+}
+
+// =============================================================================
+// task-44 Observe / Learn 输入（§27/§28/§29）
+// =============================================================================
+
+/** POST /api/decisions/[id]/observe/start 入参 */
+export interface StartObservingInput {
+  baselineText: string;
+  baselineRecordId?: string;
+  freq: CheckInFrequency;
+}
+
+/** POST /api/decisions/[id]/observations 入参（§28 新建 Observation） */
+export interface CreateObservationEntryInput {
+  text: string;
+  /** direction 非必填（§28 允许无方向描述） */
+  direction?: ObservationDirection;
+  /** synthesis {photos, recordRefs} 可选 */
+  synthesis?: {
+    photos?: { recordId: string; summary?: string }[];
+    recordRefs?: { recordId: string; summary?: string }[];
+  };
+  occurredAt?: string; // ISO
+}
+
+/** PATCH /api/decisions/[id]/observations/[entryId] 入参（D8 修正 Observation） */
+export interface UpdateObservationEntryInput {
+  text?: string;
+  /** direction 非必填，可显式 null 清空 */
+  direction?: ObservationDirection | null;
+  synthesis?: {
+    photos?: { recordId: string; summary?: string }[];
+    recordRefs?: { recordId: string; summary?: string }[];
+  };
+}
+
+/** POST /api/decisions/[id]/learn 入参（§29 保存 Learning summary） */
+export interface SaveLearningInput {
+  text: string;
+  supportingObservationIds: string[];
+}
+
+/** GET /api/decisions/[id]/learn 返回的模板预填 */
+export interface LearningTemplateDto {
+  text: string;
+  supportingObservationIds: string[];
+}
+
+/** POST /api/decisions/[id]/observe/stop 返回（决定下一步是 LEARNING 还是 COMPLETED） */
+export interface StopObservingResponse {
+  lifecycle: "LEARNING" | "COMPLETED";
+  hasObservations: boolean;
 }
 
 /** GET /api/decisions/wmn 信封（对齐 server WmnResponse；前端只消费不重排） */

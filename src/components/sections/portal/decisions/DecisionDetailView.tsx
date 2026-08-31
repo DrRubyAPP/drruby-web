@@ -23,6 +23,7 @@ import type {
   RegenerateInput,
   RegenerateResponseDto,
   SnapshotsResponseDto,
+  StopObservingResponse,
   UpdateDecisionInput,
 } from "./dto";
 import { HealthContextQuestionnaire } from "./HealthContextQuestionnaire";
@@ -40,6 +41,7 @@ import {
   typeToLabel,
 } from "./mappers";
 import { PendingUpdateIndicator } from "./PendingUpdateIndicator";
+import { StartObservingForm } from "./StartObservingForm";
 
 type Perspective = "yourself" | "others" | "science";
 
@@ -177,6 +179,21 @@ export function DecisionDetailView({ id }: { id: string }) {
   // F4 Reopen：CLOSED → ACTIVE 原子归档（走专用端点）
   const reopen = useMutation(
     (_input: void) => apiClient.post<unknown>(`/api/decisions/${id}/reopen`),
+    { onSuccess: () => refetch() },
+  );
+
+  // task-44 §27 Stop Observing：OBSERVING → LEARNING（有 obs）或 COMPLETED（无 obs）
+  const stopObserving = useMutation(
+    (_input: void) =>
+      apiClient.post<StopObservingResponse>(
+        `/api/decisions/${id}/observe/stop`,
+      ),
+    { onSuccess: () => refetch() },
+  );
+
+  // task-44 D5 Mark as completed：DECIDED → COMPLETED 直接路径
+  const markCompleted = useMutation(
+    (_input: void) => apiClient.post<unknown>(`/api/decisions/${id}/complete`),
     { onSuccess: () => refetch() },
   );
 
@@ -641,7 +658,7 @@ export function DecisionDetailView({ id }: { id: string }) {
               )}
             </div>
 
-            {/* D5/B4 DECIDED 后显示 Start observing 占位 */}
+            {/* task-44 §27 D5/B4 DECIDED → Start Observing（启用）+ Mark as completed */}
             {data.lifecycle === "DECIDED" && (
               <div
                 style={{
@@ -650,16 +667,64 @@ export function DecisionDetailView({ id }: { id: string }) {
                   borderTop: "1px solid #eee",
                 }}
               >
+                <details>
+                  <summary
+                    style={{
+                      cursor: "pointer",
+                      fontSize: 12,
+                      fontWeight: 700,
+                      letterSpacing: "0.16em",
+                      textTransform: "uppercase",
+                      color: "var(--p-red)",
+                    }}
+                  >
+                    {tr("decide.startObserving")}
+                  </summary>
+                  <p
+                    style={{
+                      fontSize: 13,
+                      color: "#7c746f",
+                      marginTop: 8,
+                      marginBottom: 8,
+                    }}
+                  >
+                    {tr("observe.start.description")}
+                  </p>
+                  <StartObservingForm
+                    decisionId={data.id}
+                    onStarted={() => refetch()}
+                  />
+                </details>
+                {/* D5 Mark as completed：不需观察的 DECIDED 直接完成 */}
                 <button
                   type="button"
-                  disabled
-                  style={{ ...SUBMIT_BTN, opacity: 0.5 }}
+                  onClick={() => {
+                    if (!window.confirm(tr("observe.markCompleted.confirm")))
+                      return;
+                    markCompleted.mutate(NO_INPUT);
+                  }}
+                  disabled={markCompleted.loading}
+                  style={{
+                    fontSize: 12,
+                    color: "#7c746f",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                    marginTop: 12,
+                    padding: 0,
+                  }}
                 >
-                  {tr("decide.startObserving")}
+                  {markCompleted.loading
+                    ? tr("observe.markCompleted.submitting")
+                    : tr("observe.markCompleted.cta")}
                 </button>
-                <p style={{ fontSize: 12, color: "#a89a95", marginTop: 6 }}>
-                  {tr("decide.startObservingDisabled")}
-                </p>
+                {markCompleted.error && (
+                  <ErrorState
+                    message={markCompleted.error.message}
+                    onRetry={() => markCompleted.reset()}
+                  />
+                )}
               </div>
             )}
           </>
