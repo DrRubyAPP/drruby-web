@@ -28,6 +28,7 @@ import type {
 } from "./dto";
 import { HealthContextQuestionnaire } from "./HealthContextQuestionnaire";
 import { HistorySnapshotList } from "./HistorySnapshotList";
+import { LearningSummaryForm } from "./LearningSummaryForm";
 import {
   ALL_DECISION_TYPES,
   archivedEntryLabel,
@@ -751,6 +752,71 @@ export function DecisionDetailView({ id }: { id: string }) {
           </div>
         )}
       </div>
+
+      {/* task-44 §27/§29 Observe / Learn section：OBSERVING → Stop Observing 入口；LEARNING → Learning summary 表单；
+          COMPLETED → 不显示本区（历史 Learning 在下方 Observations 时间线可见） */}
+      {(data.lifecycle === "OBSERVING" || data.lifecycle === "LEARNING") && (
+        <div className="sec">
+          <div className="sec-h">{tr("observe.sectionTitle")}</div>
+
+          {data.lifecycle === "OBSERVING" && (
+            <div className="card">
+              <p style={{ fontSize: 13.5, color: "#7c746f" }}>
+                {tr("observe.observing.hint", {
+                  next: data.nextCheckInAt
+                    ? new Date(data.nextCheckInAt).toLocaleDateString()
+                    : "—",
+                })}
+              </p>
+              {data.observeBaseline && (
+                <p style={{ fontSize: 13, color: "#524d49", marginTop: 8 }}>
+                  <b>{tr("observe.observing.baselineLabel")}</b>:{" "}
+                  {data.observeBaseline.text}
+                  {data.observeBaseline.freq &&
+                    ` · ${tr(`observe.start.freq.${data.observeBaseline.freq}`)}`}
+                </p>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  if (!window.confirm(tr("observe.stop.confirm"))) return;
+                  stopObserving.mutate(NO_INPUT);
+                }}
+                disabled={stopObserving.loading}
+                style={{
+                  ...SUBMIT_BTN,
+                  background: "transparent",
+                  color: "var(--p-red)",
+                  border: "1px solid var(--p-red)",
+                  marginTop: 12,
+                }}
+              >
+                {stopObserving.loading
+                  ? tr("observe.stop.submitting")
+                  : tr("observe.stop.cta")}
+              </button>
+              {stopObserving.error && (
+                <ErrorState
+                  message={stopObserving.error.message}
+                  onRetry={() => stopObserving.reset()}
+                />
+              )}
+            </div>
+          )}
+
+          {data.lifecycle === "LEARNING" && (
+            <div className="card">
+              <p style={{ fontSize: 13.5, color: "#7c746f", marginBottom: 12 }}>
+                {tr("observe.learn.prompt")}
+              </p>
+              <LearningSummaryForm
+                decisionId={data.id}
+                onSaved={() => refetch()}
+              />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Observation：append-only 时间线（task-44 §28 direction badge + Edit 入口）+ 追加表单（OBSERVING only） */}
       <div className="sec">
