@@ -53,6 +53,7 @@ const TABLE_ORDER_FOR_CLEANUP = [
   "researchStudy",
   "decisionEntry", // 引用 decision，需先于 decision
   "timelineEvent", // 引用 decision，需先于 decision
+  "decisionSnapshot", // task-43 引用 decision，需先于 decision
   "decision",
   "signal",
   // 保留域（wearable / 激素 / baseline）

@@ -28,6 +28,7 @@ export * as contributionRepo from "./repositories/contribution.repo";
 export * as decisionRepo from "./repositories/decision.repo";
 export * as decisionEntryRepo from "./repositories/decisionEntry.repo";
 export * as decisionHealthRecordRepo from "./repositories/decisionHealthRecord.repo";
+export * as decisionSnapshotRepo from "./repositories/decisionSnapshot.repo";
 export * as experimentRepo from "./repositories/experiment.repo";
 export * as healthRecordRepo from "./repositories/healthRecord.repo";
 export * as healthRecordRevisionRepo from "./repositories/healthRecordRevision.repo";

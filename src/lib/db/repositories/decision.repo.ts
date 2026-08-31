@@ -1,19 +1,32 @@
 import {
   assertOutcomeForKind,
+  type ChangeTrigger,
+  changeTriggerSchema,
   type DecisionKind,
   type DecisionLifecycle,
   type DecisionOutcome,
   type DecisionType,
   decisionKindSchema,
   decisionTypeSchema,
+  type HealthContextStatus,
+  healthContextStatusSchema,
+  type SynthesisProvenance,
+  synthesisProvenanceSchema,
   type TopicSlug,
   topicSlugSchema,
 } from "@/lib/db/enums";
 import { prisma } from "@/lib/db/prisma";
-import type { Decision, Prisma } from "~prisma/client";
+import type { Decision } from "~prisma/client";
+import { Prisma } from "~prisma/client";
 
 /** §31 幂等去重窗口（同 userId+question 复用），常量便于调整 */
 export const CREATE_DEDUP_WINDOW_MS = 60_000;
+
+/**
+ * task-43 D6 合并窗口：新相关 Record 连入时 pendingRegenAt 续期到 now + N min。
+ * N=5min（可调）；窗口未过 → STALE_UPDATE_AVAILABLE；窗口过 → lazy fire regeneration。
+ */
+export const REGEN_DEBOUNCE_MINUTES = 5;
 
 /** 四源 brief 快照（P1 存 JSON，结构对齐 App DecisionBrief） */
 export interface DecisionBriefSnapshot {
@@ -240,3 +253,108 @@ export async function findByIdWithEntries(id: string) {
     include: { entries: { orderBy: { occurredAt: "asc" } } },
   });
 }
+
+// ============================================================================
+// task-43 综合结果层（Contract §15–§26）
+// Health Context 5 类结构化（§19/§20/D5）+ pending regen 合并窗口（§18/D6）
+// + currentSnapshot 指针绑定（§15/D3）。
+// 所有方法均为 meaningful activity（§8），写 lastUserActivityAt。
+// ============================================================================
+
+export interface UpdateHealthContextInput {
+  /** §19 Yourself 结构化 5 类 JSON（symptoms/medications_treatments/...） */
+  healthContext?: Prisma.InputJsonValue | null;
+  /** §20 confirmed|unconfirmed；转 confirmed 刷 confirmedAt */
+  status?: HealthContextStatus;
+}
+
+/**
+ * §19/§20/D5 写 health_context + health_context_status。
+ * - status 转 confirmed → 刷 health_context_confirmed_at（§20）
+ * - 永不自动从 unconfirmed 转 confirmed（§20）
+ * - 更新属 meaningful activity，刷 lastUserActivityAt（§8）
+ * 扁平 yourselfContext 保留作 task-42 B2 fallback（综合时优先 healthContext）。
+ */
+export async function updateHealthContext(
+  decisionId: string,
+  input: UpdateHealthContextInput,
+): Promise<Decision> {
+  if (input.status !== undefined) {
+    healthContextStatusSchema.parse(input.status);
+  }
+  const confirmedAt = input.status === "confirmed" ? new Date() : undefined;
+  return prisma.decision.update({
+    where: { id: decisionId },
+    data: {
+      ...(input.healthContext !== undefined
+        ? {
+            healthContext:
+              input.healthContext === null
+                ? Prisma.JsonNull
+                : input.healthContext,
+          }
+        : {}),
+      ...(input.status !== undefined
+        ? { healthContextStatus: input.status }
+        : {}),
+      ...(confirmedAt ? { healthContextConfirmedAt: confirmedAt } : {}),
+      lastUserActivityAt: new Date(),
+    },
+  });
+}
+
+/**
+ * §18/D6 续期 pendingRegenAt 到 now + REGEN_DEBOUNCE_MINUTES。
+ * 已有 pending → 续期（不重置为新窗口的语义，而是延后到期时间，避免短时间多 Record 各自开窗口）。
+ * 调用时机：新相关 Record 连入（orchestrator.onRecordConnected）。
+ */
+export async function touchPendingRegen(
+  decisionId: string,
+  minutes: number = REGEN_DEBOUNCE_MINUTES,
+): Promise<Decision> {
+  const expiresAt = new Date(Date.now() + minutes * 60_000);
+  return prisma.decision.update({
+    where: { id: decisionId },
+    data: { pendingRegenAt: expiresAt },
+  });
+}
+
+/** §18/D6 清空 pendingRegenAt（regeneration 完成或非 material 后调用） */
+export async function clearPendingRegen(decisionId: string): Promise<Decision> {
+  return prisma.decision.update({
+    where: { id: decisionId },
+    data: { pendingRegenAt: null },
+  });
+}
+
+/** §18/D6 读 pendingRegenAt；null = 无 pending（READY） */
+export async function getPendingRegen(
+  decisionId: string,
+): Promise<Date | null> {
+  const row = await prisma.decision.findUnique({
+    where: { id: decisionId },
+    select: { pendingRegenAt: true },
+  });
+  return row?.pendingRegenAt ?? null;
+}
+
+/**
+ * §15/D3 绑定 currentSnapshotId + 清空 pendingRegenAt。
+ * **应在事务内与 decisionSnapshotRepo.create 一起调用**，保证 Snapshot 创建 + 指针更新原子。
+ * （orchestrator 用 $transaction 包，此处单独方法便于复用/单测。）
+ */
+export async function bindCurrentSnapshot(
+  decisionId: string,
+  snapshotId: string,
+): Promise<Decision> {
+  return prisma.decision.update({
+    where: { id: decisionId },
+    data: {
+      currentSnapshotId: snapshotId,
+      pendingRegenAt: null,
+    },
+  });
+}
+
+// 导出 task-43 枚举类型/Schema，便于上层 repo/route 复用
+export type { ChangeTrigger, SynthesisProvenance };
