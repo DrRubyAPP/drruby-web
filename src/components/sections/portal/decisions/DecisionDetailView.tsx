@@ -12,30 +12,42 @@ import { getDecisionCorpus } from "@/config/decision-corpus";
 import { useApi } from "@/hooks/useApi";
 import { useMutation } from "@/hooks/useMutation";
 import { apiClient } from "@/lib/api/client";
+import { AiStateView } from "./AiStateView";
+import { CurrentSynthesisPanel } from "./CurrentSynthesisPanel";
 import { ACTIVE_CHIP, SUBMIT_BTN, TEXTAREA } from "./drawerStyles";
 import type {
+  AiStateDto,
   DecisionDetailDto,
   DecisionOutcome,
+  HealthContextDto,
+  RegenerateInput,
+  RegenerateResponseDto,
+  SnapshotsResponseDto,
   UpdateDecisionInput,
 } from "./dto";
+import { HealthContextQuestionnaire } from "./HealthContextQuestionnaire";
+import { HistorySnapshotList } from "./HistorySnapshotList";
 import {
   ALL_DECISION_TYPES,
   archivedEntryLabel,
   KIND_OPTIONS,
   lifecycleToLabel,
+  mapAiStateDto,
   outcomesForKind,
   outcomeToLabel,
+  PERSPECTIVES,
   sortEntries,
   typeToLabel,
 } from "./mappers";
+import { PendingUpdateIndicator } from "./PendingUpdateIndicator";
 
 type Perspective = "yourself" | "others" | "science";
 
-const PERSPECTIVES: { key: Perspective; label: string }[] = [
-  { key: "yourself", label: "Yourself" },
-  { key: "others", label: "Others" },
-  { key: "science", label: "Science" },
-];
+const PERSPECTIVE_LABELS: Record<Perspective, string> = {
+  yourself: "Yourself",
+  others: "Others",
+  science: "Science",
+};
 
 const OTHERS_DIMENSIONS: { key: OthersDimensionKey; label: string }[] = [
   { key: "helpful", label: "Helpful" },
@@ -78,6 +90,27 @@ export function DecisionDetailView({ id }: { id: string }) {
   const { data, error, loading, refetch } = useApi<DecisionDetailDto>(
     `/api/decisions/${id}`,
   );
+  // task-43 综合结果层：mount 时同步拉 snapshots + ai-state + health-context
+  // 后端 GET /decisions/[id] 已含 lazy fire 副作用（maybeFirePendingRegen），
+  // 此处三个端点跟随主 GET 之后刷新，避免顺序竞态。
+  const {
+    data: snapshotsData,
+    error: snapshotsError,
+    loading: snapshotsLoading,
+    refetch: refetchSnapshots,
+  } = useApi<SnapshotsResponseDto>(`/api/decisions/${id}/snapshots`);
+  const {
+    data: aiStateData,
+    error: aiStateError,
+    loading: aiStateLoading,
+    refetch: refetchAiState,
+  } = useApi<AiStateDto>(`/api/decisions/${id}/ai-state`);
+  const {
+    data: healthContextData,
+    error: healthContextError,
+    loading: healthContextLoading,
+    refetch: refetchHealthContext,
+  } = useApi<HealthContextDto>(`/api/decisions/${id}/health-context`);
   const [tab, setTab] = useState<Perspective>("yourself");
   const [yourselfDraft, setYourselfDraft] = useState<string | null>(null); // null = 未编辑，展示已存值
   const [entryText, setEntryText] = useState("");
@@ -97,6 +130,23 @@ export function DecisionDetailView({ id }: { id: string }) {
     if (!data.freshnessCheckedAt) return true;
     return new Date(data.freshnessCheckedAt) <= new Date(archived.occurredAt);
   }, [data]);
+
+  // task-43 §18/§22 手动触发 regeneration（STALE Update now / FAILED Retry）
+  // 成功后刷全部 4 个端点（Decision + snapshots + ai-state + health-context）
+  function refetchAll() {
+    refetch();
+    refetchSnapshots();
+    refetchAiState();
+    refetchHealthContext();
+  }
+  const regenerate = useMutation(
+    (input: RegenerateInput) =>
+      apiClient.post<RegenerateResponseDto>(
+        `/api/decisions/${id}/regenerate`,
+        input,
+      ),
+    { onSuccess: () => refetchAll() },
+  );
 
   // ☆ Save 书签化（§11 纯书签）：saved 不刷新 lastUserActivityAt → 不进 WMN 排序；
   // Yourself 草稿随 Save 一并落库（保持 A5 行为不回退）
@@ -141,7 +191,7 @@ export function DecisionDetailView({ id }: { id: string }) {
     {
       onSuccess: (out) => {
         setCheckFreshnessData(out ?? null);
-        refetch();
+        refetchAll();
       },
     },
   );
@@ -160,6 +210,9 @@ export function DecisionDetailView({ id }: { id: string }) {
   const entries = sortEntries(data.entries);
   // Decide section 本地选择的 outcome（与 data.outcome 同步：用户改选后立即更新 state）
   const currentOutcomeSelection = decideOutcome ?? data.outcome;
+
+  // task-43 五态：mapAiStateDto 把 server DTO 转三视角 AiStateView
+  const aiViews = aiStateData ? mapAiStateDto(aiStateData) : null;
   const nextStepValue = nextStepDraft || data.nextStep || "";
 
   return (
@@ -213,18 +266,26 @@ export function DecisionDetailView({ id }: { id: string }) {
         </span>
       )}
 
+      {/* task-43 D6 STALE 可视化：pendingRegenAt 非空（窗口未过）时顶部条提示 */}
+      <div style={{ marginTop: 12 }}>
+        <PendingUpdateIndicator
+          pendingUntil={data.pendingRegenAt ?? null}
+          onUpdateNow={() => regenerate.mutate({ trigger: "new_record" })}
+        />
+      </div>
+
       {/* 三视角 tab（切换不卸载 Yourself 草稿 state，A2） */}
       <div className="sec">
         <div className="ask-ex" style={{ marginBottom: 14 }}>
           {PERSPECTIVES.map((p) => (
             <button
-              key={p.key}
+              key={p}
               type="button"
               className="ask-chip"
-              onClick={() => setTab(p.key)}
-              style={tab === p.key ? ACTIVE_CHIP : undefined}
+              onClick={() => setTab(p)}
+              style={tab === p ? ACTIVE_CHIP : undefined}
             >
-              {p.label}
+              {PERSPECTIVE_LABELS[p]}
             </button>
           ))}
         </div>
@@ -243,6 +304,19 @@ export function DecisionDetailView({ id }: { id: string }) {
               rows={5}
               placeholder="Anything relevant — age, symptoms, what you've already tried…"
               style={TEXTAREA}
+            />
+            {/* task-43 §19/§20/§21 Health Context 问卷（结构化 5 类，与 yourselfContext 扁平字段 B2 fallback 共存） */}
+            <HealthContextQuestionnaire
+              decisionId={id}
+              data={healthContextData}
+              loading={healthContextLoading}
+              error={
+                healthContextError
+                  ? { message: healthContextError.message }
+                  : null
+              }
+              onRetry={refetchHealthContext}
+              refetch={refetchHealthContext}
             />
             {/* task-42 B2：Connected Records 作为 Yourself 区块的新增子区块（不替换 yourselfContext 扁平字符串 fallback） */}
             <ConnectedRecordsPanel decisionId={id} />
@@ -337,6 +411,61 @@ export function DecisionDetailView({ id }: { id: string }) {
               )}
             </div>
           </div>
+        )}
+      </div>
+
+      {/* task-43 §15/§24–§26 综合结果层：Current synthesis + History + AI 五态
+          （三视角 tab 之后、Decide section 之前）
+          - LOADING 期间渲染骨架屏；READY 时让 CurrentSynthesisPanel 渲染 synthesis
+          - INSUFFICIENT_INFORMATION 三视角文案；FAILED Retry；STALE Update now */}
+      <div className="sec">
+        <div className="sec-h">{tr("synthesis.title")}</div>
+        {aiViews ? (
+          <div style={{ display: "grid", gap: 10, marginBottom: 14 }}>
+            {PERSPECTIVES.map((p) => (
+              <AiStateView
+                key={p}
+                view={
+                  p === "yourself"
+                    ? aiViews.yourself
+                    : p === "others"
+                      ? aiViews.others
+                      : aiViews.science
+                }
+                perspective={p}
+                onRetry={() => regenerate.mutate({ trigger: "new_record" })}
+                onUpdateNow={() => regenerate.mutate({ trigger: "new_record" })}
+                onAddHealthContext={() => setTab("yourself")}
+              />
+            ))}
+          </div>
+        ) : aiStateLoading ? (
+          <Skeleton lines={3} />
+        ) : aiStateError ? (
+          <ErrorState message={aiStateError.message} onRetry={refetchAiState} />
+        ) : null}
+        <CurrentSynthesisPanel
+          current={snapshotsData?.current ?? null}
+          loading={snapshotsLoading}
+          error={snapshotsError ? { message: snapshotsError.message } : null}
+          onRetry={refetchSnapshots}
+        />
+        <div style={{ marginTop: 14 }}>
+          <div className="sec-h" style={{ fontSize: 13 }}>
+            {tr("synthesis.historyTitle")}
+          </div>
+          <HistorySnapshotList
+            history={snapshotsData?.history ?? []}
+            loading={snapshotsLoading}
+            error={snapshotsError ? { message: snapshotsError.message } : null}
+            onRetry={refetchSnapshots}
+          />
+        </div>
+        {regenerate.error && (
+          <ErrorState
+            message={regenerate.error.message}
+            onRetry={() => regenerate.reset()}
+          />
         )}
       </div>
 
