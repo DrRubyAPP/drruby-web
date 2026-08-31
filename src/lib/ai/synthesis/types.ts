@@ -11,10 +11,8 @@ import type {
   SynthesisProvenance,
 } from "@/lib/db/enums";
 
-/** §19 Yourself 结构化 5 类（D5）— JSON shape */
-export type HealthContext = Partial<
-  Record<HealthContextCategory, string | Record<string, unknown> | unknown>
->;
+/** §19 Yourself 结构化 5 类（D5）— V1 全部为字符串值；后续可扩展为嵌套对象 */
+export type HealthContext = Partial<Record<HealthContextCategory, string>>;
 
 /** connected Record 引用（snapshot 时取摘要，保证历史可还原 R3） */
 export interface ConnectedRecordRef {
