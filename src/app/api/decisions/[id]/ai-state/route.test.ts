@@ -134,4 +134,80 @@ describe("GET /api/decisions/[id]/ai-state", () => {
     expect(body.science).toBe("READY");
     expect(body.pendingUntil).toBeNull();
   });
+
+  it("B6：provenance=template+llm_trigger_degraded → 状态 READY（不伪装 Failed）", async () => {
+    const { GET } = await import("./route");
+    const decisionRepo = await import("@/lib/db/repositories/decision.repo");
+    const snapshotRepo = await import(
+      "@/lib/db/repositories/decisionSnapshot.repo"
+    );
+    const owner = await makeUser("ai-degraded@example.com");
+    const decision = await decisionRepo.create(owner.id, {
+      question: "Try HRT?",
+      topicSlug: "hrt",
+    });
+    await decisionRepo.updateHealthContext(decision.id, {
+      healthContext: { symptoms: "x" },
+      status: "unconfirmed",
+    });
+    // LLM 失败降级的 Snapshot（R6 透明化：状态不伪装 Failed）
+    const s = await snapshotRepo.create(decision.id, {
+      yourselfContextRef: null,
+      sources: null,
+      citations: null,
+      synthesis: {
+        yourself: "degraded fallback",
+        others: "",
+        science: "",
+        combined: "degraded fallback",
+      },
+      provenance: "template+llm_trigger_degraded",
+      changeTrigger: "new_record",
+    });
+    await decisionRepo.bindCurrentSnapshot(decision.id, s.id);
+
+    asUser(owner.id);
+    const res = await GET(bareRequest("GET"), params(decision.id));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    // B6: 降级产出仍标 READY，不伪装 Failed
+    expect(body.yourself).toBe("READY");
+    expect(body.others).toBe("READY");
+    expect(body.science).toBe("READY");
+    expect(body.pendingUntil).toBeNull();
+  });
+
+  it("B2 静态语料：Yourself READY (有 snapshot) + Others/Science INSUFFICIENT (topicSlug=null)", async () => {
+    const { GET } = await import("./route");
+    const decisionRepo = await import("@/lib/db/repositories/decision.repo");
+    const snapshotRepo = await import(
+      "@/lib/db/repositories/decisionSnapshot.repo"
+    );
+    const owner = await makeUser("ai-mixed@example.com");
+    // topicSlug=null → Others/Science INSUFFICIENT；但有 currentSnapshot → Yourself READY
+    const decision = await decisionRepo.create(owner.id, { question: "q" });
+    await decisionRepo.updateHealthContext(decision.id, {
+      healthContext: { symptoms: "x" },
+      status: "unconfirmed",
+    });
+    const s = await snapshotRepo.create(decision.id, {
+      yourselfContextRef: null,
+      sources: null,
+      citations: null,
+      synthesis: { yourself: "ok", others: "", science: "", combined: "ok" },
+      provenance: "initial",
+      changeTrigger: "initial",
+    });
+    await decisionRepo.bindCurrentSnapshot(decision.id, s.id);
+
+    asUser(owner.id);
+    const res = await GET(bareRequest("GET"), params(decision.id));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    // Yourself 有内容（snapshot）→ READY
+    expect(body.yourself).toBe("READY");
+    // Others/Science topicSlug 未命中语料 → INSUFFICIENT（§25 三视角分别判）
+    expect(body.others).toBe("INSUFFICIENT_INFORMATION");
+    expect(body.science).toBe("INSUFFICIENT_INFORMATION");
+  });
 });

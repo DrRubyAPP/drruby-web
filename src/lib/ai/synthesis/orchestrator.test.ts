@@ -374,6 +374,156 @@ describe("RegenerationOrchestrator", () => {
     });
   });
 
+  describe("B5 pending 跨重启（D6 DB 时间戳持久化）", () => {
+    it("进程重启模拟：新 orchestrator 实例仍能读 DB pendingRegenAt 并 fire", async () => {
+      const userId = await seedUser();
+      const decisionId = await seedHrtDecision(userId);
+      const recordId = await seedLabRecord(userId);
+      await connect(decisionId, recordId, userId);
+
+      // 第一阶段：用 orchestrator-A 触发 onRecordConnected（写入 pendingRegenAt）
+      const orchA = new RegenerationOrchestrator({
+        synthesizer: makeMockSynthesizer(),
+      });
+      const links = await listByDecision(decisionId);
+      await orchA.onRecordConnected({
+        decisionId,
+        recordRef: {
+          id: links[0].healthRecordId,
+          kind: links[0].healthRecord.kind,
+          documentClass: links[0].healthRecord.documentClass,
+          summary: links[0].healthRecord.title,
+        },
+      });
+
+      // 模拟进程重启：丢弃 orchA，新实例 orchB 读同一 DB
+      const decisionMid = await prisma.decision.findUniqueOrThrow({
+        where: { id: decisionId },
+      });
+      expect(decisionMid.pendingRegenAt).not.toBeNull();
+
+      // 手动让 pending 过期（模拟重启期间时间流逝）
+      await prisma.decision.update({
+        where: { id: decisionId },
+        data: { pendingRegenAt: new Date(Date.now() - 60_000) },
+      });
+
+      // 第二阶段：orchB（无内存状态）打开 Decision → lazy fire 触发
+      const synthB = makeMockSynthesizer();
+      const orchB = new RegenerationOrchestrator({ synthesizer: synthB });
+      const result = await orchB.maybeFirePendingRegen(decisionId);
+      expect(result.fired).toBe(true);
+
+      const current = await findCurrent(decisionId);
+      expect(current).not.toBeNull();
+      expect(current?.changeTrigger).toBe("new_record");
+
+      const decisionAfter = await prisma.decision.findUniqueOrThrow({
+        where: { id: decisionId },
+      });
+      expect(decisionAfter.pendingRegenAt).toBeNull();
+    });
+  });
+
+  describe("§21 regeneration 不被 health-context unconfirmed 阻塞", () => {
+    it("healthContextStatus=unconfirmed + 相关 Record 连入 → 仍 touchPendingRegen（regen 门槛不是问卷完成）", async () => {
+      const userId = await seedUser();
+      const decisionId = await seedHrtDecision(userId); // seeds status: "unconfirmed"
+      const recordId = await seedLabRecord(userId);
+      await connect(decisionId, recordId, userId);
+
+      // 确认 decision 入库时 healthContextStatus 是 unconfirmed
+      const before = await prisma.decision.findUniqueOrThrow({
+        where: { id: decisionId },
+        select: { healthContextStatus: true, pendingRegenAt: true },
+      });
+      expect(before.healthContextStatus).toBe("unconfirmed");
+      expect(before.pendingRegenAt).toBeNull();
+
+      // 相关 Record 触发 onRecordConnected → 写 pendingRegenAt（不被 unconfirmed 阻塞）
+      const links = await listByDecision(decisionId);
+      const orch = new RegenerationOrchestrator({
+        synthesizer: makeMockSynthesizer(),
+      });
+      const result = await orch.onRecordConnected({
+        decisionId,
+        recordRef: {
+          id: links[0].healthRecordId,
+          kind: links[0].healthRecord.kind,
+          documentClass: links[0].healthRecord.documentClass,
+          summary: links[0].healthRecord.title,
+        },
+      });
+      expect(result.touched).toBe(true);
+
+      // pending 已写入（regen 已被允许），但 healthContextStatus 仍是 unconfirmed
+      const after = await prisma.decision.findUniqueOrThrow({
+        where: { id: decisionId },
+        select: { healthContextStatus: true, pendingRegenAt: true },
+      });
+      expect(after.healthContextStatus).toBe("unconfirmed"); // 问卷未确认
+      expect(after.pendingRegenAt).not.toBeNull(); // 但 regen pending 已触
+    });
+  });
+
+  describe("B4 多因 trigger → 取主因 + 单 Snapshot", () => {
+    it("多条相关 Record 续期同一 pending → 单次 fire 产出单 Snapshot（trigger=new_record 主因）", async () => {
+      const userId = await seedUser();
+      const decisionId = await seedHrtDecision(userId);
+      // 先建首版
+      const orch = new RegenerationOrchestrator({
+        synthesizer: makeMockSynthesizer(),
+      });
+      await orch.runInitialSynthesis(decisionId);
+      const initialSnap = await findCurrent(decisionId);
+
+      // 连入 3 份相关 Record（lab 类别）
+      const r1 = await seedLabRecord(userId, { title: "lab A" });
+      const r2 = await seedLabRecord(userId, { title: "lab B" });
+      const r3 = await seedLabRecord(userId, { title: "lab C" });
+      for (const rid of [r1, r2, r3]) {
+        await connect(decisionId, rid, userId);
+        const links = await listByDecision(decisionId);
+        const link = links.find((l) => l.healthRecordId === rid)!;
+        await orch.onRecordConnected({
+          decisionId,
+          recordRef: {
+            id: link.healthRecordId,
+            kind: link.healthRecord.kind,
+            documentClass: link.healthRecord.documentClass,
+            summary: link.healthRecord.title,
+          },
+        });
+      }
+
+      // 3 次续期 → 仅 1 个 pending 窗口
+      const decisionMid = await prisma.decision.findUniqueOrThrow({
+        where: { id: decisionId },
+      });
+      expect(decisionMid.pendingRegenAt).not.toBeNull();
+
+      // 让 pending 过期 → 单次 fire
+      await prisma.decision.update({
+        where: { id: decisionId },
+        data: { pendingRegenAt: new Date(Date.now() - 60_000) },
+      });
+      const fired = await orch.maybeFirePendingRegen(decisionId);
+      expect(fired.fired).toBe(true);
+
+      // 单新 Snapshot（initial 那个变历史）
+      const after = await findCurrent(decisionId);
+      expect(after?.id).not.toBe(initialSnap?.id);
+      expect(after?.changeTrigger).toBe("new_record"); // 主因
+
+      // history 只多 1 条（initial 变历史）
+      const history = await prisma.decisionSnapshot.findMany({
+        where: { decisionId },
+        orderBy: { createdAt: "asc" },
+      });
+      expect(history.length).toBe(2); // initial + new_record
+    });
+  });
+
   it("完整 lazy fire 链路：onRecordConnected → touchPending → 手动过期 → maybeFire → Snapshot", async () => {
     const userId = await seedUser();
     const decisionId = await seedHrtDecision(userId);
