@@ -69,7 +69,6 @@ export default async function HomeNav({
             width={120}
             height={30}
             className="h-[30px] w-auto"
-            style={{ width: "auto", height: "auto" }}
             priority
           />
           <span className="logo-word">
