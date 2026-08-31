@@ -1,7 +1,14 @@
 import {
+  assertCanCompleteAfterLearning,
+  assertCanMarkCompleted,
+  assertCanStartObserving,
+  assertCanStopObserving,
   assertOutcomeForKind,
   type ChangeTrigger,
   changeTriggerSchema,
+  type CheckInFrequency,
+  checkInFrequencySchema,
+  CHECK_IN_FREQ_MS,
   type DecisionKind,
   type DecisionLifecycle,
   type DecisionOutcome,
@@ -10,6 +17,8 @@ import {
   decisionTypeSchema,
   type HealthContextStatus,
   healthContextStatusSchema,
+  type ObservationDirection,
+  observationDirectionSchema,
   type SynthesisProvenance,
   synthesisProvenanceSchema,
   type TopicSlug,
@@ -74,6 +83,66 @@ export interface UpdateDecisionInput {
   decidedAt?: Date | null;
   /** §6 freshness gate 时间戳；仅 /check-freshness 端点写，通用 PATCH 不写 */
   freshnessCheckedAt?: Date | null;
+}
+
+// =============================================================================
+// task-44 Observe / Learn input 类型（§27/§28/§29）
+// =============================================================================
+
+/** §27 Start Observing 入参 */
+export interface StartObservingInput {
+  decisionId: string;
+  userId: string;
+  baselineText: string;
+  baselineRecordId?: string;
+  freq: CheckInFrequency;
+}
+
+/** §28 Observation synthesis 附件结构（kind=observation 专属） */
+export interface ObservationSynthesis {
+  photos: { recordId: string; summary?: string }[];
+  recordRefs: { recordId: string; summary?: string }[];
+}
+
+/** §29 Learning synthesis 附件结构（kind=learning 专属） */
+export interface LearningSynthesis {
+  text: string;
+  supportingObservationIds: string[];
+  generatedAt: string; // ISO timestamp
+}
+
+/** §28 Create Observation 入参 */
+export interface CreateObservationInput {
+  decisionId: string;
+  userId: string;
+  text: string;
+  /** §28 非必填方向（better/same/worse/not_sure） */
+  direction?: ObservationDirection | null;
+  synthesis?: ObservationSynthesis;
+  occurredAt?: Date; // 默认 now
+}
+
+/** §28/D8 Update Observation 入参（append-only：不改 occurredAt/createdAt） */
+export interface UpdateObservationInput {
+  entryId: string;
+  userId: string;
+  text?: string;
+  direction?: ObservationDirection | null;
+  synthesis?: ObservationSynthesis;
+}
+
+/** §29 Create Learning 入参 */
+export interface CreateLearningInput {
+  decisionId: string;
+  userId: string;
+  text: string;
+  supportingObservationIds: string[];
+}
+
+/** D5 Mark as completed 入参 */
+export interface MarkCompletedInput {
+  decisionId: string;
+  userId: string;
 }
 
 /** §8 meaningful activity：写入这些字段才刷新 lastUserActivityAt（saved/brief/decidedAt 不算） */

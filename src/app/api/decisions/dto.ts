@@ -4,6 +4,7 @@ import {
   changeTriggerSchema,
   decisionLifecycleSchema,
   healthContextStatusSchema,
+  observationDirectionSchema,
   synthesisProvenanceSchema,
 } from "@/lib/db/enums";
 import type { Decision, DecisionEntry, DecisionSnapshot } from "~prisma/client";
@@ -19,19 +20,22 @@ export const DecisionBriefDTO = z.object({
   questionsForClinician: z.array(z.string()),
 });
 
-/** append-only 时间线条目（详情附带；App 忽略额外字段不破坏契约） */
+/** append-only 时间线条目（详情附带；App 忽略额外字段不破坏契约）
+ *  task-44 §28 加 direction（better/same/worse/not_sure，非必填）。 */
 export const DecisionEntryDTO = z.object({
   id: z.string(),
   text: z.string(),
   lifecycleSnapshot: decisionLifecycleSchema,
   occurredAt: z.string(),
   kind: z.string().nullable().optional(),
+  direction: observationDirectionSchema.nullable().optional(),
   synthesis: z.unknown().nullable().optional(),
 });
 
 /** App `types.ts` Decision（`updated ← updatedAt`；列表省 brief，详情含 brief+entries）
  *  task-43 新增字段（currentSnapshotId/healthContext/healthContextStatus/healthContextConfirmedAt/pendingRegenAt）
- *  全部可选 nullable，task-37/42 存量不破坏（R1/R11）。 */
+ *  全部可选 nullable，task-37/42 存量不破坏（R1/R11）。
+ *  task-44 新增 nextCheckInAt/observeBaseline，同样可选 nullable，task-43 存量不破坏。 */
 export const DecisionDTO = z.object({
   id: z.string(),
   question: z.string(),
@@ -56,6 +60,16 @@ export const DecisionDTO = z.object({
   healthContextStatus: healthContextStatusSchema.nullable().optional(),
   healthContextConfirmedAt: z.string().nullable().optional(),
   pendingRegenAt: z.string().nullable().optional(),
+  // task-44 Observe / Learn（§27/§30）
+  nextCheckInAt: z.string().nullable().optional(),
+  observeBaseline: z
+    .object({
+      text: z.string(),
+      baselineRecordId: z.string().optional().nullable(),
+      freq: z.enum(["daily", "3days", "weekly", "2weeks", "monthly"]),
+    })
+    .nullable()
+    .optional(),
 });
 
 /** 详情：Decision + append-only entries（App 只消费 Decision 字段，entries 为附加） */
@@ -105,6 +119,11 @@ export function toDecisionDTO(
     pendingRegenAt: row.pendingRegenAt
       ? row.pendingRegenAt.toISOString()
       : null,
+    // task-44 Observe / Learn
+    nextCheckInAt: row.nextCheckInAt ? row.nextCheckInAt.toISOString() : null,
+    observeBaseline: (row.observeBaseline as z.infer<
+      typeof DecisionDTO
+    >["observeBaseline"]) ?? null,
   };
 }
 
@@ -117,6 +136,12 @@ export function toEntryDTO(
     lifecycleSnapshot: decisionLifecycleSchema.parse(row.lifecycleSnapshot),
     occurredAt: row.occurredAt.toISOString(),
     kind: row.kind,
+    direction:
+      row.direction === null || row.direction === undefined
+        ? null
+        : (observationDirectionSchema.safeParse(row.direction).success
+          ? (row.direction as z.infer<typeof observationDirectionSchema>)
+          : null),
     synthesis: row.synthesis,
   };
 }

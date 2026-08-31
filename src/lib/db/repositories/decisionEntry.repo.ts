@@ -3,10 +3,17 @@ import {
   type DecisionLifecycle,
   decisionEntryKindSchema,
   decisionLifecycleSchema,
+  type ObservationDirection,
+  observationDirectionSchema,
 } from "@/lib/db/enums";
 import { prisma } from "@/lib/db/prisma";
 import type { DecisionEntry, Prisma } from "~prisma/client";
-import { bumpActivity } from "./decision.repo";
+import {
+  type CreateLearningInput,
+  type CreateObservationInput,
+  type UpdateObservationInput,
+  bumpActivity,
+} from "./decision.repo";
 
 export interface AppendEntryInput {
   decisionId: string;
@@ -16,6 +23,8 @@ export interface AppendEntryInput {
   occurredAt: Date;
   /** §6 entry 类型；缺省/历史 = observation */
   kind?: DecisionEntryKind | null;
+  /** §28 task-44 方向评级（仅 kind=observation 时有意义；非必填） */
+  direction?: ObservationDirection | null;
   /** D3 归档 entry 的结构化 synthesis（V1 = brief 深拷贝 + outcome/nextStep） */
   synthesis?: unknown;
 }
@@ -24,10 +33,12 @@ export interface AppendEntryInput {
 export async function append(input: AppendEntryInput): Promise<DecisionEntry> {
   decisionLifecycleSchema.parse(input.lifecycleSnapshot);
   if (input.kind != null) decisionEntryKindSchema.parse(input.kind);
-  const { synthesis, ...data } = input;
+  if (input.direction != null) observationDirectionSchema.parse(input.direction);
+  const { synthesis, direction, ...data } = input;
   const entry = await prisma.decisionEntry.create({
     data: {
       ...data,
+      ...(direction !== undefined ? { direction } : {}),
       ...(synthesis !== undefined
         ? { synthesis: synthesis as Prisma.InputJsonValue }
         : {}),
