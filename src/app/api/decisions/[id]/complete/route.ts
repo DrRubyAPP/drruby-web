@@ -33,10 +33,6 @@ export const POST = handle(async (_req: Request, ctx: Ctx) => {
     });
     return NextResponse.json(toDecisionDTO(decision, { withBrief: false }));
   } catch (e) {
-    throw new AppError(
-      "UNPROCESSABLE_ENTITY",
-      (e as Error).message,
-      422,
-    );
+    throw new AppError("UNPROCESSABLE_ENTITY", (e as Error).message, 422);
   }
 });

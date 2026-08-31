@@ -54,8 +54,9 @@ describe("PATCH /api/decisions/[id]/observations/[entryId]", () => {
     const { PATCH } = await import("./route");
     const { prisma } = await import("@/lib/db/prisma");
     const owner = await makeUser("obs-patch@example.com");
-    const { decision, entry } =
-      await createObservingDecisionWithObservation(owner.id);
+    const { decision, entry } = await createObservingDecisionWithObservation(
+      owner.id,
+    );
 
     asUser(owner.id);
     const res = await PATCH(
@@ -77,16 +78,15 @@ describe("PATCH /api/decisions/[id]/observations/[entryId]", () => {
     expect(after?.occurredAt.toISOString()).toBe(
       entry.occurredAt.toISOString(),
     );
-    expect(after?.createdAt.toISOString()).toBe(
-      entry.createdAt.toISOString(),
-    );
+    expect(after?.createdAt.toISOString()).toBe(entry.createdAt.toISOString());
   });
 
   it("direction 可显式清空（null）", async () => {
     const { PATCH } = await import("./route");
     const owner = await makeUser("obs-clear@example.com");
-    const { decision, entry } =
-      await createObservingDecisionWithObservation(owner.id);
+    const { decision, entry } = await createObservingDecisionWithObservation(
+      owner.id,
+    );
 
     asUser(owner.id);
     const res = await PATCH(
@@ -102,8 +102,9 @@ describe("PATCH /api/decisions/[id]/observations/[entryId]", () => {
     const { PATCH } = await import("./route");
     const { prisma } = await import("@/lib/db/prisma");
     const owner = await makeUser("obs-synth@example.com");
-    const { decision, entry } =
-      await createObservingDecisionWithObservation(owner.id);
+    const { decision, entry } = await createObservingDecisionWithObservation(
+      owner.id,
+    );
 
     asUser(owner.id);
     const res = await PATCH(
@@ -149,8 +150,9 @@ describe("PATCH /api/decisions/[id]/observations/[entryId]", () => {
     const { PATCH } = await import("./route");
     const owner = await makeUser("obs-patch-real@example.com");
     const intruder = await makeUser("obs-patch-intruder@example.com");
-    const { decision, entry } =
-      await createObservingDecisionWithObservation(owner.id);
+    const { decision, entry } = await createObservingDecisionWithObservation(
+      owner.id,
+    );
 
     asUser(intruder.id);
     const res = await PATCH(

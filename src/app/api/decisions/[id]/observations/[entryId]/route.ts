@@ -77,9 +77,7 @@ export const PATCH = handle(async (req: Request, ctx: Ctx) => {
     userId: user.id,
     text: body.text,
     direction: body.direction,
-    synthesis: body.synthesis
-      ? normalizeSynthesis(body.synthesis)
-      : undefined,
+    synthesis: body.synthesis ? normalizeSynthesis(body.synthesis) : undefined,
   });
   return NextResponse.json(toEntryDTO(entry));
 });

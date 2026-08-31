@@ -61,8 +61,7 @@ describe("POST /api/decisions/[id]/observations", () => {
     });
     expect(updated?.nextCheckInAt).not.toBeNull();
     const deltaDays =
-      (updated!.nextCheckInAt!.getTime() - Date.now()) /
-      (24 * 60 * 60 * 1000);
+      (updated!.nextCheckInAt!.getTime() - Date.now()) / (24 * 60 * 60 * 1000);
     expect(deltaDays).toBeGreaterThan(6.9);
     expect(deltaDays).toBeLessThan(7.1);
   });
@@ -97,10 +96,7 @@ describe("POST /api/decisions/[id]/observations", () => {
     });
 
     asUser(owner.id);
-    const res = await POST(
-      jsonRequest({ text: "x" }),
-      params(decision.id),
-    );
+    const res = await POST(jsonRequest({ text: "x" }), params(decision.id));
     expect(res.status).toBe(422);
   });
 
@@ -110,10 +106,7 @@ describe("POST /api/decisions/[id]/observations", () => {
     const decision = await createObservingDecision(owner.id);
 
     asUser(owner.id);
-    const res = await POST(
-      jsonRequest({ text: "" }),
-      params(decision.id),
-    );
+    const res = await POST(jsonRequest({ text: "" }), params(decision.id));
     expect(res.status).toBe(400);
   });
 
@@ -137,10 +130,7 @@ describe("POST /api/decisions/[id]/observations", () => {
     const decision = await createObservingDecision(owner.id);
 
     asAnonymous();
-    const res = await POST(
-      jsonRequest({ text: "x" }),
-      params(decision.id),
-    );
+    const res = await POST(jsonRequest({ text: "x" }), params(decision.id));
     expect(res.status).toBe(401);
   });
 });

@@ -151,9 +151,9 @@ describe("task-44 P1 check-in due (§30)", () => {
     await createObservingDecision(user.id, new Date(Date.now() - 1000));
     const res = await GET();
     const body = await res.json();
-    expect(
-      body.cards.map((c: { question: string }) => c.question),
-    ).toContain("observing");
+    expect(body.cards.map((c: { question: string }) => c.question)).toContain(
+      "observing",
+    );
     expect(body.checkInDueCount).toBe(1);
   });
 
