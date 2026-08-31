@@ -40,6 +40,7 @@ import {
   sortEntries,
   typeToLabel,
 } from "./mappers";
+import { ObservationForm } from "./ObservationForm";
 import { PendingUpdateIndicator } from "./PendingUpdateIndicator";
 import { StartObservingForm } from "./StartObservingForm";
 
@@ -115,7 +116,9 @@ export function DecisionDetailView({ id }: { id: string }) {
   } = useApi<HealthContextDto>(`/api/decisions/${id}/health-context`);
   const [tab, setTab] = useState<Perspective>("yourself");
   const [yourselfDraft, setYourselfDraft] = useState<string | null>(null); // null = 未编辑，展示已存值
-  const [entryText, setEntryText] = useState("");
+
+  // task-44 §28 Observation 修正入口：editingEntryId 非空时展开内嵌 ObservationForm（edit mode）
+  const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
 
   // task-41 Decide section 状态
   const [decideOutcome, setDecideOutcome] = useState<DecisionOutcome | null>(
@@ -165,16 +168,8 @@ export function DecisionDetailView({ id }: { id: string }) {
     { onSuccess: () => refetch() },
   );
 
-  // Observation 追加（append-only）
-  const appendEntry = useMutation(
-    (text: string) => apiClient.post(`/api/decisions/${id}/entries`, { text }),
-    {
-      onSuccess: () => {
-        setEntryText("");
-        refetch();
-      },
-    },
-  );
+  // Observation 追加（append-only）— task-44 §28 改走专属 /observations 端点（在 ObservationForm 内部）
+  // 旧 /entries 端点的 inline 表单已退役；ObservationForm 自包含 POST + PATCH mutation
 
   // F4 Reopen：CLOSED → ACTIVE 原子归档（走专用端点）
   const reopen = useMutation(
@@ -757,7 +752,7 @@ export function DecisionDetailView({ id }: { id: string }) {
         )}
       </div>
 
-      {/* Observation：append-only 时间线 + 追加表单（迁移自 DecisionDetailDrawer） */}
+      {/* Observation：append-only 时间线（task-44 §28 direction badge + Edit 入口）+ 追加表单（OBSERVING only） */}
       <div className="sec">
         <div className="sec-h">Observations</div>
         {entries.length > 0 && (
@@ -765,14 +760,28 @@ export function DecisionDetailView({ id }: { id: string }) {
             <div className="tl">
               {entries.map((e) => {
                 const isArchived = e.kind === "archived_outcome";
+                const isLearning = e.kind === "learning";
+                const isObservation = e.kind === "observation";
                 const archived = isArchived
                   ? archivedEntryLabel(e.synthesis)
                   : null;
+                const learningText = isLearning
+                  ? (e.synthesis?.text ?? e.text)
+                  : null;
+                const editing = editingEntryId === e.id;
                 return (
                   <div className="tl-item" key={e.id}>
                     <span
                       className="tl-dot"
-                      style={isArchived ? { background: "#999" } : undefined}
+                      style={
+                        isArchived
+                          ? { background: "#999" }
+                          : isLearning
+                            ? { background: "var(--p-red)" }
+                            : isObservation
+                              ? { background: "var(--p-red)" }
+                              : undefined
+                      }
                     />
                     <div className="tl-d">
                       {new Date(e.occurredAt).toLocaleDateString()}
@@ -788,9 +797,75 @@ export function DecisionDetailView({ id }: { id: string }) {
                           </span>
                           {archived.body}
                         </>
+                      ) : isLearning ? (
+                        <>
+                          <span
+                            className="dec-badge"
+                            style={{
+                              marginRight: 6,
+                              background: "rgba(200,16,46,0.1)",
+                              color: "var(--p-red)",
+                            }}
+                          >
+                            {tr("observe.learnHistory.badge")}
+                          </span>
+                          {learningText}
+                        </>
                       ) : (
-                        e.text
+                        <>
+                          {isObservation && e.direction && (
+                            <span
+                              className="dec-badge"
+                              style={{
+                                marginRight: 6,
+                                background: "#f0e6e8",
+                                color: "var(--p-red)",
+                              }}
+                            >
+                              {tr(
+                                `observe.observation.direction.${e.direction}`,
+                              )}
+                            </span>
+                          )}
+                          {editing ? (
+                            <ObservationForm
+                              decisionId={data.id}
+                              existingEntry={{
+                                id: e.id,
+                                text: e.text,
+                                direction: e.direction ?? null,
+                              }}
+                              onSaved={() => {
+                                setEditingEntryId(null);
+                                refetch();
+                              }}
+                            />
+                          ) : (
+                            e.text
+                          )}
+                        </>
                       )}
+                      {/* Observation 修正入口（仅 OBSERVING + observation kind + 非编辑中） */}
+                      {isObservation &&
+                        data.lifecycle === "OBSERVING" &&
+                        !editing && (
+                          <button
+                            type="button"
+                            onClick={() => setEditingEntryId(e.id)}
+                            style={{
+                              fontSize: 11,
+                              color: "var(--p-red)",
+                              background: "none",
+                              border: "none",
+                              cursor: "pointer",
+                              marginLeft: 8,
+                              padding: 0,
+                              textDecoration: "underline",
+                            }}
+                          >
+                            {tr("observe.observation.edit")}
+                          </button>
+                        )}
                     </div>
                   </div>
                 );
@@ -798,33 +873,31 @@ export function DecisionDetailView({ id }: { id: string }) {
             </div>
           </div>
         )}
-        <form
-          onSubmit={(ev) => {
-            ev.preventDefault();
-            if (entryText.trim()) appendEntry.mutate(entryText.trim());
-          }}
-        >
-          <textarea
-            value={entryText}
-            onChange={(e) => setEntryText(e.target.value)}
-            rows={3}
-            placeholder="What happened? What did you notice?"
-            style={TEXTAREA}
-          />
-          {appendEntry.error && (
-            <ErrorState
-              message={appendEntry.error.message}
-              onRetry={() => appendEntry.reset()}
-            />
-          )}
-          <button
-            type="submit"
-            disabled={appendEntry.loading || entryText.trim().length === 0}
-            style={SUBMIT_BTN}
-          >
-            {appendEntry.loading ? "Saving…" : "Add observation"}
-          </button>
-        </form>
+        {/* task-44 §28 Add observation 表单（仅 OBSERVING 状态显示） */}
+        {data.lifecycle === "OBSERVING" && (
+          <details style={{ marginTop: 12 }}>
+            <summary
+              style={{
+                cursor: "pointer",
+                fontSize: 12,
+                fontWeight: 700,
+                letterSpacing: "0.16em",
+                textTransform: "uppercase",
+                color: "var(--p-red)",
+              }}
+            >
+              {tr("observe.observation.addCta")}
+            </summary>
+            <div style={{ marginTop: 12 }}>
+              <ObservationForm decisionId={data.id} onSaved={() => refetch()} />
+            </div>
+          </details>
+        )}
+        {data.lifecycle !== "OBSERVING" && entries.length === 0 && (
+          <p style={{ fontSize: 13, color: "#a89a95" }}>
+            {tr("observe.observation.emptyNonObserving")}
+          </p>
+        )}
       </div>
     </div>
   );
