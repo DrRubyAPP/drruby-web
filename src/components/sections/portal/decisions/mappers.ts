@@ -1,4 +1,7 @@
 import type {
+  AiState,
+  AiStateDto,
+  ChangeTrigger,
   DecisionBriefDto,
   DecisionDetailDto,
   DecisionDto,
@@ -6,7 +9,12 @@ import type {
   DecisionKind,
   DecisionLifecycle,
   DecisionOutcome,
+  DecisionSnapshotDto,
   DecisionType,
+  HealthContextCategory,
+  HealthContextDto,
+  SynthesisProvenance,
+  SynthesisShape,
   TopicSlug,
   WmnResponse,
 } from "./dto";
@@ -369,4 +377,179 @@ export function outcomesForKind(
     ];
   }
   return [];
+}
+
+// =============================================================================
+// task-43 综合结果层 mappers（Contract §15–§26）
+// =============================================================================
+
+/** §19 5 类的有序列表（问卷渲染顺序；镜像 enums HEALTH_CONTEXT_CATEGORIES） */
+export const HEALTH_CONTEXT_CATEGORIES: readonly HealthContextCategory[] = [
+  "symptoms",
+  "medications_treatments",
+  "related_health_changes",
+  "current_health_state",
+  "goals_concerns",
+];
+
+/** §19 5 类 → i18n label key（问卷文本域标题） */
+export const HEALTH_CONTEXT_CATEGORY_LABEL_KEYS: Record<
+  HealthContextCategory,
+  string
+> = {
+  symptoms: "decisions.healthContext.categories.symptoms",
+  medications_treatments:
+    "decisions.healthContext.categories.medications_treatments",
+  related_health_changes:
+    "decisions.healthContext.categories.related_health_changes",
+  current_health_state:
+    "decisions.healthContext.categories.current_health_state",
+  goals_concerns: "decisions.healthContext.categories.goals_concerns",
+};
+
+/** AI 三视角（§24 per-perspective） */
+export type Perspective = "yourself" | "others" | "science";
+
+/** 三视角有序列表（UI 渲染顺序） */
+export const PERSPECTIVES: readonly Perspective[] = [
+  "yourself",
+  "others",
+  "science",
+];
+
+/**
+ * §23 ChangeTrigger → i18n key（不露原始 trigger 值）。
+ * 前端 `t(key)` 后得到人话原因（D1 LLM 失败时降级文案由 i18n 兜底）。
+ */
+export function triggerToHumanLabelKey(trigger: ChangeTrigger): string {
+  return `decisions.snapshot.trigger.${trigger}`;
+}
+
+/**
+ * §24–§26 AI 五态视图（per-视角）。
+ *
+ * - LOADING → aiState.loading（骨架屏）
+ * - READY → aiState.ready
+ * - INSUFFICIENT_INFORMATION → 三视角文案 aiState.insufficient.<perspective>（§25）
+ * - FAILED → aiState.failed + retryable=true（§26 Retry，绝不伪装成"无证据"）
+ * - STALE_UPDATE_AVAILABLE → aiState.stale + pendingUntil 透传（D6 合并窗口）
+ */
+export interface AiStateView {
+  state: AiState;
+  messageKey: string;
+  /** STALE 时透传窗口到期时间（ISO） */
+  pendingUntil?: string;
+  /** FAILED 时 true（前端显示 Retry） */
+  retryable?: boolean;
+}
+
+/** 由 (state, perspective) 派生 AiStateView（pendingUntil 仅 STALE 时透传） */
+export function aiStateToView(
+  state: AiState,
+  perspective: Perspective,
+  opts: { pendingUntil?: string | null } = {},
+): AiStateView {
+  switch (state) {
+    case "LOADING":
+      return { state, messageKey: "aiState.loading" };
+    case "READY":
+      return { state, messageKey: "aiState.ready" };
+    case "INSUFFICIENT_INFORMATION":
+      return { state, messageKey: `aiState.insufficient.${perspective}` };
+    case "FAILED":
+      return { state, messageKey: "aiState.failed", retryable: true };
+    case "STALE_UPDATE_AVAILABLE":
+      return {
+        state,
+        messageKey: "aiState.stale",
+        pendingUntil: opts.pendingUntil ?? undefined,
+      };
+  }
+}
+
+/** 把 server AiStateDto 转成三视角 AiStateView（前端渲染用） */
+export function mapAiStateDto(dto: AiStateDto): {
+  yourself: AiStateView;
+  others: AiStateView;
+  science: AiStateView;
+} {
+  const pendingUntil = dto.pendingUntil ?? null;
+  return {
+    yourself: aiStateToView(dto.yourself, "yourself", { pendingUntil }),
+    others: aiStateToView(dto.others, "others", { pendingUntil }),
+    science: aiStateToView(dto.science, "science", { pendingUntil }),
+  };
+}
+
+/**
+ * R6 透明化：provenance=template+llm_trigger_degraded 表示 LLM 调用失败降级模板。
+ * 前端 AiState 仍标 READY（不伪装 FAILED），但小字标注可见 degraded。
+ */
+export function isDegradedProvenance(p: SynthesisProvenance): boolean {
+  return p === "template+llm_trigger_degraded";
+}
+
+/**
+ * §19 Health Context 5 类 → 问卷渲染行（预填 + 编辑）。
+ * 缺失类按空字符串填入（用户从零填；§19 "已有答案预填" 兼容首次进入）。
+ * 非字符串值转 string（defensive，服务端 JSON 字段可能混入对象）。
+ */
+export interface HealthContextCategoryRow {
+  category: HealthContextCategory;
+  labelKey: string;
+  value: string;
+}
+
+export function mapHealthContextToCategories(
+  dto: HealthContextDto | null | undefined,
+): HealthContextCategoryRow[] {
+  const ctx = dto?.healthContext ?? null;
+  return HEALTH_CONTEXT_CATEGORIES.map((category) => {
+    const raw = ctx?.[category];
+    const value =
+      raw == null ? "" : typeof raw === "string" ? raw : String(raw);
+    return {
+      category,
+      labelKey: HEALTH_CONTEXT_CATEGORY_LABEL_KEYS[category],
+      value,
+    };
+  });
+}
+
+/**
+ * Snapshot → 视图：合成文本四元组 + trigger 人话 key + provenance degraded 标志。
+ * HistorySnapshotList 与 CurrentSynthesisPanel 共用此映射。
+ */
+export interface SnapshotView {
+  id: string;
+  createdAt: string;
+  changeTrigger: ChangeTrigger;
+  triggerLabelKey: string;
+  /** 服务端 LLM 生成的人话原因；前端优先用此值，缺失时回退 i18n triggerLabelKey */
+  triggerHumanLabel?: string;
+  synthesis: SynthesisShape | null;
+  provenance: SynthesisProvenance;
+  degraded: boolean;
+}
+
+export function mapSnapshotToView(snap: DecisionSnapshotDto): SnapshotView {
+  return {
+    id: snap.id,
+    createdAt: snap.createdAt,
+    changeTrigger: snap.changeTrigger,
+    triggerLabelKey: triggerToHumanLabelKey(snap.changeTrigger),
+    triggerHumanLabel: snap.triggerHumanLabel,
+    synthesis: snap.synthesis,
+    provenance: snap.provenance,
+    degraded: isDegradedProvenance(snap.provenance),
+  };
+}
+
+/** 按 createdAt DESC 排序历史 Snapshot（History 视图，§15 倒序） */
+export function sortSnapshotsDesc(
+  snaps: DecisionSnapshotDto[],
+): DecisionSnapshotDto[] {
+  return [...snaps].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
 }

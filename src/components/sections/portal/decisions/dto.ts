@@ -48,6 +48,45 @@ export type TopicSlug =
   | "skincare"
   | "clinic";
 
+// =============================================================================
+// task-43 综合结果层枚举（镜像 src/lib/db/enums.ts，避免拉入 prisma 依赖）
+// =============================================================================
+
+/** decision_snapshot.change_trigger — §23 五触发因 + initial sentinel */
+export type ChangeTrigger =
+  | "new_record"
+  | "health_context_update"
+  | "others_refresh"
+  | "science_refresh"
+  | "observation_update"
+  | "initial";
+
+/** decision_snapshot.synthesis_provenance — D1 模板为主 + 小处 LLM */
+export type SynthesisProvenance =
+  | "template"
+  | "template+llm_trigger"
+  | "template+llm_trigger_degraded"
+  | "initial";
+
+/** decision.health_context_status — §20 永不自动从 unconfirmed 转 confirmed */
+export type HealthContextStatus = "confirmed" | "unconfirmed";
+
+/** decision.health_context 5 类（§19 Yourself 结构化组成） */
+export type HealthContextCategory =
+  | "symptoms"
+  | "medications_treatments"
+  | "related_health_changes"
+  | "current_health_state"
+  | "goals_concerns";
+
+/** §24–§26 AI 状态机五态（per-视角；rule-based，不依赖 LLM） */
+export type AiState =
+  | "LOADING"
+  | "READY"
+  | "INSUFFICIENT_INFORMATION"
+  | "FAILED"
+  | "STALE_UPDATE_AVAILABLE";
+
 /** 三源 Decision Brief 快照（对齐 server DecisionBriefDTO） */
 export interface DecisionBriefDto {
   yourHistory: string[];
@@ -104,6 +143,91 @@ export interface DecisionDto {
   /** 决策定下时间（outcome→DECIDED/CLOSED 时派生；outcome→ACTIVE 或 null 时清空） */
   decidedAt?: string | null;
   brief?: DecisionBriefDto; // 列表省 brief；详情含 brief
+  // task-43 综合结果层（全可选 nullable，R1/R11 兼容）
+  /** Decision 当前 Current Snapshot id（首次打开时 orchestrator 触发建首版，R1） */
+  currentSnapshotId?: string | null;
+  /** §19/D5 结构化 5 类（healthContextCategory 键 → 字符串值；部分类可缺失） */
+  healthContext?: Partial<Record<HealthContextCategory, string>> | null;
+  /** §20 confirmed | unconfirmed（永不自动转 confirmed） */
+  healthContextStatus?: HealthContextStatus | null;
+  /** DECIDE 前 gate 确认时间戳（status=confirmed 时派生） */
+  healthContextConfirmedAt?: string | null;
+  /** §18/D6 合并窗口到期时间戳；非空 → STALE_UPDATE_AVAILABLE */
+  pendingRegenAt?: string | null;
+}
+
+// =============================================================================
+// task-43 综合结果层 DTO（镜像 /api/decisions/dto.ts）
+// =============================================================================
+
+/** SynthesisResult.synthesis 文本四元组（D1 模板重组输出） */
+export interface SynthesisShape {
+  yourself: string;
+  others: string;
+  science: string;
+  combined: string;
+}
+
+/** §15/§23 综合 Snapshot（Current/History 共用此 DTO；镜像 server DecisionSnapshotDTO） */
+export interface DecisionSnapshotDto {
+  id: string;
+  decisionId: string;
+  /** 快照时的 Record 引用 + 摘要（R3：保证历史可还原，Record 软删后不悬空） */
+  yourselfContextRef: unknown | null;
+  /** SourceRef[] 引用集（Record id + Others/Science 语料段 id） */
+  sources: unknown | null;
+  /** CitationRef[] 引用集 */
+  citations: unknown | null;
+  /** D1 模板重组四元组文本；首次建首版前为 null */
+  synthesis: SynthesisShape | null;
+  provenance: SynthesisProvenance;
+  changeTrigger: ChangeTrigger;
+  createdAt: string; // ISO
+  /** §23 人话原因（不露原始 trigger 值；LLM 生成，失败降级模板） */
+  triggerHumanLabel?: string;
+}
+
+/** §19/§20 Health Context（GET 返回预填、PUT 写入；镜像 server HealthContextDTO） */
+export interface HealthContextDto {
+  /** §19/D5 5 类结构化 health context（部分类可缺失） */
+  healthContext: Partial<Record<HealthContextCategory, string>> | null;
+  status: HealthContextStatus | null;
+  /** status=confirmed 时存在；ISO */
+  healthContextConfirmedAt?: string | null;
+}
+
+/** §24–§26 AI 状态机五态（per-视角；镜像 server AiStateDTO） */
+export interface AiStateDto {
+  yourself: AiState;
+  others: AiState;
+  science: AiState;
+  /** STALE 时返回 pendingUntil（窗口到期时间）；其他状态 null */
+  pendingUntil?: string | null;
+}
+
+/** GET /api/decisions/[id]/snapshots 信封（Current + History） */
+export interface SnapshotsResponseDto {
+  current: DecisionSnapshotDto | null;
+  history: DecisionSnapshotDto[];
+}
+
+/** POST /api/decisions/[id]/regenerate 响应 */
+export interface RegenerateResponseDto {
+  material: boolean;
+  snapshotId?: string;
+  reason?: string;
+}
+
+/** POST /api/decisions/[id]/regenerate 入参 */
+export interface RegenerateInput {
+  trigger?: ChangeTrigger;
+  corpusVersionChanged?: boolean;
+}
+
+/** PUT /api/decisions/[id]/health-context 入参 */
+export interface UpdateHealthContextInput {
+  healthContext?: Partial<Record<HealthContextCategory, string>> | null;
+  status?: HealthContextStatus;
 }
 
 /** 详情：Decision + entries */

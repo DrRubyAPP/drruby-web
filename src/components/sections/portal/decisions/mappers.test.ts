@@ -1,7 +1,18 @@
 import { describe, expect, it } from "vitest";
-import type { DecisionDetailDto, DecisionDto } from "./dto";
+import type {
+  AiState,
+  AiStateDto,
+  ChangeTrigger,
+  DecisionDetailDto,
+  DecisionDto,
+  DecisionSnapshotDto,
+  HealthContextCategory,
+  HealthContextDto,
+  SynthesisProvenance,
+} from "./dto";
 import {
   ALL_DECISION_TYPES,
+  aiStateToView,
   archivedEntryLabel,
   buildEntryText,
   chipToQuestionTemplate,
@@ -12,17 +23,26 @@ import {
   GOAL_OPTIONS,
   goalToLabel,
   groupDecisions,
+  HEALTH_CONTEXT_CATEGORIES,
+  HEALTH_CONTEXT_CATEGORY_LABEL_KEYS,
   isActionable,
+  isDegradedProvenance,
   KIND_OPTIONS,
   lifecycleToLabel,
+  mapAiStateDto,
   mapBrief,
   mapDecisionDetail,
+  mapHealthContextToCategories,
+  mapSnapshotToView,
   outcomesForKind,
   outcomeToLabel,
+  PERSPECTIVES,
   skinConsiderToQuestion,
   sortEntries,
+  sortSnapshotsDesc,
   stackConsiderToQuestion,
   topicSlugToLabel,
+  triggerToHumanLabelKey,
   typeToLabel,
 } from "./mappers";
 
@@ -475,5 +495,365 @@ describe("task-41 decide mappers", () => {
       nextStep: null,
     });
     expect(body).toBe("Decided to do it");
+  });
+});
+
+// =============================================================================
+// task-43 综合结果层 mappers
+// =============================================================================
+
+describe("task-43 triggerToHumanLabelKey", () => {
+  it("maps each ChangeTrigger to a decisions.snapshot.trigger.<value> i18n key", () => {
+    expect(triggerToHumanLabelKey("new_record")).toBe(
+      "decisions.snapshot.trigger.new_record",
+    );
+    expect(triggerToHumanLabelKey("health_context_update")).toBe(
+      "decisions.snapshot.trigger.health_context_update",
+    );
+    expect(triggerToHumanLabelKey("others_refresh")).toBe(
+      "decisions.snapshot.trigger.others_refresh",
+    );
+    expect(triggerToHumanLabelKey("science_refresh")).toBe(
+      "decisions.snapshot.trigger.science_refresh",
+    );
+    expect(triggerToHumanLabelKey("observation_update")).toBe(
+      "decisions.snapshot.trigger.observation_update",
+    );
+  });
+
+  it("maps initial sentinel to its own key (R1 首版 Snapshot)", () => {
+    expect(triggerToHumanLabelKey("initial")).toBe(
+      "decisions.snapshot.trigger.initial",
+    );
+  });
+
+  it("covers all 6 ChangeTrigger values (no missing key)", () => {
+    const all: ChangeTrigger[] = [
+      "new_record",
+      "health_context_update",
+      "others_refresh",
+      "science_refresh",
+      "observation_update",
+      "initial",
+    ];
+    for (const t of all) {
+      expect(triggerToHumanLabelKey(t)).toBe(`decisions.snapshot.trigger.${t}`);
+    }
+  });
+});
+
+describe("task-43 aiStateToView", () => {
+  it("LOADING → messageKey aiState.loading, no retryable, no pendingUntil", () => {
+    const v = aiStateToView("LOADING", "yourself");
+    expect(v.state).toBe("LOADING");
+    expect(v.messageKey).toBe("aiState.loading");
+    expect(v.retryable).toBeUndefined();
+    expect(v.pendingUntil).toBeUndefined();
+  });
+
+  it("READY → messageKey aiState.ready", () => {
+    const v = aiStateToView("READY", "others");
+    expect(v.state).toBe("READY");
+    expect(v.messageKey).toBe("aiState.ready");
+    expect(v.retryable).toBeUndefined();
+  });
+
+  it("INSUFFICIENT_INFORMATION → per-perspective key (三视角文案)", () => {
+    expect(
+      aiStateToView("INSUFFICIENT_INFORMATION", "yourself").messageKey,
+    ).toBe("aiState.insufficient.yourself");
+    expect(aiStateToView("INSUFFICIENT_INFORMATION", "others").messageKey).toBe(
+      "aiState.insufficient.others",
+    );
+    expect(
+      aiStateToView("INSUFFICIENT_INFORMATION", "science").messageKey,
+    ).toBe("aiState.insufficient.science");
+  });
+
+  it("FAILED → messageKey aiState.failed + retryable=true (§26 Retry)", () => {
+    const v = aiStateToView("FAILED", "yourself");
+    expect(v.state).toBe("FAILED");
+    expect(v.messageKey).toBe("aiState.failed");
+    expect(v.retryable).toBe(true);
+  });
+
+  it("STALE_UPDATE_AVAILABLE → messageKey aiState.stale + pendingUntil passed through", () => {
+    const v = aiStateToView("STALE_UPDATE_AVAILABLE", "yourself", {
+      pendingUntil: "2026-08-31T12:00:00.000Z",
+    });
+    expect(v.state).toBe("STALE_UPDATE_AVAILABLE");
+    expect(v.messageKey).toBe("aiState.stale");
+    expect(v.pendingUntil).toBe("2026-08-31T12:00:00.000Z");
+  });
+
+  it("STALE_UPDATE_AVAILABLE without pendingUntil → pendingUntil undefined", () => {
+    const v = aiStateToView("STALE_UPDATE_AVAILABLE", "others");
+    expect(v.pendingUntil).toBeUndefined();
+  });
+
+  it("PERSPECTIVES lists 3 perspectives in stable order", () => {
+    expect(PERSPECTIVES).toEqual(["yourself", "others", "science"]);
+  });
+});
+
+describe("task-43 isDegradedProvenance", () => {
+  it("returns true only for template+llm_trigger_degraded (R6 透明化)", () => {
+    expect(isDegradedProvenance("template+llm_trigger_degraded")).toBe(true);
+    expect(isDegradedProvenance("template")).toBe(false);
+    expect(isDegradedProvenance("template+llm_trigger")).toBe(false);
+    expect(isDegradedProvenance("initial")).toBe(false);
+  });
+});
+
+describe("task-43 HEALTH_CONTEXT helpers", () => {
+  it("HEALTH_CONTEXT_CATEGORIES lists 5 categories in stable order (§19)", () => {
+    expect(HEALTH_CONTEXT_CATEGORIES).toEqual([
+      "symptoms",
+      "medications_treatments",
+      "related_health_changes",
+      "current_health_state",
+      "goals_concerns",
+    ]);
+  });
+
+  it("HEALTH_CONTEXT_CATEGORY_LABEL_KEYS maps 5 categories to decisions.healthContext.categories.<key>", () => {
+    expect(HEALTH_CONTEXT_CATEGORY_LABEL_KEYS.symptoms).toBe(
+      "decisions.healthContext.categories.symptoms",
+    );
+    expect(HEALTH_CONTEXT_CATEGORY_LABEL_KEYS.goals_concerns).toBe(
+      "decisions.healthContext.categories.goals_concerns",
+    );
+  });
+});
+
+describe("task-43 mapHealthContextToCategories", () => {
+  it("returns 5 entries in stable order even when input has missing categories", () => {
+    const dto: HealthContextDto = {
+      healthContext: {
+        symptoms: "Hot flashes",
+        goals_concerns: "Better sleep",
+      },
+      status: "unconfirmed",
+    };
+    const rows = mapHealthContextToCategories(dto);
+    expect(rows).toHaveLength(5);
+    expect(rows[0]).toEqual({
+      category: "symptoms",
+      labelKey: "decisions.healthContext.categories.symptoms",
+      value: "Hot flashes",
+    });
+    expect(rows[1]).toEqual({
+      category: "medications_treatments",
+      labelKey: "decisions.healthContext.categories.medications_treatments",
+      value: "",
+    });
+    expect(rows[4].value).toBe("Better sleep");
+  });
+
+  it("returns 5 empty entries when healthContext is null (首次进入)", () => {
+    const rows = mapHealthContextToCategories({
+      healthContext: null,
+      status: null,
+    });
+    expect(rows).toHaveLength(5);
+    for (const r of rows) expect(r.value).toBe("");
+  });
+
+  it("coerces non-string values to string (defensive)", () => {
+    const rows = mapHealthContextToCategories({
+      healthContext: {
+        symptoms: { weird: "object" } as unknown as string,
+      } as Record<HealthContextCategory, string>,
+      status: "unconfirmed",
+    });
+    expect(rows[0].value).toBe("[object Object]");
+  });
+});
+
+describe("task-43 AiStateDto mirror", () => {
+  it("server AiStateDTO shape: yourself/others/science + pendingUntil", () => {
+    const dto: AiStateDto = {
+      yourself: "READY",
+      others: "INSUFFICIENT_INFORMATION",
+      science: "READY",
+      pendingUntil: null,
+    };
+    expect(dto.yourself).toBe("READY");
+    expect(dto.others).toBe("INSUFFICIENT_INFORMATION");
+    // pendingUntil nullable 透传
+    const stale: AiStateDto = {
+      yourself: "STALE_UPDATE_AVAILABLE",
+      others: "STALE_UPDATE_AVAILABLE",
+      science: "STALE_UPDATE_AVAILABLE",
+      pendingUntil: "2026-08-31T12:00:00.000Z",
+    };
+    expect(stale.pendingUntil).toBe("2026-08-31T12:00:00.000Z");
+  });
+
+  it("AiState enum literal types compile-time check (5 states)", () => {
+    const states: AiState[] = [
+      "LOADING",
+      "READY",
+      "INSUFFICIENT_INFORMATION",
+      "FAILED",
+      "STALE_UPDATE_AVAILABLE",
+    ];
+    expect(states).toHaveLength(5);
+  });
+});
+
+describe("task-43 mapAiStateDto", () => {
+  it("把 server DTO 三视角 + pendingUntil 转成 AiStateView 三元组", () => {
+    const views = mapAiStateDto({
+      yourself: "INSUFFICIENT_INFORMATION",
+      others: "READY",
+      science: "STALE_UPDATE_AVAILABLE",
+      pendingUntil: "2026-08-31T12:00:00.000Z",
+    });
+    expect(views.yourself).toEqual({
+      state: "INSUFFICIENT_INFORMATION",
+      messageKey: "aiState.insufficient.yourself",
+    });
+    expect(views.others).toEqual({
+      state: "READY",
+      messageKey: "aiState.ready",
+    });
+    expect(views.science).toEqual({
+      state: "STALE_UPDATE_AVAILABLE",
+      messageKey: "aiState.stale",
+      pendingUntil: "2026-08-31T12:00:00.000Z",
+    });
+  });
+
+  it("pendingUntil null/undefined → 各视角 view 不带 pendingUntil（非 STALE）", () => {
+    const views = mapAiStateDto({
+      yourself: "READY",
+      others: "READY",
+      science: "READY",
+      pendingUntil: null,
+    });
+    expect(views.yourself.pendingUntil).toBeUndefined();
+  });
+});
+
+describe("task-43 mapSnapshotToView", () => {
+  const snap: DecisionSnapshotDto = {
+    id: "snap1",
+    decisionId: "d1",
+    yourselfContextRef: null,
+    sources: null,
+    citations: null,
+    synthesis: {
+      yourself: "y",
+      others: "o",
+      science: "s",
+      combined: "y\n\no\n\ns",
+    },
+    provenance: "template+llm_trigger_degraded",
+    changeTrigger: "new_record",
+    createdAt: "2026-08-31T10:00:00.000Z",
+    triggerHumanLabel: "Added a new lab record",
+  };
+
+  it("映射核心字段 + triggerLabelKey + degraded=true", () => {
+    const v = mapSnapshotToView(snap);
+    expect(v.id).toBe("snap1");
+    expect(v.changeTrigger).toBe("new_record");
+    expect(v.triggerLabelKey).toBe("decisions.snapshot.trigger.new_record");
+    expect(v.triggerHumanLabel).toBe("Added a new lab record");
+    expect(v.degraded).toBe(true);
+    expect(v.synthesis?.combined).toBe("y\n\no\n\ns");
+  });
+
+  it("非 degraded provenance → degraded=false", () => {
+    const v = mapSnapshotToView({ ...snap, provenance: "template" });
+    expect(v.degraded).toBe(false);
+  });
+
+  it("triggerHumanLabel undefined 透传（前端回退 i18n triggerLabelKey）", () => {
+    const { triggerHumanLabel, triggerLabelKey } = mapSnapshotToView({
+      ...snap,
+      triggerHumanLabel: undefined,
+    });
+    expect(triggerHumanLabel).toBeUndefined();
+    expect(triggerLabelKey).toBe("decisions.snapshot.trigger.new_record");
+  });
+});
+
+describe("task-43 sortSnapshotsDesc", () => {
+  const mk = (id: string, ts: string): DecisionSnapshotDto => ({
+    id,
+    decisionId: "d1",
+    yourselfContextRef: null,
+    sources: null,
+    citations: null,
+    synthesis: null,
+    provenance: "template",
+    changeTrigger: "new_record",
+    createdAt: ts,
+  });
+
+  it("sorts descending by createdAt (new → old)", () => {
+    const snaps = [
+      mk("s1", "2026-08-01T00:00:00.000Z"),
+      mk("s3", "2026-08-31T00:00:00.000Z"),
+      mk("s2", "2026-08-15T00:00:00.000Z"),
+    ];
+    expect(sortSnapshotsDesc(snaps).map((s) => s.id)).toEqual([
+      "s3",
+      "s2",
+      "s1",
+    ]);
+  });
+
+  it("preserves original array (immutable)", () => {
+    const snaps = [
+      mk("s2", "2026-08-15T00:00:00.000Z"),
+      mk("s1", "2026-08-01T00:00:00.000Z"),
+    ];
+    const sorted = sortSnapshotsDesc(snaps);
+    expect(snaps.map((s) => s.id)).toEqual(["s2", "s1"]);
+    expect(sorted.map((s) => s.id)).toEqual(["s2", "s1"]);
+  });
+
+  it("empty array → empty array", () => {
+    expect(sortSnapshotsDesc([])).toEqual([]);
+  });
+});
+
+describe("task-43 DecisionSnapshotDto mirror", () => {
+  it("server DecisionSnapshotDTO shape: 5 核心字段 + triggerHumanLabel optional", () => {
+    const snap: DecisionSnapshotDto = {
+      id: "snap1",
+      decisionId: "d1",
+      yourselfContextRef: null,
+      sources: null,
+      citations: null,
+      synthesis: {
+        yourself: "y",
+        others: "o",
+        science: "s",
+        combined: "y\n\no\n\ns",
+      },
+      provenance: "template",
+      changeTrigger: "new_record",
+      createdAt: "2026-08-31T10:00:00.000Z",
+    };
+    expect(snap.id).toBe("snap1");
+    expect(snap.changeTrigger).toBe("new_record");
+    expect(snap.synthesis?.combined).toBe("y\n\no\n\ns");
+    // triggerHumanLabel optional
+    const withoutLabel: DecisionSnapshotDto = { ...snap, id: "snap2" };
+    expect(withoutLabel.triggerHumanLabel).toBeUndefined();
+  });
+
+  it("SynthesisProvenance 4 values (template | template+llm_trigger | degraded | initial)", () => {
+    const ps: SynthesisProvenance[] = [
+      "template",
+      "template+llm_trigger",
+      "template+llm_trigger_degraded",
+      "initial",
+    ];
+    expect(ps).toHaveLength(4);
   });
 });
