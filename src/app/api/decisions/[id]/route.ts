@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import {
+  createSynthesizer,
+  RegenerationOrchestrator,
+} from "@/lib/ai/synthesis";
 import { requireUser } from "@/lib/auth/session";
 import { decisionEntryRepo, decisionRepo } from "@/lib/db";
 import {
@@ -64,9 +68,38 @@ export const GET = handle(async (_req: Request, ctx: Ctx) => {
     throw new AppError("NOT_FOUND", "决策不存在", 404);
   }
 
+  // task-43 R5 lazy fire on open：用户打开 Decision 时检查 pendingRegenAt。
+  // - currentSnapshotId=null → 建首版 Snapshot（R1）
+  // - pendingRegenAt 已过 → runRegeneration
+  // - pendingRegenAt 未过 → 不 fire（前端按 STALE_UPDATE_AVAILABLE 显示）
+  // 注：lazy fire 失败不阻塞 GET 返回（前端降级到 STALE/FAILED）；orchestrator 内部已清 pending。
+  if (!row.currentSnapshotId) {
+    try {
+      const orch = new RegenerationOrchestrator({
+        synthesizer: createSynthesizer(),
+      });
+      await orch.runInitialSynthesis(id);
+    } catch {
+      // 首版 synthesis 失败 → 不阻塞 GET；前端按 INSUFFICIENT/FAILED 显示
+    }
+  } else if (row.pendingRegenAt) {
+    try {
+      const orch = new RegenerationOrchestrator({
+        synthesizer: createSynthesizer(),
+      });
+      await orch.maybeFirePendingRegen(id);
+    } catch {
+      // lazy fire 失败 → 不阻塞 GET；前端按 STALE/FAILED 显示
+    }
+  }
+
+  // 重新读取（lazy fire 可能已更新 currentSnapshotId / pendingRegenAt）
+  const freshRow = await decisionRepo.findByIdWithEntries(id);
+  const detailRow = freshRow ?? row;
+
   const dto: z.infer<typeof DecisionDetailDTO> = {
-    ...toDecisionDTO(row, { withBrief: true }),
-    entries: row.entries.map(toEntryDTO),
+    ...toDecisionDTO(detailRow, { withBrief: true }),
+    entries: detailRow.entries.map(toEntryDTO),
   };
   return NextResponse.json(DecisionResponse.parse(dto));
 });

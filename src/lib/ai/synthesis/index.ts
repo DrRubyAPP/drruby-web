@@ -5,8 +5,20 @@
  * 真实 LLM synthesis 整体重写延后到 V1 之后（O3），接口契约固定。
  */
 
+export type { AiStateInput, AiStateResult } from "./aiState";
+export { computeAiState } from "./aiState";
 export type { TriggerLabelInput, TriggerLabelResult } from "./llmTriggerHelper";
 export { generateTriggerLabel } from "./llmTriggerHelper";
+export type {
+  MaybeFireResult,
+  OnRecordConnectedInput,
+  OnRecordConnectedResult,
+  OrchestratorDeps,
+  RunInitialResult,
+  RunRegenInput,
+  RunRegenResult,
+} from "./orchestrator";
+export { RegenerationOrchestrator } from "./orchestrator";
 export { TemplateSynthesizer } from "./templateSynthesizer";
 export type {
   CitationRef,

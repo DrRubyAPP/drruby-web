@@ -262,8 +262,13 @@ export async function findByIdWithEntries(id: string) {
 // ============================================================================
 
 export interface UpdateHealthContextInput {
-  /** §19 Yourself 结构化 5 类 JSON（symptoms/medications_treatments/...） */
-  healthContext?: Prisma.InputJsonValue | null;
+  /** §19 Yourself 结构化 5 类 JSON（symptoms/medications_treatments/...）
+   *  传 Prisma.JsonNull 显式置 null；传 undefined 不更新该字段 */
+  healthContext?:
+    | Prisma.InputJsonValue
+    | Prisma.NullableJsonNullValueInput
+    | null
+    | undefined;
   /** §20 confirmed|unconfirmed；转 confirmed 刷 confirmedAt */
   status?: HealthContextStatus;
 }
@@ -288,10 +293,9 @@ export async function updateHealthContext(
     data: {
       ...(input.healthContext !== undefined
         ? {
-            healthContext:
-              input.healthContext === null
-                ? Prisma.JsonNull
-                : input.healthContext,
+            healthContext: input.healthContext as
+              | Prisma.InputJsonValue
+              | Prisma.NullableJsonNullValueInput,
           }
         : {}),
       ...(input.status !== undefined
