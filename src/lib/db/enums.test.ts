@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
+  aiStateSchema,
   appointmentStatusSchema,
   assertOutcomeForKind,
   authorizationActionSchema,
   authorizationStatusSchema,
   authProviderSchema,
   bodyInsightKindSchema,
+  changeTriggerSchema,
   clinicPlanTierSchema,
   connectionStatusSchema,
   consentKeySchema,
@@ -18,6 +20,8 @@ import {
   extractionConfidenceSchema,
   fitzpatrickScaleSchema,
   followUpStatusSchema,
+  healthContextCategorySchema,
+  healthContextStatusSchema,
   healthRecordKindSchema,
   healthRecordStatusSchema,
   hormonalStatusSchema,
@@ -35,6 +39,7 @@ import {
   studyRecruitmentStatusSchema,
   subscriptionStatusSchema,
   subscriptionTierSchema,
+  synthesisProvenanceSchema,
   timelineKindSchema,
   topicSlugSchema,
   trendSchema,
@@ -271,7 +276,15 @@ describe("消费决策域枚举 - 有效值通过", () => {
   });
 
   it("healthRecordKindSchema = lab/imaging/checkup/vitals/medication/symptom/treatment", () => {
-    for (const v of ["lab", "imaging", "checkup", "vitals", "medication", "symptom", "treatment"]) {
+    for (const v of [
+      "lab",
+      "imaging",
+      "checkup",
+      "vitals",
+      "medication",
+      "symptom",
+      "treatment",
+    ]) {
       expect(healthRecordKindSchema.parse(v)).toBe(v);
     }
   });
@@ -283,7 +296,13 @@ describe("消费决策域枚举 - 有效值通过", () => {
   });
 
   it("healthRecordStatusSchema 接受 5 值（Contract §12 状态机）", () => {
-    for (const v of ["SOURCE_UPLOADED", "PROCESSING", "EXTRACTED_DRAFT", "USER_REVIEW", "CONFIRMED"]) {
+    for (const v of [
+      "SOURCE_UPLOADED",
+      "PROCESSING",
+      "EXTRACTED_DRAFT",
+      "USER_REVIEW",
+      "CONFIRMED",
+    ]) {
       expect(healthRecordStatusSchema.parse(v)).toBe(v);
     }
     expect(() => healthRecordStatusSchema.parse("CONFIRM")).toThrow();
@@ -298,7 +317,14 @@ describe("消费决策域枚举 - 有效值通过", () => {
   });
 
   it("documentClassSchema 接受 6 值（task-36 A4）", () => {
-    for (const v of ["Lab", "Imaging", "Pathology", "Procedure", "VisitSummary", "Unknown"]) {
+    for (const v of [
+      "Lab",
+      "Imaging",
+      "Pathology",
+      "Procedure",
+      "VisitSummary",
+      "Unknown",
+    ]) {
       expect(documentClassSchema.parse(v)).toBe(v);
     }
     expect(() => documentClassSchema.parse("lab")).toThrow(); // 大小写敏感
@@ -309,6 +335,71 @@ describe("消费决策域枚举 - 有效值通过", () => {
     for (const v of ["active", "canceled", "past_due", "trialing"]) {
       expect(subscriptionStatusSchema.parse(v)).toBe(v);
     }
+  });
+});
+
+describe("task-43 综合/状态机枚举 - 有效值通过", () => {
+  it("aiStateSchema 接受 5 态（Contract §24）", () => {
+    for (const v of [
+      "LOADING",
+      "READY",
+      "INSUFFICIENT_INFORMATION",
+      "FAILED",
+      "STALE_UPDATE_AVAILABLE",
+    ]) {
+      expect(aiStateSchema.parse(v)).toBe(v);
+    }
+    // 大小写敏感
+    expect(() => aiStateSchema.parse("loading")).toThrow();
+    expect(() => aiStateSchema.parse("READY_TO_SHOW")).toThrow();
+    expect(() => aiStateSchema.parse("INSUFFICIENT")).toThrow();
+  });
+
+  it("changeTriggerSchema 接受 6 值（§23 五值 + initial sentinel）", () => {
+    for (const v of [
+      "new_record",
+      "health_context_update",
+      "others_refresh",
+      "science_refresh",
+      "observation_update",
+      "initial",
+    ]) {
+      expect(changeTriggerSchema.parse(v)).toBe(v);
+    }
+    expect(() => changeTriggerSchema.parse("new-record")).toThrow();
+    expect(() => changeTriggerSchema.parse("NEW_RECORD")).toThrow();
+  });
+
+  it("healthContextStatusSchema = confirmed/unconfirmed（§20）", () => {
+    for (const v of ["confirmed", "unconfirmed"]) {
+      expect(healthContextStatusSchema.parse(v)).toBe(v);
+    }
+    expect(() => healthContextStatusSchema.parse("pending")).toThrow();
+  });
+
+  it("healthContextCategorySchema 接受 5 类（§19 Yourself 结构）", () => {
+    for (const v of [
+      "symptoms",
+      "medications_treatments",
+      "related_health_changes",
+      "current_health_state",
+      "goals_concerns",
+    ]) {
+      expect(healthContextCategorySchema.parse(v)).toBe(v);
+    }
+    expect(() => healthContextCategorySchema.parse("symptom")).toThrow();
+  });
+
+  it("synthesisProvenanceSchema 接受 4 值（含 degraded + initial sentinel）", () => {
+    for (const v of [
+      "template",
+      "template+llm_trigger",
+      "template+llm_trigger_degraded",
+      "initial",
+    ]) {
+      expect(synthesisProvenanceSchema.parse(v)).toBe(v);
+    }
+    expect(() => synthesisProvenanceSchema.parse("llm")).toThrow();
   });
 });
 
@@ -414,6 +505,17 @@ describe("enum schemas - 无效值抛错", () => {
     ["documentClassSchema", "lab", "document_class（小写非法）"],
     ["documentClassSchema", "GENETIC", "document_class"],
     ["subscriptionStatusSchema", "expired", "status"],
+    ["aiStateSchema", "loading", "ai_state（小写非法）"],
+    ["aiStateSchema", "READY_TO_SHOW", "ai_state"],
+    ["changeTriggerSchema", "new-record", "change_trigger（连字符非法）"],
+    ["changeTriggerSchema", "NEW_RECORD", "change_trigger（大写非法）"],
+    ["healthContextStatusSchema", "pending", "health_context_status"],
+    [
+      "healthContextCategorySchema",
+      "symptom",
+      "health_context_category（单数非法）",
+    ],
+    ["synthesisProvenanceSchema", "llm", "provenance"],
     ["journeySourceTypeSchema", "blog", "source_type"],
     ["followUpStatusSchema", "closed", "status"],
     ["clinicPlanTierSchema", "premium", "plan_tier"],
@@ -455,6 +557,11 @@ describe("enum schemas - 无效值抛错", () => {
     extractionConfidenceSchema,
     documentClassSchema,
     subscriptionStatusSchema,
+    aiStateSchema,
+    changeTriggerSchema,
+    healthContextStatusSchema,
+    healthContextCategorySchema,
+    synthesisProvenanceSchema,
     journeySourceTypeSchema,
     followUpStatusSchema,
     clinicPlanTierSchema,

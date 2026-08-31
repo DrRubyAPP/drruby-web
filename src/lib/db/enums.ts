@@ -344,7 +344,12 @@ export type HealthRecordKind = z.infer<typeof healthRecordKindSchema>;
  * @deprecated task-42 起 status/confidence 替代；存量 ocrStatus 仅用于迁移映射。
  *  pending/processing → status=PROCESSING；done/manual → status=CONFIRMED
  */
-export const ocrStatusSchema = z.enum(["pending", "processing", "done", "manual"]);
+export const ocrStatusSchema = z.enum([
+  "pending",
+  "processing",
+  "done",
+  "manual",
+]);
 export type OcrStatus = z.infer<typeof ocrStatusSchema>;
 
 // =============================================================================
@@ -380,6 +385,91 @@ export const documentClassSchema = z.enum([
   "Unknown",
 ]);
 export type DocumentClass = z.infer<typeof documentClassSchema>;
+
+// =============================================================================
+// Decision 综合结果层 / AI 状态机（Contract §15–§26）— task-43
+// =============================================================================
+
+/**
+ * decision_snapshot.synthesis_provenance — D1 模板为主 + 小处 LLM。
+ * - template：纯模板重组（默认）
+ * - template+llm_trigger：模板主体 + LLM 生成 trigger 人话文案/不确定性提示成功
+ * - template+llm_trigger_degraded：LLM 调用失败降级到模板兜底（B6，仍标 READY 但 provenance 记 degraded）
+ * - initial：首版 Snapshot（currentSnapshotId=null 触发，R1，作内部 sentinel，
+ *   不在 Contract §23 五值内，仅 provenance 用）
+ */
+export const synthesisProvenanceSchema = z.enum([
+  "template",
+  "template+llm_trigger",
+  "template+llm_trigger_degraded",
+  "initial",
+]);
+export type SynthesisProvenance = z.infer<typeof synthesisProvenanceSchema>;
+
+/**
+ * decision_snapshot.change_trigger — §23 五触发因 + initial sentinel。
+ * 多因触发时取主因或按合并 set 归类（B4）。
+ * - initial：首版 Snapshot 的内部 sentinel（不在 §23 五值字面内）
+ */
+export const changeTriggerSchema = z.enum([
+  "new_record",
+  "health_context_update",
+  "others_refresh",
+  "science_refresh",
+  "observation_update",
+  "initial",
+]);
+export type ChangeTrigger = z.infer<typeof changeTriggerSchema>;
+
+/**
+ * decision.health_context_status — §20 永不因时间流逝自动从 unconfirmed 转 confirmed。
+ * - confirmed：用户已确认当前 health context（DECIDE 前 gate）
+ * - unconfirmed：尚未确认（UI 显示"目前健康语境尚未确认"）
+ */
+export const healthContextStatusSchema = z.enum(["confirmed", "unconfirmed"]);
+export type HealthContextStatus = z.infer<typeof healthContextStatusSchema>;
+
+/**
+ * decision.health_context 5 类（§19 Yourself 结构化组成）。
+ * 用作 healthContext JSON 对象的 key 集合（每类可填字符串/对象）。
+ */
+export const healthContextCategorySchema = z.enum([
+  "symptoms",
+  "medications_treatments",
+  "related_health_changes",
+  "current_health_state",
+  "goals_concerns",
+]);
+export type HealthContextCategory = z.infer<typeof healthContextCategorySchema>;
+
+/** 决策 health_context 5 类的有序列表（问卷渲染顺序） */
+export const HEALTH_CONTEXT_CATEGORIES: readonly HealthContextCategory[] = [
+  "symptoms",
+  "medications_treatments",
+  "related_health_changes",
+  "current_health_state",
+  "goals_concerns",
+];
+
+/**
+ * AI 状态机五态（Contract §24–§26）。
+ * Yourself / Others / Science 三视角各自独立判定。
+ * - LOADING：regeneration 进行中或首次 synthesis 生成中
+ * - READY：当前 synthesis 可用且 pendingRegenAt=null
+ * - INSUFFICIENT_INFORMATION：无 connected Records 且 healthContext 空（Yourself）
+ *   或 topicSlug 无匹配语料（Others/Science）—— §25 合法空态
+ * - FAILED：regeneration 抛错 / LLM 失败 —— §26 ≠ Insufficient，提供 Retry
+ * - STALE_UPDATE_AVAILABLE：pendingRegenAt 非空（窗口未过）或 freshness check 发现潜在变化
+ *   未 regen —— 显示"有更新可用"
+ */
+export const aiStateSchema = z.enum([
+  "LOADING",
+  "READY",
+  "INSUFFICIENT_INFORMATION",
+  "FAILED",
+  "STALE_UPDATE_AVAILABLE",
+]);
+export type AiState = z.infer<typeof aiStateSchema>;
 
 /** ai_report.type — task-26 AI 报告域 */
 export const aiReportTypeSchema = z.enum(["skin", "hormone", "body"]);
