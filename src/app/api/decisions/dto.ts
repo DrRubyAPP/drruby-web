@@ -121,9 +121,9 @@ export function toDecisionDTO(
       : null,
     // task-44 Observe / Learn
     nextCheckInAt: row.nextCheckInAt ? row.nextCheckInAt.toISOString() : null,
-    observeBaseline: (row.observeBaseline as z.infer<
-      typeof DecisionDTO
-    >["observeBaseline"]) ?? null,
+    observeBaseline:
+      (row.observeBaseline as z.infer<typeof DecisionDTO>["observeBaseline"]) ??
+      null,
   };
 }
 
@@ -139,9 +139,9 @@ export function toEntryDTO(
     direction:
       row.direction === null || row.direction === undefined
         ? null
-        : (observationDirectionSchema.safeParse(row.direction).success
+        : observationDirectionSchema.safeParse(row.direction).success
           ? (row.direction as z.infer<typeof observationDirectionSchema>)
-          : null),
+          : null,
     synthesis: row.synthesis,
   };
 }

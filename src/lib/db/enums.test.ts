@@ -11,9 +11,9 @@ import {
   authorizationStatusSchema,
   authProviderSchema,
   bodyInsightKindSchema,
+  CHECK_IN_FREQ_MS,
   changeTriggerSchema,
   checkInFrequencySchema,
-  CHECK_IN_FREQ_MS,
   clinicPlanTierSchema,
   connectionStatusSchema,
   consentKeySchema,
@@ -600,8 +600,16 @@ describe("enum schemas - 无效值抛错", () => {
     ["reviewStatusSchema", "draft", "status"],
     ["referralStatusSchema", "rejected", "status"],
     ["invoiceStatusSchema", "overdue", "status"],
-    ["decisionEntryKindSchema", "unknown", "kind（task-44 learning 之外的值非法）"],
-    ["observationDirectionSchema", "improving", "direction（task-44 4 值之外非法）"],
+    [
+      "decisionEntryKindSchema",
+      "unknown",
+      "kind（task-44 learning 之外的值非法）",
+    ],
+    [
+      "observationDirectionSchema",
+      "improving",
+      "direction（task-44 4 值之外非法）",
+    ],
     ["checkInFrequencySchema", "biweekly", "freq（task-44 5 值之外非法）"],
   ];
 

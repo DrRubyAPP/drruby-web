@@ -4,16 +4,17 @@ import {
   assertCanStartObserving,
   assertCanStopObserving,
   assertOutcomeForKind,
-  type ChangeTrigger,
-  changeTriggerSchema,
-  type CheckInFrequency,
-  checkInFrequencySchema,
   CHECK_IN_FREQ_MS,
+  type ChangeTrigger,
+  type CheckInFrequency,
+  changeTriggerSchema,
+  checkInFrequencySchema,
   type DecisionKind,
   type DecisionLifecycle,
   type DecisionOutcome,
   type DecisionType,
   decisionKindSchema,
+  decisionLifecycleSchema,
   decisionTypeSchema,
   type HealthContextStatus,
   healthContextStatusSchema,
@@ -431,3 +432,207 @@ export async function bindCurrentSnapshot(
 
 // 导出 task-43 枚举类型/Schema，便于上层 repo/route 复用
 export type { ChangeTrigger, SynthesisProvenance };
+
+// =============================================================================
+// task-44 Observe / Learn（Contract §27/§29/§30）
+// 原子事务方法：startObserving / stopObserving / markCompleted /
+// completeAfterLearning。复用 reopenAtomic 模式（tx 内重新 findUniqueOrThrow
+// 避免 read-then-write 竞态）。所有写入属 §8 meaningful activity。
+// =============================================================================
+
+/**
+ * §27 Start Observing：DECIDED → OBSERVING，原子写 observeBaseline +
+ * 设 nextCheckInAt + 写 TimelineEvent。
+ * 前置：lifecycle === DECIDED（assertCanStartObserving 校验）。
+ */
+export async function startObserving(
+  input: StartObservingInput,
+): Promise<Decision> {
+  checkInFrequencySchema.parse(input.freq);
+  return prisma.$transaction(async (tx) => {
+    const decision = await tx.decision.findUniqueOrThrow({
+      where: { id: input.decisionId },
+      select: { lifecycle: true, userId: true },
+    });
+    if (decision.userId !== input.userId) throw new Error("forbidden");
+    assertCanStartObserving(decisionLifecycleSchema.parse(decision.lifecycle));
+
+    const now = new Date();
+    const nextCheckInAt = new Date(
+      now.getTime() + CHECK_IN_FREQ_MS[input.freq],
+    );
+    const updated = await tx.decision.update({
+      where: { id: input.decisionId },
+      data: {
+        lifecycle: "OBSERVING",
+        nextCheckInAt,
+        observeBaseline: {
+          text: input.baselineText,
+          ...(input.baselineRecordId
+            ? { baselineRecordId: input.baselineRecordId }
+            : {}),
+          freq: input.freq,
+        } as Prisma.InputJsonValue,
+        lastUserActivityAt: now,
+      },
+    });
+    await tx.timelineEvent.create({
+      data: {
+        userId: input.userId,
+        decisionId: input.decisionId,
+        kind: "decision",
+        title: "Started observing",
+        occurredAt: now,
+      },
+    });
+    return updated;
+  });
+}
+
+/**
+ * §27 Stop Observing：OBSERVING → LEARNING 或 COMPLETED。
+ * - 有 observation records → LEARNING（UI 弹 Learning summary 表单）
+ * - 无 observation records → COMPLETED（直接完成，不弹表单）
+ * 清 nextCheckInAt；observeBaseline 保留到 markCompleted 时清空（D7 不删历史）。
+ */
+export async function stopObserving(input: {
+  decisionId: string;
+  userId: string;
+}): Promise<{
+  lifecycle: DecisionLifecycle;
+  hasObservations: boolean;
+}> {
+  return prisma.$transaction(async (tx) => {
+    const decision = await tx.decision.findUniqueOrThrow({
+      where: { id: input.decisionId },
+      select: { lifecycle: true, userId: true },
+    });
+    if (decision.userId !== input.userId) throw new Error("forbidden");
+    assertCanStopObserving(decisionLifecycleSchema.parse(decision.lifecycle));
+
+    const observationCount = await tx.decisionEntry.count({
+      where: { decisionId: input.decisionId, kind: "observation" },
+    });
+    const hasObs = observationCount > 0;
+    const nextLifecycle: DecisionLifecycle = hasObs ? "LEARNING" : "COMPLETED";
+    const now = new Date();
+
+    await tx.decision.update({
+      where: { id: input.decisionId },
+      data: {
+        lifecycle: nextLifecycle,
+        nextCheckInAt: null,
+        lastUserActivityAt: now,
+      },
+    });
+    await tx.timelineEvent.create({
+      data: {
+        userId: input.userId,
+        decisionId: input.decisionId,
+        kind: "decision",
+        title: hasObs ? "Stopped observing" : "Marked as completed",
+        occurredAt: now,
+      },
+    });
+    return { lifecycle: nextLifecycle, hasObservations: hasObs };
+  });
+}
+
+/**
+ * D5 Mark as completed：DECIDED → COMPLETED 直接路径（不需观察的完成）。
+ * 清 nextCheckInAt + observeBaseline（此时 baseline 不再有用）。
+ * 不允许从 ACTIVE/OBSERVING/LEARNING 直跳 COMPLETED（违反 §5 单向）。
+ */
+export async function markCompleted(
+  input: MarkCompletedInput,
+): Promise<Decision> {
+  return prisma.$transaction(async (tx) => {
+    const decision = await tx.decision.findUniqueOrThrow({
+      where: { id: input.decisionId },
+      select: { lifecycle: true, userId: true },
+    });
+    if (decision.userId !== input.userId) throw new Error("forbidden");
+    assertCanMarkCompleted(decisionLifecycleSchema.parse(decision.lifecycle));
+
+    const now = new Date();
+    const updated = await tx.decision.update({
+      where: { id: input.decisionId },
+      data: {
+        lifecycle: "COMPLETED",
+        nextCheckInAt: null,
+        observeBaseline: Prisma.JsonNull,
+        lastUserActivityAt: now,
+      },
+    });
+    await tx.timelineEvent.create({
+      data: {
+        userId: input.userId,
+        decisionId: input.decisionId,
+        kind: "decision",
+        title: "Marked as completed",
+        occurredAt: now,
+      },
+    });
+    return updated;
+  });
+}
+
+/**
+ * §29 Stop→Learning 流程终态：保存 Learning summary 后调用，
+ * lifecycle: LEARNING → COMPLETED。清 observeBaseline；nextCheckInAt 已在
+ * stopObserving 时清空。
+ */
+export async function completeAfterLearning(input: {
+  decisionId: string;
+  userId: string;
+}): Promise<Decision> {
+  return prisma.$transaction(async (tx) => {
+    const decision = await tx.decision.findUniqueOrThrow({
+      where: { id: input.decisionId },
+      select: { lifecycle: true, userId: true },
+    });
+    if (decision.userId !== input.userId) throw new Error("forbidden");
+    assertCanCompleteAfterLearning(
+      decisionLifecycleSchema.parse(decision.lifecycle),
+    );
+
+    const now = new Date();
+    const updated = await tx.decision.update({
+      where: { id: input.decisionId },
+      data: {
+        lifecycle: "COMPLETED",
+        observeBaseline: Prisma.JsonNull,
+        lastUserActivityAt: now,
+      },
+    });
+    await tx.timelineEvent.create({
+      data: {
+        userId: input.userId,
+        decisionId: input.decisionId,
+        kind: "decision",
+        title: "Completed",
+        occurredAt: now,
+      },
+    });
+    return updated;
+  });
+}
+
+/**
+ * §30 task-44 WMN P1 查询：lifecycle=OBSERVING && nextCheckInAt<=now &&
+ * deletedAt IS NULL（Decision 无软删，但留接口）。
+ * 按 nextCheckInAt ASC 排序（最早的到期在前）。
+ */
+export async function listDueForCheckIn(
+  userId: string,
+  now: Date = new Date(),
+): Promise<Decision[]> {
+  return prisma.decision.findMany({
+    where: {
+      userId,
+      lifecycle: "OBSERVING",
+      nextCheckInAt: { lte: now },
+    },
+    orderBy: { nextCheckInAt: "asc" },
+  });
+}

@@ -292,9 +292,7 @@ export const CHECK_IN_FREQ_MS: Record<CheckInFrequency, number> = {
  * §27 Start Observing 前置：lifecycle 必须 === DECIDED。
  * CLOSED 不可观察（已终态）；ACTIVE/OBSERVING/LEARNING/COMPLETED 不可重复 Start。
  */
-export function assertCanStartObserving(
-  lifecycle: DecisionLifecycle,
-): void {
+export function assertCanStartObserving(lifecycle: DecisionLifecycle): void {
   if (lifecycle !== "DECIDED") {
     throw new Error(
       `cannot start observing from lifecycle "${lifecycle}"; must be DECIDED`,
@@ -303,9 +301,7 @@ export function assertCanStartObserving(
 }
 
 /** §27 Stop Observing 前置：lifecycle 必须 === OBSERVING。 */
-export function assertCanStopObserving(
-  lifecycle: DecisionLifecycle,
-): void {
+export function assertCanStopObserving(lifecycle: DecisionLifecycle): void {
   if (lifecycle !== "OBSERVING") {
     throw new Error(
       `cannot stop observing from lifecycle "${lifecycle}"; must be OBSERVING`,
@@ -317,9 +313,7 @@ export function assertCanStopObserving(
  * D5 Mark as completed 前置：lifecycle === DECIDED（不需观察的完成路径）。
  * 不允许从 ACTIVE/OBSERVING/LEARNING 直跳 COMPLETED（违反 §5 单向）。
  */
-export function assertCanMarkCompleted(
-  lifecycle: DecisionLifecycle,
-): void {
+export function assertCanMarkCompleted(lifecycle: DecisionLifecycle): void {
   if (lifecycle !== "DECIDED") {
     throw new Error(
       `cannot mark as completed from lifecycle "${lifecycle}"; must be DECIDED`,

@@ -1,16 +1,14 @@
 import { describe, expect, it } from "vitest";
+import type { Decision, DecisionEntry } from "~prisma/client";
 import {
   DecisionDTO,
   DecisionEntryDTO,
   toDecisionDTO,
   toEntryDTO,
 } from "./dto";
-import type { Decision, DecisionEntry } from "~prisma/client";
 
 /** 构造最小 Decision 行（覆盖 task-44 新增字段） */
-function makeDecisionRow(
-  overrides: Partial<Decision> = {},
-): Decision {
+function makeDecisionRow(overrides: Partial<Decision> = {}): Decision {
   return {
     id: "dec1",
     userId: "u1",
