@@ -263,23 +263,32 @@
 #app-portal .nav-item--more.active {
   opacity: 1;
 }
-/* ☆ Save 书签（§11 纯书签，低强调；与 come_back_later 等 Outcome 语义分离） */
+/* ☆ Save 书签（§11 纯书签；与 come_back_later 等 Outcome 语义分离）。
+   视觉上需足够醒目：白底 + 描边 + 阴影；saved 态红底反白 */
 #app-portal .save-star {
   flex-shrink: 0;
-  background: transparent;
-  border: 1px solid var(--p-line, #e7e0dc);
-  border-radius: 8px;
-  padding: 6px 12px;
-  font-size: 13px;
-  color: #7c746f;
+  background: #fff;
+  border: 1.5px solid #d8c4bf;
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #524d49;
   cursor: pointer;
+  box-shadow: 0 2px 8px rgba(60, 40, 32, 0.07);
   transition:
     color 0.15s,
-    border-color 0.15s;
+    border-color 0.15s,
+    background 0.15s;
+}
+#app-portal .save-star:hover {
+  border-color: var(--p-red);
+  color: var(--p-red);
 }
 #app-portal .save-star[aria-pressed="true"] {
-  color: #8c2635;
-  border-color: #e7cfd3;
+  color: #fff;
+  background: var(--p-red);
+  border-color: var(--p-red);
 }
 #app-portal .save-star:disabled {
   opacity: 0.6;
@@ -2245,7 +2254,12 @@
   margin-bottom: 18px;
 }
 #app-portal .dec {
-  padding: 18px 0;
+  padding: 12px 0 12px 14px;
+  border-left: 4px solid transparent;
+}
+/* WMN 首卡左侧红色竖条（P1/P2 最高优先级）；竖条与内容间距由 .dec padding-left 提供 */
+#app-portal .dec.mn-primary {
+  border-left-color: var(--p-red);
 }
 /* portal Today legibility bump */
 #app-portal .hello {

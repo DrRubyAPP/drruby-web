@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { EmptyState, ErrorState, Skeleton } from "@/components/api";
+import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { ConnectedRecordsPanel } from "@/components/sections/portal/health/ConnectedRecordsPanel";
 import type {
   OthersDimensionKey,
@@ -91,6 +92,7 @@ const NO_INPUT = undefined as unknown as void;
  */
 export function DecisionDetailView({ id }: { id: string }) {
   const tr = useTranslations("portal.decisionsDetail");
+  const tc = useTranslations("portal.common");
   const { data, error, loading, refetch } = useApi<DecisionDetailDto>(
     `/api/decisions/${id}`,
   );
@@ -127,6 +129,10 @@ export function DecisionDetailView({ id }: { id: string }) {
   );
   const [nextStepDraft, setNextStepDraft] = useState("");
   const [reclassifyConfirm, setReclassifyConfirm] = useState(false);
+  // 通用 ConfirmDialog 开关（替代 window.confirm）
+  const [stopConfirmOpen, setStopConfirmOpen] = useState(false);
+  const [markCompletedConfirmOpen, setMarkCompletedConfirmOpen] =
+    useState(false);
 
   // D4 freshness gate 派生：最近 archived_outcome entry 存在且 freshnessCheckedAt 不新于该 entry → 需检查
   const needsFreshnessCheck = useMemo(() => {
@@ -184,13 +190,23 @@ export function DecisionDetailView({ id }: { id: string }) {
       apiClient.post<StopObservingResponse>(
         `/api/decisions/${id}/observe/stop`,
       ),
-    { onSuccess: () => refetch() },
+    {
+      onSuccess: () => {
+        setStopConfirmOpen(false);
+        refetch();
+      },
+    },
   );
 
   // task-44 D5 Mark as completed：DECIDED → COMPLETED 直接路径
   const markCompleted = useMutation(
     (_input: void) => apiClient.post<unknown>(`/api/decisions/${id}/complete`),
-    { onSuccess: () => refetch() },
+    {
+      onSuccess: () => {
+        setMarkCompletedConfirmOpen(false);
+        refetch();
+      },
+    },
   );
 
   // D4 Check now：freshness gate 占位（V1 写 freshnessCheckedAt=now，task-43 接真实刷新）
@@ -694,11 +710,7 @@ export function DecisionDetailView({ id }: { id: string }) {
                 {/* D5 Mark as completed：不需观察的 DECIDED 直接完成 */}
                 <button
                   type="button"
-                  onClick={() => {
-                    if (!window.confirm(tr("observe.markCompleted.confirm")))
-                      return;
-                    markCompleted.mutate(NO_INPUT);
-                  }}
+                  onClick={() => setMarkCompletedConfirmOpen(true)}
                   disabled={markCompleted.loading}
                   style={{
                     fontSize: 12,
@@ -778,10 +790,7 @@ export function DecisionDetailView({ id }: { id: string }) {
               )}
               <button
                 type="button"
-                onClick={() => {
-                  if (!window.confirm(tr("observe.stop.confirm"))) return;
-                  stopObserving.mutate(NO_INPUT);
-                }}
+                onClick={() => setStopConfirmOpen(true)}
                 disabled={stopObserving.loading}
                 style={{
                   ...SUBMIT_BTN,
@@ -965,6 +974,30 @@ export function DecisionDetailView({ id }: { id: string }) {
           </p>
         )}
       </div>
+
+      {/* 通用确认弹窗（替代 window.confirm） */}
+      <ConfirmDialog
+        open={stopConfirmOpen}
+        title={tr("observe.stop.cta")}
+        message={tr("observe.stop.confirm")}
+        confirmLabel={tr("observe.stop.cta")}
+        confirmingLabel={tr("observe.stop.submitting")}
+        cancelLabel={tc("cancel")}
+        loading={stopObserving.loading}
+        onConfirm={() => stopObserving.mutate(NO_INPUT)}
+        onCancel={() => setStopConfirmOpen(false)}
+      />
+      <ConfirmDialog
+        open={markCompletedConfirmOpen}
+        title={tr("observe.markCompleted.cta")}
+        message={tr("observe.markCompleted.confirm")}
+        confirmLabel={tr("observe.markCompleted.cta")}
+        confirmingLabel={tr("observe.markCompleted.submitting")}
+        cancelLabel={tc("cancel")}
+        loading={markCompleted.loading}
+        onConfirm={() => markCompleted.mutate(NO_INPUT)}
+        onCancel={() => setMarkCompletedConfirmOpen(false)}
+      />
     </div>
   );
 }

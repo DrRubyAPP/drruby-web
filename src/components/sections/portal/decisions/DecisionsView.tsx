@@ -85,6 +85,7 @@ export function DecisionsView() {
             justifyContent: "space-between",
             alignItems: "center",
             gap: 12,
+            marginBottom: 14,
           }}
         >
           <div className="sec-h">Active decisions</div>

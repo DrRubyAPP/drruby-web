@@ -97,6 +97,57 @@ describe("useApi", () => {
     await waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(2));
   });
 
+  it("refetch 保留旧数据且不回到 loading（防整页骨架屏滚动跳顶）", async () => {
+    let call = 0;
+    const fetchSpy = vi.fn(async () => {
+      const payload = [{ id: `s${call++}` }];
+      return {
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify(payload),
+        json: async () => payload,
+      } as unknown as Response;
+    });
+    vi.stubGlobal("fetch", fetchSpy);
+    const { result } = renderHook(() =>
+      useApi<{ id: string }[]>("/api/signals"),
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.data).toEqual([{ id: "s0" }]);
+
+    result.current.refetch();
+    // refetch 发起后：数据保留、loading 仍为 false
+    expect(result.current.data).toEqual([{ id: "s0" }]);
+    expect(result.current.loading).toBe(false);
+    await waitFor(() => expect(result.current.data).toEqual([{ id: "s1" }]));
+    expect(result.current.loading).toBe(false);
+    expect(result.current.error).toBeNull();
+  });
+
+  it("path 切换时清空旧数据并回到 loading", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        async () =>
+          ({
+            ok: true,
+            status: 200,
+            text: async () => "[]",
+            json: async () => [],
+          }) as unknown as Response,
+      ),
+    );
+    const { result, rerender } = renderHook(
+      ({ path }: { path: string }) => useApi(path),
+      { initialProps: { path: "/api/a" } },
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    rerender({ path: "/api/b" });
+    expect(result.current.loading).toBe(true);
+    expect(result.current.data).toBeNull();
+    await waitFor(() => expect(result.current.loading).toBe(false));
+  });
+
   it("does not setState after unmount", async () => {
     let resolve!: (v: unknown) => void;
     vi.stubGlobal(
