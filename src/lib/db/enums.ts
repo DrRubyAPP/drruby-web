@@ -246,12 +246,97 @@ export function isValidOutcomeForKind(
   return set.includes(outcome);
 }
 
-/** DecisionEntry.kind — §6 append-only entry 类型；null=历史 observation（向后兼容） */
+/** DecisionEntry.kind — §6/§27/§29 append-only entry 类型；null=历史 observation（向后兼容） */
 export const decisionEntryKindSchema = z.enum([
   "observation",
   "archived_outcome",
+  "learning", // task-44 §29 Learning summary
 ]);
 export type DecisionEntryKind = z.infer<typeof decisionEntryKindSchema>;
+
+/** DecisionEntry.direction — §28 task-44 check-in 方向评级（非必填，允许无方向描述） */
+export const observationDirectionSchema = z.enum([
+  "better",
+  "same",
+  "worse",
+  "not_sure",
+]);
+export type ObservationDirection = z.infer<typeof observationDirectionSchema>;
+
+/** Decision.observeBaseline.freq — §27 task-44 check-in 频率选项 */
+export const checkInFrequencySchema = z.enum([
+  "daily",
+  "3days",
+  "weekly",
+  "2weeks",
+  "monthly",
+]);
+export type CheckInFrequency = z.infer<typeof checkInFrequencySchema>;
+
+/** 频率 → 毫秒数（用于 nextCheckInAt 计算） */
+export const CHECK_IN_FREQ_MS: Record<CheckInFrequency, number> = {
+  daily: 24 * 60 * 60 * 1000,
+  "3days": 3 * 24 * 60 * 60 * 1000,
+  weekly: 7 * 24 * 60 * 60 * 1000,
+  "2weeks": 14 * 24 * 60 * 60 * 1000,
+  monthly: 30 * 24 * 60 * 60 * 1000,
+};
+
+// =============================================================================
+// task-44 lifecycle 守卫（OBSERVE/LEARN/COMPLETED 转移校验，§27/§29）
+// 与 task-39 assertLifecycleForOutcome（outcome 驱动）互补，本组为非 outcome 驱动的
+// 生命周期转移守卫。所有守卫失败抛 Error，由 route 层映射为 422。
+// =============================================================================
+
+/**
+ * §27 Start Observing 前置：lifecycle 必须 === DECIDED。
+ * CLOSED 不可观察（已终态）；ACTIVE/OBSERVING/LEARNING/COMPLETED 不可重复 Start。
+ */
+export function assertCanStartObserving(
+  lifecycle: DecisionLifecycle,
+): void {
+  if (lifecycle !== "DECIDED") {
+    throw new Error(
+      `cannot start observing from lifecycle "${lifecycle}"; must be DECIDED`,
+    );
+  }
+}
+
+/** §27 Stop Observing 前置：lifecycle 必须 === OBSERVING。 */
+export function assertCanStopObserving(
+  lifecycle: DecisionLifecycle,
+): void {
+  if (lifecycle !== "OBSERVING") {
+    throw new Error(
+      `cannot stop observing from lifecycle "${lifecycle}"; must be OBSERVING`,
+    );
+  }
+}
+
+/**
+ * D5 Mark as completed 前置：lifecycle === DECIDED（不需观察的完成路径）。
+ * 不允许从 ACTIVE/OBSERVING/LEARNING 直跳 COMPLETED（违反 §5 单向）。
+ */
+export function assertCanMarkCompleted(
+  lifecycle: DecisionLifecycle,
+): void {
+  if (lifecycle !== "DECIDED") {
+    throw new Error(
+      `cannot mark as completed from lifecycle "${lifecycle}"; must be DECIDED`,
+    );
+  }
+}
+
+/** §29 Stop→Learning 后保存 Learning 完成前置：lifecycle === LEARNING。 */
+export function assertCanCompleteAfterLearning(
+  lifecycle: DecisionLifecycle,
+): void {
+  if (lifecycle !== "LEARNING") {
+    throw new Error(
+      `cannot complete after learning from lifecycle "${lifecycle}"; must be LEARNING`,
+    );
+  }
+}
 
 /** decision.topicSlug — 已知语料实体 slug（可空；null=无 topic 或未命中）
  *  仅驱动语料检索；与粗粒度 decisionType 正交。Journey.decisionType 亦复用此集。 */

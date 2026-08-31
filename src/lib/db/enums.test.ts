@@ -2,16 +2,23 @@ import { describe, expect, it } from "vitest";
 import {
   aiStateSchema,
   appointmentStatusSchema,
+  assertCanCompleteAfterLearning,
+  assertCanMarkCompleted,
+  assertCanStartObserving,
+  assertCanStopObserving,
   assertOutcomeForKind,
   authorizationActionSchema,
   authorizationStatusSchema,
   authProviderSchema,
   bodyInsightKindSchema,
   changeTriggerSchema,
+  checkInFrequencySchema,
+  CHECK_IN_FREQ_MS,
   clinicPlanTierSchema,
   connectionStatusSchema,
   consentKeySchema,
   dataQualitySchema,
+  decisionEntryKindSchema,
   decisionKindSchema,
   decisionLifecycleSchema,
   decisionTypeSchema,
@@ -29,6 +36,7 @@ import {
   insightToneSchema,
   invoiceStatusSchema,
   journeySourceTypeSchema,
+  observationDirectionSchema,
   ocrStatusSchema,
   referralStatusSchema,
   reviewStatusSchema,
@@ -403,6 +411,73 @@ describe("task-43 综合/状态机枚举 - 有效值通过", () => {
   });
 });
 
+describe("task-44 observe/learn 枚举 + 守卫", () => {
+  it("decisionEntryKindSchema accepts learning", () => {
+    expect(decisionEntryKindSchema.parse("learning")).toBe("learning");
+    expect(decisionEntryKindSchema.parse("observation")).toBe("observation");
+    expect(decisionEntryKindSchema.parse("archived_outcome")).toBe(
+      "archived_outcome",
+    );
+    expect(decisionEntryKindSchema.safeParse("unknown").success).toBe(false);
+  });
+
+  it("observationDirectionSchema has 4 values (better/same/worse/not_sure)", () => {
+    for (const v of ["better", "same", "worse", "not_sure"]) {
+      expect(observationDirectionSchema.parse(v)).toBe(v);
+    }
+    expect(() => observationDirectionSchema.parse("improving")).toThrow();
+    expect(() => observationDirectionSchema.parse("BETTER")).toThrow();
+  });
+
+  it("checkInFrequencySchema has 5 values + CHECK_IN_FREQ_MS map", () => {
+    for (const v of ["daily", "3days", "weekly", "2weeks", "monthly"]) {
+      expect(checkInFrequencySchema.parse(v)).toBe(v);
+    }
+    expect(() => checkInFrequencySchema.parse("biweekly")).toThrow();
+    expect(CHECK_IN_FREQ_MS.daily).toBe(24 * 60 * 60 * 1000);
+    expect(CHECK_IN_FREQ_MS["3days"]).toBe(3 * 24 * 60 * 60 * 1000);
+    expect(CHECK_IN_FREQ_MS.weekly).toBe(7 * 24 * 60 * 60 * 1000);
+    expect(CHECK_IN_FREQ_MS["2weeks"]).toBe(14 * 24 * 60 * 60 * 1000);
+    expect(CHECK_IN_FREQ_MS.monthly).toBe(30 * 24 * 60 * 60 * 1000);
+  });
+
+  it("assertCanStartObserving only allows DECIDED", () => {
+    expect(() => assertCanStartObserving("DECIDED")).not.toThrow();
+    expect(() => assertCanStartObserving("CLOSED")).toThrow();
+    expect(() => assertCanStartObserving("ACTIVE")).toThrow();
+    expect(() => assertCanStartObserving("OBSERVING")).toThrow();
+    expect(() => assertCanStartObserving("LEARNING")).toThrow();
+    expect(() => assertCanStartObserving("COMPLETED")).toThrow();
+  });
+
+  it("assertCanStopObserving only allows OBSERVING", () => {
+    expect(() => assertCanStopObserving("OBSERVING")).not.toThrow();
+    expect(() => assertCanStopObserving("DECIDED")).toThrow();
+    expect(() => assertCanStopObserving("ACTIVE")).toThrow();
+    expect(() => assertCanStopObserving("LEARNING")).toThrow();
+    expect(() => assertCanStopObserving("COMPLETED")).toThrow();
+    expect(() => assertCanStopObserving("CLOSED")).toThrow();
+  });
+
+  it("assertCanMarkCompleted only allows DECIDED", () => {
+    expect(() => assertCanMarkCompleted("DECIDED")).not.toThrow();
+    expect(() => assertCanMarkCompleted("ACTIVE")).toThrow();
+    expect(() => assertCanMarkCompleted("OBSERVING")).toThrow();
+    expect(() => assertCanMarkCompleted("LEARNING")).toThrow();
+    expect(() => assertCanMarkCompleted("COMPLETED")).toThrow();
+    expect(() => assertCanMarkCompleted("CLOSED")).toThrow();
+  });
+
+  it("assertCanCompleteAfterLearning only allows LEARNING", () => {
+    expect(() => assertCanCompleteAfterLearning("LEARNING")).not.toThrow();
+    expect(() => assertCanCompleteAfterLearning("DECIDED")).toThrow();
+    expect(() => assertCanCompleteAfterLearning("OBSERVING")).toThrow();
+    expect(() => assertCanCompleteAfterLearning("COMPLETED")).toThrow();
+    expect(() => assertCanCompleteAfterLearning("CLOSED")).toThrow();
+    expect(() => assertCanCompleteAfterLearning("ACTIVE")).toThrow();
+  });
+});
+
 describe("P2 / P3（B 端）枚举 - 有效值通过", () => {
   it("journeySourceTypeSchema 接受 4 值", () => {
     for (const v of [
@@ -525,6 +600,9 @@ describe("enum schemas - 无效值抛错", () => {
     ["reviewStatusSchema", "draft", "status"],
     ["referralStatusSchema", "rejected", "status"],
     ["invoiceStatusSchema", "overdue", "status"],
+    ["decisionEntryKindSchema", "unknown", "kind（task-44 learning 之外的值非法）"],
+    ["observationDirectionSchema", "improving", "direction（task-44 4 值之外非法）"],
+    ["checkInFrequencySchema", "biweekly", "freq（task-44 5 值之外非法）"],
   ];
 
   const schemaMap: Record<string, import("zod").ZodTypeAny> = {
@@ -571,6 +649,9 @@ describe("enum schemas - 无效值抛错", () => {
     reviewStatusSchema,
     referralStatusSchema,
     invoiceStatusSchema,
+    decisionEntryKindSchema,
+    observationDirectionSchema,
+    checkInFrequencySchema,
   };
 
   for (const [schemaName, invalidValue, field] of invalidCases) {
