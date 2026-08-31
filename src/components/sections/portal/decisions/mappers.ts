@@ -392,19 +392,16 @@ export const HEALTH_CONTEXT_CATEGORIES: readonly HealthContextCategory[] = [
   "goals_concerns",
 ];
 
-/** §19 5 类 → i18n label key（问卷文本域标题） */
+/** §19 5 类 → i18n label key（问卷文本域标题；相对 namespace `decisions.healthContext`） */
 export const HEALTH_CONTEXT_CATEGORY_LABEL_KEYS: Record<
   HealthContextCategory,
   string
 > = {
-  symptoms: "decisions.healthContext.categories.symptoms",
-  medications_treatments:
-    "decisions.healthContext.categories.medications_treatments",
-  related_health_changes:
-    "decisions.healthContext.categories.related_health_changes",
-  current_health_state:
-    "decisions.healthContext.categories.current_health_state",
-  goals_concerns: "decisions.healthContext.categories.goals_concerns",
+  symptoms: "categories.symptoms",
+  medications_treatments: "categories.medications_treatments",
+  related_health_changes: "categories.related_health_changes",
+  current_health_state: "categories.current_health_state",
+  goals_concerns: "categories.goals_concerns",
 };
 
 /** AI 三视角（§24 per-perspective） */
@@ -433,6 +430,8 @@ export function triggerToHumanLabelKey(trigger: ChangeTrigger): string {
  * - INSUFFICIENT_INFORMATION → 三视角文案 aiState.insufficient.<perspective>（§25）
  * - FAILED → aiState.failed + retryable=true（§26 Retry，绝不伪装成"无证据"）
  * - STALE_UPDATE_AVAILABLE → aiState.stale + pendingUntil 透传（D6 合并窗口）
+ *
+ * messageKey 为相对路径（namespace `aiState`），由组件 `useTranslations("aiState")` 解析。
  */
 export interface AiStateView {
   state: AiState;
@@ -451,17 +450,17 @@ export function aiStateToView(
 ): AiStateView {
   switch (state) {
     case "LOADING":
-      return { state, messageKey: "aiState.loading" };
+      return { state, messageKey: "loading" };
     case "READY":
-      return { state, messageKey: "aiState.ready" };
+      return { state, messageKey: "ready" };
     case "INSUFFICIENT_INFORMATION":
-      return { state, messageKey: `aiState.insufficient.${perspective}` };
+      return { state, messageKey: `insufficient.${perspective}` };
     case "FAILED":
-      return { state, messageKey: "aiState.failed", retryable: true };
+      return { state, messageKey: "failed", retryable: true };
     case "STALE_UPDATE_AVAILABLE":
       return {
         state,
-        messageKey: "aiState.stale",
+        messageKey: "stale",
         pendingUntil: opts.pendingUntil ?? undefined,
       };
   }

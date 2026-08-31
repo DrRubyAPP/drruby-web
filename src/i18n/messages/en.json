@@ -671,6 +671,10 @@
         "ariaSavedLabel": "Saved — click to remove bookmark"
       },
       "scienceFraming": "Science framing",
+      "synthesis": {
+        "title": "Current understanding",
+        "historyTitle": "What's changed"
+      },
       "decide": {
         "title": "Decide",
         "clarifyQuestion": "What are you trying to decide?",
@@ -1330,5 +1334,79 @@
       "hint": "It may have been removed."
     },
     "invalidJson": "Invalid JSON in corrected values"
+  },
+  "decisions": {
+    "snapshot": {
+      "trigger": {
+        "new_record": "Updated: {date} — a new record was added",
+        "health_context_update": "Updated: {date} — your health context changed",
+        "others_refresh": "Updated: {date} — others' experiences refreshed",
+        "science_refresh": "Updated: {date} — science evidence refreshed",
+        "observation_update": "Updated: {date} — a new observation was added",
+        "initial": "Initial synthesis"
+      },
+      "loading": "Preparing current understanding…",
+      "empty": "No synthesis yet.",
+      "currentTitle": "Current understanding",
+      "currentLabel": "Current understanding",
+      "historyTitle": "What's changed",
+      "history": "History",
+      "historyEmpty": "No history yet.",
+      "viewAtTime": "What we knew then",
+      "degradedHint": "Generated with limited AI; some details use a fallback template",
+      "degradedNote": "Generated with limited AI; some details use a fallback template",
+      "yourself": "Yourself",
+      "others": "Others",
+      "science": "Science",
+      "collapse": "Collapse",
+      "expand": "Expand"
+    },
+    "healthContext": {
+      "title": "Your health context",
+      "unconfirmedBanner": "Updated with your new health information. Your current health context is not yet confirmed.",
+      "saving": "Saving…",
+      "save": "Save changes",
+      "saveChanges": "Save changes",
+      "confirming": "Confirming…",
+      "confirmNoChanges": "Confirm no changes",
+      "confirmedAt": "Confirmed at {date}",
+      "confirmQuestion": "Before you decide — has anything changed?",
+      "categories": {
+        "symptoms": "Symptoms",
+        "medications_treatments": "Medications / treatments",
+        "related_health_changes": "Related health changes",
+        "current_health_state": "Current health state",
+        "goals_concerns": "Goals / concerns"
+      },
+      "placeholder": {
+        "symptoms": "e.g., headache, fatigue",
+        "medications_treatments": "e.g., vitamin D, HRT",
+        "related_health_changes": "e.g., perimenopause, new diagnosis",
+        "current_health_state": "e.g., feeling better, sleeping poorly",
+        "goals_concerns": "e.g., firmer skin, more energy"
+      }
+    }
+  },
+  "aiState": {
+    "loading": "Preparing…",
+    "ready": "Ready",
+    "insufficient": {
+      "yourself": "We don't yet know enough about you.",
+      "others": "We don't yet have enough relevant experiences to show.",
+      "science": "We don't yet have enough reliable evidence to summarize confidently."
+    },
+    "insufficientCta": {
+      "addHealthContext": "Add health context"
+    },
+    "addHealthContext": "Add health context",
+    "failed": "Something went wrong preparing this.",
+    "retry": "Retry",
+    "stale": {
+      "title": "An update is available",
+      "updateNow": "Update now",
+      "pendingUntil": "Pending until {time}"
+    },
+    "updateNow": "Update now",
+    "pendingHint": "An update is pending."
   }
 }

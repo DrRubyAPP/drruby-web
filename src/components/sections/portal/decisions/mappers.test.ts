@@ -543,46 +543,46 @@ describe("task-43 triggerToHumanLabelKey", () => {
 });
 
 describe("task-43 aiStateToView", () => {
-  it("LOADING → messageKey aiState.loading, no retryable, no pendingUntil", () => {
+  it("LOADING → messageKey loading, no retryable, no pendingUntil", () => {
     const v = aiStateToView("LOADING", "yourself");
     expect(v.state).toBe("LOADING");
-    expect(v.messageKey).toBe("aiState.loading");
+    expect(v.messageKey).toBe("loading");
     expect(v.retryable).toBeUndefined();
     expect(v.pendingUntil).toBeUndefined();
   });
 
-  it("READY → messageKey aiState.ready", () => {
+  it("READY → messageKey ready", () => {
     const v = aiStateToView("READY", "others");
     expect(v.state).toBe("READY");
-    expect(v.messageKey).toBe("aiState.ready");
+    expect(v.messageKey).toBe("ready");
     expect(v.retryable).toBeUndefined();
   });
 
   it("INSUFFICIENT_INFORMATION → per-perspective key (三视角文案)", () => {
     expect(
       aiStateToView("INSUFFICIENT_INFORMATION", "yourself").messageKey,
-    ).toBe("aiState.insufficient.yourself");
+    ).toBe("insufficient.yourself");
     expect(aiStateToView("INSUFFICIENT_INFORMATION", "others").messageKey).toBe(
-      "aiState.insufficient.others",
+      "insufficient.others",
     );
     expect(
       aiStateToView("INSUFFICIENT_INFORMATION", "science").messageKey,
-    ).toBe("aiState.insufficient.science");
+    ).toBe("insufficient.science");
   });
 
-  it("FAILED → messageKey aiState.failed + retryable=true (§26 Retry)", () => {
+  it("FAILED → messageKey failed + retryable=true (§26 Retry)", () => {
     const v = aiStateToView("FAILED", "yourself");
     expect(v.state).toBe("FAILED");
-    expect(v.messageKey).toBe("aiState.failed");
+    expect(v.messageKey).toBe("failed");
     expect(v.retryable).toBe(true);
   });
 
-  it("STALE_UPDATE_AVAILABLE → messageKey aiState.stale + pendingUntil passed through", () => {
+  it("STALE_UPDATE_AVAILABLE → messageKey stale + pendingUntil passed through", () => {
     const v = aiStateToView("STALE_UPDATE_AVAILABLE", "yourself", {
       pendingUntil: "2026-08-31T12:00:00.000Z",
     });
     expect(v.state).toBe("STALE_UPDATE_AVAILABLE");
-    expect(v.messageKey).toBe("aiState.stale");
+    expect(v.messageKey).toBe("stale");
     expect(v.pendingUntil).toBe("2026-08-31T12:00:00.000Z");
   });
 
@@ -616,12 +616,12 @@ describe("task-43 HEALTH_CONTEXT helpers", () => {
     ]);
   });
 
-  it("HEALTH_CONTEXT_CATEGORY_LABEL_KEYS maps 5 categories to decisions.healthContext.categories.<key>", () => {
+  it("HEALTH_CONTEXT_CATEGORY_LABEL_KEYS maps 5 categories to categories.<key> (relative to decisions.healthContext namespace)", () => {
     expect(HEALTH_CONTEXT_CATEGORY_LABEL_KEYS.symptoms).toBe(
-      "decisions.healthContext.categories.symptoms",
+      "categories.symptoms",
     );
     expect(HEALTH_CONTEXT_CATEGORY_LABEL_KEYS.goals_concerns).toBe(
-      "decisions.healthContext.categories.goals_concerns",
+      "categories.goals_concerns",
     );
   });
 });
@@ -639,12 +639,12 @@ describe("task-43 mapHealthContextToCategories", () => {
     expect(rows).toHaveLength(5);
     expect(rows[0]).toEqual({
       category: "symptoms",
-      labelKey: "decisions.healthContext.categories.symptoms",
+      labelKey: "categories.symptoms",
       value: "Hot flashes",
     });
     expect(rows[1]).toEqual({
       category: "medications_treatments",
-      labelKey: "decisions.healthContext.categories.medications_treatments",
+      labelKey: "categories.medications_treatments",
       value: "",
     });
     expect(rows[4].value).toBe("Better sleep");
@@ -712,15 +712,15 @@ describe("task-43 mapAiStateDto", () => {
     });
     expect(views.yourself).toEqual({
       state: "INSUFFICIENT_INFORMATION",
-      messageKey: "aiState.insufficient.yourself",
+      messageKey: "insufficient.yourself",
     });
     expect(views.others).toEqual({
       state: "READY",
-      messageKey: "aiState.ready",
+      messageKey: "ready",
     });
     expect(views.science).toEqual({
       state: "STALE_UPDATE_AVAILABLE",
-      messageKey: "aiState.stale",
+      messageKey: "stale",
       pendingUntil: "2026-08-31T12:00:00.000Z",
     });
   });

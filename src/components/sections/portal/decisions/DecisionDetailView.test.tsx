@@ -196,7 +196,7 @@ describe("DecisionDetailView · task-43 T12 集成", () => {
     });
     render(<DecisionDetailView id="d1" />);
     expect(
-      screen.getByText("aiState.insufficient.yourself"),
+      screen.getByText("insufficient.yourself"),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /^addHealthContext$/ }),
