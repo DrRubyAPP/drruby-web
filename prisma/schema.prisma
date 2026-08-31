@@ -307,6 +307,19 @@ model Decision {
   decidedAt DateTime? @map("decided_at") @db.Timestamptz
   /// Contract §6 freshness gate 时间戳：Reopen 不写、Check now 才写
   freshnessCheckedAt DateTime? @map("freshness_checked_at") @db.Timestamptz
+
+  // ---- task-43 综合结果层（Contract §15–§26）----
+  /// §15 Current 指针（D3）— 指向最新 decision_snapshot 行；首次打开时 lazy fire 建首版
+  currentSnapshotId String? @map("current_snapshot_id")
+  /// §19/§20 Health Context 结构化 5 类（D5）— 与扁平 yourselfContext 并存，综合时优先取此
+  healthContext Json? @map("health_context")
+  /// §20 confirmed|unconfirmed — 永不因时间流逝自动从 unconfirmed 转 confirmed
+  healthContextStatus String? @map("health_context_status")
+  /// §20 用户上次确认 health context 的时间
+  healthContextConfirmedAt DateTime? @map("health_context_confirmed_at") @db.Timestamptz
+  /// §18/D6 合并窗口时间戳 + lazy fire：新相关 Record 连入续期；用户打开 Decision 时按窗口触发或显示 STALE
+  pendingRegenAt DateTime? @map("pending_regen_at") @db.Timestamptz
+
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
 
@@ -314,11 +327,40 @@ model Decision {
   entries        DecisionEntry[]
   timelineEvents TimelineEvent[]
   connectedHealthRecords DecisionHealthRecord[]
+  snapshots      DecisionSnapshot[]
 
   @@index([userId, lastUserActivityAt], map: "decision_user_activity_idx")
   @@index([userId, saved], map: "decision_user_saved_idx")
   @@index([userId, topicSlug], map: "decision_user_topic_slug_idx")
+  /// §18/D6 lazy fire 扫描：按 (userId, pendingRegenAt) 检索到期 regen
+  @@index([userId, pendingRegenAt], map: "decision_pending_regen_idx")
   @@map("decision")
+}
+
+/// Decision 综合快照（task-43，Contract §15/§23）— 每次 material synthesis change 建新行。
+/// Current = Decision.currentSnapshotId 指向最新行；History = 同 decisionId 早期行（createdAt DESC）。
+/// yourselfContextRef 存快照时的 Record id + parsedValues 摘要（不只 id）保证历史可还原（R3）。
+model DecisionSnapshot {
+  id             String   @id @default(cuid(2))
+  decisionId     String   @map("decision_id")
+  /// §23 快照内容：{ healthContextSnapshot, connectedRecordRefs:[{id,kind,documentClass,summary}] }
+  yourselfContextRef Json?  @map("yourself_context_ref")
+  /// 引用集：[{ type: record|others|science, ref, summary }]
+  sources         Json?
+  /// 引用：[{ label, ref }]
+  citations       Json?
+  /// 综合文本：{ yourself, others, science, combined }
+  synthesis       Json?
+  /// 生成方式：template|template+llm_trigger|template+llm_trigger_degraded|initial
+  provenance      String
+  /// 触发原因：new_record|health_context_update|others_refresh|science_refresh|observation_update|initial
+  changeTrigger   String   @map("change_trigger")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  decision Decision @relation(fields: [decisionId], references: [id], onDelete: Cascade)
+
+  @@index([decisionId, createdAt], map: "decision_snapshot_decision_created_idx")
+  @@map("decision_snapshot")
 }
 
 /// 决策时间线条目（append-only，原始记录永不覆盖）— backend_v5 §2.3b
