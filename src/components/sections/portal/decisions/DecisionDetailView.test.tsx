@@ -195,9 +195,7 @@ describe("DecisionDetailView · task-43 T12 集成", () => {
       healthContext: { healthContext: null, status: "unconfirmed" },
     });
     render(<DecisionDetailView id="d1" />);
-    expect(
-      screen.getByText("insufficient.yourself"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("insufficient.yourself")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /^addHealthContext$/ }),
     ).toBeInTheDocument();
