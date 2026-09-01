@@ -3,6 +3,7 @@ import UserMenu from "@/components/auth/UserMenu";
 import { NavDownloadButton } from "@/components/DownloadWaitlist";
 import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { HIDE_HOME_LOGIN } from "@/config/site";
 import { getServerSession } from "@/lib/auth/session";
 
 interface HomeNavProps {
@@ -97,7 +98,12 @@ export default async function HomeNav({
         <div className="actions">
           {appControls && <LocaleSwitcher />}
           {appControls && <ThemeToggle />}
-          {sessionAware && user ? (
+          {HIDE_HOME_LOGIN ? (
+            // 登录入口被 NEXT_PUBLIC_HIDE_HOME_LOGIN=true 屏蔽：未登录不显示
+            // Log in 按钮，已登录也不显示用户头像。Download CTA 照常保留
+            // （appControls 页本身不带 Download）。
+            !appControls && <NavDownloadButton />
+          ) : sessionAware && user ? (
             <>
               {/* Signed in: avatar sits leftmost in the actions cluster and
                   opens the account dropdown. The homepage keeps its Download

@@ -22,3 +22,11 @@ export const DEFAULT_LOCALE: Locale = "en";
  */
 export const LOCALE_SWITCH_ENABLED =
   process.env.NEXT_PUBLIC_ENABLE_LOCALE_SWITCH === "true";
+
+/**
+ * 首页登录入口开关。默认关闭（false），顶栏正常显示 Log in 按钮 / 已登录头像。
+ * 在 .env 设置 NEXT_PUBLIC_HIDE_HOME_LOGIN=true 可屏蔽公开页顶栏的登录入口：
+ * 未登录不显示 Log in 按钮；已登录（浏览器持有 session）也不显示用户头像。
+ */
+export const HIDE_HOME_LOGIN =
+  process.env.NEXT_PUBLIC_HIDE_HOME_LOGIN === "true";
