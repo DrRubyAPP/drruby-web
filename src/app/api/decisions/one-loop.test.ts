@@ -293,9 +293,7 @@ describe("task-44 One Loop · DECIDED → Start → Observation → Stop → Lea
     asUser(owner.id);
 
     const { GET: getWmn } = await import("./wmn/route");
-    const res = await getWmn(new Request("http://test", { method: "GET" }), {
-      params: Promise.resolve({}) as never,
-    });
+    const res = await getWmn();
     expect(res.status).toBe(200);
     const body = await res.json();
     // P1 计数 ≥1（到期 decision）
