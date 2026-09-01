@@ -1,4 +1,8 @@
-import "dotenv/config";
+import { config } from "dotenv";
+
+// dotenv 默认只读 .env，这里对齐 Next.js 的优先级：.env.local > .env
+config({ path: ".env.local" });
+config({ path: ".env" });
 import path from "node:path";
 import { defineConfig, env } from "prisma/config";
 

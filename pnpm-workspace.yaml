@@ -5,15 +5,15 @@ onlyBuiltDependencies:
   - "@prisma/engines"
   - prisma
 ignoredBuiltDependencies:
-  - sharp
   - unrs-resolver
   - "@parcel/watcher"
   - "@swc/core"
 allowBuilds:
   '@parcel/watcher': true
-  '@prisma/client': set this to true or false
+  '@prisma/client': true
   '@prisma/engines': true
   '@swc/core': true
   esbuild: true
   prisma: true
+  sharp: true
   vue-demi: true
