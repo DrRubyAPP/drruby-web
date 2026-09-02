@@ -67,9 +67,8 @@ export default async function HomeNav({
           <Image
             src="/logo.png"
             alt="DrRuby.ai"
-            width={120}
+            width={30}
             height={30}
-            className="h-[30px] w-auto"
             priority
           />
           <span className="logo-word">
