@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, type ReactNode, useEffect, useState } from "react";
 
 /**
  * When the app ships, set this to the store URL (or a smart App Store /
@@ -78,6 +78,24 @@ export function StartJourneyButton() {
   return (
     <button type="button" className="btn primary" onClick={triggerDownload}>
       Start Your Journey
+    </button>
+  );
+}
+
+/**
+ * Generic download CTA used by the pricing cards, where each card needs its
+ * own label/styling but the same waitlist-modal behavior as the store buttons.
+ */
+export function DownloadCTA({
+  className,
+  children,
+}: {
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <button type="button" className={className} onClick={triggerDownload}>
+      {children}
     </button>
   );
 }

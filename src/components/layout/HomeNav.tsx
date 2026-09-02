@@ -83,8 +83,8 @@ export default async function HomeNav({
           <a href={`${sectionPrefix}#healthspan`}>Age well</a>
           {role === "clinic" && <a href="/clinic">For Clinics</a>}
           <a href="/collaborate">Collaborate</a>
-          <a href={`${sectionPrefix}#trust`}>Trust</a>
-          <a href="/pricing">Pricing</a>
+          <a href={`${sectionPrefix}#science`}>Trust</a>
+          <a href={`${sectionPrefix}#pricing`}>Pricing</a>
           {appControls && user && role === "user" && (
             <a href="/portal">Portal</a>
           )}

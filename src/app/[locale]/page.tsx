@@ -1,8 +1,9 @@
 import FooterSubscribe from "@/components/FooterSubscribe";
 import "./home-v5.css";
 import {
+  DownloadCTA,
   DownloadModal,
-  StartJourneyButton,
+  StoreRow,
 } from "@/components/DownloadWaitlist";
 import HomeNav from "@/components/layout/HomeNav";
 
@@ -15,23 +16,23 @@ export default function Home() {
         {/* HERO */}
         <section className="wrap hero">
           <div className="hero-copy">
-            <div className="eyebrow">From today, and over time</div>
+            <div className="eyebrow">Women&rsquo;s Healthspan Intelligence</div>
             <h1>
-              Know your body,
-              <em style={{ display: "block", marginTop: 14 }}>
-                understand yourself over time.
-              </em>
+              Understand your health before a decision.{" "}
+              <em>Learn from what happens after.</em>
             </h1>
             <div className="lede">
-              Capture what you notice, connect it to what you tried, and let
-              your own history make your next decision easier. Skin is just the
-              easiest place to start.
+              Bring your history, other women&rsquo;s experience, and the
+              science together.
+              <br />
+              So every decision starts with the full picture.
+            </div>
+            <div className="hero-formula">
+              Yourself + Others + Science <b>&rarr;</b> Better Health Decisions
             </div>
             <div>
-              <StartJourneyButton />
-              <span className="note">
-                Free to start. Your first entry takes less than a minute.
-              </span>
+              <StoreRow />
+              <span className="note">Launching soon. Free to start.</span>
             </div>
           </div>
           <div className="hero-visual">
@@ -39,27 +40,227 @@ export default function Home() {
               src="/hero-woman.webp"
               alt="Woman reflecting on her skin journey"
             />
-            <div className="hero-journey">
-              <div className="hj-title">Your skin journey</div>
-              <div className="hj-step">
-                <span className="hj-dot" />
-                <div className="hj-body">
-                  <div className="hj-k">Started &middot; Mar 12</div>
-                  <div className="hj-t">Retinol 0.025%</div>
+          </div>
+        </section>
+
+        {/* ONE PLACE — bento */}
+        <section id="oneplace" className="section">
+          <div className="wrap" style={{ textAlign: "center" }}>
+            <div className="kicker">All in one place</div>
+            <h2>Everything about your health, together.</h2>
+            <p
+              className="sub"
+              style={{
+                fontFamily: "Georgia, serif",
+                color: "#8C2635",
+                maxWidth: 600,
+                marginLeft: "auto",
+                marginRight: "auto",
+              }}
+            >
+              Your notes, photos, cycle, labs, and decisions &mdash; in one
+              place, so every decision starts with the full picture.
+            </p>
+            <div className="op-bento">
+              <div className="opw span2">
+                <div className="opk">Sleep</div>
+                <div className="opv">7h 54m &middot; Good</div>
+                <svg
+                  viewBox="0 0 320 60"
+                  preserveAspectRatio="none"
+                  style={{ width: "100%", height: 50, marginTop: 6 }}
+                >
+                  <polyline
+                    points="4,42 56,32 108,36 160,22 212,33 264,18 312,26"
+                    fill="none"
+                    stroke="#dc99a4"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <circle cx="312" cy="26" r="4.5" fill="#cf1736" />
+                </svg>
+                <div className="ops">
+                  Last 7 nights &middot; from your wearable
                 </div>
               </div>
-              <div className="hj-step">
-                <span className="hj-dot" />
-                <div className="hj-body">
-                  <div className="hj-k">Week 2 &middot; Mar 26</div>
-                  <div className="hj-t">Dryness noticed</div>
+              <div className="opw">
+                <div className="opk">Cycle</div>
+                <div className="opv">Day 4</div>
+                <div className="op-dots">
+                  <i className="on" />
+                  <i className="on" />
+                  <i className="on" />
+                  <i className="on today" />
+                  <i />
+                  <i />
+                  <i />
+                  <i />
+                  <i />
+                  <i />
+                </div>
+                <div className="ops">period &middot; tracked monthly</div>
+              </div>
+              <div className="opw">
+                <div className="opk">Skin &amp; photos</div>
+                <div className="op-thumbs">
+                  <span
+                    style={{
+                      background: "linear-gradient(135deg,#ecd8d2,#d6b4ac)",
+                    }}
+                  />
+                  <span
+                    style={{
+                      background: "linear-gradient(135deg,#f0dcd8,#e0b9c0)",
+                    }}
+                  />
+                </div>
+                <div className="ops">Retinol &middot; week 6</div>
+              </div>
+              <div className="opw">
+                <div className="opk">Labs &amp; records</div>
+                <div className="opv" style={{ fontSize: 32 }}>
+                  128
+                </div>
+                <div className="ops">
+                  LDL &middot; Jun 12 &middot; from your doctor
                 </div>
               </div>
-              <div className="hj-step last">
-                <span className="hj-dot" />
-                <div className="hj-body">
-                  <div className="hj-k">Today &middot; Jun 20</div>
-                  <div className="hj-t">Continue this routine?</div>
+              <div className="opw">
+                <div className="opk">Decision</div>
+                <div className="opv" style={{ fontSize: 17 }}>
+                  Retinol &mdash; in progress
+                </div>
+                <span className="op-pill">Paused 12 days ago</span>
+              </div>
+              <div className="opw span2">
+                <div className="opk">What you noticed</div>
+                <div className="opv">
+                  &ldquo;My skin&rsquo;s been drier this month.&rdquo;
+                </div>
+                <div className="ops">in your own words &middot; Jun 18</div>
+              </div>
+              <div className="opw">
+                <div className="opk">Resting heart</div>
+                <div className="opv" style={{ fontSize: 32 }}>
+                  62{" "}
+                  <span
+                    style={{
+                      fontSize: 15,
+                      color: "#8a807a",
+                      fontFamily: "inherit",
+                    }}
+                  >
+                    bpm
+                  </span>
+                </div>
+                <div className="ops">steady this week</div>
+              </div>
+              <div className="opw span3 op-med">
+                <svg
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M6 3v5a4 4 0 0 0 8 0V3" />
+                  <path d="M10 16a6 6 0 0 0 6 6 4 4 0 0 0 4-4v-2" />
+                  <circle cx="20" cy="12" r="2" />
+                </svg>
+                <div>
+                  <div className="opv" style={{ fontSize: 16, marginTop: 0 }}>
+                    Medical records
+                  </div>
+                  <div className="ops" style={{ marginTop: 2 }}>
+                    Labs, visit notes, and history &mdash; all in one place
+                  </div>
+                </div>
+                <span className="arr">&rsaquo;</span>
+              </div>
+            </div>
+            <div className="op-close">
+              It all becomes your history &mdash; ready for your next decision.
+            </div>
+            <div style={{ marginTop: 38, textAlign: "center" }}>
+              <StoreRow />
+            </div>
+          </div>
+        </section>
+
+        {/* SCIENCE + TRUST */}
+        <section id="science" className="science">
+          <div className="wrap">
+            <div className="kicker">Built on real science</div>
+            <h2 style={{ maxWidth: 820 }}>
+              Skin is visible. The biology shaping it is not always obvious.
+            </h2>
+            <p style={{ maxWidth: 640 }}>
+              DrRuby brings longitudinal observation together with carefully
+              labeled scientific context&mdash;without turning uncertainty into
+              a diagnosis or a sales pitch.
+            </p>
+            <div className="advisor-row">
+              <div className="advisor-card">
+                <img
+                  className="advisor-photo"
+                  src="/charles-brenner.webp"
+                  alt="Dr. Charles Brenner"
+                />
+                <div>
+                  <div className="advisor-name">Dr. Charles Brenner, PhD</div>
+                  <div className="advisor-role">Founding Science Advisor</div>
+                  <div className="advisor-creds">
+                    Biochemist &middot; Professor of Metabolic Regulation,
+                    University of Helsinki
+                  </div>
+                </div>
+              </div>
+              <div className="advisor-card">
+                <div className="adv-ph">+</div>
+                <div>
+                  <div className="advisor-name adv-soon">To be announced</div>
+                  <div className="advisor-role">
+                    Women&rsquo;s Health Advisor
+                  </div>
+                  <div className="advisor-creds adv-soon">
+                    Placeholder &mdash; name &amp; credentials to be added
+                  </div>
+                </div>
+              </div>
+              <div className="advisor-card">
+                <div className="adv-ph">+</div>
+                <div>
+                  <div className="advisor-name adv-soon">To be announced</div>
+                  <div className="advisor-role">Dermatology Advisor</div>
+                  <div className="advisor-creds adv-soon">
+                    Placeholder &mdash; name &amp; credentials to be added
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="trust-points">
+              <div>
+                <div className="tp-h">Private by default</div>
+                <div className="tp-p">
+                  Your history is yours. Nothing is shared unless you explicitly
+                  choose to.
+                </div>
+              </div>
+              <div>
+                <div className="tp-h">
+                  Using DrRuby isn&rsquo;t joining research
+                </div>
+                <div className="tp-p">
+                  Research is always separate, explicit, and voluntary &mdash;
+                  you choose which scientist or doctor to join.
+                </div>
+              </div>
+              <div>
+                <div className="tp-h">You decide, not DrRuby</div>
+                <div className="tp-p">
+                  We help you prepare. The decision stays yours &mdash; with
+                  your clinician.
                 </div>
               </div>
             </div>
@@ -69,50 +270,9 @@ export default function Home() {
         {/* HOW IT WORKS */}
         <section id="how" className="section soft">
           <div className="wrap">
-            <div className="kicker">How it works</div>
-            <h2>One decision. Three moments.</h2>
-            <p className="sub">
-              Instead of starting from scratch every time, DrRuby helps you
-              build on your own experience.
-            </p>
+            <div className="kicker">Your next decision</div>
+            <h2>DrRuby remembers what happened last time.</h2>
             <div className="how-grid">
-              <div className="how-journey">
-                <div className="hm">
-                  <span className="hm-dot" />
-                  <div className="hm-body">
-                    <div className="hm-k">Before</div>
-                    <h3>You have a question</h3>
-                    <p>
-                      &ldquo;Should I start retinol?&rdquo; &middot;
-                      &ldquo;Should I try HRT?&rdquo; &middot; &ldquo;Should I
-                      see this clinic?&rdquo;
-                    </p>
-                  </div>
-                </div>
-                <div className="hm">
-                  <span className="hm-dot" />
-                  <div className="hm-body">
-                    <div className="hm-k">What happened</div>
-                    <h3>Your experience, remembered</h3>
-                    <p>
-                      Started Retinol &rarr; dryness after two weeks &rarr;
-                      stopped &rarr; skin recovered.
-                    </p>
-                  </div>
-                </div>
-                <div className="hm last">
-                  <span className="hm-dot" />
-                  <div className="hm-body">
-                    <div className="hm-k">Next time</div>
-                    <h3>You don&rsquo;t start from zero</h3>
-                    <p>
-                      &ldquo;Thinking about restarting? Last time, dryness
-                      appeared after two weeks.&rdquo; DrRuby gives you your own
-                      context &mdash; it never tells you what to do.
-                    </p>
-                  </div>
-                </div>
-              </div>
               <div className="how-visual">
                 <div className="phone">
                   <div className="phone-status">
@@ -198,7 +358,7 @@ export default function Home() {
                     </svg>
                   </div>
                   <div className="phone-content">
-                    <div className="phone-top">&larr; My History</div>
+                    <div className="phone-top">&larr; My Health History</div>
                     <div className="source-label red">Your History</div>
                     <div className="story-line">
                       <div className="story-step">
@@ -229,78 +389,19 @@ export default function Home() {
                 </div>
               </div>
             </div>
-          </div>
-        </section>
-
-        {/* SKIN — three things before you decide */}
-        <section id="skin" className="section">
-          <div className="wrap">
-            <div className="kicker">Before you decide</div>
-            <h2>Three things Google can&rsquo;t give you.</h2>
-            <p className="sub">
-              Google gives you information. DrRuby brings together your own
-              experience, people like you, and the evidence &mdash; so your next
-              decision is yours, made with more confidence.
+            <p
+              className="sub"
+              style={{
+                textAlign: "center",
+                maxWidth: 520,
+                margin: "28px auto 0",
+              }}
+            >
+              So your next decision doesn&rsquo;t start from zero &mdash; it
+              starts with what you already know.
             </p>
-            <div className="three-things">
-              <div className="tt">
-                <div className="tt-k">You</div>
-                <h3>Your own history</h3>
-                <p>
-                  Your photos, your timeline, your changes over time &mdash; the
-                  one thing no one else has.
-                </p>
-                <div className="tt-ex">
-                  Photo &rarr; Retinol &rarr; dryness &rarr; stopped &rarr;
-                  recovered
-                </div>
-              </div>
-              <div className="tt">
-                <div className="tt-k">People like you</div>
-                <h3>Similar journeys</h3>
-                <p>
-                  Women around your age and situation who tried the same thing
-                  &mdash; what they actually experienced.
-                </p>
-                <div className="tt-ex">
-                  Among women 45&ndash;55 who started retinol, many noticed
-                  dryness around week 2 &mdash; and most who continued said it
-                  settled.
-                </div>
-                <div className="tt-note">
-                  Consented, structured experience &mdash; not a study, not a
-                  recommendation.
-                </div>
-              </div>
-              <div className="tt">
-                <div className="tt-k">Evidence</div>
-                <h3>What the field says</h3>
-                <p>
-                  Dermatologists&rsquo; perspectives and the evidence &mdash; in
-                  plain language, with the uncertainty kept visible.
-                </p>
-                <div className="tt-ex">
-                  What&rsquo;s supported &middot; what&rsquo;s still debated
-                  &middot; where experts disagree
-                </div>
-              </div>
-            </div>
-            <div className="tt-synthesis">
-              <div className="tt-sum">
-                DrRuby brings the three together into a{" "}
-                <strong>Decision Brief</strong> &mdash; what&rsquo;s known,
-                what&rsquo;s still uncertain, and the questions worth asking. It
-                never tells you what to do.
-              </div>
-              <div className="tt-formula">
-                <span>You</span>
-                <b>+</b>
-                <span>People like you</span>
-                <b>+</b>
-                <span>Evidence</span>
-                <b>=</b>
-                <em>confidence in your own decision</em>
-              </div>
+            <div style={{ marginTop: 38, textAlign: "center" }}>
+              <StoreRow />
             </div>
           </div>
         </section>
@@ -308,19 +409,16 @@ export default function Home() {
         {/* HEALTHSPAN — orbit */}
         <section id="healthspan" className="section soft">
           <div className="wrap">
-            <div className="kicker">
-              HealthSpan &middot; a second layer of context
-            </div>
+            <div className="kicker">The long game</div>
             <h2>
-              Skin is what you see.
+              Don&rsquo;t fight aging.
               <br />
-              Sleep, hormones, and stress are part of the record too.
+              <em>Age well.</em>
             </h2>
             <p className="sub">
-              Sleep, hormones, stress, and treatments are part of your story
-              too. DrRuby gives you one place to note them alongside your skin
-              history, so the full picture is there when you need it &mdash; not
-              scattered across separate apps.
+              Skin is what you see &mdash; but sleep, hormones, and stress shape
+              how you age. DrRuby keeps the full picture in one place, so you
+              can care for the long game instead of chasing quick fixes.
             </p>
             <div className="orbit-wrap">
               <div className="orbit">
@@ -369,105 +467,364 @@ export default function Home() {
           </div>
         </section>
 
-        {/* SCIENCE */}
-        <section id="science" className="science">
-          <div className="wrap">
-            <div className="kicker">Built on real science</div>
-            <h2 style={{ maxWidth: 650 }}>
-              Skin is visible. The biology shaping it is not always obvious.
+        {/* COMEBACK — flow */}
+        <section id="comeback" className="section soft">
+          <div className="wrap" style={{ textAlign: "center", maxWidth: 920 }}>
+            <h2>
+              Most health apps buzz you all day.
+              <br />
+              <em>
+                <span style={{ color: "#cf1736" }}>DrRuby</span> only speaks up
+                when a decision matters.
+              </em>
             </h2>
-            <p>
-              DrRuby brings longitudinal observation together with carefully
-              labeled scientific context&mdash;without turning uncertainty into
-              a diagnosis or a sales pitch.
+            <div className="cb-flow">
+              <div className="cb-card">
+                <div className="cb-badge">1</div>
+                <div className="cb-h">Every decision</div>
+                <div className="cb-p">becomes part of your understanding.</div>
+              </div>
+              <div className="cb-arrow">&rarr;</div>
+              <div className="cb-card">
+                <div className="cb-badge">2</div>
+                <div className="cb-h">Every outcome</div>
+                <div className="cb-p">teaches you something.</div>
+              </div>
+              <div className="cb-arrow">&rarr;</div>
+              <div className="cb-card">
+                <div className="cb-badge">3</div>
+                <div className="cb-h">Every lesson</div>
+                <div className="cb-p">makes the next decision easier.</div>
+              </div>
+            </div>
+            <div className="cb-close">
+              Every decision makes the next one better.
+            </div>
+            <div style={{ marginTop: 38, textAlign: "center" }}>
+              <StoreRow />
+            </div>
+          </div>
+        </section>
+
+        {/* SKIN — formula */}
+        <section id="skin" className="section">
+          <div className="wrap">
+            <div className="kicker">Before you decide</div>
+            <h2>Every health decision deserves the full picture.</h2>
+            <p className="sub">
+              Search gives you information. DrRuby brings together your history,
+              similar experiences, and the evidence &mdash; so you decide with
+              confidence.
             </p>
-            <div className="advisor-row">
-              <div className="advisor-card">
-                <img
-                  className="advisor-photo"
-                  src="/charles-brenner.webp"
-                  alt="Dr. Charles Brenner"
-                />
-                <div>
-                  <div className="advisor-name">Dr. Charles Brenner, PhD</div>
-                  <div className="advisor-role">Founding Science Advisor</div>
-                  <div className="advisor-creds">
-                    Biochemist &middot; Professor of Metabolic Regulation,
-                    University of Helsinki
-                  </div>
-                </div>
-              </div>
-              <div className="advisor-card">
-                <div className="adv-ph">+</div>
-                <div>
-                  <div className="advisor-name adv-soon">To be announced</div>
-                  <div className="advisor-role">
-                    Women&rsquo;s Health Advisor
-                  </div>
-                  <div className="advisor-creds adv-soon">
-                    Placeholder &mdash; name &amp; credentials to be added
-                  </div>
-                </div>
-              </div>
-              <div className="advisor-card">
-                <div className="adv-ph">+</div>
-                <div>
-                  <div className="advisor-name adv-soon">To be announced</div>
-                  <div className="advisor-role">Dermatology Advisor</div>
-                  <div className="advisor-creds adv-soon">
-                    Placeholder &mdash; name &amp; credentials to be added
-                  </div>
-                </div>
+            <div className="tt-synthesis" style={{ marginTop: 36 }}>
+              <div className="tt-formula2">
+                <span className="ff-term">
+                  <i>
+                    <svg viewBox="0 0 24 24">
+                      <circle cx="12" cy="8" r="3.2" />
+                      <path d="M5 20c0-3.5 3-6 7-6s7 2.5 7 6" />
+                    </svg>
+                  </i>
+                  Yourself
+                </span>
+                <b className="ff-op">+</b>
+                <span className="ff-term">
+                  <i>
+                    <svg viewBox="0 0 24 24">
+                      <circle cx="9" cy="9" r="2.6" />
+                      <circle cx="16.5" cy="10" r="2.1" />
+                      <path d="M4 19c0-2.8 2.2-4.6 5-4.6s5 1.8 5 4.6" />
+                      <path d="M15 19c0-1.8 1-3.2 2.8-3.2S20.6 17 20.6 19" />
+                    </svg>
+                  </i>
+                  Others
+                </span>
+                <b className="ff-op">+</b>
+                <span className="ff-term">
+                  <i>
+                    <svg viewBox="0 0 24 24">
+                      <path d="M9 3h6M10 3v5l-4.2 8.4A2 2 0 0 0 7.6 20h8.8a2 2 0 0 0 1.8-3.6L14 8V3" />
+                    </svg>
+                  </i>
+                  Science
+                </span>
+                <b className="ff-op">&rarr;</b>
+                <span className="ff-out">Better Health Decisions</span>
               </div>
             </div>
           </div>
         </section>
 
-        {/* TRUST */}
-        <section id="trust" className="trust">
+        {/* PRICING */}
+        <section id="pricing" className="section soft">
           <div className="wrap">
-            <div className="kicker">Why trust DrRuby</div>
-            <h2>
-              Personal value first.
-              <br />
-              Research only by separate choice.
-            </h2>
-            <p className="trust-sub">
-              Using DrRuby does not mean participating in research. Your
-              personal history is useful on its own. Research is always
-              separate, explicit, and voluntary.
-            </p>
-            <div className="trust-stack">
-              <div className="trust-layer">
-                <div className="trust-tag">You</div>
-                <h3>Your decisions</h3>
-                <p>
-                  Preserved for your own clarity and confidence. This is where
-                  everyone starts&mdash;and where most people stay.
-                </p>
+            <div style={{ textAlign: "center" }}>
+              <div className="kicker">Membership</div>
+              <h2>You never pay to unlock your own data.</h2>
+              <p className="sub" style={{ margin: "0 auto" }}>
+                That stays free, always. Pay once when a decision matters, or
+                become a member if you want DrRuby with you for every decision.
+              </p>
+            </div>
+            <div className="price-cards">
+              <div className="price-card">
+                <div className="price-tag free">
+                  Always free &middot; no time limit
+                </div>
+                <div className="price-name">Free</div>
+                <div className="price-value">DrRuby remembers your health.</div>
+                <div className="price-line">
+                  So it&rsquo;s ready to help when a decision matters.
+                </div>
+                <ul>
+                  <li>Record photos, changes, decisions and outcomes</li>
+                  <li>Keep your personal timeline</li>
+                  <li>Receive basic summaries</li>
+                  <li>Read public learning resources</li>
+                </ul>
+                <div className="price-amount">
+                  $0<small> forever</small>
+                </div>
+                <div className="price-note">
+                  Not a trial. Not a countdown. Free for as long as you use
+                  DrRuby.
+                </div>
+                <DownloadCTA className="btn line">
+                  Start Your Journey
+                </DownloadCTA>
+                <div className="price-foot">
+                  Your history remains yours, whether or not you ever pay.
+                </div>
               </div>
-              <div className="trust-layer">
-                <div className="trust-tag">Research &middot; Optional</div>
-                <h3>Decision Research Platform</h3>
-                <p>
-                  Separate consent, separate protocol, never automatic. Powered
-                  by structured multiple N-of-1 research.
-                </p>
+              <div className="price-card feature">
+                <div className="price-tag">
+                  For this one decision, right now
+                </div>
+                <div className="price-name">Decision</div>
+                <div className="price-value">Understand this decision.</div>
+                <div className="price-line">One-time. No subscription.</div>
+                <ul>
+                  <li>
+                    Understand this decision in the context of your history
+                  </li>
+                  <li>
+                    Yourself + Others + Science, brought together for this
+                    decision
+                  </li>
+                  <li>Tradeoffs and questions worth considering</li>
+                  <li>
+                    Prepare more clearly for a conversation with your doctor
+                  </li>
+                </ul>
+                <div
+                  className="price-amount"
+                  style={{ fontSize: 16, color: "#494441" }}
+                >
+                  Pricing announced before launch
+                </div>
+                <div className="price-note">
+                  Paid once, per decision &mdash; no subscription required.
+                </div>
+                <DownloadCTA className="btn primary">
+                  Understand This Decision
+                </DownloadCTA>
+                <div className="price-foot">
+                  Pay only when a decision matters. Your history stays yours
+                  either way.
+                </div>
               </div>
-              <div className="trust-layer">
-                <div className="trust-tag">Knowledge</div>
-                <h3>Validated patterns</h3>
-                <p>
-                  Governed, traceable patterns may improve future decision
-                  context. Research improves the platform&mdash;it never
-                  replaces your decisions.
-                </p>
+              <div className="price-card">
+                <div className="price-tag">
+                  For every decision, going forward
+                </div>
+                <div className="price-name">Membership</div>
+                <div className="price-value">
+                  Understand yourself, continuously.
+                </div>
+                <div className="price-line">
+                  For your next decision &mdash; and the one after that.
+                </div>
+                <ul>
+                  <li>Everything in Decision, for every decision</li>
+                  <li>Ongoing access to Yourself + Others + Science</li>
+                  <li>Priority access as new learning becomes available</li>
+                </ul>
+                <div
+                  className="price-amount"
+                  style={{ fontSize: 16, color: "#494441" }}
+                >
+                  Pricing announced before launch
+                </div>
+                <div className="price-note">
+                  A single, clear price &mdash; no ranges, no confusion.
+                </div>
+                <DownloadCTA className="btn line">Join Membership</DownloadCTA>
+                <div className="price-foot">
+                  Cancel anytime &mdash; your history is never deleted or
+                  locked.
+                </div>
               </div>
             </div>
-            <div className="trust-note">
-              Some decision journeys&mdash;shared only with your explicit
-              consent&mdash;may also help research learn. Nothing here happens
-              automatically.
+
+            <div className="price-band">
+              <div className="always">On every plan, always</div>
+              <h3>Your trust is not a premium feature.</h3>
+              <ul>
+                <li>Your data belongs to you</li>
+                <li>Private by default</li>
+                <li>We never sell your personal data</li>
+                <li>
+                  We support your decisions. We don&rsquo;t make them for you
+                </li>
+                <li>Export or delete anytime</li>
+              </ul>
+              <div className="fine">
+                We earn your trust before we earn your revenue.
+              </div>
+            </div>
+
+            <details className="price-compare">
+              <summary>Compare plans in detail &rarr;</summary>
+              <table className="price-ctable">
+                <thead>
+                  <tr>
+                    <th>What you get</th>
+                    <th>Free</th>
+                    <th>Decision</th>
+                    <th>Membership</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="grp">
+                    <td colSpan={4}>Build your history</td>
+                  </tr>
+                  <tr>
+                    <td>Record photos, changes, decisions, outcomes</td>
+                    <td className="price-ck">&#10003;</td>
+                    <td className="price-ck">&#10003;</td>
+                    <td className="price-ck">&#10003;</td>
+                  </tr>
+                  <tr>
+                    <td>Personal timeline &amp; basic summaries</td>
+                    <td className="price-ck">&#10003;</td>
+                    <td className="price-ck">&#10003;</td>
+                    <td className="price-ck">&#10003;</td>
+                  </tr>
+                  <tr className="grp">
+                    <td colSpan={4}>Understand a decision</td>
+                  </tr>
+                  <tr>
+                    <td>Your decision in the context of your history</td>
+                    <td className="price-dash">&mdash;</td>
+                    <td className="price-ck">&#10003;</td>
+                    <td className="price-ck">&#10003;</td>
+                  </tr>
+                  <tr>
+                    <td>Relevant evidence &amp; expert perspectives</td>
+                    <td className="price-dash">&mdash;</td>
+                    <td className="price-ck">&#10003;</td>
+                    <td className="price-ck">&#10003;</td>
+                  </tr>
+                  <tr>
+                    <td>Tradeoffs &amp; questions for your doctor</td>
+                    <td className="price-dash">&mdash;</td>
+                    <td className="price-ck">&#10003;</td>
+                    <td className="price-ck">&#10003;</td>
+                  </tr>
+                  <tr className="grp">
+                    <td colSpan={4}>Learn from relevant experiences</td>
+                  </tr>
+                  <tr>
+                    <td>A few relevant journeys, summarized</td>
+                    <td className="price-dash">&mdash;</td>
+                    <td className="price-ck">&#10003;</td>
+                    <td className="price-ck">&#10003;</td>
+                  </tr>
+                  <tr className="grp">
+                    <td colSpan={4}>Ongoing access</td>
+                  </tr>
+                  <tr>
+                    <td>Covers every future decision, not just one</td>
+                    <td className="price-dash">&mdash;</td>
+                    <td className="price-dash">&mdash;</td>
+                    <td className="price-ck">&#10003;</td>
+                  </tr>
+                  <tr>
+                    <td>Priority access as new learning becomes available</td>
+                    <td className="price-dash">&mdash;</td>
+                    <td className="price-dash">&mdash;</td>
+                    <td className="price-ck">&#10003;</td>
+                  </tr>
+                  <tr className="grp">
+                    <td colSpan={4}>Privacy &amp; ownership</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      Your data belongs to you &middot; private by default
+                    </td>
+                    <td className="price-ck">&#10003;</td>
+                    <td className="price-ck">&#10003;</td>
+                    <td className="price-ck">&#10003;</td>
+                  </tr>
+                  <tr>
+                    <td>Never sold &middot; export or delete anytime</td>
+                    <td className="price-ck">&#10003;</td>
+                    <td className="price-ck">&#10003;</td>
+                    <td className="price-ck">&#10003;</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      We support your decisions. We don&rsquo;t make them.
+                    </td>
+                    <td className="price-ck">&#10003;</td>
+                    <td className="price-ck">&#10003;</td>
+                    <td className="price-ck">&#10003;</td>
+                  </tr>
+                </tbody>
+              </table>
+            </details>
+
+            <div className="price-faq">
+              <div className="q">
+                <h4>Will DrRuby sell my data?</h4>
+                <p>
+                  No &mdash; never, on any plan, including Free. DrRuby is
+                  funded by members and by women who pay for a single Decision,
+                  not by selling anyone&rsquo;s data.
+                </p>
+              </div>
+              <div className="q">
+                <h4>Do I have to pay to access my own history?</h4>
+                <p>
+                  No. Your history remains available to read and export, even if
+                  you don&rsquo;t subscribe or later downgrade.
+                </p>
+              </div>
+              <div className="q">
+                <h4>Does DrRuby tell me what treatment to choose?</h4>
+                <p>
+                  No. DrRuby helps you understand context, evidence, experiences
+                  and tradeoffs. The decision remains yours.
+                </p>
+              </div>
+              <div className="q">
+                <h4>
+                  What&rsquo;s the difference between Decision and Membership?
+                </h4>
+                <p>
+                  Decision unlocks full understanding for one decision, paid
+                  once. Membership covers every decision as it comes up, for a
+                  single ongoing price. Either way, your history stays free and
+                  yours.
+                </p>
+              </div>
+              <div className="q">
+                <h4>What happens if I cancel?</h4>
+                <p>
+                  Your premium analysis stops, but your history is not deleted
+                  or locked. You can continue to read and export it.
+                </p>
+              </div>
             </div>
           </div>
         </section>
@@ -478,13 +835,13 @@ export default function Home() {
             <div className="kicker">
               It doesn&rsquo;t get smarter. It gets more complete.
             </div>
-            <h2>Build the history behind your next decision.</h2>
+            <h2>Build the health history behind your next decision.</h2>
             <p>Your first entry takes only a few minutes.</p>
             <p className="final-note">
               Nothing you&rsquo;ve tried is wasted. It becomes part of your
               health history.
             </p>
-            <StartJourneyButton />
+            <StoreRow />
           </div>
         </section>
       </main>
@@ -502,10 +859,9 @@ export default function Home() {
                 <h4>Product</h4>
                 <a href="#how">How It Works</a>
                 <a href="#skin">Skin</a>
-                <a href="#healthspan">HealthSpan</a>
-                <a href="#science">Science</a>
-                <a href="#trust">Trust</a>
-                <a href="/pricing">Pricing</a>
+                <a href="#healthspan">Age well</a>
+                <a href="#science">Trust</a>
+                <a href="#pricing">Pricing</a>
               </div>
               <div className="ft-col">
                 <h4>Company</h4>
@@ -532,7 +888,7 @@ export default function Home() {
                   </svg>
                   Collaborate
                 </a>
-                <a href="#trust">Research &amp; ethics</a>
+                <a href="#science">Research &amp; ethics</a>
               </div>
             </div>
             <div className="ft-sub">
