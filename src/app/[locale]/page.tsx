@@ -208,7 +208,19 @@ export default function Home() {
                   alt="Dr. Charles Brenner"
                 />
                 <div>
-                  <div className="advisor-name">Dr. Charles Brenner, PhD</div>
+                  <div className="advisor-name">
+                    <a
+                      href="https://en.wikipedia.org/wiki/Charles_Brenner_(biochemist)"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        textDecoration: "underline",
+                        textUnderlineOffset: 2,
+                      }}
+                    >
+                      Dr. Charles Brenner, PhD
+                    </a>
+                  </div>
                   <div className="advisor-role">Founding Science Advisor</div>
                   <div className="advisor-creds">
                     Biochemist &middot; Professor of Metabolic Regulation,

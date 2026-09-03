@@ -1,4 +1,3 @@
-import Image from "next/image";
 import UserMenu from "@/components/auth/UserMenu";
 import { NavDownloadButton } from "@/components/DownloadWaitlist";
 import { LocaleSwitcher } from "@/components/i18n/LocaleSwitcher";
@@ -62,15 +61,22 @@ export default async function HomeNav({
           className="logo"
           href="/"
           aria-label="DrRuby.ai home"
-          style={{ display: "flex", alignItems: "center", gap: 10 }}
+          style={{ display: "flex", alignItems: "center", gap: 14 }}
         >
-          <Image
-            src="/logo.png"
-            alt="DrRuby.ai"
-            width={30}
-            height={30}
-            priority
-          />
+          <span className="logo-icon" style={{ color: "#fff" }}>
+            {/* Brand "R" mark — inline SVG matches design spec v6.5 (#r-open). */}
+            <svg viewBox="0 0 100 100" aria-hidden="true">
+              <rect x="22" y="15" width="18" height="70" fill="currentColor" />
+              <path
+                d="M40,15 L58,15 C74,15 78,26 78,34 C78,43 71,48 58,48 L46,48 Z"
+                fill="currentColor"
+              />
+              <path
+                d="M46,52 L54,52 L80,85 L64,85 L44,60 Z"
+                fill="currentColor"
+              />
+            </svg>
+          </span>
           <span className="logo-word">
             Dr<span className="logo-ruby">Ruby</span>
             <span className="logo-tld">.ai</span>

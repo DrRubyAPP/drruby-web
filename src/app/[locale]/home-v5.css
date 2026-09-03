@@ -38,6 +38,8 @@
 .dr-v5 .logo { font-size: 27px; font-weight: 850; letter-spacing: -1px; }
 .dr-v5 .logo-word { font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 27px; font-weight: 800; letter-spacing: -1px; color: var(--ink); line-height: 1; }
 .dr-v5 .logo-ruby { color: var(--red); }
+.dr-v5 .logo-icon { width: 44px; height: 44px; border-radius: 12px; background: #8C2635; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.dr-v5 .logo-icon svg { width: 25px; height: 25px; }
 .dr-v5 .navlinks { display: flex; gap: 30px; font-size: 14px; font-weight: 550; color: #494441; }
 .dr-v5 .actions { display: flex; gap: 12px; align-items: center; }
 .dr-v5 .btn {
@@ -69,7 +71,7 @@
   text-transform: uppercase; font-weight: 800; color: var(--red); background: rgba(207, 23, 54, .09);
   border: 1px solid rgba(207, 23, 54, .22); padding: 6px 13px; border-radius: 999px; line-height: 1; margin-bottom: 22px;
 }
-.dr-v5 h1 { font-size: 70px; line-height: 1.02; letter-spacing: -3.4px; margin: 0 0 26px; max-width: 680px; }
+.dr-v5 h1 { font-size: 70px; font-weight: 700; line-height: 1.02; letter-spacing: -3.4px; margin: 0 0 26px; max-width: 680px; }
 .dr-v5 h1 em { font-style: normal; color: var(--red); }
 .dr-v5 .lede { font-size: 20px; line-height: 1.6; color: var(--muted); max-width: 520px; margin-bottom: 22px; }
 .dr-v5 .hero-formula {
@@ -93,7 +95,7 @@
   text-transform: uppercase; font-weight: 800; color: var(--red); background: rgba(207, 23, 54, .09);
   border: 1px solid rgba(207, 23, 54, .22); padding: 6px 13px; border-radius: 999px; line-height: 1; margin-bottom: 18px;
 }
-.dr-v5 h2 { font-size: 52px; line-height: 1.08; letter-spacing: -2px; margin: 0 0 20px; }
+.dr-v5 h2 { font-size: 52px; font-weight: 700; line-height: 1.08; letter-spacing: -2px; margin: 0 0 20px; }
 .dr-v5 h2 em { font-style: normal; color: var(--red); }
 .dr-v5 .sub { font-size: 18px; line-height: 1.7; color: var(--muted); max-width: 680px; }
 
