@@ -76,11 +76,11 @@ export const DecisionHealthRecordListResponse = z.array(
 // Body schemas
 // =============================================================================
 
-/** 上传原件 body（V1 占位存储：objectKey 为本地路径/字符串） */
-export const UploadSourceBody = z.object({
-  fileName: z.string().min(1),
-  mime: z.string().optional(),
-  objectKey: z.string().optional(),
+/**
+ * 上传原件的**非文件字段**（task-46：请求体为 multipart/form-data，
+ * `file` 字段单独走 FormData；objectKey 不再由客户端提供，只能服务端按 F4 生成）。
+ */
+export const UploadSourceFields = z.object({
   kind: healthRecordKindSchema,
   recordedAt: z.string(),
 });

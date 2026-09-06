@@ -35,6 +35,38 @@ export async function create(
   });
 }
 
+/**
+ * 更新原件存储元数据（task-46：storage.put 成功后回写真实 objectKey / mime / hash）。
+ * key 由服务端生成（含 sourceId），故须先建行拿到 id 再回写。
+ */
+export async function update(
+  id: string,
+  input: {
+    objectKey?: string | null;
+    mime?: string | null;
+    hash?: string | null;
+    storageLifecycle?: string | null;
+  },
+): Promise<HealthSource> {
+  return prisma.healthSource.update({
+    where: { id },
+    data: {
+      objectKey: input.objectKey ?? undefined,
+      mime: input.mime ?? undefined,
+      hash: input.hash ?? undefined,
+      storageLifecycle: input.storageLifecycle ?? undefined,
+    },
+  });
+}
+
+/**
+ * 删除原件行（task-46：上传链路失败时回滚已建的 placeholder 行）。
+ * 用户主动删除（留痕）属 task-49，不在本任务调用。
+ */
+export async function remove(id: string): Promise<void> {
+  await prisma.healthSource.delete({ where: { id } });
+}
+
 /** 按 uploadedAt 倒序列出某用户的原件 */
 export async function listByUser(userId: string): Promise<HealthSource[]> {
   return prisma.healthSource.findMany({
