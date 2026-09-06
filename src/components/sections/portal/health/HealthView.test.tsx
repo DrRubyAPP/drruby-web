@@ -7,14 +7,21 @@ vi.mock("@/hooks/useApi", () => ({
   useApi: (path: string | null) => useApiMock(path),
 }));
 
-// ── apiClient.post mock（LogForm/UploadDialog 提交）──
+// ── apiClient mock（LogForm/UploadDialog/PhotoUploadDialog 提交）──
 const postMock = vi.fn();
+const postFormMock = vi.fn();
 vi.mock("@/lib/api/client", () => ({
   apiClient: {
     get: vi.fn(),
     post: (...args: unknown[]) => postMock(...args),
+    postForm: (...args: unknown[]) => postFormMock(...args),
     patch: vi.fn(),
   },
+}));
+
+// ── browser-image-compression：避免 jsdom 无 canvas/worker（PhotoUploadDialog 依赖）──
+vi.mock("browser-image-compression", () => ({
+  default: vi.fn(async (f: File) => f),
 }));
 
 // ── next-intl：返回 key 原样（便于断言）──
@@ -76,12 +83,21 @@ describe("HealthView · C1 录入入口（task-42）", () => {
     expect(screen.getByText("log.title")).toBeInTheDocument();
   });
 
-  it("clicking Upload opens UploadDialog (covers Photos too — same dialog)", () => {
+  it("clicking Upload opens UploadDialog (document branch)", () => {
     render(<HealthView />);
     expect(screen.queryByText("upload.title")).toBeNull();
     fireEvent.click(
       screen.getByRole("button", { name: /intake\.upload\.label/ }),
     );
     expect(screen.getByText("upload.title")).toBeInTheDocument();
+  });
+
+  it("clicking Photos opens PhotoUploadDialog (task-46 独立照片分支)", () => {
+    render(<HealthView />);
+    expect(screen.queryByText("photo.title")).toBeNull();
+    fireEvent.click(
+      screen.getByRole("button", { name: /intake\.photos\.label/ }),
+    );
+    expect(screen.getByText("photo.title")).toBeInTheDocument();
   });
 });
