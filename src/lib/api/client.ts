@@ -13,6 +13,13 @@ export const apiClient = {
       headers: { "Content-Type": "application/json", ...init?.headers },
     }),
 
+  /**
+   * multipart/form-data 上传：直接把 FormData 交给 fetch，
+   * **不设 Content-Type**（浏览器自动补带 boundary 的 multipart 头）。
+   */
+  postForm: <T>(path: string, form: FormData, init?: RequestInit) =>
+    fetchJson<T>(path, { ...init, method: "POST", body: form }),
+
   patch: <T>(path: string, body?: unknown, init?: RequestInit) =>
     fetchJson<T>(path, {
       ...init,

@@ -1310,8 +1310,9 @@
     "upload": {
       "title": "Upload a document",
       "intro": "PDF or photo. DrRuby will extract what it can — you confirm before it becomes a health record.",
-      "fileLabel": "File name",
-      "filePlaceholder": "e.g., june-lab-panel.pdf",
+      "fileLabel": "File",
+      "fileHint": "PDF, JPEG or PNG · up to 20MB",
+      "errTooLarge": "File exceeds 20MB. Please compress it and try again.",
       "kindLabel": "Kind",
       "dateLabel": "Date",
       "upload": "Upload",

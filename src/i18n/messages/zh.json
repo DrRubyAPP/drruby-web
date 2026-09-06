@@ -1316,8 +1316,9 @@
     "upload": {
       "title": "上传文档",
       "intro": "PDF 或照片。DrRuby 会先抽取内容——你确认后才会成为健康记录。",
-      "fileLabel": "文件名",
-      "filePlaceholder": "例如：june-lab-panel.pdf",
+      "fileLabel": "文件",
+      "fileHint": "PDF、JPEG 或 PNG · 最大 20MB",
+      "errTooLarge": "文件超过 20MB，请压缩后重试",
       "kindLabel": "类型",
       "dateLabel": "日期",
       "upload": "上传",

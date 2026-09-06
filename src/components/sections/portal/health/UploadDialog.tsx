@@ -1,11 +1,22 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { type CSSProperties, useState } from "react";
+import { type CSSProperties, useRef, useState } from "react";
 import { toErrorMessage } from "@/components/sections/portal/coach-helpers";
 import { ApiError, apiClient } from "@/lib/api";
 import type { HealthRecordKind } from "@/lib/db/enums";
 import { ACTIVE_CHIP, LABEL, SUBMIT_BTN } from "../decisions/drawerStyles";
+
+/** 文档上传接受的类型（服务端仍按魔数二次校验，此处仅体验优化）。 */
+const DOC_ACCEPT = "application/pdf,image/jpeg,image/png";
+/** 文档大小上限（与服务端 DOC_MAX_BYTES 对齐，仅前端提示用）。 */
+const DOC_MAX_BYTES = 20 * 1024 * 1024;
+
+function formatSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 const CENTER_OVERLAY: CSSProperties = {
   position: "fixed",
@@ -59,14 +70,15 @@ interface UploadDialogProps {
 }
 
 /**
- * 文档/照片上传弹层（Contract §2 V1 采集方式之二/之三）。
- * 占位存储（D1）：objectKey 为本地路径/字符串，不引入真实对象存储。
+ * 文档上传弹层（Contract §2 V1 采集方式之二；照片走独立 PhotoUploadDialog）。
+ * task-46：真实文件传输——`<input type="file">` + FormData（不再输文件名占位）。
  * 上传成功 → 服务端建 Source + Record（status=SOURCE_UPLOADED），
  * 前端通过 onUploaded(recordId) 跳转 Review 页触发抽取流程。
  */
 export function UploadDialog({ open, onClose, onUploaded }: UploadDialogProps) {
   const t = useTranslations("myHealth");
-  const [fileName, setFileName] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [file, setFile] = useState<File | null>(null);
   const [kind, setKind] = useState<HealthRecordKind>("lab");
   const [recordedAt, setRecordedAt] = useState<string>(
     new Date().toISOString().slice(0, 10),
@@ -77,11 +89,12 @@ export function UploadDialog({ open, onClose, onUploaded }: UploadDialogProps) {
   if (!open) return null;
 
   function reset() {
-    setFileName("");
+    setFile(null);
     setKind("lab");
     setRecordedAt(new Date().toISOString().slice(0, 10));
     setSubmitting(false);
     setErrMsg(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
   function close() {
@@ -89,22 +102,32 @@ export function UploadDialog({ open, onClose, onUploaded }: UploadDialogProps) {
     window.setTimeout(reset, 50);
   }
 
+  function onPick(e: React.ChangeEvent<HTMLInputElement>) {
+    const picked = e.target.files?.[0] ?? null;
+    setErrMsg(null);
+    // 前端体验拦截（服务端仍按魔数二次校验）
+    if (picked && picked.size > DOC_MAX_BYTES) {
+      setErrMsg(t("upload.errTooLarge"));
+      setFile(null);
+      return;
+    }
+    setFile(picked);
+  }
+
   async function submit() {
     if (submitting) return;
-    if (!fileName.trim()) return;
+    if (!file) return;
     setSubmitting(true);
     setErrMsg(null);
     try {
-      const res = await apiClient.post<{ sourceId: string; recordId: string }>(
-        "/api/health/sources",
-        {
-          fileName: fileName.trim(),
-          kind,
-          // 占位 objectKey（D1：本地路径/字符串，真实存储延后 O3）
-          objectKey: `/files/${encodeURIComponent(fileName.trim())}`,
-          recordedAt: new Date(recordedAt).toISOString(),
-        },
-      );
+      const form = new FormData();
+      form.append("file", file);
+      form.append("kind", kind);
+      form.append("recordedAt", new Date(recordedAt).toISOString());
+      const res = await apiClient.postForm<{
+        sourceId: string;
+        recordId: string;
+      }>("/api/health/sources", form);
       if (res?.recordId) {
         onUploaded(res.recordId);
       }
@@ -147,14 +170,18 @@ export function UploadDialog({ open, onClose, onUploaded }: UploadDialogProps) {
           {t("upload.fileLabel")}
         </label>
         <input
+          ref={fileInputRef}
           id="upload-file"
-          type="text"
-          value={fileName}
-          maxLength={200}
-          onChange={(e) => setFileName(e.target.value)}
-          placeholder={t("upload.filePlaceholder")}
+          type="file"
+          accept={DOC_ACCEPT}
+          onChange={onPick}
           style={INPUT_STYLE}
         />
+        <div style={{ fontSize: 12, color: "#a89a95", marginTop: 6 }}>
+          {file
+            ? `${file.name} · ${formatSize(file.size)}`
+            : t("upload.fileHint")}
+        </div>
 
         <label style={{ ...LABEL, marginTop: 14 }} htmlFor="upload-kind">
           {t("upload.kindLabel")}
@@ -211,7 +238,7 @@ export function UploadDialog({ open, onClose, onUploaded }: UploadDialogProps) {
           <button
             type="button"
             onClick={submit}
-            disabled={submitting || !fileName.trim()}
+            disabled={submitting || !file}
             style={SUBMIT_BTN}
             className="disabled:opacity-50"
           >
