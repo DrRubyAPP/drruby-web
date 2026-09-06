@@ -40,6 +40,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# task-46 本地磁盘存储（LOCAL_STORAGE_DIR 默认值）——上传文件不进 git
+/.uploads/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
