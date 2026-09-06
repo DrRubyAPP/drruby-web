@@ -1325,6 +1325,21 @@
       "uploading": "上传中…",
       "cancel": "取消"
     },
+    "photo": {
+      "title": "上传照片",
+      "intro": "皮肤或身体变化。照片会在你的设备上先压缩再上传——你确认后才会成为健康记录。",
+      "fileLabel": "照片",
+      "fileHint": "JPEG 或 PNG · 上传前压缩到约 1.5MB",
+      "previewAlt": "所选照片预览",
+      "kindLabel": "类型",
+      "dateLabel": "日期",
+      "upload": "上传",
+      "uploading": "上传中…",
+      "cancel": "取消",
+      "errTooLarge": "照片超过 25MB，请换一张更小的",
+      "errHeic": "不支持 HEIC 格式。iPhone 从图库选择会自动上传 JPEG；否则请先转成 JPEG 或 PNG。",
+      "compressFailed": "此设备无法压缩，已改为上传原图。"
+    },
     "review": {
       "title": "复核抽取结果",
       "intro": "检查 DrRuby 抽取的内容。在你确认之前，这里的任何内容都不是已确认的事实。",

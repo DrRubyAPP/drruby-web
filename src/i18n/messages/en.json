@@ -1319,6 +1319,21 @@
       "uploading": "Uploading…",
       "cancel": "Cancel"
     },
+    "photo": {
+      "title": "Upload photos",
+      "intro": "Skin or physical changes. Photos are compressed on your device before upload — you confirm before anything becomes a health record.",
+      "fileLabel": "Photo",
+      "fileHint": "JPEG or PNG · compressed to ~1.5MB before upload",
+      "previewAlt": "Selected photo preview",
+      "kindLabel": "Kind",
+      "dateLabel": "Date",
+      "upload": "Upload",
+      "uploading": "Uploading…",
+      "cancel": "Cancel",
+      "errTooLarge": "Photo exceeds 25MB. Please pick a smaller one.",
+      "errHeic": "HEIC images aren't supported. On iPhone, choosing from the library uploads a JPEG automatically — otherwise convert to JPEG or PNG first.",
+      "compressFailed": "Couldn't compress on this device — uploading the original photo instead."
+    },
     "review": {
       "title": "Review extraction",
       "intro": "Check what DrRuby extracted. Nothing here is a confirmed fact until you confirm it.",

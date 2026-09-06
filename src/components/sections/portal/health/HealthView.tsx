@@ -8,6 +8,7 @@ import { useRouter } from "@/i18n/navigation";
 import type { SignalDto } from "./dto";
 import { LogForm } from "./LogForm";
 import { mapSignals } from "./mappers";
+import { PhotoUploadDialog } from "./PhotoUploadDialog";
 import { UploadDialog } from "./UploadDialog";
 
 /** My Health（health）视图：对齐设计稿 v-health 结构。
@@ -129,6 +130,7 @@ export function HealthView() {
   // C1 录入入口弹层状态
   const [logOpen, setLogOpen] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [photoOpen, setPhotoOpen] = useState(false);
 
   const signalRows = mapSignals(signals.data ?? []);
 
@@ -146,9 +148,11 @@ export function HealthView() {
               key={d.key}
               type="button"
               className="data-btn"
-              onClick={() =>
-                d.key === "log" ? setLogOpen(true) : setUploadOpen(true)
-              }
+              onClick={() => {
+                if (d.key === "log") setLogOpen(true);
+                else if (d.key === "photos") setPhotoOpen(true);
+                else setUploadOpen(true);
+              }}
             >
               <span className="data-ic">{d.icon}</span>
               <b>{t(d.labelKey)}</b>
@@ -258,6 +262,13 @@ export function HealthView() {
       <UploadDialog
         open={uploadOpen}
         onClose={() => setUploadOpen(false)}
+        onUploaded={(recordId) =>
+          router.push(`/portal/health/review/${recordId}`)
+        }
+      />
+      <PhotoUploadDialog
+        open={photoOpen}
+        onClose={() => setPhotoOpen(false)}
         onUploaded={(recordId) =>
           router.push(`/portal/health/review/${recordId}`)
         }
