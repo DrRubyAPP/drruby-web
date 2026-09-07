@@ -367,6 +367,7 @@ export function ReviewView({ recordId }: { recordId: string }) {
       />
       <ConnectToDecisionDialog
         recordId={data.id}
+        recordTitle={data.title}
         open={connectOpen}
         onClose={() => setConnectOpen(false)}
       />

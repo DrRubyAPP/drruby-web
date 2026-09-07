@@ -1361,7 +1361,17 @@
     "connect": {
       "title": "Connect to a decision",
       "intro": "Link this record to a decision. It becomes part of that decision's Yourself context — by reference, not copied.",
+      "existing": "Connect to an existing decision",
       "empty": "No decisions yet. Create one first.",
+      "newDecision": "Create a new decision",
+      "newDecisionHint": "Start a new decision with this record attached.",
+      "relatedRecord": "Related record: {title}",
+      "questionLabel": "Question",
+      "questionPlaceholder": "e.g. What do my latest labs mean?",
+      "notNow": "Not now",
+      "notNowHint": "Keep it in My Health only. You can connect it anytime later.",
+      "creating": "Creating…",
+      "dismissing": "Saving…",
       "confirm": "Connect",
       "connecting": "Connecting…",
       "cancel": "Cancel"

@@ -1367,7 +1367,17 @@
     "connect": {
       "title": "关联到决策",
       "intro": "把这条记录关联到某个决策。它会作为该决策的「你自己」语境的一部分——以引用方式组装，不会复制。",
+      "existing": "连接已有的决策",
       "empty": "还没有决策。先创建一个。",
+      "newDecision": "新建一个决策",
+      "newDecisionHint": "以这条记录为语境新建一个决策。",
+      "relatedRecord": "相关记录：{title}",
+      "questionLabel": "你的问题",
+      "questionPlaceholder": "例如：我最新的化验结果说明什么？",
+      "notNow": "暂不处理",
+      "notNowHint": "仅保留在 My Health，不接入任何决策；之后可随时连接。",
+      "creating": "创建中…",
+      "dismissing": "保存中…",
       "confirm": "关联",
       "connecting": "关联中…",
       "cancel": "取消"
