@@ -63,3 +63,68 @@ describe("POST /api/timeline", () => {
     });
   });
 });
+
+describe("GET /api/timeline × Decision 软删过滤（task-50 D-2）", () => {
+  beforeEach(resetDb);
+  afterEach(disconnectDb);
+
+  it("软删 Decision 的关联事件消失；无关联与未删关联事件保留", async () => {
+    const { GET, POST } = await import("./route");
+    const decisionRepo = await import("@/lib/db/repositories/decision.repo");
+    const user = await makeUser("tl-softdel@example.com");
+    const decision = await decisionRepo.create(user.id, {
+      question: "q",
+      goal: "firmness",
+    });
+
+    asUser(user.id);
+    const linked = await POST(
+      jsonRequest({
+        kind: "note",
+        title: "linked to decision",
+        decisionId: decision.id,
+      }),
+    );
+    expect(linked.status).toBe(201);
+    const orphan = await POST(
+      jsonRequest({ kind: "note", title: "orphan event" }),
+    );
+    expect(orphan.status).toBe(201);
+
+    // 软删前：两条都在
+    const before = await GET();
+    const beforeRows: Array<{ title: string }> = await before.json();
+    expect(beforeRows.map((r) => r.title)).toContain("linked to decision");
+
+    await decisionRepo.softDelete(decision.id);
+
+    const after = await GET();
+    const afterRows: Array<{ title: string }> = await after.json();
+    expect(afterRows.map((r) => r.title)).not.toContain("linked to decision");
+    expect(afterRows.map((r) => r.title)).toContain("orphan event");
+  });
+
+  it("未删 Decision 的关联事件保留", async () => {
+    const { GET, POST } = await import("./route");
+    const decisionRepo = await import("@/lib/db/repositories/decision.repo");
+    const user = await makeUser("tl-keep@example.com");
+    const decision = await decisionRepo.create(user.id, {
+      question: "q",
+      goal: "firmness",
+    });
+
+    asUser(user.id);
+    const created = await POST(
+      jsonRequest({
+        kind: "note",
+        title: "still active",
+        decisionId: decision.id,
+      }),
+    );
+    expect(created.status).toBe(201);
+
+    const list = await GET();
+    const rows: Array<{ title: string }> = await list.json();
+    expect(rows.map((r) => r.title)).toContain("still active");
+  });
+});
