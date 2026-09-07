@@ -780,7 +780,10 @@
           "supportingEmpty": "尚未记录观察结果。",
           "saveAndComplete": "保存并完成",
           "submitting": "保存中…",
-          "errorTextRequired": "请添加总结"
+          "errorTextRequired": "请添加总结",
+          "staleHint": "你修改了一条观察记录，已保存的 Learning 可能已过时。",
+          "regenerateCta": "更新 Learning",
+          "saveRegenerate": "保存更新后的 Learning"
         },
         "markCompleted": {
           "cta": "标记为已完成",

@@ -126,6 +126,9 @@ export function DecisionDetailView({ id }: { id: string }) {
   // task-44 §28 Observation 修正入口：editingEntryId 非空时展开内嵌 ObservationForm（edit mode）
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
 
+  // task-51 D-51-c：修正 Observation 后的「Learning 可能已过时」提示（仅已存在 learning entry 时置位）
+  const [staleHint, setStaleHint] = useState(false);
+
   // task-41 Decide section 状态
   const [decideOutcome, setDecideOutcome] = useState<DecisionOutcome | null>(
     null, // 服务端 outcome 在 data.outcome；本地仅跟踪用户未提交的选择
@@ -252,6 +255,8 @@ export function DecisionDetailView({ id }: { id: string }) {
   // 语料检索按 topicSlug（B9）：命中→专题语料，null/未命中→通用占位；type 不参与检索
   const corpus = getDecisionCorpus(data.topicSlug);
   const entries = sortEntries(data.entries);
+  // task-51 D-51-c：是否已有 learning entry（决定过时提示与重生成入口的展示）
+  const hasLearning = entries.some((e) => e.kind === "learning");
   // Decide section 本地选择的 outcome（与 data.outcome 同步：用户改选后立即更新 state）
   const currentOutcomeSelection = decideOutcome ?? data.outcome;
 
@@ -811,8 +816,10 @@ export function DecisionDetailView({ id }: { id: string }) {
       </div>
 
       {/* task-44 §27/§29 Observe / Learn section：OBSERVING → Stop Observing 入口；LEARNING → Learning summary 表单；
-          COMPLETED → 不显示本区（历史 Learning 在下方 Observations 时间线可见） */}
-      {(data.lifecycle === "OBSERVING" || data.lifecycle === "LEARNING") && (
+          task-51 T2：COMPLETED 且已有 learning → 重生成入口（Update learning，append-only 写新 entry） */}
+      {(data.lifecycle === "OBSERVING" ||
+        data.lifecycle === "LEARNING" ||
+        (data.lifecycle === "COMPLETED" && hasLearning)) && (
         <div className="sec">
           <div className="sec-h">{tr("observe.sectionTitle")}</div>
 
@@ -867,6 +874,49 @@ export function DecisionDetailView({ id }: { id: string }) {
                 decisionId={data.id}
                 onSaved={() => refetch()}
               />
+            </div>
+          )}
+
+          {/* task-51 T2/F2：COMPLETED 态重生成入口（D-51-c：仅已存在 learning 时展示）；
+              修正 Observation 后 staleHint 置位 → 默认展开并提示可能过时 */}
+          {data.lifecycle === "COMPLETED" && hasLearning && (
+            <div className="card">
+              <details open={staleHint}>
+                <summary
+                  style={{
+                    cursor: "pointer",
+                    fontSize: 12,
+                    fontWeight: 700,
+                    letterSpacing: "0.16em",
+                    textTransform: "uppercase",
+                    color: "var(--p-red)",
+                  }}
+                >
+                  {tr("observe.learn.regenerateCta")}
+                </summary>
+                {staleHint && (
+                  <p
+                    style={{
+                      fontSize: 13,
+                      color: "#7c746f",
+                      marginTop: 8,
+                      marginBottom: 8,
+                    }}
+                  >
+                    {tr("observe.learn.staleHint")}
+                  </p>
+                )}
+                <div style={{ marginTop: 12 }}>
+                  <LearningSummaryForm
+                    decisionId={data.id}
+                    submitLabelKey="learn.saveRegenerate"
+                    onSaved={() => {
+                      setStaleHint(false);
+                      refetch();
+                    }}
+                  />
+                </div>
+              </details>
             </div>
           )}
         </div>
@@ -958,6 +1008,8 @@ export function DecisionDetailView({ id }: { id: string }) {
                               onSaved={() => {
                                 setEditingEntryId(null);
                                 refetch();
+                                // task-51 D-51-c：仅已存在 learning 时提示过时
+                                if (hasLearning) setStaleHint(true);
                               }}
                             />
                           ) : (
@@ -965,9 +1017,11 @@ export function DecisionDetailView({ id }: { id: string }) {
                           )}
                         </>
                       )}
-                      {/* Observation 修正入口（仅 OBSERVING + observation kind + 非编辑中） */}
+                      {/* task-51 T2/P-1 Observation 修正入口（OBSERVING/LEARNING/COMPLETED 三态 + observation kind + 非编辑中） */}
                       {isObservation &&
-                        data.lifecycle === "OBSERVING" &&
+                        ["OBSERVING", "LEARNING", "COMPLETED"].includes(
+                          data.lifecycle,
+                        ) &&
                         !editing && (
                           <button
                             type="button"

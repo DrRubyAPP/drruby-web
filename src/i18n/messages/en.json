@@ -774,7 +774,10 @@
           "supportingEmpty": "No observations recorded yet.",
           "saveAndComplete": "Save and complete",
           "submitting": "Saving…",
-          "errorTextRequired": "Please add a summary"
+          "errorTextRequired": "Please add a summary",
+          "staleHint": "You edited an observation. Your saved learning may be out of date.",
+          "regenerateCta": "Update learning",
+          "saveRegenerate": "Save updated learning"
         },
         "markCompleted": {
           "cta": "Mark as completed",

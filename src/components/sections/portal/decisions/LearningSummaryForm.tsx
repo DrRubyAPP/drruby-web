@@ -29,6 +29,12 @@ import type {
 interface Props {
   decisionId: string;
   onSaved?: () => void;
+  /**
+   * task-51 T2：提交按钮文案 key（相对 portal.decisionsDetail.observe 命名空间）。
+   * 默认 "learn.saveAndComplete"（LEARNING 首次保存）；COMPLETED 重生成语境传
+   * "learn.saveRegenerate"，避免改 LEARNING 现有文案（回归零风险）。
+   */
+  submitLabelKey?: string;
 }
 
 const SUBMIT_BTN: React.CSSProperties = {
@@ -77,7 +83,11 @@ const OBS_LIST_ITEM: React.CSSProperties = {
   marginBottom: 4,
 };
 
-export function LearningSummaryForm({ decisionId, onSaved }: Props) {
+export function LearningSummaryForm({
+  decisionId,
+  onSaved,
+  submitLabelKey = "learn.saveAndComplete",
+}: Props) {
   const t = useTranslations("portal.decisionsDetail.observe");
 
   // GET /learn 拿模板预填
@@ -216,7 +226,7 @@ export function LearningSummaryForm({ decisionId, onSaved }: Props) {
         <ErrorState message={save.error.message} onRetry={() => save.reset()} />
       )}
       <button type="submit" disabled={save.loading} style={SUBMIT_BTN}>
-        {save.loading ? t("learn.submitting") : t("learn.saveAndComplete")}
+        {save.loading ? t("learn.submitting") : t(submitLabelKey)}
       </button>
     </form>
   );
