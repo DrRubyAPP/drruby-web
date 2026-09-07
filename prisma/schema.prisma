@@ -568,6 +568,10 @@ model HealthRecord {
   recordedAt    DateTime @map("recorded_at") @db.Timestamptz
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz
+  /// task-49 F3：软删除留痕（列表过滤 deletedAt: null；Decision 侧渲染层占位降级）
+  deletedAt          DateTime? @map("deleted_at") @db.Timestamptz
+  /// task-49 D-1：「暂不处理」落库；connect 成功后清空（重新进入已处理状态）
+  connectDismissedAt DateTime? @map("connect_dismissed_at") @db.Timestamptz
 
   // task-42 起保留兼容：source/objectKey/ocrStatus 不删，仅作迁移映射
   // 旧字段在 schema 中显式标 `@deprecated`（Prisma 不支持注释移除）

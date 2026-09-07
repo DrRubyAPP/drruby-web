@@ -18,6 +18,11 @@ export async function connect(
       where: { id: decisionId },
       data: { lastUserActivityAt: new Date() },
     });
+    // task-49 D-1：主动连接成功 → 清空「暂不处理」标记（重新进入已处理状态）
+    await tx.healthRecord.update({
+      where: { id: healthRecordId },
+      data: { connectDismissedAt: null },
+    });
   });
 }
 

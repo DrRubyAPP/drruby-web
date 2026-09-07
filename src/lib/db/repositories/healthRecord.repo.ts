@@ -104,14 +104,19 @@ export async function create(
   });
 }
 
-/** 按 recordedAt 倒序列出某用户的健康记录（含 healthSource） */
-export async function listByUser(
-  userId: string,
-): Promise<HealthRecordWithSource[]> {
+/**
+ * 按 recordedAt 倒序列出某用户的健康记录（含 healthSource）。
+ * task-49 F3：默认过滤软删（deletedAt: null）。
+ * task-49 D-1：带活跃连接计数（removedAt: null），驱动列表「待连接」徽标。
+ */
+export async function listByUser(userId: string) {
   return prisma.healthRecord.findMany({
-    where: { userId },
+    where: { userId, deletedAt: null },
     orderBy: { recordedAt: "desc" },
-    include: { healthSource: true },
+    include: {
+      healthSource: true,
+      _count: { select: { decisions: { where: { removedAt: null } } } },
+    },
   });
 }
 
@@ -235,5 +240,34 @@ export async function updateExtraction(
       pleaseConfirm: input.pleaseConfirm,
       extractionError: input.error === undefined ? undefined : input.error,
     },
+  });
+}
+
+/**
+ * task-49 F3：软删除留痕（不物理删除；列表过滤、详情按 404 处理）。
+ * 记录不存在抛 NOT_FOUND(404)；重复软删幂等（仅再次置时间戳）。
+ */
+export async function softDelete(recordId: string): Promise<HealthRecord> {
+  const cur = await prisma.healthRecord.findUnique({
+    where: { id: recordId },
+    select: { id: true },
+  });
+  if (!cur) {
+    throw new AppError("NOT_FOUND", "记录不存在", 404);
+  }
+  return prisma.healthRecord.update({
+    where: { id: recordId },
+    data: { deletedAt: new Date() },
+  });
+}
+
+/**
+ * task-49 D-1：「暂不处理」落库——用户明确知道但不接。
+ * 幂等：重复提交仅刷新时间戳。Cancel 不走这里（Cancel 无状态）。
+ */
+export async function dismissConnect(recordId: string): Promise<HealthRecord> {
+  return prisma.healthRecord.update({
+    where: { id: recordId },
+    data: { connectDismissedAt: new Date() },
   });
 }

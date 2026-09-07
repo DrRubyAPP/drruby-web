@@ -1,10 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { prisma } from "@/lib/db/prisma";
+import { create as createDecision } from "./decision.repo";
+import { connect, disconnect } from "./decisionHealthRecord.repo";
 import {
   advanceStatus,
   create,
+  dismissConnect,
   findById,
   listByUser,
+  softDelete,
   updateExtraction,
 } from "./healthRecord.repo";
 import { resetDatabase } from "./test-helpers";
@@ -323,5 +327,147 @@ describe("healthRecord.repo", () => {
     expect(found?.revisions).toHaveLength(1);
     expect(found?.revisions[0].diffSummary).toBe("fixed LDL value");
     expect(found?.parsedValues).toEqual({ corrected: true }); // current 指针已更新
+  });
+
+  describe("task-49 F3 · softDelete 软删除留痕", () => {
+    it("置 deletedAt 非空；listByUser 不再返回该记录；行保留", async () => {
+      const userId = await seedUser();
+      const rec = await create(userId, {
+        kind: "lab",
+        title: "soft delete me",
+        recordedAt: new Date("2026-09-01T00:00:00Z"),
+      });
+
+      const deleted = await softDelete(rec.id);
+      expect(deleted.deletedAt).toBeInstanceOf(Date);
+
+      // 列表过滤软删
+      const rows = await listByUser(userId);
+      expect(rows.find((r) => r.id === rec.id)).toBeUndefined();
+
+      // 行仍在（留痕，非物理删除）
+      const raw = await prisma.healthRecord.findUniqueOrThrow({
+        where: { id: rec.id },
+      });
+      expect(raw.deletedAt).not.toBeNull();
+    });
+
+    it("记录不存在抛 NOT_FOUND(404)", async () => {
+      await expect(softDelete("nonexistent_id")).rejects.toMatchObject({
+        code: "NOT_FOUND",
+        status: 404,
+      });
+    });
+
+    it("重复软删幂等（仅再次置时间戳，不抛错）", async () => {
+      const userId = await seedUser();
+      const rec = await create(userId, {
+        kind: "lab",
+        title: "delete twice",
+        recordedAt: new Date(),
+      });
+
+      await softDelete(rec.id);
+      const again = await softDelete(rec.id);
+      expect(again.deletedAt).toBeInstanceOf(Date);
+    });
+
+    it("软删记录不出现在列表，活跃记录保留", async () => {
+      const userId = await seedUser();
+      const keep = await create(userId, {
+        kind: "lab",
+        title: "keep me",
+        recordedAt: new Date("2026-09-01T00:00:00Z"),
+      });
+      const drop = await create(userId, {
+        kind: "lab",
+        title: "drop me",
+        recordedAt: new Date("2026-09-02T00:00:00Z"),
+      });
+
+      await softDelete(drop.id);
+      const rows = await listByUser(userId);
+      expect(rows).toHaveLength(1);
+      expect(rows[0].id).toBe(keep.id);
+    });
+  });
+
+  describe("task-49 D-1 · dismissConnect 暂不处理落库", () => {
+    it("置 connectDismissedAt 非空", async () => {
+      const userId = await seedUser();
+      const rec = await create(userId, {
+        kind: "lab",
+        title: "dismiss me",
+        recordedAt: new Date(),
+      });
+
+      const updated = await dismissConnect(rec.id);
+      expect(updated.connectDismissedAt).toBeInstanceOf(Date);
+    });
+
+    it("重复调用幂等不抛错（仅刷新时间戳）", async () => {
+      const userId = await seedUser();
+      const rec = await create(userId, {
+        kind: "lab",
+        title: "dismiss twice",
+        recordedAt: new Date(),
+      });
+
+      await dismissConnect(rec.id);
+      const again = await dismissConnect(rec.id);
+      expect(again.connectDismissedAt).toBeInstanceOf(Date);
+    });
+
+    it("connect 成功后 connectDismissedAt 清空（D-1 回到已处理状态）", async () => {
+      const userId = await seedUser();
+      const rec = await create(userId, {
+        kind: "lab",
+        title: "dismiss then connect",
+        recordedAt: new Date(),
+      });
+      const decision = await createDecision(userId, {
+        question: "Try Thermage?",
+      });
+
+      await dismissConnect(rec.id);
+      const dismissed = await prisma.healthRecord.findUniqueOrThrow({
+        where: { id: rec.id },
+      });
+      expect(dismissed.connectDismissedAt).not.toBeNull();
+
+      await connect(decision.id, rec.id, userId);
+      const after = await prisma.healthRecord.findUniqueOrThrow({
+        where: { id: rec.id },
+      });
+      expect(after.connectDismissedAt).toBeNull();
+    });
+  });
+
+  describe("task-49 · listByUser 活跃连接计数", () => {
+    it("_count.decisions：connect 后 =1，disconnect 后 =0", async () => {
+      const userId = await seedUser();
+      const rec = await create(userId, {
+        kind: "lab",
+        title: "count test",
+        recordedAt: new Date(),
+      });
+      const decision = await createDecision(userId, {
+        question: "Count connections?",
+      });
+
+      // 初始 0
+      let rows = await listByUser(userId);
+      expect(rows[0]._count.decisions).toBe(0);
+
+      // connect 后 1
+      await connect(decision.id, rec.id, userId);
+      rows = await listByUser(userId);
+      expect(rows[0]._count.decisions).toBe(1);
+
+      // disconnect（软删关联）后回到 0
+      await disconnect(decision.id, rec.id);
+      rows = await listByUser(userId);
+      expect(rows[0]._count.decisions).toBe(0);
+    });
   });
 });
