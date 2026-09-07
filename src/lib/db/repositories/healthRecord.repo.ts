@@ -180,6 +180,28 @@ export async function advanceStatus(
 }
 
 /**
+ * F6 同 hash 结果缓存（task-48）：查同用户、同 hash、已有成功抽取结果
+ * （EXTRACTED_DRAFT/CONFIRMED）的其他 Record —— 命中则复用其抽取结果，
+ * 不再打模型（省成本、去重复）。走 HealthRecord join healthSource.hash，
+ * 不新增表、不产生迁移（C-3）。
+ */
+export async function findDoneExtractionByHash(
+  userId: string,
+  hash: string,
+  excludeRecordId: string,
+): Promise<HealthRecord | null> {
+  return prisma.healthRecord.findFirst({
+    where: {
+      userId,
+      id: { not: excludeRecordId },
+      status: { in: ["EXTRACTED_DRAFT", "CONFIRMED"] },
+      healthSource: { hash },
+    },
+    orderBy: { updatedAt: "desc" },
+  });
+}
+
+/**
  * 更新抽取结果（Extractor 返回后写入；Contract §13）
  * 不走 append-only（append-only 仅用于用户纠错 → HealthRecordRevision）；
  * Extractor 输出是机器初值，可被下一次抽取覆盖。

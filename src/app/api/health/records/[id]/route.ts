@@ -2,10 +2,22 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/session";
 import { healthRecordRepo, healthRecordRevisionRepo } from "@/lib/db";
+import {
+  documentClassSchema,
+  extractionConfidenceSchema,
+} from "@/lib/db/enums";
 import { AppError, handle } from "@/lib/errors";
+import type { ExtractionResult, Extractor } from "@/lib/health/extractor";
+import { OpenAiExtractor } from "@/lib/health/extractor.openai";
 import { AdvanceStatusBody, CorrectRecordBody, toRecordDTO } from "../../dto";
 
 type Ctx = { params: Promise<{ id: string }> };
+
+// 便于测试注入 mock extractor（生产用 OpenAiExtractor，镜像 ask route 可注入模式）。
+let extractor: Extractor = new OpenAiExtractor();
+export function __setExtractor(e: Extractor): void {
+  extractor = e;
+}
 
 /**
  * Get health record detail
@@ -71,8 +83,8 @@ export const PATCH = handle(async (req: Request, ctx: Ctx) => {
 });
 
 /**
- * Retry extraction
- * @description 重新触发抽取（FAILED 态可 Retry；INSUFFICIENT 留 task-43）。V1 走 mock 抽取
+ * Trigger extraction（task-48 D-9：前端触发 + 轮询；并入原 Retry 语义）
+ * @description 触发真实抽取：置 PROCESSING → 同 hash 缓存命中则复用（F6），否则跑 OpenAiExtractor → 落 EXTRACTED_DRAFT（done）或 FAILED + error（failed，原件保留）。FAILED 态可 Retry（再 POST）。非法状态转移 409。越权 404
  * @response HealthRecordDTO
  * @auth bearer
  * @responseSet auth
@@ -86,11 +98,44 @@ export const POST = handle(async (_req: Request, ctx: Ctx) => {
   if (!existing || existing.userId !== user.id) {
     throw new AppError("NOT_FOUND", "记录不存在", 404);
   }
+  const source = existing.healthSource;
 
-  // task-42 V1：Retry 仅推进状态机回 PROCESSING；真实抽取由前端 / 异步任务调用 Extractor
-  // 这里不直接调用 Extractor（route 保持无副作用；mock 抽取在测试中通过 repo.updateExtraction 推进）
-  const updated = await healthRecordRepo.advanceStatus(id, "PROCESSING");
-  return NextResponse.json(
-    toRecordDTO({ ...updated, healthSource: existing.healthSource }),
-  );
+  // 置 PROCESSING（前端轮询可见）；非法转移（如 CONFIRMED/EXTRACTED_DRAFT）→ 409
+  await healthRecordRepo.advanceStatus(id, "PROCESSING");
+
+  // F6：打模型前先按 hash 查缓存，命中则复用已抽结果，不再打模型
+  const cached = source.hash
+    ? await healthRecordRepo.findDoneExtractionByHash(user.id, source.hash, id)
+    : null;
+  const result: ExtractionResult = cached
+    ? {
+        status: "done",
+        parsedValues: cached.parsedValues as Record<string, unknown>,
+        confidence: cached.confidence
+          ? extractionConfidenceSchema.parse(cached.confidence)
+          : undefined,
+        documentClass: cached.documentClass
+          ? documentClassSchema.parse(cached.documentClass)
+          : undefined,
+        pleaseConfirm: cached.pleaseConfirm,
+      }
+    : await extractor.extract(source);
+
+  // done → EXTRACTED_DRAFT（清空历史失败原因）；failed → FAILED + 用户安全文案
+  const updated =
+    result.status === "done"
+      ? await healthRecordRepo.updateExtraction(id, {
+          status: "EXTRACTED_DRAFT",
+          parsedValues: result.parsedValues as never,
+          confidence: result.confidence ?? null,
+          documentClass: result.documentClass ?? null,
+          pleaseConfirm: result.pleaseConfirm ?? [],
+          error: null,
+        })
+      : await healthRecordRepo.updateExtraction(id, {
+          status: "FAILED",
+          error: result.error ?? "抽取失败，请重试或手动录入",
+        });
+
+  return NextResponse.json(toRecordDTO({ ...updated, healthSource: source }));
 });
