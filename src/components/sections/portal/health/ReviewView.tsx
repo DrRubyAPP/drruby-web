@@ -346,7 +346,8 @@ export function ReviewView({ recordId }: { recordId: string }) {
         </div>
       )}
 
-      {/* C6 · Connect to a decision（仅 CONFIRMED 后可用；显式 Connect 护栏） */}
+      {/* C6/F2 · Understand this result（Contract §2 + A9：点击本身不创建也不连接，
+          仅打开三选一 dialog；与「是否存入 My Health」（Confirm）是两件独立的事） */}
       {data.status === "CONFIRMED" && (
         <div style={{ marginTop: 8 }}>
           <button
@@ -354,7 +355,7 @@ export function ReviewView({ recordId }: { recordId: string }) {
             onClick={() => setConnectOpen(true)}
             style={BTN_PRIMARY}
           >
-            {t("review.connect")}
+            {t("review.understand")}
           </button>
         </div>
       )}
@@ -370,6 +371,7 @@ export function ReviewView({ recordId }: { recordId: string }) {
         recordTitle={data.title}
         open={connectOpen}
         onClose={() => setConnectOpen(false)}
+        onDismissed={() => refetch()}
       />
     </>
   );

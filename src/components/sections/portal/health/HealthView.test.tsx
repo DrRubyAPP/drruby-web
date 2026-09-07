@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -8,15 +8,17 @@ vi.mock("@/hooks/useApi", () => ({
   useApi: (path: string | null) => useApiMock(path),
 }));
 
-// ── apiClient mock（LogForm/UploadDialog/PhotoUploadDialog 提交）──
+// ── apiClient mock（LogForm/UploadDialog/PhotoUploadDialog 提交 + task-49 删除）──
 const postMock = vi.fn();
 const postFormMock = vi.fn();
+const delMock = vi.fn();
 vi.mock("@/lib/api/client", () => ({
   apiClient: {
     get: vi.fn(),
     post: (...args: unknown[]) => postMock(...args),
     postForm: (...args: unknown[]) => postFormMock(...args),
     patch: vi.fn(),
+    del: (...args: unknown[]) => delMock(...args),
   },
 }));
 
@@ -81,6 +83,7 @@ const emptyApi = { data: [], error: null, loading: false, refetch: vi.fn() };
 beforeEach(() => {
   useApiMock.mockReset();
   postMock.mockReset();
+  delMock.mockReset();
   pushMock.mockReset();
   // 按 path 分流：records 返回记录，signals 走空态
   useApiMock.mockImplementation((path: string) =>
@@ -159,5 +162,125 @@ describe("HealthView · records 列表（task-47）", () => {
     expect(screen.queryByText(/June 12 lab upload/)).toBeNull();
     expect(screen.queryByText("Strength & muscle health")).toBeNull();
     expect(screen.queryByText("Lab Results")).toBeNull(); // BROWSE_CATEGORIES
+  });
+});
+
+// =============================================================================
+// task-49 T4 · D-1 待连接徽标 + F3 删除按钮
+// =============================================================================
+
+describe("HealthView · 待连接徽标 + 删除（task-49）", () => {
+  function renderWith(records: unknown[]) {
+    const refetch = vi.fn();
+    useApiMock.mockImplementation((path: string) =>
+      path === "/api/health/records"
+        ? { data: records, error: null, loading: false, refetch }
+        : emptyApi,
+    );
+    return { refetch, ...render(<HealthView />) };
+  }
+
+  it("CONFIRMED + 无活跃连接 + 未 dismiss → 显示待连接徽标", () => {
+    renderWith([
+      {
+        id: "rec_1",
+        sourceId: "src_1",
+        kind: "lab",
+        title: "Confirmed lab",
+        status: "CONFIRMED",
+        recordedAt: "2026-03-01T00:00:00.000Z",
+        connectedCount: 0,
+        connectDismissedAt: null,
+      },
+    ]);
+    expect(screen.getByText("connectHint")).toBeInTheDocument();
+  });
+
+  it("已「暂不处理」（connectDismissedAt 非空）→ 不显示徽标（D-1 抑制）", () => {
+    renderWith([
+      {
+        id: "rec_1",
+        sourceId: "src_1",
+        kind: "lab",
+        title: "Dismissed lab",
+        status: "CONFIRMED",
+        recordedAt: "2026-03-01T00:00:00.000Z",
+        connectedCount: 0,
+        connectDismissedAt: "2026-09-01T00:00:00.000Z",
+      },
+    ]);
+    expect(screen.queryByText("connectHint")).toBeNull();
+  });
+
+  it("已有活跃连接（connectedCount>0）→ 不显示徽标", () => {
+    renderWith([
+      {
+        id: "rec_1",
+        sourceId: "src_1",
+        kind: "lab",
+        title: "Connected lab",
+        status: "CONFIRMED",
+        recordedAt: "2026-03-01T00:00:00.000Z",
+        connectedCount: 1,
+        connectDismissedAt: null,
+      },
+    ]);
+    expect(screen.queryByText("connectHint")).toBeNull();
+  });
+
+  it("非 CONFIRMED 态不显示徽标", () => {
+    renderWith([
+      {
+        id: "rec_1",
+        sourceId: "src_1",
+        kind: "lab",
+        title: "Draft lab",
+        status: "EXTRACTED_DRAFT",
+        recordedAt: "2026-03-01T00:00:00.000Z",
+        connectedCount: 0,
+        connectDismissedAt: null,
+      },
+    ]);
+    expect(screen.queryByText("connectHint")).toBeNull();
+  });
+
+  it("点删除 → confirm 后 DELETE 被调 + 列表 refetch（F3）", async () => {
+    delMock.mockResolvedValue({});
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    const { refetch } = renderWith([
+      {
+        id: "rec_1",
+        sourceId: "src_1",
+        kind: "lab",
+        title: "To delete",
+        status: "CONFIRMED",
+        recordedAt: "2026-03-01T00:00:00.000Z",
+      },
+    ]);
+
+    fireEvent.click(screen.getByRole("button", { name: "delete" }));
+    await waitFor(() =>
+      expect(delMock).toHaveBeenCalledWith("/api/health/records/rec_1"),
+    );
+    expect(refetch).toHaveBeenCalled();
+    vi.mocked(window.confirm).mockRestore();
+  });
+
+  it("confirm 取消 → 不发 DELETE", () => {
+    vi.spyOn(window, "confirm").mockReturnValue(false);
+    renderWith([
+      {
+        id: "rec_1",
+        sourceId: "src_1",
+        kind: "lab",
+        title: "Keep me",
+        status: "CONFIRMED",
+        recordedAt: "2026-03-01T00:00:00.000Z",
+      },
+    ]);
+
+    fireEvent.click(screen.getByRole("button", { name: "delete" }));
+    expect(delMock).not.toHaveBeenCalled();
+    vi.mocked(window.confirm).mockRestore();
   });
 });

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { EmptyState, ErrorState, Skeleton } from "@/components/api";
 import { useApi } from "@/hooks/useApi";
 import { Link, useRouter } from "@/i18n/navigation";
+import { apiClient } from "@/lib/api/client";
 import type { HealthRecordDto, SignalDto } from "./dto";
 import { LogForm } from "./LogForm";
 import { mapHealthRecords, mapSignals } from "./mappers";
@@ -90,6 +91,13 @@ export function HealthView() {
   const signalRows = mapSignals(signals.data ?? []);
   const recordRows = mapHealthRecords(records.data ?? []);
 
+  /** F3 软删：确认后 DELETE，列表 refetch（留痕由服务端保证） */
+  async function remove(id: string) {
+    if (!window.confirm(tr("deleteConfirm"))) return;
+    await apiClient.del(`/api/health/records/${id}`);
+    records.refetch();
+  }
+
   return (
     <>
       <h1>{t("title")}</h1>
@@ -136,30 +144,56 @@ export function HealthView() {
         ) : (
           <div className="card">
             {recordRows.map((r) => (
-              <Link
+              <div
                 key={r.id}
-                href={`/portal/health/review/${r.id}`}
-                className="rec-row"
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "space-between",
                   gap: 12,
                   padding: "12px 0",
                   borderBottom: "1px solid #f0ece9",
-                  textDecoration: "none",
-                  color: "inherit",
                 }}
               >
-                <span style={{ minWidth: 0 }}>
-                  <span style={{ display: "block", fontSize: 14.5 }}>
-                    {r.title}
+                <Link
+                  href={`/portal/health/review/${r.id}`}
+                  className="rec-row"
+                  style={{
+                    flex: 1,
+                    minWidth: 0,
+                    textDecoration: "none",
+                    color: "inherit",
+                  }}
+                >
+                  <span style={{ minWidth: 0 }}>
+                    <span style={{ display: "block", fontSize: 14.5 }}>
+                      {r.title}
+                    </span>
+                    <span style={{ fontSize: 12, color: "#a89a95" }}>
+                      {t(`kindLabel.${r.kind}`)}
+                      {r.source?.fileName ? ` · ${r.source.fileName}` : ""}
+                    </span>
                   </span>
-                  <span style={{ fontSize: 12, color: "#a89a95" }}>
-                    {t(`kindLabel.${r.kind}`)}
-                    {r.source?.fileName ? ` · ${r.source.fileName}` : ""}
-                  </span>
-                </span>
+                </Link>
+                {/* D-1 待连接徽标：CONFIRMED 且无活跃连接且未「暂不处理」 */}
+                {r.status === "CONFIRMED" &&
+                  r.connectedCount === 0 &&
+                  !r.connectDismissedAt && (
+                    <span
+                      style={{
+                        flexShrink: 0,
+                        fontSize: 10,
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        letterSpacing: ".08em",
+                        color: "var(--p-red)",
+                        border: "1px solid var(--p-red)",
+                        borderRadius: 999,
+                        padding: "2px 8px",
+                      }}
+                    >
+                      {tr("connectHint")}
+                    </span>
+                  )}
                 <span
                   style={{
                     flexShrink: 0,
@@ -172,7 +206,25 @@ export function HealthView() {
                 >
                   {tr(r.statusKey)}
                 </span>
-              </Link>
+                {/* F3 删除按钮（软删留痕） */}
+                <button
+                  type="button"
+                  aria-label={tr("delete")}
+                  onClick={() => remove(r.id)}
+                  style={{
+                    flexShrink: 0,
+                    fontSize: 16,
+                    lineHeight: 1,
+                    color: "#a89a95",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: "2px 6px",
+                  }}
+                >
+                  ×
+                </button>
+              </div>
             ))}
           </div>
         )}

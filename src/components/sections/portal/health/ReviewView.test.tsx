@@ -317,3 +317,60 @@ describe("ReviewView · 抽取触发/轮询/FAILED（task-48）", () => {
     expect(pushMock).toHaveBeenCalledTimes(2);
   });
 });
+
+// =============================================================================
+// task-49 T4 · F2 Understand this result（Handoff Flow B + A9）
+// =============================================================================
+
+describe("ReviewView · Understand this result（task-49 F2/A9）", () => {
+  beforeEach(() => {
+    useApiMock.mockReset();
+    patchMock.mockReset();
+    postMock.mockReset();
+    pushMock.mockReset();
+  });
+
+  it("CONFIRMED 态显示「Understand this result」按钮（替换旧 review.connect）", () => {
+    useApiMock.mockReturnValue({
+      data: { ...RECORD, status: "CONFIRMED" },
+      error: null,
+      loading: false,
+      refetch: vi.fn(),
+    });
+    render(<ReviewView recordId="r1" />);
+    expect(screen.getByText("review.understand")).toBeInTheDocument();
+  });
+
+  it("点击 Understand 仅打开三选一 dialog，不触发任何网络写请求（A9）", () => {
+    // 按 path 分流：record 详情 + dialog 内 decisions 列表
+    useApiMock.mockImplementation((path: string) =>
+      path === "/api/decisions"
+        ? { data: [], error: null, loading: false, refetch: vi.fn() }
+        : {
+            data: { ...RECORD, status: "CONFIRMED" },
+            error: null,
+            loading: false,
+            refetch: vi.fn(),
+          },
+    );
+    render(<ReviewView recordId="r1" />);
+
+    fireEvent.click(screen.getByText("review.understand"));
+    // dialog 打开（title 可见）
+    expect(screen.getByText("connect.title")).toBeInTheDocument();
+    // A9：点击本身不创建也不连接任何 Decision
+    expect(postMock).not.toHaveBeenCalled();
+    expect(patchMock).not.toHaveBeenCalled();
+  });
+
+  it("非 CONFIRMED 态不显示 Understand 按钮", () => {
+    useApiMock.mockReturnValue({
+      data: RECORD, // EXTRACTED_DRAFT
+      error: null,
+      loading: false,
+      refetch: vi.fn(),
+    });
+    render(<ReviewView recordId="r1" />);
+    expect(screen.queryByText("review.understand")).toBeNull();
+  });
+});

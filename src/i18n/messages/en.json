@@ -1343,6 +1343,7 @@
       "retrying": "Retrying…",
       "correct": "Correct this record",
       "connect": "Connect to a decision",
+      "understand": "Understand this result",
       "confirmed": "This record is confirmed.",
       "inReview": "Marked for review.",
       "processing": "Reading your document… this can take up to a minute.",
@@ -1434,6 +1435,9 @@
       "title": "Record not found",
       "hint": "It may have been removed."
     },
+    "connectHint": "Connect?",
+    "delete": "Delete record",
+    "deleteConfirm": "Delete this record? It will be removed from your list but kept for traceability.",
     "invalidJson": "Invalid JSON in corrected values"
   },
   "decisions": {

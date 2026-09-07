@@ -1349,6 +1349,7 @@
       "retrying": "重新抽取中…",
       "correct": "纠正这条记录",
       "connect": "关联到决策",
+      "understand": "理解这份结果",
       "confirmed": "这条记录已确认。",
       "inReview": "已标记待复核。",
       "processing": "正在读取你的文档……最多约需一分钟。",
@@ -1440,6 +1441,9 @@
       "title": "记录未找到",
       "hint": "可能已被删除。"
     },
+    "connectHint": "待连接",
+    "delete": "删除记录",
+    "deleteConfirm": "删除这条记录？它将从列表移除，但会保留痕迹。",
     "invalidJson": "纠正内容 JSON 格式无效"
   },
   "aiState": {
