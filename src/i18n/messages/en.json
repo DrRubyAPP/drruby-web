@@ -1399,7 +1399,8 @@
       "PROCESSING": "Processing…",
       "EXTRACTED_DRAFT": "Draft — review needed",
       "USER_REVIEW": "In review",
-      "CONFIRMED": "Confirmed"
+      "CONFIRMED": "Confirmed",
+      "FAILED": "Extraction failed"
     },
     "confidence": {
       "High": "High confidence",

@@ -201,6 +201,49 @@ describe("healthRecord.repo", () => {
     ).rejects.toThrow();
   });
 
+  it("advanceStatus 支持 FAILED：PROCESSING→FAILED，FAILED→PROCESSING（Retry，task-48 F5）", async () => {
+    const userId = await seedUser();
+    const rec = await create(userId, {
+      kind: "lab",
+      title: "failed path",
+      recordedAt: new Date(),
+    });
+    await advanceStatus(rec.id, "PROCESSING");
+    const f = await advanceStatus(rec.id, "FAILED");
+    expect(f.status).toBe("FAILED");
+    const r = await advanceStatus(rec.id, "PROCESSING"); // Retry 合法
+    expect(r.status).toBe("PROCESSING");
+  });
+
+  it("advanceStatus 拒绝非法转移（SOURCE_UPLOADED→CONFIRMED 抛 ILLEGAL_STATUS_TRANSITION，task-48 F5）", async () => {
+    const userId = await seedUser();
+    const rec = await create(userId, {
+      kind: "lab",
+      title: "illegal transition",
+      recordedAt: new Date(),
+    });
+    await expect(advanceStatus(rec.id, "CONFIRMED")).rejects.toMatchObject({
+      code: "ILLEGAL_STATUS_TRANSITION",
+    });
+    // PROCESSING→CONFIRMED 也非法（必须先到 EXTRACTED_DRAFT）
+    await advanceStatus(rec.id, "PROCESSING");
+    await expect(advanceStatus(rec.id, "CONFIRMED")).rejects.toMatchObject({
+      code: "ILLEGAL_STATUS_TRANSITION",
+    });
+    // CONFIRMED 是终态，无合法后继
+    await advanceStatus(rec.id, "EXTRACTED_DRAFT");
+    await advanceStatus(rec.id, "CONFIRMED");
+    await expect(advanceStatus(rec.id, "PROCESSING")).rejects.toMatchObject({
+      code: "ILLEGAL_STATUS_TRANSITION",
+    });
+  });
+
+  it("advanceStatus 记录不存在抛 NOT_FOUND（task-48 F5）", async () => {
+    await expect(
+      advanceStatus("nonexistent-id", "PROCESSING"),
+    ).rejects.toMatchObject({ code: "NOT_FOUND" });
+  });
+
   it("updateExtraction 写入抽取结果（confidence/documentClass/parsedValues）", async () => {
     const userId = await seedUser();
     const rec = await create(userId, {

@@ -11,6 +11,7 @@ import {
   ocrStatusSchema,
 } from "@/lib/db/enums";
 import { prisma } from "@/lib/db/prisma";
+import { AppError } from "@/lib/errors";
 import type { HealthRecord, Prisma } from "~prisma/client";
 
 export type HealthRecordWithProvenance = Prisma.HealthRecordGetPayload<{
@@ -131,14 +132,47 @@ export async function findById(
 }
 
 /**
- * 推进状态机（Contract §12）：SOURCE_UPLOADED→PROCESSING→EXTRACTED_DRAFT→USER_REVIEW→CONFIRMED
- * 不做合法性校验（调用方负责），仅做枚举 parse 防错。
+ * 合法状态转移表（Contract §12；task-48 F5 补 FAILED）：
+ * - SOURCE_UPLOADED → PROCESSING（触发抽取）
+ * - PROCESSING → EXTRACTED_DRAFT | FAILED（抽取终态）
+ * - EXTRACTED_DRAFT → USER_REVIEW | CONFIRMED（可直接 confirm）
+ * - USER_REVIEW → CONFIRMED
+ * - FAILED → PROCESSING（Retry，§13 失败恢复）
+ * - CONFIRMED 为终态；手动录入 create 时直落 CONFIRMED，不经本表
+ */
+const LEGAL_TRANSITIONS: Record<HealthRecordStatus, HealthRecordStatus[]> = {
+  SOURCE_UPLOADED: ["PROCESSING"],
+  PROCESSING: ["EXTRACTED_DRAFT", "FAILED"],
+  EXTRACTED_DRAFT: ["USER_REVIEW", "CONFIRMED"],
+  USER_REVIEW: ["CONFIRMED"],
+  FAILED: ["PROCESSING"],
+  CONFIRMED: [],
+};
+
+/**
+ * 推进状态机（Contract §12）—— 带转移合法性校验（task-48 F5）。
+ * 非法转移抛 `ILLEGAL_STATUS_TRANSITION`(409)；记录不存在抛 `NOT_FOUND`(404)。
  */
 export async function advanceStatus(
   recordId: string,
   next: HealthRecordStatus,
 ): Promise<HealthRecord> {
   healthRecordStatusSchema.parse(next);
+  const cur = await prisma.healthRecord.findUnique({
+    where: { id: recordId },
+    select: { status: true },
+  });
+  if (!cur) {
+    throw new AppError("NOT_FOUND", "记录不存在", 404);
+  }
+  const from = healthRecordStatusSchema.parse(cur.status);
+  if (!LEGAL_TRANSITIONS[from].includes(next)) {
+    throw new AppError(
+      "ILLEGAL_STATUS_TRANSITION",
+      `非法状态转移：${from} → ${next}`,
+      409,
+    );
+  }
   return prisma.healthRecord.update({
     where: { id: recordId },
     data: { status: next },

@@ -117,11 +117,16 @@ export function canConfirm(status: HealthRecordStatus): boolean {
   return status === "EXTRACTED_DRAFT" || status === "USER_REVIEW";
 }
 
-/** Record 是否处于失败可重试状态（V1 占位：FAILED 态在 task-42 通过 mock 抽取触发）。 */
+/**
+ * Record 是否处于失败可重试状态（§13 失败恢复：FAILED → PROCESSING 重试）。
+ * task-48 起状态机含 FAILED，Retry 走 trigger 端点（POST /api/health/records/[id]）。
+ */
 export function canRetry(status: HealthRecordStatus): boolean {
-  // task-42 落地的状态机不含 FAILED；FAILED 由抽取失败回退到 PROCESSING 重试
-  // 此处保留语义钩子，task-43 接入真实状态机后启用
-  return status === "SOURCE_UPLOADED" || status === "PROCESSING";
+  return (
+    status === "SOURCE_UPLOADED" ||
+    status === "PROCESSING" ||
+    status === "FAILED"
+  );
 }
 
 /**

@@ -1405,7 +1405,8 @@
       "PROCESSING": "处理中…",
       "EXTRACTED_DRAFT": "草稿——待复核",
       "USER_REVIEW": "复核中",
-      "CONFIRMED": "已确认"
+      "CONFIRMED": "已确认",
+      "FAILED": "抽取失败"
     },
     "confidence": {
       "High": "高置信",

@@ -435,13 +435,14 @@ export type OcrStatus = z.infer<typeof ocrStatusSchema>;
 // My Health 摄入域（Contract §2/§12-§14）— task-42
 // =============================================================================
 
-/** health_record.status — Contract §12 Source→Record 状态机 */
+/** health_record.status — Contract §12 Source→Record 状态机（task-48 补 FAILED，§13 失败恢复） */
 export const healthRecordStatusSchema = z.enum([
   "SOURCE_UPLOADED",
   "PROCESSING",
   "EXTRACTED_DRAFT",
   "USER_REVIEW",
   "CONFIRMED",
+  "FAILED",
 ]);
 export type HealthRecordStatus = z.infer<typeof healthRecordStatusSchema>;
 

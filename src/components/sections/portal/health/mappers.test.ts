@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { ExtractionConfidence, HealthRecordStatus } from "@/lib/db/enums";
 import {
+  canConfirm,
+  canRetry,
   confidenceKey,
   mapHormones,
   mapSignals,
@@ -131,6 +133,7 @@ const ALL_STATUSES: HealthRecordStatus[] = [
   "EXTRACTED_DRAFT",
   "USER_REVIEW",
   "CONFIRMED",
+  "FAILED",
 ];
 
 const ALL_CONFIDENCES: ExtractionConfidence[] = [
@@ -157,6 +160,27 @@ describe("statusKey", () => {
     expect(statusKey("EXTRACTED_DRAFT")).toBe("status.EXTRACTED_DRAFT");
     expect(statusKey("USER_REVIEW")).toBe("status.USER_REVIEW");
     expect(statusKey("CONFIRMED")).toBe("status.CONFIRMED");
+    expect(statusKey("FAILED")).toBe("status.FAILED");
+  });
+});
+
+describe("canRetry / canConfirm（task-48 F5：FAILED 态可 Retry）", () => {
+  it("canRetry：SOURCE_UPLOADED/PROCESSING/FAILED 可重试，其余不可", () => {
+    expect(canRetry("SOURCE_UPLOADED")).toBe(true);
+    expect(canRetry("PROCESSING")).toBe(true);
+    expect(canRetry("FAILED")).toBe(true);
+    expect(canRetry("EXTRACTED_DRAFT")).toBe(false);
+    expect(canRetry("USER_REVIEW")).toBe(false);
+    expect(canRetry("CONFIRMED")).toBe(false);
+  });
+
+  it("canConfirm：仅 EXTRACTED_DRAFT/USER_REVIEW 可确认", () => {
+    expect(canConfirm("EXTRACTED_DRAFT")).toBe(true);
+    expect(canConfirm("USER_REVIEW")).toBe(true);
+    expect(canConfirm("FAILED")).toBe(false);
+    expect(canConfirm("SOURCE_UPLOADED")).toBe(false);
+    expect(canConfirm("PROCESSING")).toBe(false);
+    expect(canConfirm("CONFIRMED")).toBe(false);
   });
 });
 
