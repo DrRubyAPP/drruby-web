@@ -6,10 +6,13 @@ import { observationDirectionSchema } from "@/lib/db/enums";
 import { AppError, handle } from "@/lib/errors";
 import { toEntryDTO } from "../../../dto";
 
+const MAX_OBSERVATION_PHOTOS = 5;
+
 /** §28 Observation synthesis 附件结构（与 POST 端点一致） */
 const observationSynthesisSchema = z.object({
   photos: z
     .array(z.object({ recordId: z.string(), summary: z.string().optional() }))
+    .max(MAX_OBSERVATION_PHOTOS)
     .optional(),
   recordRefs: z
     .array(z.object({ recordId: z.string(), summary: z.string().optional() }))

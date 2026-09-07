@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { EmptyState, ErrorState, Skeleton } from "@/components/api";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { ConnectedRecordsPanel } from "@/components/sections/portal/health/ConnectedRecordsPanel";
@@ -137,6 +137,11 @@ export function DecisionDetailView({ id }: { id: string }) {
     null, // 服务端 outcome 在 data.outcome；本地仅跟踪用户未提交的选择
   );
   const [nextStepDraft, setNextStepDraft] = useState("");
+  const [showHealthContextGate, setShowHealthContextGate] = useState(false);
+  const [pendingGateOutcome, setPendingGateOutcome] =
+    useState<DecisionOutcome | null>(null);
+  const [healthContextConfirmedOverride, setHealthContextConfirmedOverride] =
+    useState(false);
   const [reclassifyConfirm, setReclassifyConfirm] = useState(false);
   // 通用 ConfirmDialog 开关（替代 window.confirm）
   const [stopConfirmOpen, setStopConfirmOpen] = useState(false);
@@ -196,6 +201,22 @@ export function DecisionDetailView({ id }: { id: string }) {
     { onSuccess: () => refetch() },
   );
 
+  const confirmHealthContext = useMutation(
+    (_input: void) =>
+      apiClient.post<HealthContextDto>(`/api/decisions/${id}/health-context`),
+    {
+      onSuccess: () => {
+        setHealthContextConfirmedOverride(true);
+        setShowHealthContextGate(false);
+        if (pendingGateOutcome) {
+          setDecideOutcome(pendingGateOutcome);
+          setPendingGateOutcome(null);
+        }
+        refetchHealthContext();
+      },
+    },
+  );
+
   // Observation 追加（append-only）— task-44 §28 改走专属 /observations 端点（在 ObservationForm 内部）
   // 旧 /entries 端点的 inline 表单已退役；ObservationForm 自包含 POST + PATCH mutation
 
@@ -246,6 +267,14 @@ export function DecisionDetailView({ id }: { id: string }) {
     },
   );
 
+  // Confirm 后立即放行 pending outcome；后续若用户修改问卷导致状态回到 unconfirmed，
+  // 以服务端最新状态为准，清掉本地放行标记。
+  useEffect(() => {
+    if (healthContextData?.status === "unconfirmed") {
+      setHealthContextConfirmedOverride(false);
+    }
+  }, [healthContextData?.status]);
+
   if (loading) return <Skeleton lines={6} />;
   if (error) return <ErrorState message={error.message} onRetry={refetch} />;
   if (!data)
@@ -268,10 +297,27 @@ export function DecisionDetailView({ id }: { id: string }) {
       : null;
   // Decide section 本地选择的 outcome（与 data.outcome 同步：用户改选后立即更新 state）
   const currentOutcomeSelection = decideOutcome ?? data.outcome;
+  const latestHealthContextStatus =
+    healthContextData?.status ?? data.healthContextStatus ?? "unconfirmed";
+  const isHealthContextConfirmed =
+    healthContextConfirmedOverride || latestHealthContextStatus === "confirmed";
 
   // task-43 五态：mapAiStateDto 把 server DTO 转三视角 AiStateView
   const aiViews = aiStateData ? mapAiStateDto(aiStateData) : null;
   const nextStepValue = nextStepDraft || data.nextStep || "";
+
+  function openHealthContextGate(outcome?: DecisionOutcome) {
+    setPendingGateOutcome(outcome ?? null);
+    setShowHealthContextGate(true);
+  }
+
+  function handleOutcomeClick(outcome: DecisionOutcome) {
+    if (!isHealthContextConfirmed) {
+      openHealthContextGate(outcome);
+      return;
+    }
+    setDecideOutcome(outcome);
+  }
 
   return (
     <div>
@@ -620,6 +666,57 @@ export function DecisionDetailView({ id }: { id: string }) {
               </div>
             )}
 
+            {showHealthContextGate && !isHealthContextConfirmed && (
+              <div
+                className="card"
+                style={{ background: "#fdf6ec", borderColor: "#f0c674" }}
+              >
+                <b style={{ fontSize: 13.5 }}>
+                  {tr("decide.healthContextGatePrompt")}
+                </b>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 10,
+                    flexWrap: "wrap",
+                    marginTop: 10,
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => confirmHealthContext.mutate(NO_INPUT)}
+                    disabled={confirmHealthContext.loading}
+                    style={SUBMIT_BTN}
+                  >
+                    {confirmHealthContext.loading
+                      ? tr("decide.healthContextConfirming")
+                      : tr("decide.healthContextConfirmNoChanges")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTab("yourself");
+                      setShowHealthContextGate(false);
+                    }}
+                    style={{
+                      ...SUBMIT_BTN,
+                      background: "transparent",
+                      color: "var(--p-red)",
+                      border: "1px solid var(--p-red)",
+                    }}
+                  >
+                    {tr("decide.healthContextModify")}
+                  </button>
+                </div>
+                {confirmHealthContext.error && (
+                  <ErrorState
+                    message={confirmHealthContext.error.message}
+                    onRetry={() => confirmHealthContext.reset()}
+                  />
+                )}
+              </div>
+            )}
+
             {/* F3 outcome 选择 */}
             <div className="ask-ex" style={{ marginBottom: 12 }}>
               {outcomesForKind(data.decisionKind).map((o) => (
@@ -632,7 +729,7 @@ export function DecisionDetailView({ id }: { id: string }) {
                     needsFreshnessCheck ||
                     checkFreshness.loading
                   }
-                  onClick={() => setDecideOutcome(o)}
+                  onClick={() => handleOutcomeClick(o)}
                   style={
                     currentOutcomeSelection === o ? ACTIVE_CHIP : undefined
                   }
@@ -666,12 +763,17 @@ export function DecisionDetailView({ id }: { id: string }) {
               type="button"
               disabled={
                 update.loading ||
+                !isHealthContextConfirmed ||
                 !currentOutcomeSelection ||
                 (currentOutcomeSelection === "decided_on_next_step" &&
                   nextStepValue.trim().length === 0)
               }
               onClick={() => {
                 if (!currentOutcomeSelection) return;
+                if (!isHealthContextConfirmed) {
+                  openHealthContextGate(currentOutcomeSelection);
+                  return;
+                }
                 update.mutate({
                   outcome: currentOutcomeSelection,
                   nextStep:
@@ -1100,6 +1202,7 @@ export function DecisionDetailView({ id }: { id: string }) {
                                 id: e.id,
                                 text: e.text,
                                 direction: e.direction ?? null,
+                                synthesis: e.synthesis ?? null,
                               }}
                               onSaved={() => {
                                 setEditingEntryId(null);

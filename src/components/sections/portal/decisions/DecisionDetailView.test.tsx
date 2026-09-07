@@ -326,3 +326,94 @@ describe("DecisionDetailView · task-50 T8 删除入口", () => {
     expect(pushMock).not.toHaveBeenCalled();
   });
 });
+
+describe("DecisionDetailView · task-52 DECIDE Health Context gate", () => {
+  it("未 confirmed 时点击 Type A outcome 只显示 gate，不选择也不提交", () => {
+    setEndpoints({
+      decision: { ...DECISION, decisionKind: "action" },
+      healthContext: { healthContext: null, status: "unconfirmed" },
+    });
+    render(<DecisionDetailView id="d1" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Decided to do it" }));
+
+    expect(
+      screen.getByText("decide.healthContextGatePrompt"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /^decide.submit$/ }),
+    ).toBeDisabled();
+    expect(postMock).not.toHaveBeenCalled();
+  });
+
+  it("Type B come_back_later 同样触发 Health Context gate", () => {
+    setEndpoints({
+      decision: { ...DECISION, decisionKind: "exploration" },
+      healthContext: { healthContext: null, status: "unconfirmed" },
+    });
+    render(<DecisionDetailView id="d1" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Come back later" }));
+
+    expect(
+      screen.getByText("decide.healthContextGatePrompt"),
+    ).toBeInTheDocument();
+    expect(postMock).not.toHaveBeenCalled();
+  });
+
+  it("Confirm no changes 成功后继续原 outcome 提交流程", async () => {
+    postMock
+      .mockResolvedValueOnce({ status: "confirmed" })
+      .mockResolvedValueOnce({ ok: true });
+    setEndpoints({
+      decision: { ...DECISION, decisionKind: "action" },
+      healthContext: { healthContext: null, status: "unconfirmed" },
+    });
+    render(<DecisionDetailView id="d1" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Decided to do it" }));
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /^decide.healthContextConfirmNoChanges$/,
+      }),
+    );
+
+    await waitFor(() =>
+      expect(postMock).toHaveBeenCalledWith("/api/decisions/d1/health-context"),
+    );
+    fireEvent.click(screen.getByRole("button", { name: /^decide.submit$/ }));
+
+    await waitFor(() => expect(postMock).toHaveBeenCalledTimes(2));
+    expect(postMock).toHaveBeenLastCalledWith(
+      "/api/decisions/d1",
+      expect.objectContaining({
+        outcome: "decided_to_do_it",
+        nextStep: null,
+      }),
+    );
+  });
+
+  it("已 confirmed 时 outcome 可直接选择并提交", async () => {
+    postMock.mockResolvedValueOnce({ ok: true });
+    setEndpoints({
+      decision: { ...DECISION, decisionKind: "action" },
+      healthContext: { healthContext: null, status: "confirmed" },
+    });
+    render(<DecisionDetailView id="d1" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Decided not to" }));
+    fireEvent.click(screen.getByRole("button", { name: /^decide.submit$/ }));
+
+    await waitFor(() => expect(postMock).toHaveBeenCalledTimes(1));
+    expect(postMock).toHaveBeenCalledWith(
+      "/api/decisions/d1",
+      expect.objectContaining({
+        outcome: "decided_not_to",
+        nextStep: null,
+      }),
+    );
+    expect(
+      screen.queryByText("decide.healthContextGatePrompt"),
+    ).not.toBeInTheDocument();
+  });
+});

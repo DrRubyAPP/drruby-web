@@ -17,23 +17,34 @@ vi.mock("@/i18n/navigation", () => ({
 
 // ── apiClient mock ──
 const postMock = vi.fn();
+const postFormMock = vi.fn();
 const patchMock = vi.fn();
 vi.mock("@/lib/api/client", () => ({
   apiClient: {
     get: vi.fn(),
     post: (...args: unknown[]) => postMock(...args),
+    postForm: (...args: unknown[]) => postFormMock(...args),
     patch: (...args: unknown[]) => patchMock(...args),
     put: vi.fn(),
     del: vi.fn(),
   },
 }));
 
+vi.mock("browser-image-compression", () => ({
+  default: vi.fn(async (file: File) => file),
+}));
+
 import { ObservationForm } from "./ObservationForm";
 
 beforeEach(() => {
   postMock.mockReset();
+  postFormMock.mockReset();
   patchMock.mockReset();
 });
+
+function makePhoto(name: string, type = "image/jpeg") {
+  return new File(["photo"], name, { type });
+}
 
 describe("ObservationForm · task-44 §28（sub-plan-3 T9）", () => {
   it("渲染 4 个 direction 按钮 + 文本域 + 提交按钮（新建模式）", () => {
@@ -228,5 +239,88 @@ describe("ObservationForm · task-44 §28（sub-plan-3 T9）", () => {
     expect((submittingBtn as HTMLButtonElement).disabled).toBe(true);
     fireEvent.click(submittingBtn);
     expect(postMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("选择照片后调用 /api/health/sources，提交时带 synthesis.photos", async () => {
+    postFormMock.mockResolvedValueOnce({
+      sourceId: "src-1",
+      recordId: "rec-1",
+    });
+    postMock.mockResolvedValueOnce({ id: "e1" });
+    render(<ObservationForm decisionId="d1" />);
+
+    fireEvent.change(screen.getByLabelText("observation.photosLabel"), {
+      target: { files: [makePhoto("skin.jpg")] },
+    });
+
+    await waitFor(() => expect(postFormMock).toHaveBeenCalledTimes(1));
+    expect(postFormMock).toHaveBeenCalledWith(
+      "/api/health/sources",
+      expect.any(FormData),
+    );
+    expect(screen.getByText(/rec-1/)).toBeInTheDocument();
+
+    fireEvent.change(
+      screen.getByPlaceholderText("observation.textPlaceholder"),
+      {
+        target: { value: "photo note" },
+      },
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: /^observation.submit$/ }),
+    );
+
+    await waitFor(() => expect(postMock).toHaveBeenCalledTimes(1));
+    expect(postMock).toHaveBeenCalledWith("/api/decisions/d1/observations", {
+      text: "photo note",
+      direction: undefined,
+      synthesis: {
+        photos: [{ recordId: "rec-1", summary: "skin.jpg" }],
+      },
+    });
+  });
+
+  it("超过 5 张照片时阻止添加并显示错误", async () => {
+    render(<ObservationForm decisionId="d1" />);
+
+    fireEvent.change(screen.getByLabelText("observation.photosLabel"), {
+      target: {
+        files: [
+          makePhoto("1.jpg"),
+          makePhoto("2.jpg"),
+          makePhoto("3.jpg"),
+          makePhoto("4.jpg"),
+          makePhoto("5.jpg"),
+          makePhoto("6.jpg"),
+        ],
+      },
+    });
+
+    await waitFor(() =>
+      expect(screen.getByText("observation.photoTooMany")).toBeInTheDocument(),
+    );
+    expect(postFormMock).not.toHaveBeenCalled();
+  });
+
+  it("修正模式回显 existingEntry.synthesis.photos", () => {
+    render(
+      <ObservationForm
+        decisionId="d1"
+        existingEntry={{
+          id: "e1",
+          text: "existing",
+          direction: null,
+          synthesis: {
+            photos: [{ recordId: "rec-1", summary: "front photo" }],
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByText(/front photo/)).toBeInTheDocument();
+    expect(screen.getByText(/rec-1/)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "observation.photoRemove" }),
+    ).toBeInTheDocument();
   });
 });

@@ -13,6 +13,13 @@ vi.mock("@/lib/auth/session", async () =>
   (await import("@/lib/test/route-helpers")).sessionModuleMock(),
 );
 
+function makePhotos(count: number) {
+  return Array.from({ length: count }, (_, index) => ({
+    recordId: `rec-${index + 1}`,
+    summary: `photo-${index + 1}`,
+  }));
+}
+
 /** 直接造 OBSERVING + observeBaseline(weekly) 的 decision 供 observation 测试 */
 async function createObservingDecision(
   userId: string,
@@ -80,6 +87,40 @@ describe("POST /api/decisions/[id]/observations", () => {
     const body = await res.json();
     expect(body.direction).toBe(null);
     expect(body.text).toBe("noted skin texture change");
+  });
+
+  it("synthesis.photos 接收 5 张照片", async () => {
+    const { POST } = await import("./route");
+    const owner = await makeUser("obs-five-photos@example.com");
+    const decision = await createObservingDecision(owner.id);
+
+    asUser(owner.id);
+    const res = await POST(
+      jsonRequest({
+        text: "five photos",
+        synthesis: { photos: makePhotos(5) },
+      }),
+      params(decision.id),
+    );
+    expect(res.status).toBe(201);
+    const body = await res.json();
+    expect(body.synthesis.photos).toHaveLength(5);
+  });
+
+  it("synthesis.photos 超过 5 张 → 400", async () => {
+    const { POST } = await import("./route");
+    const owner = await makeUser("obs-six-photos@example.com");
+    const decision = await createObservingDecision(owner.id);
+
+    asUser(owner.id);
+    const res = await POST(
+      jsonRequest({
+        text: "six photos",
+        synthesis: { photos: makePhotos(6) },
+      }),
+      params(decision.id),
+    );
+    expect(res.status).toBe(400);
   });
 
   it("非 OBSERVING（ACTIVE）→ 422", async () => {

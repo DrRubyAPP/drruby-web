@@ -11,6 +11,13 @@ vi.mock("@/lib/auth/session", async () =>
   (await import("@/lib/test/route-helpers")).sessionModuleMock(),
 );
 
+function makePhotos(count: number) {
+  return Array.from({ length: count }, (_, index) => ({
+    recordId: `rec-${index + 1}`,
+    summary: `photo-${index + 1}`,
+  }));
+}
+
 function entryParams(id: string, entryId: string) {
   return { params: Promise.resolve({ id, entryId }) };
 }
@@ -127,6 +134,44 @@ describe("PATCH /api/decisions/[id]/observations/[entryId]", () => {
       photos: [{ recordId: "rec-1", summary: "skin photo" }],
       recordRefs: [{ recordId: "rec-2" }],
     });
+  });
+
+  it("synthesis.photos 接收 5 张照片", async () => {
+    const { PATCH } = await import("./route");
+    const owner = await makeUser("obs-patch-five@example.com");
+    const { decision, entry } = await createObservingDecisionWithObservation(
+      owner.id,
+    );
+
+    asUser(owner.id);
+    const res = await PATCH(
+      jsonRequest(
+        { synthesis: { photos: makePhotos(5) } },
+        { method: "PATCH" },
+      ),
+      entryParams(decision.id, entry.id),
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.synthesis.photos).toHaveLength(5);
+  });
+
+  it("synthesis.photos 超过 5 张 → 400", async () => {
+    const { PATCH } = await import("./route");
+    const owner = await makeUser("obs-patch-six@example.com");
+    const { decision, entry } = await createObservingDecisionWithObservation(
+      owner.id,
+    );
+
+    asUser(owner.id);
+    const res = await PATCH(
+      jsonRequest(
+        { synthesis: { photos: makePhotos(6) } },
+        { method: "PATCH" },
+      ),
+      entryParams(decision.id, entry.id),
+    );
+    expect(res.status).toBe(400);
   });
 
   it("entryId 不属于该 decision → 404（不泄露存在性）", async () => {
