@@ -1277,11 +1277,8 @@
     "lede": "把数据交给 DrRuby，我们帮你看到真正相关的——这不是又一个需要维护的仪表盘。",
     "section": {
       "yourData": "你的数据",
-      "bodyNow": "此刻的身体",
-      "recentLabs": "近期化验",
-      "currentFocus": "当前关注 · 只看与你相关的",
-      "followUps": "有意义的后续",
-      "browseAll": "浏览所有健康信息 →"
+      "records": "你的记录",
+      "recentLabs": "近期化验"
     },
     "intake": {
       "log": {
@@ -1398,7 +1395,9 @@
     },
     "loading": "加载中…",
     "signalsEmptyTitle": "暂无信号",
-    "signalsEmptyHint": "连接设备或上传化验结果即可开始。"
+    "signalsEmptyHint": "连接设备或上传化验结果即可开始。",
+    "recordsEmptyTitle": "还没有记录",
+    "recordsEmptyHint": "从上方手动记录、上传文档或添加照片开始。在你添加之前，这里不会显示任何内容。"
   },
   "records": {
     "status": {

@@ -1271,11 +1271,8 @@
     "lede": "Bring your data in. DrRuby helps you see what's relevant — not another dashboard to maintain.",
     "section": {
       "yourData": "Your data",
-      "bodyNow": "Your body right now",
-      "recentLabs": "Recent labs",
-      "currentFocus": "Current focus · only what's relevant to you",
-      "followUps": "Meaningful follow-ups",
-      "browseAll": "Browse all health information →"
+      "records": "Your records",
+      "recentLabs": "Recent labs"
     },
     "intake": {
       "log": {
@@ -1392,7 +1389,9 @@
     },
     "loading": "Loading…",
     "signalsEmptyTitle": "No signals yet",
-    "signalsEmptyHint": "Connect a device or upload a lab result to begin."
+    "signalsEmptyHint": "Connect a device or upload a lab result to begin.",
+    "recordsEmptyTitle": "No records yet",
+    "recordsEmptyHint": "Log something, upload a document, or add photos above to begin. Nothing is shown here until you add it."
   },
   "records": {
     "status": {
