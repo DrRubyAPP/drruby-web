@@ -4,13 +4,16 @@ import {
   completeAfterLearning,
   create,
   type DecisionBriefSnapshot,
+  findById,
   findByIdWithEntries,
   listByUser,
   listByUserActionable,
+  listByUserDeleted,
   listByUserHistory,
   listDueForCheckIn,
   markCompleted,
   reopenAtomic,
+  softDelete,
   startObserving,
   stopObserving,
   update,
@@ -562,5 +565,102 @@ describe("task-44 startObserving/stopObserving/markCompleted/completeAfterLearni
     const due = await listDueForCheckIn(userId);
     expect(due.find((d) => d.id === completed.id)).toBeUndefined();
     expect(due.find((d) => d.id === decided.id)).toBeUndefined();
+  });
+});
+
+describe("task-50 soft delete（D-2 软删作用域）", () => {
+  beforeEach(async () => await resetDatabase());
+  afterEach(async () => await prisma.$disconnect());
+
+  async function seedUser(
+    email = "task50-softdel@example.com",
+  ): Promise<string> {
+    const u = await createUser({
+      email,
+      authProvider: "email",
+      role: "user",
+    });
+    return u.id;
+  }
+
+  it("softDelete 写 deletedAt，行仍在（D-8 永久保留）", async () => {
+    const userId = await seedUser("softdel-write@example.com");
+    const d = await create(userId, { question: "Delete me softly" });
+    expect(d.deletedAt).toBeNull();
+
+    await softDelete(d.id);
+
+    const row = await prisma.decision.findUnique({ where: { id: d.id } });
+    expect(row).not.toBeNull();
+    expect(row?.deletedAt).not.toBeNull();
+  });
+
+  it("listByUser / listByUserActionable / listByUserHistory 排除软删行", async () => {
+    const userId = await seedUser("softdel-list@example.com");
+    const active = await create(userId, { question: "stay active" });
+    const closed = await create(userId, { question: "stay closed" });
+    await update(closed.id, { lifecycle: "CLOSED" });
+    const deleted = await create(userId, { question: "to be deleted" });
+    await softDelete(deleted.id);
+
+    const all = await listByUser(userId);
+    expect(all.map((r) => r.id).sort()).toEqual([active.id, closed.id].sort());
+
+    const actionable = await listByUserActionable(userId);
+    expect(actionable.map((r) => r.id)).toEqual([active.id]);
+
+    const history = await listByUserHistory(userId);
+    expect(history.map((r) => r.id)).toEqual([closed.id]);
+  });
+
+  it("findById / findByIdWithEntries 对软删行返回 null（→ 路由 404）", async () => {
+    const userId = await seedUser("softdel-find@example.com");
+    const d = await create(userId, { question: "vanish from detail" });
+    await softDelete(d.id);
+
+    expect(await findById(d.id)).toBeNull();
+    expect(await findByIdWithEntries(d.id)).toBeNull();
+  });
+
+  it("listDueForCheckIn 排除软删行（WMN P1）", async () => {
+    const userId = await seedUser("softdel-due@example.com");
+    const d = await prisma.decision.create({
+      data: {
+        userId,
+        question: "due but deleted",
+        lifecycle: "OBSERVING",
+        nextCheckInAt: new Date(Date.now() - 60 * 60 * 1000),
+      },
+    });
+    await softDelete(d.id);
+
+    const due = await listDueForCheckIn(userId);
+    expect(due.find((r) => r.id === d.id)).toBeUndefined();
+  });
+
+  it("listByUserDeleted 只返回软删行（D-10 导出分区）", async () => {
+    const userId = await seedUser("softdel-export@example.com");
+    const stay = await create(userId, { question: "still here" });
+    const gone = await create(userId, { question: "gone to export" });
+    await softDelete(gone.id);
+
+    const deleted = await listByUserDeleted(userId);
+    expect(deleted.map((r) => r.id)).toEqual([gone.id]);
+    expect(deleted[0].deletedAt).not.toBeNull();
+    expect(deleted.find((r) => r.id === stay.id)).toBeUndefined();
+  });
+
+  it("dup-check 忽略软删行：删除后重建同题 → 新行", async () => {
+    const userId = await seedUser("softdel-dup@example.com");
+    const a = await create(userId, { question: "Same question" });
+    await softDelete(a.id);
+
+    const b = await create(userId, { question: "Same question" });
+    expect(b.id).not.toBe(a.id);
+    expect(b.deletedAt).toBeNull();
+
+    // 活跃视图只剩新行
+    const rows = await listByUser(userId);
+    expect(rows.map((r) => r.id)).toEqual([b.id]);
   });
 });

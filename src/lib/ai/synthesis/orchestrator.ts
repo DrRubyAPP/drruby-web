@@ -82,6 +82,8 @@ async function gatherSynthesisInput(
   const decision = await prisma.decision.findUniqueOrThrow({
     where: { id: decisionId },
   });
+  // task-50 D-2：已删 Decision 不再综合（GET 详情已 404，此为防御性守卫）
+  if (decision.deletedAt) throw new Error("Decision is deleted");
 
   // 取 connected Records（task-42 listByDecision 含 healthRecord + healthSource）
   const links = await listByDecision(decisionId);
@@ -160,8 +162,11 @@ export class RegenerationOrchestrator {
         topic: true,
         healthContext: true,
         yourselfContext: true,
+        deletedAt: true,
       },
     });
+    // task-50 D-2：已删 Decision 不触发 regen（no-op）
+    if (decision.deletedAt) return { touched: false };
 
     const decisionRef: DecisionRef = {
       id: decision.id,
@@ -229,6 +234,8 @@ export class RegenerationOrchestrator {
     const decision = await prisma.decision.findUniqueOrThrow({
       where: { id: decisionId },
     });
+    // task-50 D-2：已删 Decision 不再综合（防御性守卫，同 gatherSynthesisInput）
+    if (decision.deletedAt) throw new Error("Decision is deleted");
 
     const materialResult = detectMaterialChange({
       prevConnectedRecords,

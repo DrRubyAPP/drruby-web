@@ -33,6 +33,12 @@ import { Prisma } from "~prisma/client";
 export const CREATE_DEDUP_WINDOW_MS = 60_000;
 
 /**
+ * task-50 D-2：软删作用域——所有"活跃视图"读查询统一展开此条件，
+ * 禁止业务代码手写 where 绕过。导出/审计路径用 listByUserDeleted 显式取软删行。
+ */
+const ACTIVE_SCOPE = { deletedAt: null } as const;
+
+/**
  * task-43 D6 合并窗口：新相关 Record 连入时 pendingRegenAt 续期到 now + N min。
  * N=5min（可调）；窗口未过 → STALE_UPDATE_AVAILABLE；窗口过 → lazy fire regeneration。
  */
@@ -185,9 +191,15 @@ export async function create(
   validateKindOutcome(input.decisionKind, input.outcome);
 
   // §31：60s 内同 userId+question 的重复创建 → 返回既有行，不新建
+  // task-50 D-2：已删行不阻塞同题重建（删除后重建同题 → 新行）
   const since = new Date(Date.now() - CREATE_DEDUP_WINDOW_MS);
   const dup = await prisma.decision.findFirst({
-    where: { userId, question: input.question, createdAt: { gte: since } },
+    where: {
+      ...ACTIVE_SCOPE,
+      userId,
+      question: input.question,
+      createdAt: { gte: since },
+    },
     orderBy: { createdAt: "desc" },
   });
   if (dup) return dup;
@@ -233,7 +245,7 @@ export async function update(
 
 export async function listByUser(userId: string): Promise<Decision[]> {
   return prisma.decision.findMany({
-    where: { userId },
+    where: { ...ACTIVE_SCOPE, userId },
     orderBy: { updatedAt: "desc" },
   });
 }
@@ -243,7 +255,11 @@ export async function listByUserActionable(
   userId: string,
 ): Promise<Decision[]> {
   return prisma.decision.findMany({
-    where: { userId, lifecycle: { notIn: ["CLOSED", "COMPLETED"] } },
+    where: {
+      ...ACTIVE_SCOPE,
+      userId,
+      lifecycle: { notIn: ["CLOSED", "COMPLETED"] },
+    },
     orderBy: { lastUserActivityAt: "desc" },
   });
 }
@@ -251,7 +267,11 @@ export async function listByUserActionable(
 /** History：Closed/Completed（列表 UI 消费在 task-40） */
 export async function listByUserHistory(userId: string): Promise<Decision[]> {
   return prisma.decision.findMany({
-    where: { userId, lifecycle: { in: ["CLOSED", "COMPLETED"] } },
+    where: {
+      ...ACTIVE_SCOPE,
+      userId,
+      lifecycle: { in: ["CLOSED", "COMPLETED"] },
+    },
     orderBy: { lastUserActivityAt: "desc" },
   });
 }
@@ -264,8 +284,11 @@ export async function bumpActivity(id: string): Promise<void> {
   });
 }
 
+/** task-50 D-2：所有 [id] 子路由的 404 门——软删行不可达 */
 export async function findById(id: string): Promise<Decision | null> {
-  return prisma.decision.findUnique({ where: { id } });
+  return prisma.decision.findFirst({
+    where: { ...ACTIVE_SCOPE, id },
+  });
 }
 
 /**
@@ -318,9 +341,29 @@ export async function reopenAtomic(
 
 /** 详情：含 append-only entries（时间正序） */
 export async function findByIdWithEntries(id: string) {
-  return prisma.decision.findUnique({
-    where: { id },
+  return prisma.decision.findFirst({
+    where: { ...ACTIVE_SCOPE, id },
     include: { entries: { orderBy: { occurredAt: "asc" } } },
+  });
+}
+
+/**
+ * task-50 D-2：软删除——写 deletedAt，不物理删行（D-8 永久保留）。
+ * 前置条件（ownership + 活跃）由 route 预检；已删行经 findById 过滤不可达（重复删除 404）。
+ * P-1：不写 TimelineEvent（视图要过滤，补了也会被滤掉）。
+ */
+export async function softDelete(id: string): Promise<Decision> {
+  return prisma.decision.update({
+    where: { id },
+    data: { deletedAt: new Date() },
+  });
+}
+
+/** task-50 D-10：导出用——仅软删行（deletedAt 升序），与活跃列表分区展示 */
+export async function listByUserDeleted(userId: string): Promise<Decision[]> {
+  return prisma.decision.findMany({
+    where: { userId, deletedAt: { not: null } },
+    orderBy: { deletedAt: "asc" },
   });
 }
 
@@ -620,7 +663,7 @@ export async function completeAfterLearning(input: {
 
 /**
  * §30 task-44 WMN P1 查询：lifecycle=OBSERVING && nextCheckInAt<=now &&
- * deletedAt IS NULL（Decision 无软删，但留接口）。
+ * deletedAt IS NULL（task-50 D-2 软删过滤）。
  * 按 nextCheckInAt ASC 排序（最早的到期在前）。
  */
 export async function listDueForCheckIn(
@@ -629,6 +672,7 @@ export async function listDueForCheckIn(
 ): Promise<Decision[]> {
   return prisma.decision.findMany({
     where: {
+      ...ACTIVE_SCOPE,
       userId,
       lifecycle: "OBSERVING",
       nextCheckInAt: { lte: now },

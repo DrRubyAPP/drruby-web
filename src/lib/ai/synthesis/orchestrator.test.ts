@@ -569,3 +569,72 @@ describe("RegenerationOrchestrator", () => {
     expect(after?.changeTrigger).toBe("new_record");
   });
 });
+
+describe("task-50 soft delete guards（已删 Decision 不再综合）", () => {
+  beforeEach(async () => await resetDatabase());
+  afterEach(async () => await prisma.$disconnect());
+
+  it("runRegeneration：已删 Decision → throw（防御性守卫）", async () => {
+    const userId = await seedUser();
+    const decisionId = await seedHrtDecision(userId);
+    await prisma.decision.update({
+      where: { id: decisionId },
+      data: { deletedAt: new Date() },
+    });
+
+    const orch = new RegenerationOrchestrator({
+      synthesizer: makeMockSynthesizer(),
+    });
+    await expect(
+      orch.runRegeneration(decisionId, { trigger: "new_record" }),
+    ).rejects.toThrow(/deleted/i);
+  });
+
+  it("runInitialSynthesis：已删 Decision → throw（防御性守卫）", async () => {
+    const userId = await seedUser();
+    const decisionId = await seedHrtDecision(userId);
+    await prisma.decision.update({
+      where: { id: decisionId },
+      data: { deletedAt: new Date() },
+    });
+
+    const orch = new RegenerationOrchestrator({
+      synthesizer: makeMockSynthesizer(),
+    });
+    await expect(orch.runInitialSynthesis(decisionId)).rejects.toThrow(
+      /deleted/i,
+    );
+  });
+
+  it("onRecordConnected：已删 Decision → no-op（touched=false，不 touch pending）", async () => {
+    const userId = await seedUser();
+    const decisionId = await seedHrtDecision(userId);
+    const recordId = await seedLabRecord(userId);
+    await connect(decisionId, recordId, userId);
+
+    await prisma.decision.update({
+      where: { id: decisionId },
+      data: { deletedAt: new Date() },
+    });
+
+    const links = await listByDecision(decisionId);
+    const orch = new RegenerationOrchestrator({
+      synthesizer: makeMockSynthesizer(),
+    });
+    const result = await orch.onRecordConnected({
+      decisionId,
+      recordRef: {
+        id: links[0].healthRecordId,
+        kind: links[0].healthRecord.kind,
+        documentClass: links[0].healthRecord.documentClass,
+        summary: links[0].healthRecord.title,
+      },
+    });
+    expect(result.touched).toBe(false);
+
+    const decision = await prisma.decision.findUniqueOrThrow({
+      where: { id: decisionId },
+    });
+    expect(decision.pendingRegenAt).toBeNull();
+  });
+});
