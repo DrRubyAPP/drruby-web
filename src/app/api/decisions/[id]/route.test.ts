@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  asAnonymous,
   asUser,
   bareRequest,
   disconnectDb,
@@ -194,5 +195,109 @@ describe("POST /api/decisions/[id]", () => {
     expect(body.nextStep).toBe("Book a consult with Dr. Lee");
     expect(body.lifecycle).toBe("DECIDED");
     expect(body.decidedAt).not.toBe(null);
+  });
+});
+
+describe("DELETE /api/decisions/[id]", () => {
+  beforeEach(resetDb);
+  afterEach(disconnectDb);
+
+  it("未登录 → 401", async () => {
+    const { DELETE } = await import("./route");
+    const decisionRepo = await import("@/lib/db/repositories/decision.repo");
+    const owner = await makeUser("del-anon@example.com");
+    const decision = await decisionRepo.create(owner.id, {
+      question: "q",
+    });
+
+    asAnonymous();
+    const res = await DELETE(bareRequest("DELETE"), params(decision.id));
+    expect(res.status).toBe(401);
+  });
+
+  it("本人删除 → 204；行仍在库且 deletedAt 非空（D-8 永久保留）", async () => {
+    const { DELETE } = await import("./route");
+    const decisionRepo = await import("@/lib/db/repositories/decision.repo");
+    const prisma = (await import("@/lib/db/prisma")).prisma;
+    const owner = await makeUser("del-owner@example.com");
+    const decision = await decisionRepo.create(owner.id, {
+      question: "q",
+    });
+
+    asUser(owner.id);
+    const res = await DELETE(bareRequest("DELETE"), params(decision.id));
+    expect(res.status).toBe(204);
+
+    // 直查（绕过 repo 软删过滤）：行未物理删除
+    const raw = await prisma.decision.findUnique({
+      where: { id: decision.id },
+    });
+    expect(raw).not.toBe(null);
+    expect(raw?.deletedAt).not.toBe(null);
+  });
+
+  it("删除后 GET 详情 → 404；POST 更新 → 404", async () => {
+    const { DELETE, GET, POST } = await import("./route");
+    const decisionRepo = await import("@/lib/db/repositories/decision.repo");
+    const owner = await makeUser("del-gone@example.com");
+    const decision = await decisionRepo.create(owner.id, {
+      question: "q",
+    });
+
+    asUser(owner.id);
+    await DELETE(bareRequest("DELETE"), params(decision.id));
+
+    const detail = await GET(bareRequest("GET"), params(decision.id));
+    expect(detail.status).toBe(404);
+
+    const update = await POST(
+      jsonRequest({ saved: true }, { method: "POST" }),
+      params(decision.id),
+    );
+    expect(update.status).toBe(404);
+  });
+
+  it("重复删除 → 404（findById 过滤软删）", async () => {
+    const { DELETE } = await import("./route");
+    const decisionRepo = await import("@/lib/db/repositories/decision.repo");
+    const owner = await makeUser("del-twice@example.com");
+    const decision = await decisionRepo.create(owner.id, {
+      question: "q",
+    });
+
+    asUser(owner.id);
+    const first = await DELETE(bareRequest("DELETE"), params(decision.id));
+    expect(first.status).toBe(204);
+    const second = await DELETE(bareRequest("DELETE"), params(decision.id));
+    expect(second.status).toBe(404);
+  });
+
+  it("他人 Decision → 404，且行未被动（deletedAt 仍为 null）", async () => {
+    const { DELETE } = await import("./route");
+    const decisionRepo = await import("@/lib/db/repositories/decision.repo");
+    const prisma = (await import("@/lib/db/prisma")).prisma;
+    const owner = await makeUser("del-victim@example.com");
+    const intruder = await makeUser("del-intruder@example.com");
+    const decision = await decisionRepo.create(owner.id, {
+      question: "q",
+    });
+
+    asUser(intruder.id);
+    const res = await DELETE(bareRequest("DELETE"), params(decision.id));
+    expect(res.status).toBe(404);
+
+    const raw = await prisma.decision.findUnique({
+      where: { id: decision.id },
+    });
+    expect(raw?.deletedAt).toBe(null);
+  });
+
+  it("不存在 id → 404", async () => {
+    const { DELETE } = await import("./route");
+    const owner = await makeUser("del-ghost@example.com");
+
+    asUser(owner.id);
+    const res = await DELETE(bareRequest("DELETE"), params("nonexistent-id"));
+    expect(res.status).toBe(404);
   });
 });

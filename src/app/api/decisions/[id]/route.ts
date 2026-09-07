@@ -220,3 +220,25 @@ export const POST = handle(async (req: Request, ctx: Ctx) => {
   }
   return NextResponse.json(toDecisionDTO(row, { withBrief: false }));
 });
+
+/**
+ * Delete decision
+ * @description task-50 D-2 软删除：写 deletedAt，不物理删行（D-8 永久保留，§14 provenance）。删除后从 WMN/My Decisions/timeline 消失，保留在 /api/me/export 的 deletedDecisions 分区。重复删除/越权/不存在均 404。无恢复入口（D-9）
+ * @auth bearer
+ * @responseSet auth
+ * @openapi
+ */
+export const DELETE = handle(async (_req: Request, ctx: Ctx) => {
+  const user = await requireUser();
+  const { id } = await ctx.params;
+
+  // findById 已过滤软删（T2）→ 已删/不存在/越权统一 404，不泄露存在性
+  const existing = await decisionRepo.findById(id);
+  if (!existing || existing.userId !== user.id) {
+    throw new AppError("NOT_FOUND", "决策不存在", 404);
+  }
+
+  // P-1：不写 TimelineEvent；不动 lifecycle/nextCheckInAt（查询层已过滤，行留原状最利于 provenance）
+  await decisionRepo.softDelete(id);
+  return new NextResponse(null, { status: 204 });
+});
