@@ -3,8 +3,11 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { ErrorState, Skeleton } from "@/components/api";
+import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { useApi } from "@/hooks/useApi";
+import { useMutation } from "@/hooks/useMutation";
 import { useRouter } from "@/i18n/navigation";
+import { apiClient } from "@/lib/api/client";
 import type { DecisionDto } from "./dto";
 import {
   DECISION_CHIPS,
@@ -13,6 +16,9 @@ import {
   lifecycleToLabel,
 } from "./mappers";
 import { NewDecisionDrawer } from "./NewDecisionDrawer";
+
+/** useMutation 无参调用的占位 input（hook 签名要求传值） */
+const NO_INPUT = undefined as unknown as void;
 
 /**
  * My Decisions 视图：4 个 section 常驻（设计稿结构）。
@@ -29,6 +35,18 @@ export function DecisionsView() {
     useApi<DecisionDto[]>("/api/decisions");
   const [newDrawerChip, setNewDrawerChip] = useState<string | null>(null);
   const [savedOnly, setSavedOnly] = useState(false); // Saved 次要筛选（F4）
+
+  // task-50 D-2：卡片/行内删除入口（ConfirmDialog 二次确认，D-9 无恢复）
+  const [deleteTarget, setDeleteTarget] = useState<DecisionDto | null>(null);
+  const deleteMutation = useMutation(
+    (_input: void) => apiClient.del(`/api/decisions/${deleteTarget?.id}`),
+    {
+      onSuccess: () => {
+        setDeleteTarget(null);
+        refetch();
+      },
+    },
+  );
 
   const { actionable, history } = groupDecisions(data ?? []);
   const shownActionable = savedOnly
@@ -115,6 +133,7 @@ export function DecisionsView() {
               key={d.id}
               decision={d}
               onClick={() => router.push(`/portal/decisions/${d.id}`)}
+              onDelete={() => setDeleteTarget(d)}
             />
           ))
         )}
@@ -187,7 +206,23 @@ export function DecisionsView() {
                     {d.question} &middot;{" "}
                     {lifecycleToLabel(d.lifecycle).toLowerCase()}
                   </span>
-                  <span className="arr">&rsaquo;</span>
+                  <span
+                    style={{ display: "flex", alignItems: "center", gap: 8 }}
+                  >
+                    <button
+                      type="button"
+                      className="ask-chip"
+                      aria-label={t("delete.ariaLabel")}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeleteTarget(d);
+                      }}
+                      style={{ borderColor: "var(--p-border)", fontSize: 11 }}
+                    >
+                      {t("delete.label")}
+                    </button>
+                    <span className="arr">&rsaquo;</span>
+                  </span>
                 </div>
               ))}
             </div>
@@ -202,6 +237,28 @@ export function DecisionsView() {
           onCreated={handleCreated}
         />
       )}
+
+      {/* task-50 D-2：删除二次确认（P-1 删除后从视图消失；D-8 数据保留在导出） */}
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        title={t("delete.title")}
+        message={t("delete.message")}
+        confirmLabel={t("delete.confirm")}
+        confirmingLabel={t("delete.confirming")}
+        cancelLabel={t("delete.cancel")}
+        loading={deleteMutation.loading}
+        onCancel={() => {
+          setDeleteTarget(null);
+          deleteMutation.reset();
+        }}
+        onConfirm={() => deleteMutation.mutate(NO_INPUT)}
+      />
+      {deleteMutation.error && (
+        <ErrorState
+          message={deleteMutation.error.message}
+          onRetry={() => deleteMutation.reset()}
+        />
+      )}
     </>
   );
 }
@@ -210,10 +267,13 @@ export function DecisionsView() {
 function DecisionCard({
   decision,
   onClick,
+  onDelete,
 }: {
   decision: DecisionDto;
   onClick: () => void;
+  onDelete: () => void;
 }) {
+  const t = useTranslations("portal.decisions");
   return (
     <div
       className="dcard"
@@ -241,8 +301,23 @@ function DecisionCard({
       <div className="dcard-main">
         <div className="dcard-top">
           <h4>{decision.question}</h4>
-          <span className="dec-badge">
-            {lifecycleToLabel(decision.lifecycle)}
+          <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span className="dec-badge">
+              {lifecycleToLabel(decision.lifecycle)}
+            </span>
+            {/* task-50 D-2：删除入口（低强调，stopPropagation 防整卡跳详情） */}
+            <button
+              type="button"
+              className="ask-chip"
+              aria-label={t("delete.ariaLabel")}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+              style={{ borderColor: "var(--p-border)", fontSize: 11 }}
+            >
+              {t("delete.label")}
+            </button>
           </span>
         </div>
         {decision.goal && (

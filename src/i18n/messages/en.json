@@ -842,6 +842,15 @@
       "saved": "Saved & completed",
       "savedOnly": "☆ Saved only",
       "savedEmpty": "No saved decisions among the active ones.",
+      "delete": {
+        "label": "Delete",
+        "ariaLabel": "Delete decision",
+        "title": "Delete this decision?",
+        "message": "It will disappear from your lists and timeline. Your data stays on your export for provenance.",
+        "confirm": "Delete",
+        "confirming": "Deleting…",
+        "cancel": "Keep it"
+      },
       "empty": "No decisions yet",
       "emptyHint": "Start a new decision above.",
       "newDrawer": {
