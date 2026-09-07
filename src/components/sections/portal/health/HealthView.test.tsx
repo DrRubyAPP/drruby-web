@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // ── useApi mock：避免拉起真实 fetch ──
@@ -29,30 +30,64 @@ vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-// ── mapSignals stub（避免引入真实 mapper）──
-vi.mock("./mappers", () => ({
-  mapSignals: () => [],
-}));
+// ── mappers：透传真实实现（mapHealthRecords 需要），仅覆盖 mapSignals ──
+vi.mock("./mappers", async () => {
+  const actual = await vi.importActual<typeof import("./mappers")>("./mappers");
+  return { ...actual, mapSignals: () => [] };
+});
 
-// ── useRouter stub（避免 HealthView 内部 router 调用真实导航）──
+// ── @/i18n/navigation：useRouter stub + Link（记录行用 Link 渲染，需断言 href）──
 const pushMock = vi.fn();
 vi.mock("@/i18n/navigation", () => ({
   useRouter: () => ({ push: pushMock }),
+  Link: ({ href, children }: { href: string; children: ReactNode }) => (
+    <a href={href}>{children}</a>
+  ),
 }));
 
 import { HealthView } from "./HealthView";
+
+// task-47：/api/health/records 记录列表 mock（§12 状态机 + 1:1 source）
+const RECORDS = [
+  {
+    id: "rec_1",
+    sourceId: "src_1",
+    kind: "lab",
+    title: "Full blood panel",
+    status: "EXTRACTED_DRAFT",
+    recordedAt: "2026-03-01T00:00:00.000Z",
+    source: {
+      id: "src_1",
+      fileName: "panel.pdf",
+      uploadedAt: "2026-03-01T00:00:00.000Z",
+    },
+  },
+  {
+    id: "rec_2",
+    sourceId: "src_2",
+    kind: "vitals",
+    title: "Morning BP",
+    status: "CONFIRMED",
+    recordedAt: "2026-02-20T00:00:00.000Z",
+    source: {
+      id: "src_2",
+      fileName: "Morning BP",
+      uploadedAt: "2026-02-20T00:00:00.000Z",
+    },
+  },
+];
+const emptyApi = { data: [], error: null, loading: false, refetch: vi.fn() };
 
 beforeEach(() => {
   useApiMock.mockReset();
   postMock.mockReset();
   pushMock.mockReset();
-  // /api/signals 默认空数组，避免 loading/error 分支
-  useApiMock.mockReturnValue({
-    data: [],
-    error: null,
-    loading: false,
-    refetch: vi.fn(),
-  });
+  // 按 path 分流：records 返回记录，signals 走空态
+  useApiMock.mockImplementation((path: string) =>
+    path === "/api/health/records"
+      ? { data: RECORDS, error: null, loading: false, refetch: vi.fn() }
+      : emptyApi,
+  );
 });
 
 describe("HealthView · C1 录入入口（task-42）", () => {
@@ -99,5 +134,30 @@ describe("HealthView · C1 录入入口（task-42）", () => {
       screen.getByRole("button", { name: /intake\.photos\.label/ }),
     );
     expect(screen.getByText("photo.title")).toBeInTheDocument();
+  });
+});
+
+describe("HealthView · records 列表（task-47）", () => {
+  it("renders real records with §12 status badges", () => {
+    render(<HealthView />);
+    expect(screen.getByText("Full blood panel")).toBeInTheDocument();
+    expect(screen.getByText("Morning BP")).toBeInTheDocument();
+    // tr = useTranslations("records") → statusKey 原样返回
+    expect(screen.getByText("status.EXTRACTED_DRAFT")).toBeInTheDocument();
+    expect(screen.getByText("status.CONFIRMED")).toBeInTheDocument();
+  });
+
+  it("record row links to the review page", () => {
+    render(<HealthView />);
+    const link = screen.getByText("Full blood panel").closest("a");
+    expect(link).toHaveAttribute("href", "/portal/health/review/rec_1");
+  });
+
+  it("no fake data constants render anymore", () => {
+    render(<HealthView />);
+    expect(screen.queryByText(/46 minutes later/)).toBeNull();
+    expect(screen.queryByText(/June 12 lab upload/)).toBeNull();
+    expect(screen.queryByText("Strength & muscle health")).toBeNull();
+    expect(screen.queryByText("Lab Results")).toBeNull(); // BROWSE_CATEGORIES
   });
 });
