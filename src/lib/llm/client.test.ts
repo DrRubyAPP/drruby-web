@@ -15,6 +15,8 @@ vi.mock("@/config/env", () => ({
 // 延迟 import：确保 mock 生效后再取被测模块。
 const { openAiClient } = await import("@/lib/llm/client");
 
+import type { MessageContent } from "@/lib/llm/client";
+
 function okResponse(content: string) {
   return {
     ok: true,
@@ -102,6 +104,24 @@ describe("openAiClient", () => {
     expect(openAiClient.isConfigured()).toBe(true);
     mockEnv.OPENAI_API_KEY = "";
     expect(openAiClient.isConfigured()).toBe(false);
+  });
+
+  it("多模态 content（text+image_url 部件数组）原样透传（task-48 C-1）", async () => {
+    const fetchMock = vi.fn(async () => okResponse("ok"));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const content: MessageContent = [
+      { type: "text", text: "describe" },
+      { type: "image_url", image_url: { url: "data:image/png;base64,AQID" } },
+    ];
+    const out = await openAiClient.chatComplete([{ role: "user", content }]);
+
+    expect(out).toBe("ok");
+    const body = JSON.parse(
+      (fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1]
+        .body as string,
+    );
+    expect(body.messages).toEqual([{ role: "user", content }]);
   });
 
   describe("onUsage（token 成本记账，task-26）", () => {

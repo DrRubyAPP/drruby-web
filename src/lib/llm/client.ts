@@ -8,9 +8,20 @@ import { AppError } from "@/lib/errors";
  * 秘钥仅服务端持有（经 `serverEnv()` Zod 校验），绝不下发 App/进 `NEXT_PUBLIC_*`。
  * 客户端接口 `LlmClient` 便于单测注入 mock —— 单测不打真实上游。
  */
+/**
+ * 消息内容：纯文本，或多模态部件数组（text + image_url）。
+ * task-48 起支持视觉输入（化验单抽取）；纯文本调用方仍传 string，行为不变。
+ */
+export type MessageContent =
+  | string
+  | Array<
+      | { type: "text"; text: string }
+      | { type: "image_url"; image_url: { url: string } }
+    >;
+
 export interface ChatMessage {
   role: "system" | "user" | "assistant";
-  content: string;
+  content: MessageContent;
 }
 
 /** 上游 usage 记账（仅 token 数，不含任何内容/PII）。 */
