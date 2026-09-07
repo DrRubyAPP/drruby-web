@@ -39,12 +39,18 @@ export const GET = handle(async () => {
   if (!account) throw new AppError("NOT_FOUND", "账号不存在", 404);
 
   // 决策 + 其 append-only 时间线条目
-  const decisions = await decisionRepo.listByUser(user.id);
-  const decisionsWithEntries = await Promise.all(
-    decisions.map(async (d) => ({
-      ...d,
-      entries: await decisionEntryRepo.listByDecision(d.id),
-    })),
+  // task-50 D-10：软删 Decision 单独分区（deletedDecisions），活跃列表不含软删行
+  const [decisions, deletedDecisions] = await Promise.all([
+    decisionRepo.listByUser(user.id),
+    decisionRepo.listByUserDeleted(user.id),
+  ]);
+  const toWithEntries = async (d: (typeof decisions)[number]) => ({
+    ...d,
+    entries: await decisionEntryRepo.listByDecision(d.id),
+  });
+  const decisionsWithEntries = await Promise.all(decisions.map(toWithEntries));
+  const deletedDecisionsWithEntries = await Promise.all(
+    deletedDecisions.map(toWithEntries),
   );
 
   // body_insight 覆盖全部 kind
@@ -67,7 +73,10 @@ export const GET = handle(async () => {
     skinScanLatest,
     healthRecords,
   ] = await Promise.all([
-    timelineEventRepo.listByUser(user.id),
+    // P-2：导出完整时间线（含软删 Decision 关联事件，§14 provenance）
+    timelineEventRepo.listByUser(user.id, {
+      includeDeletedDecisionEvents: true,
+    }),
     signalRepo.listByUser(user.id),
     consentSettingRepo.listByUser(user.id),
     contributionRepo.listByUser(user.id),
@@ -89,6 +98,7 @@ export const GET = handle(async () => {
       memberSince: account.createdAt.toISOString(),
     },
     decisions: decisionsWithEntries,
+    deletedDecisions: deletedDecisionsWithEntries,
     timeline,
     signals,
     consent,
