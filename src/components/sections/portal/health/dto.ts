@@ -83,6 +83,8 @@ export interface HealthRecordDto {
   parsedValues?: unknown;
   /** §13 Please confirm 标记（抽取时由 Extractor 写入） */
   pleaseConfirm?: string[];
+  /** task-48 F4：抽取失败原因（用户安全文案，FAILED 态由服务端返回） */
+  error?: string | null;
   recordedAt: string;
   createdAt?: string;
   updatedAt?: string;

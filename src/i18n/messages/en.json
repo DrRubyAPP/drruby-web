@@ -1344,7 +1344,11 @@
       "correct": "Correct this record",
       "connect": "Connect to a decision",
       "confirmed": "This record is confirmed.",
-      "inReview": "Marked for review."
+      "inReview": "Marked for review.",
+      "processing": "Reading your document… this can take up to a minute.",
+      "failedTitle": "We couldn't extract this document",
+      "reupload": "Upload again",
+      "manualEntry": "Enter values manually"
     },
     "pleaseConfirm": "Please confirm",
     "provenance": {

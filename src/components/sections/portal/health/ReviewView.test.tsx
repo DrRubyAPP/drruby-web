@@ -26,8 +26,9 @@ vi.mock("next-intl", () => ({
 
 // ── @/i18n/navigation stub：@/components/api 索引会传递性加载 UnauthorizedRedirect
 //    进而触发 next-intl/navigation（jsdom 下 next/navigation 不可用）──
+const pushMock = vi.fn();
 vi.mock("@/i18n/navigation", () => ({
-  useRouter: () => ({ push: vi.fn() }),
+  useRouter: () => ({ push: pushMock }),
   Link: () => null,
   redirect: vi.fn(),
   usePathname: () => "/",
@@ -65,6 +66,7 @@ beforeEach(() => {
   useApiMock.mockReset();
   patchMock.mockReset();
   postMock.mockReset();
+  pushMock.mockReset();
 });
 
 function renderReview(record: HealthRecordDto | null = RECORD) {
@@ -97,15 +99,27 @@ describe("ReviewView · C2/C3/C4（task-42）", () => {
     expect(screen.queryByText("pleaseConfirm")).toBeNull();
   });
 
-  it("shows Please confirm flag when record has pleaseConfirm entries (§13)", () => {
+  it("shows per-field Please confirm badge when item name is in pleaseConfirm（§13，来自 DB 非 FS 猜测）", () => {
+    // task-48 F3：徽标按字段名匹配（LDL 在 pleaseConfirm → 只有 LDL 行带标记）
     renderReview({
       ...RECORD,
-      pleaseConfirm: ["mock_field_unverified"],
+      pleaseConfirm: ["LDL"],
       confidence: "Low",
     });
-    // 多条 item 时每个 RecordItem 都会渲染 please-confirm 标记
     const flags = screen.getAllByText("pleaseConfirm");
-    expect(flags.length).toBeGreaterThan(0);
+    expect(flags).toHaveLength(1); // 仅 LDL 一行
+    expect(flags[0].closest(".rec-item")?.textContent).toContain("LDL");
+  });
+
+  it("does NOT show per-field badge for items not listed in pleaseConfirm", () => {
+    renderReview({
+      ...RECORD,
+      pleaseConfirm: ["HDL"],
+    });
+    // LDL 行无徽标，HDL 行有一条
+    const flags = screen.getAllByText("pleaseConfirm");
+    expect(flags).toHaveLength(1);
+    expect(flags[0].closest(".rec-item")?.textContent).toContain("HDL");
   });
 
   it("Confirm action → PATCH /api/health/records/[id] action=advance status=CONFIRMED (C4)", async () => {
@@ -142,18 +156,33 @@ describe("ReviewView · C2/C3/C4（task-42）", () => {
     });
   });
 
-  it("Retry action → POST /api/health/records/[id] (retry endpoint)", async () => {
+  it("Retry action（FAILED 态）→ POST /api/health/records/[id] trigger 端点", async () => {
     const refetch = vi.fn();
     useApiMock.mockReturnValue({
-      data: { ...RECORD, status: "PROCESSING" },
+      data: {
+        ...RECORD,
+        status: "FAILED",
+        error: "PDF 暂不支持自动抽取，请手动录入",
+      },
       error: null,
       loading: false,
       refetch,
     });
     render(<ReviewView recordId="r1" />);
+    // 失败文案来自 DTO（DB extractionError）
+    expect(
+      screen.getByText("PDF 暂不支持自动抽取，请手动录入"),
+    ).toBeInTheDocument();
     fireEvent.click(screen.getByText("review.retry"));
     await waitFor(() => expect(postMock).toHaveBeenCalledTimes(1));
     expect(postMock).toHaveBeenCalledWith("/api/health/records/r1");
+  });
+
+  it("PROCESSING 态不显示动作按钮（轮询等终态，点击会 409）", () => {
+    renderReview({ ...RECORD, status: "PROCESSING" });
+    expect(screen.queryByText("review.retry")).toBeNull();
+    expect(screen.queryByText("review.confirm")).toBeNull();
+    expect(screen.getByText("review.processing")).toBeInTheDocument();
   });
 
   it("hides Confirm/MarkForReview/Retry once CONFIRMED (avoids duplicate state-machine writes)", () => {
@@ -181,5 +210,110 @@ describe("ReviewView · C2/C3/C4（task-42）", () => {
     renderReview(null);
     expect(screen.getByText("notFound.title")).toBeInTheDocument();
     expect(screen.getByText("notFound.hint")).toBeInTheDocument();
+  });
+});
+
+// =============================================================================
+// task-48 T5：自动触发 + 轮询 + FAILED 恢复路径（D-9/F4）
+// =============================================================================
+
+describe("ReviewView · 抽取触发/轮询/FAILED（task-48）", () => {
+  beforeEach(() => {
+    useApiMock.mockReset();
+    patchMock.mockReset();
+    postMock.mockReset();
+    pushMock.mockReset();
+  });
+
+  it("SOURCE_UPLOADED 挂载自动触发一次 POST trigger（D-9，useRef 防重复）", async () => {
+    postMock.mockResolvedValue({});
+    const refetch = vi.fn();
+    useApiMock.mockReturnValue({
+      data: { ...RECORD, status: "SOURCE_UPLOADED" },
+      error: null,
+      loading: false,
+      refetch,
+    });
+    render(<ReviewView recordId="r1" />);
+
+    await waitFor(() =>
+      expect(postMock).toHaveBeenCalledWith("/api/health/records/r1"),
+    );
+    expect(postMock).toHaveBeenCalledTimes(1);
+    // 触发后 refetch（让轮询看到 PROCESSING/终态）
+    await waitFor(() => expect(refetch).toHaveBeenCalled());
+  });
+
+  it("PROCESSING 期间每 2s 轮询 refetch，卸载后停止（D-9）", () => {
+    vi.useFakeTimers();
+    try {
+      const refetch = vi.fn();
+      useApiMock.mockReturnValue({
+        data: { ...RECORD, status: "PROCESSING" },
+        error: null,
+        loading: false,
+        refetch,
+      });
+      const { unmount } = render(<ReviewView recordId="r1" />);
+
+      vi.advanceTimersByTime(2000);
+      expect(refetch).toHaveBeenCalledTimes(1);
+      vi.advanceTimersByTime(2000);
+      expect(refetch).toHaveBeenCalledTimes(2);
+
+      unmount();
+      vi.advanceTimersByTime(6000);
+      expect(refetch).toHaveBeenCalledTimes(2); // 卸载后不再轮询
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("非 PROCESSING 态不轮询（终态依赖变化自然清理）", () => {
+    vi.useFakeTimers();
+    try {
+      const refetch = vi.fn();
+      useApiMock.mockReturnValue({
+        data: RECORD, // EXTRACTED_DRAFT 终态
+        error: null,
+        loading: false,
+        refetch,
+      });
+      render(<ReviewView recordId="r1" />);
+      vi.advanceTimersByTime(10_000);
+      expect(refetch).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("FAILED 态显示错误文案 + 三条恢复路径（Retry / 重新上传 / 手动录入，F4）", async () => {
+    useApiMock.mockReturnValue({
+      data: {
+        ...RECORD,
+        status: "FAILED",
+        error: "PDF 暂不支持自动抽取，请手动录入",
+      },
+      error: null,
+      loading: false,
+      refetch: vi.fn(),
+    });
+    render(<ReviewView recordId="r1" />);
+
+    expect(screen.getByText("review.failedTitle")).toBeInTheDocument();
+    expect(
+      screen.getByText("PDF 暂不支持自动抽取，请手动录入"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("review.retry")).toBeInTheDocument();
+    expect(screen.getByText("review.reupload")).toBeInTheDocument();
+    expect(screen.getByText("review.manualEntry")).toBeInTheDocument();
+    // 失败态不显示 Confirm（canConfirm=false）
+    expect(screen.queryByText("review.confirm")).toBeNull();
+
+    // 重新上传 / 手动录入 → 回 My Health 页（/portal）
+    fireEvent.click(screen.getByText("review.reupload"));
+    expect(pushMock).toHaveBeenCalledWith("/portal");
+    fireEvent.click(screen.getByText("review.manualEntry"));
+    expect(pushMock).toHaveBeenCalledTimes(2);
   });
 });

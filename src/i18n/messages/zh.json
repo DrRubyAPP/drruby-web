@@ -1350,7 +1350,11 @@
       "correct": "纠正这条记录",
       "connect": "关联到决策",
       "confirmed": "这条记录已确认。",
-      "inReview": "已标记待复核。"
+      "inReview": "已标记待复核。",
+      "processing": "正在读取你的文档……最多约需一分钟。",
+      "failedTitle": "无法抽取这份文档",
+      "reupload": "重新上传",
+      "manualEntry": "手动录入"
     },
     "pleaseConfirm": "请确认",
     "provenance": {
