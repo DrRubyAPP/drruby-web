@@ -61,44 +61,77 @@ export function ConnectedRecordsPanel({ decisionId }: { decisionId: string }) {
       <div className="sec-h" style={{ fontSize: 13 }}>
         {t("connected.title")}
       </div>
-      {rows.map((row) => (
-        <div
-          key={row.id}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            padding: "10px 0",
-            borderBottom: "1px solid #eee",
-          }}
-        >
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div
-              style={{
-                fontSize: 14,
-                fontWeight: 600,
-                color: "#524d49",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {row.healthRecord.title}
-            </div>
-            <div style={{ fontSize: 11, color: "#a89a95", marginTop: 2 }}>
-              {tr(row.healthRecord.statusKey)} ·{" "}
-              {new Date(row.connectedAt).toLocaleDateString()}
+      {rows.map((row) =>
+        row.healthRecord.deletedAt ? (
+          /* D-2：已删记录占位——置灰、不可点、不可展开、无 Remove 按钮（不静默移除引用） */
+          <div
+            key={row.id}
+            style={{
+              display: "flex",
+              gap: 12,
+              padding: "10px 0",
+              borderBottom: "1px solid #eee",
+              opacity: 0.55,
+            }}
+          >
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: "#a89a95",
+                  textDecoration: "line-through",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {row.healthRecord.title}
+              </div>
+              <div style={{ fontSize: 11, color: "#a89a95", marginTop: 2 }}>
+                {t("connected.deletedPlaceholder")}
+              </div>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={() => remove(row.healthRecordId)}
-            style={BTN_BASE}
+        ) : (
+          <div
+            key={row.id}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+              padding: "10px 0",
+              borderBottom: "1px solid #eee",
+            }}
           >
-            {t("connected.remove")}
-          </button>
-        </div>
-      ))}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: "#524d49",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {row.healthRecord.title}
+              </div>
+              <div style={{ fontSize: 11, color: "#a89a95", marginTop: 2 }}>
+                {tr(row.healthRecord.statusKey)} ·{" "}
+                {new Date(row.connectedAt).toLocaleDateString()}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => remove(row.healthRecordId)}
+              style={BTN_BASE}
+            >
+              {t("connected.remove")}
+            </button>
+          </div>
+        ),
+      )}
     </div>
   );
 }

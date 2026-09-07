@@ -44,6 +44,7 @@ import {
 } from "./mappers";
 import { ObservationForm } from "./ObservationForm";
 import { PendingUpdateIndicator } from "./PendingUpdateIndicator";
+import { RelevantRecordsPanel } from "./RelevantRecordsPanel";
 import { StartObservingForm } from "./StartObservingForm";
 
 type Perspective = "yourself" | "others" | "science";
@@ -349,6 +350,17 @@ export function DecisionDetailView({ id }: { id: string }) {
             />
             {/* task-42 B2：Connected Records 作为 Yourself 区块的新增子区块（不替换 yourselfContext 扁平字符串 fallback） */}
             <ConnectedRecordsPanel decisionId={id} />
+            {/* task-49 F4：Relevant from My Health 建议条（仅建议，用户不选不生效，§2 护栏） */}
+            <RelevantRecordsPanel
+              decisionId={id}
+              decision={{
+                id,
+                topicSlug: data.topicSlug,
+                topic: data.topic,
+                healthContext: healthContextData?.healthContext ?? null,
+                yourselfContext: data.yourselfContext ?? null,
+              }}
+            />
           </div>
         )}
 

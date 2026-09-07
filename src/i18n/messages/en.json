@@ -1391,7 +1391,12 @@
       "title": "Connected records",
       "empty": "No records connected to this decision yet.",
       "remove": "Remove",
-      "removing": "Removing…"
+      "removing": "Removing…",
+      "deletedPlaceholder": "Record deleted"
+    },
+    "relevant": {
+      "title": "Relevant from My Health",
+      "connect": "Connect"
     },
     "kindLabel": {
       "lab": "Lab",

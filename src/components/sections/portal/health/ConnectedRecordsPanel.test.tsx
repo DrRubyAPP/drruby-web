@@ -138,3 +138,40 @@ describe("ConnectedRecordsPanel · C9 软删除留痕（task-42）", () => {
     expect(refetch).toHaveBeenCalled();
   });
 });
+
+// =============================================================================
+// task-49 T5 · D-2 已删记录占位降级
+// =============================================================================
+
+describe("ConnectedRecordsPanel · 已删记录占位（task-49 D-2）", () => {
+  it("healthRecord.deletedAt 非空 → 占位「记录已删除」，无 Remove 按钮，不可点击", () => {
+    useApiMock.mockReturnValue({
+      data: [
+        {
+          ...LINKS[0],
+          healthRecord: {
+            ...LINKS[0].healthRecord,
+            deletedAt: "2026-09-01T00:00:00.000Z",
+          },
+        },
+        LINKS[1],
+      ],
+      error: null,
+      loading: false,
+      refetch: vi.fn(),
+    });
+    render(<ConnectedRecordsPanel decisionId="d1" />);
+    // 占位文案
+    expect(
+      screen.getByText("connected.deletedPlaceholder"),
+    ).toBeInTheDocument();
+    // 已删行仍显示标题（置灰划线），供追溯
+    expect(screen.getByText("June Lab Panel")).toBeInTheDocument();
+    // 活跃行有 Remove，已删行没有 → 只有 1 个 Remove 按钮
+    expect(
+      screen.getAllByRole("button", { name: "connected.remove" }),
+    ).toHaveLength(1);
+    // 活跃行正常渲染
+    expect(screen.getByText("Resting HR log")).toBeInTheDocument();
+  });
+});

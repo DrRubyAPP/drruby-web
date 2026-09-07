@@ -1397,7 +1397,12 @@
       "title": "已关联记录",
       "empty": "还没有记录关联到这个决策。",
       "remove": "移除",
-      "removing": "移除中…"
+      "removing": "移除中…",
+      "deletedPlaceholder": "记录已删除"
+    },
+    "relevant": {
+      "title": "来自 My Health 的相关记录",
+      "connect": "连接"
     },
     "kindLabel": {
       "lab": "化验",
