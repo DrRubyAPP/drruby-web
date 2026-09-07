@@ -325,6 +325,8 @@ model Decision {
   nextCheckInAt  DateTime?  @map("next_check_in_at")  @db.Timestamptz
   /// §27 观察计划 baseline：{ text: string, baselineRecordId?: string, freq: CheckInFrequency }
   observeBaseline  Json?    @map("observe_baseline")
+  /// task-50 D-2：软删除时间戳（null=活跃）。全链路查询须带 deletedAt: null（repo 层 ACTIVE_SCOPE）
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz
 
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
