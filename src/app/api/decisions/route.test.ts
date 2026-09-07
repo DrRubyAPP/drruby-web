@@ -71,6 +71,27 @@ describe("GET /api/decisions", () => {
     expect(ids.indexOf(activeBody.id)).toBeLessThan(ids.indexOf(completed.id));
     expect(ids.indexOf(activeBody.id)).toBeLessThan(ids.indexOf(closed.id));
   });
+
+  it("软删 Decision 不出现在列表（task-50 D-2）", async () => {
+    const { GET, POST } = await import("./route");
+    const decisionRepo = await import("@/lib/db/repositories/decision.repo");
+    const user = await makeUser("dec-list-softdel@example.com");
+    asUser(user.id);
+
+    const first = await POST(jsonRequest({ question: "keep me" }));
+    expect(first.status).toBe(201);
+    const firstBody = await first.json();
+    const second = await POST(jsonRequest({ question: "delete me" }));
+    expect(second.status).toBe(201);
+    const secondBody = await second.json();
+
+    await decisionRepo.softDelete(secondBody.id);
+
+    const res = await GET();
+    expect(res.status).toBe(200);
+    const rows: Array<{ id: string }> = await res.json();
+    expect(rows.map((r) => r.id)).toEqual([firstBody.id]);
+  });
 });
 
 describe("POST /api/decisions", () => {

@@ -244,3 +244,58 @@ describe("task-44 P1 check-in due (§30)", () => {
     expect(body.cards[1].question).toBe("p2-actionable");
   });
 });
+
+describe("task-50 D-2：软删 Decision 不出现在 WMN", () => {
+  beforeEach(resetDb);
+  afterEach(disconnectDb);
+
+  it("软删行不计入 cards/total/actionableCount/checkInDueCount", async () => {
+    const { GET } = await import("./route");
+    const decisionRepo = await import("@/lib/db/repositories/decision.repo");
+    const { prisma } = await import("@/lib/db/prisma");
+    const user = await makeUser("wmn-softdel@example.com");
+    asUser(user.id);
+
+    // 1 个 active + 1 个 OBSERVING 到期（P1）+ 1 个将被软删的 OBSERVING 到期
+    const active = await decisionRepo.create(user.id, {
+      question: "active",
+      type: "not_sure",
+    });
+    const dueKept = await prisma.decision.create({
+      data: {
+        userId: user.id,
+        question: "due-kept",
+        lifecycle: "OBSERVING",
+        decisionKind: "action",
+        outcome: "decided_to_do_it",
+        decidedAt: new Date(),
+        observeBaseline: { text: "baseline", freq: "weekly" },
+        nextCheckInAt: new Date(Date.now() - 1000),
+      },
+    });
+    const dueDeleted = await prisma.decision.create({
+      data: {
+        userId: user.id,
+        question: "due-deleted",
+        lifecycle: "OBSERVING",
+        decisionKind: "action",
+        outcome: "decided_to_do_it",
+        decidedAt: new Date(),
+        observeBaseline: { text: "baseline", freq: "weekly" },
+        nextCheckInAt: new Date(Date.now() - 2000),
+      },
+    });
+
+    await decisionRepo.softDelete(dueDeleted.id);
+
+    const res = await GET();
+    const body = await res.json();
+    const ids = body.cards.map((c: { id: string }) => c.id);
+    expect(ids).toContain(active.id);
+    expect(ids).toContain(dueKept.id);
+    expect(ids).not.toContain(dueDeleted.id);
+    expect(body.total).toBe(2);
+    expect(body.actionableCount).toBe(2);
+    expect(body.checkInDueCount).toBe(1);
+  });
+});
