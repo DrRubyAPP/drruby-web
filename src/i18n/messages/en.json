@@ -787,7 +787,8 @@
         "learnHistory": {
           "badge": "Learning",
           "title": "Previous learnings",
-          "empty": "No learnings recorded yet."
+          "empty": "No learnings recorded yet.",
+          "supersededBadge": "Updated"
         }
       }
     },

@@ -793,7 +793,8 @@
         "learnHistory": {
           "badge": "学习",
           "title": "既往学习",
-          "empty": "尚无学习记录。"
+          "empty": "尚无学习记录。",
+          "supersededBadge": "已被更新"
         }
       }
     },

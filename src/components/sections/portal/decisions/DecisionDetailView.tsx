@@ -257,6 +257,12 @@ export function DecisionDetailView({ id }: { id: string }) {
   const entries = sortEntries(data.entries);
   // task-51 D-51-c：是否已有 learning entry（决定过时提示与重生成入口的展示）
   const hasLearning = entries.some((e) => e.kind === "learning");
+  // task-51 D-51-b：sortEntries 已按 occurredAt 升序 → 最新 learning = 最后一个；其余标 Superseded
+  const learningEntries = entries.filter((e) => e.kind === "learning");
+  const latestLearningId =
+    learningEntries.length > 0
+      ? learningEntries[learningEntries.length - 1].id
+      : null;
   // Decide section 本地选择的 outcome（与 data.outcome 同步：用户改选后立即更新 state）
   const currentOutcomeSelection = decideOutcome ?? data.outcome;
 
@@ -979,6 +985,19 @@ export function DecisionDetailView({ id }: { id: string }) {
                           >
                             {tr("observe.learnHistory.badge")}
                           </span>
+                          {/* task-51 D-51-b：非最新 learning entry 灰色「已被更新」角标 */}
+                          {e.id !== latestLearningId && (
+                            <span
+                              className="dec-badge"
+                              style={{
+                                marginRight: 6,
+                                background: "#e8e0d8",
+                                color: "#7c746f",
+                              }}
+                            >
+                              {tr("observe.learnHistory.supersededBadge")}
+                            </span>
+                          )}
                           {learningText}
                         </>
                       ) : (
