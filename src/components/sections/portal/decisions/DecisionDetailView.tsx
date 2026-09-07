@@ -355,7 +355,10 @@ export function DecisionDetailView({ id }: { id: string }) {
               })
             }
           >
-            {data.saved ? tr("save.saved") : tr("save.save")}
+            <span aria-hidden="true">{data.saved ? "★" : "☆"}</span>
+            <span className="save-star-label">
+              {data.saved ? tr("save.saved") : tr("save.save")}
+            </span>
           </button>
           {/* task-50 D-2：删除入口（Save 旁，低强调） */}
           <button

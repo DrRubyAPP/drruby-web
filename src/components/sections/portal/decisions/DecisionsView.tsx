@@ -36,6 +36,12 @@ export function DecisionsView() {
   const [newDrawerChip, setNewDrawerChip] = useState<string | null>(null);
   const [savedOnly, setSavedOnly] = useState(false); // Saved 次要筛选（F4）
 
+  const toggleSaveMutation = useMutation(
+    (input: { id: string; saved: boolean }) =>
+      apiClient.post(`/api/decisions/${input.id}`, { saved: input.saved }),
+    { onSuccess: () => refetch() },
+  );
+
   // task-50 D-2：卡片/行内删除入口（ConfirmDialog 二次确认，D-9 无恢复）
   const [deleteTarget, setDeleteTarget] = useState<DecisionDto | null>(null);
   const deleteMutation = useMutation(
@@ -133,6 +139,9 @@ export function DecisionsView() {
               key={d.id}
               decision={d}
               onClick={() => router.push(`/portal/decisions/${d.id}`)}
+              onToggleSave={() =>
+                toggleSaveMutation.mutate({ id: d.id, saved: !d.saved })
+              }
               onDelete={() => setDeleteTarget(d)}
             />
           ))
@@ -259,6 +268,12 @@ export function DecisionsView() {
           onRetry={() => deleteMutation.reset()}
         />
       )}
+      {toggleSaveMutation.error && (
+        <ErrorState
+          message={toggleSaveMutation.error.message}
+          onRetry={() => toggleSaveMutation.reset()}
+        />
+      )}
     </>
   );
 }
@@ -267,13 +282,16 @@ export function DecisionsView() {
 function DecisionCard({
   decision,
   onClick,
+  onToggleSave,
   onDelete,
 }: {
   decision: DecisionDto;
   onClick: () => void;
+  onToggleSave: () => void;
   onDelete: () => void;
 }) {
   const t = useTranslations("portal.decisions");
+  const td = useTranslations("portal.decisionsDetail");
   return (
     <div
       className="dcard"
@@ -305,6 +323,23 @@ function DecisionCard({
             <span className="dec-badge">
               {lifecycleToLabel(decision.lifecycle)}
             </span>
+            <button
+              type="button"
+              className="save-star save-star--compact"
+              aria-pressed={decision.saved}
+              aria-label={
+                decision.saved
+                  ? td("save.ariaSavedLabel")
+                  : td("save.ariaSaveLabel")
+              }
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleSave();
+              }}
+              onKeyDown={(e) => e.stopPropagation()}
+            >
+              <span aria-hidden="true">{decision.saved ? "★" : "☆"}</span>
+            </button>
             {/* task-50 D-2：删除入口（低强调，stopPropagation 防整卡跳详情） */}
             <button
               type="button"

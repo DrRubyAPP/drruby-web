@@ -594,6 +594,9 @@
         "newAddHealth": "Add to My Health →",
         "emptyTitle": "Nothing needs your attention right now.",
         "emptySub": "Ask something new, add to My Health, or revisit recent items.",
+        "emptyAskSomethingNew": "Ask something new",
+        "emptyAddHealth": "Add to My Health",
+        "recentHealthTitle": "Recent in My Health",
         "updated": "Updated {date}"
       },
       "ask": {

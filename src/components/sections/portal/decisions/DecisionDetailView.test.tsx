@@ -160,6 +160,42 @@ beforeEach(() => {
 });
 
 describe("DecisionDetailView · task-43 T12 集成", () => {
+  it("Save 渲染为星形书签按钮，点击后提交 saved=true + yourselfContext", async () => {
+    postMock.mockResolvedValueOnce({ ok: true });
+    render(<DecisionDetailView id="d1" />);
+
+    const save = screen.getByRole("button", {
+      name: /^save.ariaSaveLabel$/,
+    });
+    expect(save).toHaveAttribute("aria-pressed", "false");
+    expect(save).toHaveTextContent("☆");
+    fireEvent.click(save);
+
+    await waitFor(() => expect(postMock).toHaveBeenCalledTimes(1));
+    expect(postMock).toHaveBeenCalledWith("/api/decisions/d1", {
+      saved: true,
+      yourselfContext: undefined,
+    });
+  });
+
+  it("Save 请求失败时显示错误，不跳转、不伪造成功态", async () => {
+    const { ApiError } = await import("@/lib/api");
+    postMock.mockRejectedValueOnce(new ApiError("server", 500, "save failed"));
+    render(<DecisionDetailView id="d1" />);
+
+    const save = screen.getByRole("button", {
+      name: /^save.ariaSaveLabel$/,
+    });
+    fireEvent.click(save);
+
+    await waitFor(() => expect(postMock).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(screen.getByText("save failed")).toBeInTheDocument(),
+    );
+    expect(pushMock).not.toHaveBeenCalled();
+    expect(save).toHaveAttribute("aria-pressed", "false");
+  });
+
   it("mount 时拉 4 个端点：decisions/[id] + snapshots + ai-state + health-context", () => {
     render(<DecisionDetailView id="d1" />);
     const paths = useApiMock.mock.calls.map((c) => c[0]);

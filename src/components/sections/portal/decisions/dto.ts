@@ -331,6 +331,14 @@ export interface UpdateObservationEntryInput {
   };
 }
 
+export interface RecentHealthRecordDto {
+  id: string;
+  title: string;
+  kind: string;
+  status: string;
+  recordedAt: string;
+}
+
 /** POST /api/decisions/[id]/learn 入参（§29 保存 Learning summary） */
 export interface SaveLearningInput {
   text: string;
@@ -359,4 +367,6 @@ export interface WmnResponse {
   actionableCount: number;
   /** P1 check-in due 计数（task-44 前恒 0） */
   checkInDueCount: number;
+  /** 老用户空状态下展示的真实 My Health 最近记录（最多 3 条） */
+  recentHealth?: RecentHealthRecordDto[];
 }

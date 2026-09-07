@@ -8,12 +8,13 @@ vi.mock("@/hooks/useApi", () => ({
   useApi: (path: string | null) => useApiMock(path),
 }));
 
-// ── apiClient mock（del 为主测对象）──
+// ── apiClient mock（post/del 为主测对象）──
+const postMock = vi.fn();
 const delMock = vi.fn();
 vi.mock("@/lib/api/client", () => ({
   apiClient: {
     get: vi.fn(),
-    post: vi.fn(),
+    post: (...args: unknown[]) => postMock(...args),
     patch: vi.fn(),
     put: vi.fn(),
     del: (...args: unknown[]) => delMock(...args),
@@ -57,6 +58,7 @@ const ACTIVE: DecisionDto = {
 
 beforeEach(() => {
   useApiMock.mockReset();
+  postMock.mockReset();
   delMock.mockReset();
   refetchMock.mockReset();
   pushMock.mockReset();
@@ -69,6 +71,53 @@ beforeEach(() => {
 });
 
 describe("DecisionsView · task-50 T7 卡片删除入口", () => {
+  it("Active 卡片显示低强调 Save 星形按钮", () => {
+    render(<DecisionsView />);
+    const save = screen.getByRole("button", {
+      name: /^save.ariaSaveLabel$/,
+    });
+    expect(save).toHaveAttribute("aria-pressed", "false");
+    expect(save).toHaveTextContent("☆");
+  });
+
+  it("点击卡片 Save 只切换收藏、refetch，不触发详情跳转", async () => {
+    postMock.mockResolvedValueOnce({ ok: true });
+    render(<DecisionsView />);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /^save.ariaSaveLabel$/ }),
+    );
+
+    await waitFor(() => expect(postMock).toHaveBeenCalledTimes(1));
+    expect(postMock).toHaveBeenCalledWith("/api/decisions/d-active", {
+      saved: true,
+    });
+    await waitFor(() => expect(refetchMock).toHaveBeenCalledTimes(1));
+    expect(pushMock).not.toHaveBeenCalled();
+  });
+
+  it("saved=true 卡片显示 aria-pressed=true，点击后取消收藏", async () => {
+    useApiMock.mockReturnValue({
+      data: [{ ...ACTIVE, saved: true }],
+      error: null,
+      loading: false,
+      refetch: refetchMock,
+    });
+    postMock.mockResolvedValueOnce({ ok: true });
+    render(<DecisionsView />);
+
+    const save = screen.getByRole("button", {
+      name: /^save.ariaSavedLabel$/,
+    });
+    expect(save).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(save);
+
+    await waitFor(() => expect(postMock).toHaveBeenCalledTimes(1));
+    expect(postMock).toHaveBeenCalledWith("/api/decisions/d-active", {
+      saved: false,
+    });
+  });
+
   it("点卡片删除按钮不触发跳转，打开 ConfirmDialog", () => {
     render(<DecisionsView />);
     const delBtn = screen.getByRole("button", { name: /^delete.ariaLabel$/ });

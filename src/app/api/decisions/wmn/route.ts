@@ -1,9 +1,17 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/session";
-import { decisionRepo } from "@/lib/db";
+import { decisionRepo, healthRecordRepo } from "@/lib/db";
 import { handle } from "@/lib/errors";
 import { DecisionDTO, toDecisionDTO } from "../dto";
+
+const RecentHealthRecordDTO = z.object({
+  id: z.string(),
+  title: z.string(),
+  kind: z.string(),
+  status: z.string(),
+  recordedAt: z.string(),
+});
 
 /** What Matters Now 信封：≤3 排序卡片 + 三态计数（前端只消费，不重排/不重算可见性） */
 export const WmnResponse = z.object({
@@ -11,6 +19,7 @@ export const WmnResponse = z.object({
   total: z.number().int().nonnegative(),
   actionableCount: z.number().int().nonnegative(),
   checkInDueCount: z.number().int().nonnegative(),
+  recentHealth: z.array(RecentHealthRecordDTO).optional(),
 });
 
 /** 最多 3 张卡（§7） */
@@ -27,9 +36,10 @@ const WMN_MAX = 3;
 export const GET = handle(async () => {
   const user = await requireUser();
 
-  const [all, actionable] = await Promise.all([
+  const [all, actionable, recentHealthRows] = await Promise.all([
     decisionRepo.listByUser(user.id), // total（含 CLOSED/COMPLETED）
     decisionRepo.listByUserActionable(user.id), // 已按 lastUserActivityAt DESC
+    healthRecordRepo.listByUser(user.id), // My Health 最近记录，已按 recordedAt DESC
   ]);
 
   // P1 — Check-in Due（OBSERVING + nextCheckInAt<=now）：task-44 §30 真实查询
@@ -53,6 +63,13 @@ export const GET = handle(async () => {
       total: all.length,
       actionableCount: actionable.length,
       checkInDueCount: checkInDue.length,
+      recentHealth: recentHealthRows.slice(0, 3).map((r) => ({
+        id: r.id,
+        title: r.title,
+        kind: r.kind,
+        status: r.status,
+        recordedAt: r.recordedAt.toISOString(),
+      })),
     }),
   );
 });

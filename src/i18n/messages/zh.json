@@ -600,6 +600,9 @@
         "newAddHealth": "添加到我的健康 →",
         "emptyTitle": "现在没有需要你关注的事。",
         "emptySub": "提出新问题、添加到我的健康，或回顾最近的事项。",
+        "emptyAskSomethingNew": "提出新问题",
+        "emptyAddHealth": "添加到我的健康",
+        "recentHealthTitle": "我的健康近期记录",
         "updated": "更新于 {date}"
       },
       "ask": {

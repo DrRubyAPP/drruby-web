@@ -263,19 +263,24 @@
 #app-portal .nav-item--more.active {
   opacity: 1;
 }
-/* ☆ Save 书签（§11 纯书签；与 come_back_later 等 Outcome 语义分离）。
-   视觉上需足够醒目：白底 + 描边 + 阴影；saved 态红底反白 */
+/* ☆ Save 书签（§11 纯书签；与 come_back_later 等 Outcome 语义分离）。 */
 #app-portal .save-star {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   flex-shrink: 0;
-  background: #fff;
-  border: 1.5px solid #d8c4bf;
+  min-width: 40px;
+  min-height: 36px;
+  background: transparent;
+  border: 1px solid var(--p-border);
   border-radius: 10px;
-  padding: 8px 16px;
+  padding: 7px 11px;
   font-size: 13.5px;
   font-weight: 600;
-  color: #524d49;
+  color: #6f6762;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(60, 40, 32, 0.07);
+  box-shadow: none;
   transition:
     color 0.15s,
     border-color 0.15s,
@@ -286,13 +291,24 @@
   color: var(--p-red);
 }
 #app-portal .save-star[aria-pressed="true"] {
-  color: #fff;
-  background: var(--p-red);
-  border-color: var(--p-red);
+  color: var(--p-red-d);
+  background: var(--p-off);
+  border-color: #d8c4bf;
 }
 #app-portal .save-star:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+#app-portal .save-star--compact {
+  width: 34px;
+  height: 32px;
+  min-width: 34px;
+  min-height: 32px;
+  padding: 0;
+  font-size: 17px;
+}
+#app-portal .save-star-label {
+  font-size: 12px;
 }
 #app-portal .side-foot {
   border-top: 1px solid var(--p-border);
@@ -992,6 +1008,10 @@
   line-height: 1.55;
 }
 #app-portal .matter-next {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
   font-size: 13px;
   color: var(--p-red);
   margin: 0 0 10px;
@@ -2168,8 +2188,10 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  margin-bottom: 2px;
 }
 #app-portal .dcard-top h4 {
+  min-width: 0;
   margin: 0;
   font-family: var(--p-serif);
   font-size: 19px;
@@ -2250,11 +2272,15 @@
 #app-portal .card {
   padding: 26px 28px;
 }
+#app-portal .card:has(.dec) {
+  padding: 18px 22px;
+}
 #app-portal .matter {
   margin-bottom: 18px;
+  padding-left: 34px;
 }
 #app-portal .dec {
-  padding: 12px 0 12px 14px;
+  padding: 10px 0 10px 18px;
   border-left: 4px solid transparent;
 }
 /* WMN 首卡左侧红色竖条（P1/P2 最高优先级）；竖条与内容间距由 .dec padding-left 提供 */
@@ -2292,6 +2318,35 @@
   line-height: 1.6;
 }
 #app-portal .matter-next {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font-size: 14.5px;
+  color: var(--p-red);
+  cursor: pointer;
+  font-weight: 600;
+  font-family: var(--p-sans);
+  text-align: left;
+}
+#app-portal .empty-cta-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+#app-portal .sub-row--button {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  font-family: var(--p-sans);
+  cursor: pointer;
+  text-align: left;
+}
+#app-portal .recent-health-title {
+  display: block;
   font-size: 14.5px;
 }
 #app-portal .why-src {

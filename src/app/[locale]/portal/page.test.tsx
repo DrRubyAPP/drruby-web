@@ -246,4 +246,143 @@ describe("PortalPage /portal 仪表盘", () => {
           : "evening";
     expect(screen.getByText(`dashboard.greeting.${tod}`)).toBeInTheDocument();
   });
+
+  it("Home 空状态：展示两个真实 CTA，Add to My Health 切到 health，Ask 聚焦输入区", () => {
+    useApiMock.mockImplementation((path: string | null) => {
+      if (path === "/api/me") {
+        return { data: ME, error: null, loading: false, refetch: vi.fn() };
+      }
+      if (path === "/api/decisions/wmn") {
+        return {
+          data: {
+            cards: [],
+            total: 2,
+            actionableCount: 0,
+            checkInDueCount: 0,
+            recentHealth: [],
+          },
+          error: null,
+          loading: false,
+          refetch: vi.fn(),
+        };
+      }
+      if (path === "/api/timeline") {
+        return { data: [], error: null, loading: false, refetch: vi.fn() };
+      }
+      return { data: null, error: null, loading: false, refetch: vi.fn() };
+    });
+    const { container } = render(<PortalPage />);
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "dashboard.home.emptyAskSomethingNew",
+      }),
+    );
+    expect(
+      screen.getByPlaceholderText("dashboard.ask.placeholder"),
+    ).toHaveFocus();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "dashboard.home.emptyAddHealth" }),
+    );
+    expect(container.querySelector("#v-health")?.className).toContain("on");
+  });
+
+  it("Home 新用户 Add to My Health 是真实按钮并切到 health", () => {
+    useApiMock.mockImplementation((path: string | null) => {
+      if (path === "/api/me") {
+        return { data: ME, error: null, loading: false, refetch: vi.fn() };
+      }
+      if (path === "/api/decisions/wmn") {
+        return {
+          data: {
+            cards: [],
+            total: 0,
+            actionableCount: 0,
+            checkInDueCount: 0,
+            recentHealth: [],
+          },
+          error: null,
+          loading: false,
+          refetch: vi.fn(),
+        };
+      }
+      if (path === "/api/timeline") {
+        return { data: [], error: null, loading: false, refetch: vi.fn() };
+      }
+      return { data: null, error: null, loading: false, refetch: vi.fn() };
+    });
+    const { container } = render(<PortalPage />);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "dashboard.home.newAddHealth" }),
+    );
+    expect(container.querySelector("#v-health")?.className).toContain("on");
+  });
+
+  it("Home 空状态：有 recentHealth 时展示 Recent in My Health，无数据时不展示空壳", () => {
+    useApiMock.mockImplementation((path: string | null) => {
+      if (path === "/api/me") {
+        return { data: ME, error: null, loading: false, refetch: vi.fn() };
+      }
+      if (path === "/api/decisions/wmn") {
+        return {
+          data: {
+            cards: [],
+            total: 2,
+            actionableCount: 0,
+            checkInDueCount: 0,
+            recentHealth: [
+              {
+                id: "hr1",
+                title: "Hormone panel",
+                kind: "lab",
+                status: "CONFIRMED",
+                recordedAt: "2026-08-31T00:00:00.000Z",
+              },
+            ],
+          },
+          error: null,
+          loading: false,
+          refetch: vi.fn(),
+        };
+      }
+      if (path === "/api/timeline") {
+        return { data: [], error: null, loading: false, refetch: vi.fn() };
+      }
+      return { data: null, error: null, loading: false, refetch: vi.fn() };
+    });
+    const { rerender } = render(<PortalPage />);
+
+    expect(
+      screen.getByText("dashboard.home.recentHealthTitle"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Hormone panel")).toBeInTheDocument();
+
+    useApiMock.mockImplementation((path: string | null) => {
+      if (path === "/api/me") {
+        return { data: ME, error: null, loading: false, refetch: vi.fn() };
+      }
+      if (path === "/api/decisions/wmn") {
+        return {
+          data: {
+            cards: [],
+            total: 2,
+            actionableCount: 0,
+            checkInDueCount: 0,
+            recentHealth: [],
+          },
+          error: null,
+          loading: false,
+          refetch: vi.fn(),
+        };
+      }
+      if (path === "/api/timeline") {
+        return { data: [], error: null, loading: false, refetch: vi.fn() };
+      }
+      return { data: null, error: null, loading: false, refetch: vi.fn() };
+    });
+    rerender(<PortalPage />);
+    expect(screen.queryByText("dashboard.home.recentHealthTitle")).toBeNull();
+  });
 });

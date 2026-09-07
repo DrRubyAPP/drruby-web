@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ErrorState } from "@/components/api/ErrorState";
 import LogoutButton from "@/components/auth/LogoutButton";
 import { ContributeDialog } from "@/components/sections/portal/ContributeDialog";
@@ -170,6 +170,7 @@ export default function PortalPage() {
   // chip 语义 = 选 topic：预填 { topic, topicSlug, type } 三元组；自由 Ask 不选 chip
   const [question, setQuestion] = useState("");
   const [askChip, setAskChip] = useState<string | null>(null);
+  const askInputRef = useRef<HTMLInputElement>(null);
   const createAsk = useMutation(
     (input: CreateDecisionInput) =>
       apiClient.post<{ id: string }>("/api/decisions", input),
@@ -215,12 +216,20 @@ export default function PortalPage() {
     if (m) m.scrollTop = 0;
   };
 
+  const focusAsk = () => {
+    setView("today");
+    const askSection = document.getElementById("portal-ask-health");
+    askSection?.scrollIntoView?.({ block: "start" });
+    askInputRef.current?.focus();
+  };
+
   const cmToast = (msg: string) => {
     setToast(msg);
     window.setTimeout(() => setToast(null), 2200);
   };
 
   const on = (v: View) => `ufv${view === v ? " on" : ""}`;
+  const recentHealth = wmn?.recentHealth ?? [];
 
   return (
     <div id="app-portal">
@@ -297,9 +306,13 @@ export default function PortalPage() {
                 <div className="card matter">
                   <h3>{t("dashboard.home.newTitle")}</h3>
                   <p>{t("dashboard.home.newSub")}</p>
-                  <div className="matter-next">
+                  <button
+                    type="button"
+                    className="matter-next"
+                    onClick={() => go("health")}
+                  >
                     {t("dashboard.home.newAddHealth")}
-                  </div>
+                  </button>
                 </div>
               </div>
             )}
@@ -311,10 +324,54 @@ export default function PortalPage() {
                 <div className="card">
                   <b>{t("dashboard.home.emptyTitle")}</b>
                   <p>{t("dashboard.home.emptySub")}</p>
+                  <div className="empty-cta-row">
+                    <button
+                      type="button"
+                      className="ask-btn"
+                      onClick={focusAsk}
+                    >
+                      {t("dashboard.home.emptyAskSomethingNew")}
+                    </button>
+                    <button
+                      type="button"
+                      className="matter-next"
+                      onClick={() => go("health")}
+                    >
+                      {t("dashboard.home.emptyAddHealth")}
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
-            <div className="sec">
+            {homeState === "empty" && recentHealth.length > 0 && (
+              <div className="sec">
+                <div className="sec-h">
+                  {t("dashboard.home.recentHealthTitle")}
+                </div>
+                <div className="card">
+                  {recentHealth.map((r) => (
+                    <button
+                      key={r.id}
+                      type="button"
+                      className="sub-row sub-row--button"
+                      onClick={() => go("health")}
+                    >
+                      <span>
+                        <span className="recent-health-title">{r.title}</span>
+                        <span className="st">
+                          {r.kind} ·{" "}
+                          {new Date(r.recordedAt).toLocaleDateString()}
+                        </span>
+                      </span>
+                      <span className="arr" aria-hidden="true">
+                        &rsaquo;
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="sec" id="portal-ask-health">
               <div className="sec-h">Ask about your health</div>
               <div className="ask">
                 <div style={{ fontSize: 15, color: "var(--p-ink)" }}>
@@ -340,6 +397,7 @@ export default function PortalPage() {
                 </div>
                 <div className="ask-in">
                   <input
+                    ref={askInputRef}
                     type="text"
                     value={question}
                     onChange={(e) => setQuestion(e.target.value)}
