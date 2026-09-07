@@ -87,4 +87,22 @@ describe("POST /api/health/records 手动录入", () => {
       expect(body.kind).toBe(kind);
     }
   });
+
+  it("列表 DTO 含 task-49 新字段：deletedAt/connectDismissedAt/connectedCount（task-49 T2）", async () => {
+    const { POST, GET } = await import("./route");
+    const user = await makeUser("hr-t49@example.com");
+    asUser(user.id);
+
+    await POST(jsonRequest(validManual));
+    const list = await GET();
+    const rows: Array<{
+      deletedAt: string | null;
+      connectDismissedAt: string | null;
+      connectedCount?: number;
+    }> = await list.json();
+    expect(rows).toHaveLength(1);
+    expect(rows[0].deletedAt).toBeNull();
+    expect(rows[0].connectDismissedAt).toBeNull();
+    expect(rows[0].connectedCount).toBe(0);
+  });
 });

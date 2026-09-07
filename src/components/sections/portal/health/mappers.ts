@@ -162,6 +162,12 @@ export interface HealthRecordRow {
   items: ParsedValueItem[];
   pleaseConfirm: string[];
   needsConfirm: boolean;
+  /** task-49 F3：软删时间戳（正常列表恒 null） */
+  deletedAt?: string | null;
+  /** task-49 D-1：「暂不处理」落库时间；null = 未 dismiss */
+  connectDismissedAt?: string | null;
+  /** task-49 D-1：活跃连接数（0 = 待连接徽标候选） */
+  connectedCount: number;
   recordedAt: string;
   source?: HealthSourceDto;
   revisions: RecordRevisionDto[];
@@ -185,6 +191,9 @@ export function mapHealthRecord(dto: HealthRecordDto): HealthRecordRow {
     items,
     pleaseConfirm,
     needsConfirm: pleaseConfirm.length > 0,
+    deletedAt: dto.deletedAt ?? null,
+    connectDismissedAt: dto.connectDismissedAt ?? null,
+    connectedCount: dto.connectedCount ?? 0,
     recordedAt: dto.recordedAt,
     source: dto.source,
     revisions: dto.revisions ?? [],

@@ -55,3 +55,32 @@ describe("toRecordDTO（task-48 F3：pleaseConfirm 落库三环之 DTO 环）", 
     expect(toRecordDTO(fakeRow()).error).toBeNull();
   });
 });
+
+describe("toRecordDTO（task-49 T2：软删/暂不处理/连接计数透传）", () => {
+  it("返回 deletedAt / connectDismissedAt（ISO 字符串）", () => {
+    const deletedAt = new Date("2026-09-07T00:00:00Z");
+    const connectDismissedAt = new Date("2026-09-06T00:00:00Z");
+    const dto = toRecordDTO(fakeRow({ deletedAt, connectDismissedAt }));
+    expect(dto.deletedAt).toBe(deletedAt.toISOString());
+    expect(dto.connectDismissedAt).toBe(connectDismissedAt.toISOString());
+  });
+
+  it("deletedAt / connectDismissedAt 缺省 → null", () => {
+    const dto = toRecordDTO(fakeRow());
+    expect(dto.deletedAt).toBeNull();
+    expect(dto.connectDismissedAt).toBeNull();
+  });
+
+  it("带 _count.decisions → connectedCount 透传", () => {
+    const dto = toRecordDTO({
+      ...fakeRow(),
+      _count: { decisions: 2 },
+    });
+    expect(dto.connectedCount).toBe(2);
+  });
+
+  it("无 _count → connectedCount undefined（增量兼容）", () => {
+    const dto = toRecordDTO(fakeRow());
+    expect(dto.connectedCount).toBeUndefined();
+  });
+});

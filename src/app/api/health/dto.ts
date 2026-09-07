@@ -39,6 +39,12 @@ export const HealthRecordDTO = z.object({
   pleaseConfirm: z.array(z.string()).optional(),
   /** task-48 F4：抽取失败原因（用户安全文案；FAILED 态返回） */
   error: z.string().nullable().optional(),
+  /** task-49 F3：软删时间戳（列表不返回已删行；此处 null/缺省） */
+  deletedAt: z.string().nullable().optional(),
+  /** task-49 D-1：「暂不处理」落库时间；connect 成功后清空 */
+  connectDismissedAt: z.string().nullable().optional(),
+  /** task-49 D-1：活跃连接数（removedAt: null 的关联数），驱动「待连接」徽标 */
+  connectedCount: z.number().optional(),
   recordedAt: z.string(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
@@ -101,6 +107,11 @@ export const AdvanceStatusBody = z.object({
   status: healthRecordStatusSchema,
 });
 
+/** 暂不处理 body（PATCH /api/health/records/[id] action=dismissConnect，task-49 D-1） */
+export const DismissConnectBody = z.object({
+  action: z.literal("dismissConnect"),
+});
+
 /** 纠错 body（PATCH /api/health/records/[id] action=correct，走 HealthRecordRevision append-only） */
 export const CorrectRecordBody = z.object({
   action: z.literal("correct"),
@@ -140,6 +151,8 @@ export function toRecordDTO(
       correctedAt: Date;
       reason: string | null;
     }>;
+    /** task-49 D-1：listByUser include 的活跃连接计数（其他调用方不传 → undefined） */
+    _count?: { decisions: number };
   },
 ): z.infer<typeof HealthRecordDTO> {
   return {
@@ -158,6 +171,10 @@ export function toRecordDTO(
     // task-48 F3：请确认标记来自 DB 行（extractionError 同理），非前端猜测
     pleaseConfirm: row.pleaseConfirm ?? [],
     error: row.extractionError ?? null,
+    // task-49 T2：软删/暂不处理/连接计数透传
+    deletedAt: row.deletedAt?.toISOString() ?? null,
+    connectDismissedAt: row.connectDismissedAt?.toISOString() ?? null,
+    connectedCount: row._count?.decisions,
     recordedAt: row.recordedAt.toISOString(),
     createdAt: row.createdAt?.toISOString(),
     updatedAt: row.updatedAt?.toISOString(),

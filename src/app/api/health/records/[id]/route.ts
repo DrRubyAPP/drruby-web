@@ -9,7 +9,12 @@ import {
 import { AppError, handle } from "@/lib/errors";
 import type { ExtractionResult, Extractor } from "@/lib/health/extractor";
 import { OpenAiExtractor } from "@/lib/health/extractor.openai";
-import { AdvanceStatusBody, CorrectRecordBody, toRecordDTO } from "../../dto";
+import {
+  AdvanceStatusBody,
+  CorrectRecordBody,
+  DismissConnectBody,
+  toRecordDTO,
+} from "../../dto";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -36,6 +41,10 @@ export const GET = handle(async (_req: Request, ctx: Ctx) => {
   if (!row || row.userId !== user.id) {
     throw new AppError("NOT_FOUND", "记录不存在", 404);
   }
+  // task-49 F3：软删按「不存在」处理（不泄露删除态）
+  if (row.deletedAt) {
+    throw new AppError("NOT_FOUND", "记录不存在", 404);
+  }
   return NextResponse.json(toRecordDTO(row));
 });
 
@@ -58,11 +67,24 @@ export const PATCH = handle(async (req: Request, ctx: Ctx) => {
   }
 
   const body = z
-    .discriminatedUnion("action", [AdvanceStatusBody, CorrectRecordBody])
+    .discriminatedUnion("action", [
+      AdvanceStatusBody,
+      CorrectRecordBody,
+      DismissConnectBody,
+    ])
     .parse(await req.json());
 
   if (body.action === "advance") {
     const updated = await healthRecordRepo.advanceStatus(id, body.status);
+    return NextResponse.json(
+      toRecordDTO({ ...updated, healthSource: existing.healthSource }),
+    );
+  }
+
+  // task-49 D-1：「暂不处理」落库（幂等）；不产生任何 Decision/连接。
+  // 与 Cancel 区分：Cancel 不发请求，无状态。
+  if (body.action === "dismissConnect") {
+    const updated = await healthRecordRepo.dismissConnect(id);
     return NextResponse.json(
       toRecordDTO({ ...updated, healthSource: existing.healthSource }),
     );
@@ -138,4 +160,25 @@ export const POST = handle(async (_req: Request, ctx: Ctx) => {
         });
 
   return NextResponse.json(toRecordDTO({ ...updated, healthSource: source }));
+});
+
+/**
+ * Soft-delete health record
+ * @description task-49 F3 软删除留痕：置 deletedAt，不物理删除。列表默认过滤、详情按 404；已连接 Decision 侧渲染层占位降级。重复删除/越权 404
+ * @response { ok: true }
+ * @auth bearer
+ * @responseSet auth
+ * @openapi
+ */
+export const DELETE = handle(async (_req: Request, ctx: Ctx) => {
+  const user = await requireUser();
+  const { id } = await ctx.params;
+
+  const existing = await healthRecordRepo.findById(id);
+  // 越权/已软删均按「不存在」处理（不泄露存在性与删除态）
+  if (!existing || existing.userId !== user.id || existing.deletedAt) {
+    throw new AppError("NOT_FOUND", "记录不存在", 404);
+  }
+  await healthRecordRepo.softDelete(id);
+  return NextResponse.json({ ok: true });
 });

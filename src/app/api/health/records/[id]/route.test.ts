@@ -183,6 +183,138 @@ describe("GET/PATCH/POST /api/health/records/[id]", () => {
 });
 
 // =============================================================================
+// task-49 T2：DELETE 软删 + PATCH dismissConnect + 软删后 GET 404
+// =============================================================================
+
+describe("DELETE /api/health/records/[id]（task-49 F3 软删留痕）", () => {
+  beforeEach(resetDb);
+  afterEach(disconnectDb);
+
+  it("owner → 200 且软删（deletedAt 非空，行保留）", async () => {
+    const { DELETE } = await import("./route");
+    const user = await makeUser("rec-del@example.com");
+    asUser(user.id);
+    const rec = await seedRecord(user.id);
+
+    const res = await DELETE(bareRequest("DELETE"), params(rec.id));
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ ok: true });
+
+    const { prisma } = await import("@/lib/db/prisma");
+    const raw = await prisma.healthRecord.findUniqueOrThrow({
+      where: { id: rec.id },
+    });
+    expect(raw.deletedAt).not.toBeNull(); // 留痕，非物理删除
+  });
+
+  it("非本人 → 404（不泄露存在性）", async () => {
+    const { DELETE } = await import("./route");
+    const owner = await makeUser("rec-del-owner@example.com");
+    const intruder = await makeUser("rec-del-intruder@example.com");
+    asUser(owner.id);
+    const rec = await seedRecord(owner.id);
+    asUser(intruder.id);
+
+    const res = await DELETE(bareRequest("DELETE"), params(rec.id));
+    expect(res.status).toBe(404);
+  });
+
+  it("重复删除 → 404（已软删按不存在处理）", async () => {
+    const { DELETE } = await import("./route");
+    const user = await makeUser("rec-del2@example.com");
+    asUser(user.id);
+    const rec = await seedRecord(user.id);
+
+    await DELETE(bareRequest("DELETE"), params(rec.id));
+    const res = await DELETE(bareRequest("DELETE"), params(rec.id));
+    expect(res.status).toBe(404);
+  });
+
+  it("软删后 GET 详情 → 404", async () => {
+    const { DELETE, GET } = await import("./route");
+    const user = await makeUser("rec-del3@example.com");
+    asUser(user.id);
+    const rec = await seedRecord(user.id);
+
+    await DELETE(bareRequest("DELETE"), params(rec.id));
+    const res = await GET(bareRequest("GET"), params(rec.id));
+    expect(res.status).toBe(404);
+  });
+
+  it("软删后列表不返回该记录", async () => {
+    const { DELETE } = await import("./route");
+    const { GET } = await import("../route");
+    const user = await makeUser("rec-del4@example.com");
+    asUser(user.id);
+    const rec = await seedRecord(user.id);
+
+    await DELETE(bareRequest("DELETE"), params(rec.id));
+    const list = await GET();
+    const rows: Array<{ id: string }> = await list.json();
+    expect(rows.find((r) => r.id === rec.id)).toBeUndefined();
+  });
+});
+
+describe("PATCH /api/health/records/[id] action=dismissConnect（task-49 D-1）", () => {
+  beforeEach(resetDb);
+  afterEach(disconnectDb);
+
+  it("200 且 connectDismissedAt 落库 + DTO 返回", async () => {
+    const { PATCH } = await import("./route");
+    const user = await makeUser("rec-dismiss@example.com");
+    asUser(user.id);
+    const rec = await seedRecord(user.id);
+
+    const res = await PATCH(
+      jsonRequest({ action: "dismissConnect" }, { method: "PATCH" }),
+      params(rec.id),
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.connectDismissedAt).toBeTruthy();
+
+    const { prisma } = await import("@/lib/db/prisma");
+    const raw = await prisma.healthRecord.findUniqueOrThrow({
+      where: { id: rec.id },
+    });
+    expect(raw.connectDismissedAt).not.toBeNull();
+  });
+
+  it("幂等：重复 dismissConnect 仍 200（仅刷新时间戳）", async () => {
+    const { PATCH } = await import("./route");
+    const user = await makeUser("rec-dismiss2@example.com");
+    asUser(user.id);
+    const rec = await seedRecord(user.id);
+
+    const r1 = await PATCH(
+      jsonRequest({ action: "dismissConnect" }, { method: "PATCH" }),
+      params(rec.id),
+    );
+    expect(r1.status).toBe(200);
+    const r2 = await PATCH(
+      jsonRequest({ action: "dismissConnect" }, { method: "PATCH" }),
+      params(rec.id),
+    );
+    expect(r2.status).toBe(200);
+  });
+
+  it("越权 → 404", async () => {
+    const { PATCH } = await import("./route");
+    const owner = await makeUser("rec-dismiss-owner@example.com");
+    const intruder = await makeUser("rec-dismiss-intruder@example.com");
+    asUser(owner.id);
+    const rec = await seedRecord(owner.id);
+    asUser(intruder.id);
+
+    const res = await PATCH(
+      jsonRequest({ action: "dismissConnect" }, { method: "PATCH" }),
+      params(rec.id),
+    );
+    expect(res.status).toBe(404);
+  });
+});
+
+// =============================================================================
 // task-48 T4：POST = 抽取 trigger（D-9：前端触发 + 轮询；并入原 Retry 语义）
 // =============================================================================
 

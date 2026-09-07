@@ -85,6 +85,12 @@ export interface HealthRecordDto {
   pleaseConfirm?: string[];
   /** task-48 F4：抽取失败原因（用户安全文案，FAILED 态由服务端返回） */
   error?: string | null;
+  /** task-49 F3：软删时间戳（列表不返回已删行，正常恒 null） */
+  deletedAt?: string | null;
+  /** task-49 D-1：「暂不处理」落库时间；connect 成功后清空 */
+  connectDismissedAt?: string | null;
+  /** task-49 D-1：活跃连接数（removedAt: null 的关联数），驱动「待连接」徽标 */
+  connectedCount?: number;
   recordedAt: string;
   createdAt?: string;
   updatedAt?: string;
