@@ -9,13 +9,14 @@ vi.mock("@/hooks/useApi", () => ({
 
 // ── apiClient mock ──
 const postMock = vi.fn();
+const delMock = vi.fn();
 vi.mock("@/lib/api/client", () => ({
   apiClient: {
     get: vi.fn(),
     post: (...args: unknown[]) => postMock(...args),
     patch: vi.fn(),
     put: vi.fn(),
-    del: vi.fn(),
+    del: (...args: unknown[]) => delMock(...args),
   },
 }));
 
@@ -25,8 +26,9 @@ vi.mock("next-intl", () => ({
 }));
 
 // ── @/i18n/navigation stub ──
+const pushMock = vi.fn();
 vi.mock("@/i18n/navigation", () => ({
-  useRouter: () => ({ push: vi.fn() }),
+  useRouter: () => ({ push: pushMock }),
   Link: () => null,
   redirect: vi.fn(),
   usePathname: () => "/",
@@ -152,6 +154,8 @@ function setEndpoints(
 beforeEach(() => {
   useApiMock.mockReset();
   postMock.mockReset();
+  delMock.mockReset();
+  pushMock.mockReset();
   setEndpoints();
 });
 
@@ -284,5 +288,41 @@ describe("DecisionDetailView · task-43 T12 集成", () => {
     render(<DecisionDetailView id="d1" />);
     // current=null + !loading + !error → "loading" 占位文案
     expect(screen.getByText("loading")).toBeInTheDocument();
+  });
+});
+
+describe("DecisionDetailView · task-50 T8 删除入口", () => {
+  it("点 Delete 打开 ConfirmDialog；确认后调用 DELETE 并跳转 /portal/decisions", async () => {
+    delMock.mockResolvedValueOnce(undefined);
+    render(<DecisionDetailView id="d1" />);
+    fireEvent.click(screen.getByRole("button", { name: /^delete.cta$/ }));
+    expect(screen.getByText("delete.title")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /^delete.confirm$/ }));
+    await waitFor(() => expect(delMock).toHaveBeenCalledTimes(1));
+    expect(delMock).toHaveBeenCalledWith("/api/decisions/d1");
+    await waitFor(() =>
+      expect(pushMock).toHaveBeenCalledWith("/portal/decisions"),
+    );
+  });
+
+  it("取消后不发请求、关闭弹窗", () => {
+    render(<DecisionDetailView id="d1" />);
+    fireEvent.click(screen.getByRole("button", { name: /^delete.cta$/ }));
+    fireEvent.click(screen.getByRole("button", { name: /^delete.cancel$/ }));
+    expect(delMock).not.toHaveBeenCalled();
+    expect(screen.queryByText("delete.title")).not.toBeInTheDocument();
+  });
+
+  it("DELETE 失败显示错误且不跳转", async () => {
+    const { ApiError } = await import("@/lib/api");
+    delMock.mockRejectedValueOnce(new ApiError("server", 500, "delete failed"));
+    render(<DecisionDetailView id="d1" />);
+    fireEvent.click(screen.getByRole("button", { name: /^delete.cta$/ }));
+    fireEvent.click(screen.getByRole("button", { name: /^delete.confirm$/ }));
+    await waitFor(() => expect(delMock).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(screen.getByText("delete failed")).toBeInTheDocument(),
+    );
+    expect(pushMock).not.toHaveBeenCalled();
   });
 });

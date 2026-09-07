@@ -12,6 +12,7 @@ import type {
 import { getDecisionCorpus } from "@/config/decision-corpus";
 import { useApi } from "@/hooks/useApi";
 import { useMutation } from "@/hooks/useMutation";
+import { useRouter } from "@/i18n/navigation";
 import { apiClient } from "@/lib/api/client";
 import { AiStateView } from "./AiStateView";
 import { CurrentSynthesisPanel } from "./CurrentSynthesisPanel";
@@ -92,6 +93,7 @@ const NO_INPUT = undefined as unknown as void;
  * - Observation 追加（迁移自 DecisionDetailDrawer，append-only）
  */
 export function DecisionDetailView({ id }: { id: string }) {
+  const router = useRouter();
   const tr = useTranslations("portal.decisionsDetail");
   const tc = useTranslations("portal.common");
   const { data, error, loading, refetch } = useApi<DecisionDetailDto>(
@@ -167,6 +169,18 @@ export function DecisionDetailView({ id }: { id: string }) {
     (input: { saved: boolean; yourselfContext?: string }) =>
       apiClient.post(`/api/decisions/${id}`, input),
     { onSuccess: () => refetch() },
+  );
+
+  // task-50 D-2：删除（软删）→ 跳回列表（此时 GET 详情已 404）；D-9 无恢复入口
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const deleteDecision = useMutation(
+    (_input: void) => apiClient.del(`/api/decisions/${id}`),
+    {
+      onSuccess: () => {
+        setDeleteConfirmOpen(false);
+        router.push("/portal/decisions");
+      },
+    },
   );
 
   // 改 type（粗粒度，只影响 Science 措辞框架，不切换检索语料）+ task-41 outcome/decisionKind/nextStep
@@ -265,23 +279,42 @@ export function DecisionDetailView({ id }: { id: string }) {
         >
           {data.question}
         </h1>
-        <button
-          type="button"
-          className="save-star"
-          aria-pressed={data.saved}
-          aria-label={
-            data.saved ? tr("save.ariaSavedLabel") : tr("save.ariaSaveLabel")
-          }
-          disabled={toggleSave.loading}
-          onClick={() =>
-            toggleSave.mutate({
-              saved: !data.saved,
-              yourselfContext: yourselfValue.trim() || undefined,
-            })
-          }
-        >
-          {data.saved ? tr("save.saved") : tr("save.save")}
-        </button>
+        <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+          <button
+            type="button"
+            className="save-star"
+            aria-pressed={data.saved}
+            aria-label={
+              data.saved ? tr("save.ariaSavedLabel") : tr("save.ariaSaveLabel")
+            }
+            disabled={toggleSave.loading}
+            onClick={() =>
+              toggleSave.mutate({
+                saved: !data.saved,
+                yourselfContext: yourselfValue.trim() || undefined,
+              })
+            }
+          >
+            {data.saved ? tr("save.saved") : tr("save.save")}
+          </button>
+          {/* task-50 D-2：删除入口（Save 旁，低强调） */}
+          <button
+            type="button"
+            onClick={() => setDeleteConfirmOpen(true)}
+            disabled={deleteDecision.loading}
+            style={{
+              fontSize: 12,
+              color: "#6f6762",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              textDecoration: "underline",
+              padding: 0,
+            }}
+          >
+            {tr("delete.cta")}
+          </button>
+        </div>
       </div>
       {toggleSave.error && (
         <ErrorState
@@ -999,6 +1032,27 @@ export function DecisionDetailView({ id }: { id: string }) {
         onConfirm={() => stopObserving.mutate(NO_INPUT)}
         onCancel={() => setStopConfirmOpen(false)}
       />
+      {/* task-50 D-2：删除二次确认（P-1 视图消失；D-8 数据保留在导出） */}
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        title={tr("delete.title")}
+        message={tr("delete.message")}
+        confirmLabel={tr("delete.confirm")}
+        confirmingLabel={tr("delete.confirming")}
+        cancelLabel={tr("delete.cancel")}
+        loading={deleteDecision.loading}
+        onConfirm={() => deleteDecision.mutate(NO_INPUT)}
+        onCancel={() => {
+          setDeleteConfirmOpen(false);
+          deleteDecision.reset();
+        }}
+      />
+      {deleteDecision.error && (
+        <ErrorState
+          message={deleteDecision.error.message}
+          onRetry={() => deleteDecision.reset()}
+        />
+      )}
       <ConfirmDialog
         open={markCompletedConfirmOpen}
         title={tr("observe.markCompleted.cta")}

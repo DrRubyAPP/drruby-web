@@ -676,6 +676,14 @@
         "ariaSaveLabel": "收藏 — 方便日后查找",
         "ariaSavedLabel": "已收藏 — 点击取消书签"
       },
+      "delete": {
+        "cta": "删除",
+        "title": "删除这条决策？",
+        "message": "它将从你的列表与时间线中消失。数据仍保留在导出中以供追溯。",
+        "confirm": "删除",
+        "confirming": "删除中…",
+        "cancel": "保留"
+      },
       "scienceFraming": "科学视角框架",
       "decide": {
         "title": "做决定",

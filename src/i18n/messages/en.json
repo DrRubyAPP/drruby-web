@@ -670,6 +670,14 @@
         "ariaSaveLabel": "Save — easier to find later",
         "ariaSavedLabel": "Saved — click to remove bookmark"
       },
+      "delete": {
+        "cta": "Delete",
+        "title": "Delete this decision?",
+        "message": "It will disappear from your lists and timeline. Your data stays on your export for provenance.",
+        "confirm": "Delete",
+        "confirming": "Deleting…",
+        "cancel": "Keep it"
+      },
       "scienceFraming": "Science framing",
       "synthesis": {
         "title": "Current understanding",
