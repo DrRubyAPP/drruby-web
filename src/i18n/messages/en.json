@@ -788,7 +788,8 @@
           "badge": "Learning",
           "title": "Previous learnings",
           "empty": "No learnings recorded yet.",
-          "supersededBadge": "Updated"
+          "supersededBadge": "Updated",
+          "supportingLabel": "Based on"
         }
       }
     },

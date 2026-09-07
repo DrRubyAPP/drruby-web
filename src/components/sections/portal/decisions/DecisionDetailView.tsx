@@ -129,6 +129,9 @@ export function DecisionDetailView({ id }: { id: string }) {
   // task-51 D-51-c：修正 Observation 后的「Learning 可能已过时」提示（仅已存在 learning entry 时置位）
   const [staleHint, setStaleHint] = useState(false);
 
+  // task-51 T4 §29：追溯跳转目标 observation 的短暂高亮（2s 后清除）
+  const [highlightEntryId, setHighlightEntryId] = useState<string | null>(null);
+
   // task-41 Decide section 状态
   const [decideOutcome, setDecideOutcome] = useState<DecisionOutcome | null>(
     null, // 服务端 outcome 在 data.outcome；本地仅跟踪用户未提交的选择
@@ -945,8 +948,24 @@ export function DecisionDetailView({ id }: { id: string }) {
                   ? (e.synthesis?.text ?? e.text)
                   : null;
                 const editing = editingEntryId === e.id;
+                // task-51 T4 §29：learning entry 追溯到支撑它的 observations（只展示日期 + text，禁强度/置信度）
+                const supportingIds = isLearning
+                  ? (e.synthesis?.supportingObservationIds ?? [])
+                  : [];
                 return (
-                  <div className="tl-item" key={e.id}>
+                  <div
+                    className="tl-item"
+                    key={e.id}
+                    id={`entry-${e.id}`}
+                    style={
+                      highlightEntryId === e.id
+                        ? {
+                            outline: "1px solid var(--p-red)",
+                            outlineOffset: 4,
+                          }
+                        : undefined
+                    }
+                  >
                     <span
                       className="tl-dot"
                       style={
@@ -999,6 +1018,64 @@ export function DecisionDetailView({ id }: { id: string }) {
                             </span>
                           )}
                           {learningText}
+                          {/* task-51 T4 §29：追溯列表（日期 + 摘要，点击锚点跳转 + 高亮） */}
+                          {supportingIds.length > 0 && (
+                            <div style={{ marginTop: 6 }}>
+                              <span style={{ fontSize: 11, color: "#a89a95" }}>
+                                {tr("observe.learnHistory.supportingLabel")}
+                              </span>
+                              <ul
+                                style={{
+                                  listStyle: "none",
+                                  padding: 0,
+                                  margin: "4px 0 0",
+                                }}
+                              >
+                                {supportingIds.map((oid) => {
+                                  const obs = entries.find((x) => x.id === oid);
+                                  // 引用不存在（异常数据）静默跳过
+                                  if (!obs) return null;
+                                  return (
+                                    <li key={oid}>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          document
+                                            .getElementById(`entry-${oid}`)
+                                            ?.scrollIntoView({
+                                              behavior: "smooth",
+                                              block: "center",
+                                            });
+                                          setHighlightEntryId(oid);
+                                          setTimeout(() => {
+                                            setHighlightEntryId((cur) =>
+                                              cur === oid ? null : cur,
+                                            );
+                                          }, 2000);
+                                        }}
+                                        style={{
+                                          fontSize: 12,
+                                          color: "var(--p-red)",
+                                          background: "none",
+                                          border: "none",
+                                          cursor: "pointer",
+                                          padding: 0,
+                                          textDecoration: "underline",
+                                        }}
+                                      >
+                                        {new Date(
+                                          obs.occurredAt,
+                                        ).toLocaleDateString()}
+                                        {obs.text.length > 60
+                                          ? ` · ${obs.text.slice(0, 60)}…`
+                                          : ` · ${obs.text}`}
+                                      </button>
+                                    </li>
+                                  );
+                                })}
+                              </ul>
+                            </div>
+                          )}
                         </>
                       ) : (
                         <>
