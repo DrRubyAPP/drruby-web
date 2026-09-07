@@ -265,6 +265,42 @@ describe("healthRecord.repo", () => {
     });
   });
 
+  it("updateExtraction 写 pleaseConfirm + extractionError，Retry 成功后 error 可清空（task-48 F3/F4）", async () => {
+    const userId = await seedUser();
+    const rec = await create(userId, {
+      kind: "lab",
+      title: "please confirm test",
+      recordedAt: new Date(),
+    });
+    // 抽取失败：落 FAILED + 用户安全文案
+    await advanceStatus(rec.id, "PROCESSING");
+    const failed = await updateExtraction(rec.id, {
+      status: "FAILED",
+      error: "PDF 暂不支持自动抽取，请手动录入",
+    });
+    expect(failed.status).toBe("FAILED");
+    expect(failed.extractionError).toBe("PDF 暂不支持自动抽取，请手动录入");
+
+    // Retry 成功：写 pleaseConfirm，清空 error
+    await advanceStatus(rec.id, "PROCESSING");
+    const done = await updateExtraction(rec.id, {
+      status: "EXTRACTED_DRAFT",
+      confidence: "Low",
+      documentClass: "Lab",
+      parsedValues: { items: [{ name: "LDL", value: 130 }] },
+      pleaseConfirm: ["ldl"],
+      error: null,
+    });
+    expect(done.status).toBe("EXTRACTED_DRAFT");
+    expect(done.pleaseConfirm).toEqual(["ldl"]);
+    expect(done.extractionError).toBeNull();
+
+    // 读回验证持久化
+    const found = await findById(rec.id);
+    expect(found?.pleaseConfirm).toEqual(["ldl"]);
+    expect(found?.extractionError).toBeNull();
+  });
+
   it("findById 含 revisions 修正历史（provenance）", async () => {
     const userId = await seedUser();
     const rec = await create(userId, {

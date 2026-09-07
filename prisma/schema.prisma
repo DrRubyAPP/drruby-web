@@ -558,9 +558,13 @@ model HealthRecord {
   kind          String   // lab|imaging|checkup|vitals|medication|symptom|treatment
   documentClass String?  @map("document_class") // Lab|Imaging|Pathology|Procedure|VisitSummary|Unknown
   title         String
-  status        String   @default("SOURCE_UPLOADED") // 状态机 SOURCE_UPLOADED→PROCESSING→EXTRACTED_DRAFT→USER_REVIEW→CONFIRMED
+  status        String   @default("SOURCE_UPLOADED") // 状态机 SOURCE_UPLOADED→PROCESSING→EXTRACTED_DRAFT→USER_REVIEW→CONFIRMED；FAILED（task-48 §13 失败恢复）
   confidence    String?  // High|Low|Unrecognized|Conflicting
   parsedValues  Json?    @map("parsed_values") // 带类型 + 逐项置信
+  /// Contract §13：需核实字段标记（抽取时由 Extractor 写入，前端逐字段标「请确认」）
+  pleaseConfirm  String[] @default([]) @map("please_confirm")
+  /// task-48 F4：抽取失败原因（用户安全文案，不落 PII/上游细节）；成功时清空
+  extractionError String?  @map("extraction_error")
   recordedAt    DateTime @map("recorded_at") @db.Timestamptz
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz

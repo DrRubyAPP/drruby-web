@@ -37,6 +37,8 @@ export const HealthRecordDTO = z.object({
   parsedValues: z.unknown().nullable().optional(),
   /** Contract §13：Please confirm 标记（抽取时由 Extractor 写入） */
   pleaseConfirm: z.array(z.string()).optional(),
+  /** task-48 F4：抽取失败原因（用户安全文案；FAILED 态返回） */
+  error: z.string().nullable().optional(),
   recordedAt: z.string(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
@@ -153,6 +155,9 @@ export function toRecordDTO(
       ? extractionConfidenceSchema.parse(row.confidence)
       : null,
     parsedValues: row.parsedValues,
+    // task-48 F3：请确认标记来自 DB 行（extractionError 同理），非前端猜测
+    pleaseConfirm: row.pleaseConfirm ?? [],
+    error: row.extractionError ?? null,
     recordedAt: row.recordedAt.toISOString(),
     createdAt: row.createdAt?.toISOString(),
     updatedAt: row.updatedAt?.toISOString(),

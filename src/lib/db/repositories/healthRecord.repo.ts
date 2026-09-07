@@ -180,9 +180,10 @@ export async function advanceStatus(
 }
 
 /**
- * 更新抽取结果（mock Extractor 返回后写入；Contract §13）
+ * 更新抽取结果（Extractor 返回后写入；Contract §13）
  * 不走 append-only（append-only 仅用于用户纠错 → HealthRecordRevision）；
  * Extractor 输出是机器初值，可被下一次抽取覆盖。
+ * task-48：pleaseConfirm（§13 需核实字段）+ error（失败原因，传 null 显式清空）。
  */
 export async function updateExtraction(
   recordId: string,
@@ -191,6 +192,10 @@ export async function updateExtraction(
     confidence?: ExtractionConfidence | null;
     documentClass?: DocumentClass | null;
     parsedValues?: Prisma.InputJsonValue | null;
+    /** §13 需核实字段标记（低置信/冲突项），成功抽取时写入 */
+    pleaseConfirm?: string[];
+    /** 失败原因（用户安全文案）；传 null 清空（Retry 成功后），undefined 不动 */
+    error?: string | null;
   },
 ): Promise<HealthRecord> {
   if (input.status) healthRecordStatusSchema.parse(input.status);
@@ -205,6 +210,8 @@ export async function updateExtraction(
       parsedValues: (input.parsedValues ?? undefined) as
         | Prisma.InputJsonValue
         | undefined,
+      pleaseConfirm: input.pleaseConfirm,
+      extractionError: input.error === undefined ? undefined : input.error,
     },
   });
 }
