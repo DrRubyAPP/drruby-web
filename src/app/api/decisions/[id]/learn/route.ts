@@ -18,11 +18,12 @@ async function assertDecisionOwner(userId: string, decisionId: string) {
   if (!existing || existing.userId !== userId) {
     throw new AppError("NOT_FOUND", "决策不存在", 404);
   }
+  return existing;
 }
 
 /**
  * Save learning summary
- * @description §29 Stop→Learning 流程终态：写 kind=learning entry（append-only，synthesis 承载 {text, supportingObservationIds, generatedAt}）+ lifecycle: LEARNING → COMPLETED 原子事务。刷 lastUserActivityAt + 写 TimelineEvent。非 LEARNING 422。越权 404
+ * @description §29 Stop→Learning 流程终态：写 kind=learning entry（append-only，synthesis 承载 {text, supportingObservationIds, generatedAt}）。task-51 D-51-a 按 lifecycle 分派：LEARNING → 首次保存，completeAfterLearning 原子转 COMPLETED（刷 lastUserActivityAt + 写 TimelineEvent）；COMPLETED → append-only 重生成，仅写新 entry，跳过生命周期转换（P-2 不写重复 "Completed" 事件），lifecycle 保持 COMPLETED。其余 lifecycle 422。越权 404
  * @body SaveLearningBody
  * @response { learning: EntryResponse, decision: DecisionDTO }
  * @auth bearer
@@ -32,9 +33,18 @@ async function assertDecisionOwner(userId: string, decisionId: string) {
 export const POST = handle(async (req: Request, ctx: Ctx) => {
   const user = await requireUser();
   const { id } = await ctx.params;
-  await assertDecisionOwner(user.id, id);
+  const decision = await assertDecisionOwner(user.id, id);
 
   const body = bodySchema.parse(await req.json());
+
+  // task-51 D-51-a：LEARNING=首次保存；COMPLETED=append-only 重生成（仅写新 entry）
+  if (decision.lifecycle !== "LEARNING" && decision.lifecycle !== "COMPLETED") {
+    throw new AppError(
+      "UNPROCESSABLE_ENTITY",
+      `cannot save learning from lifecycle "${decision.lifecycle}"; must be LEARNING or COMPLETED`,
+      422,
+    );
+  }
 
   try {
     const learning = await decisionEntryRepo.createLearning({
@@ -43,13 +53,20 @@ export const POST = handle(async (req: Request, ctx: Ctx) => {
       text: body.text,
       supportingObservationIds: body.supportingObservationIds,
     });
-    const decision = await decisionRepo.completeAfterLearning({
-      decisionId: id,
-      userId: user.id,
-    });
+    // COMPLETED 态跳过生命周期转换（P-2：不写重复 "Completed" TimelineEvent）
+    const updated =
+      decision.lifecycle === "LEARNING"
+        ? await decisionRepo.completeAfterLearning({
+            decisionId: id,
+            userId: user.id,
+          })
+        : await decisionRepo.findById(id);
+    if (!updated) {
+      throw new AppError("NOT_FOUND", "决策不存在", 404);
+    }
     return NextResponse.json({
       learning: toEntryDTO(learning),
-      decision: toDecisionDTO(decision, { withBrief: false }),
+      decision: toDecisionDTO(updated, { withBrief: false }),
     });
   } catch (e) {
     throw new AppError("UNPROCESSABLE_ENTITY", (e as Error).message, 422);

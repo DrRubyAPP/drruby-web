@@ -48,6 +48,46 @@ async function addObservation(
   return entry.id;
 }
 
+async function createCompletedDecision(userId: string) {
+  const { prisma } = await import("@/lib/db/prisma");
+  return prisma.decision.create({
+    data: {
+      userId,
+      question: "completed",
+      lifecycle: "COMPLETED",
+      decisionKind: "action",
+      outcome: "decided_to_do_it",
+      decidedAt: new Date(),
+    },
+  });
+}
+
+async function addLearningEntry(
+  decisionId: string,
+  userId: string,
+  text: string,
+  supportingObservationIds: string[],
+) {
+  const { prisma } = await import("@/lib/db/prisma");
+  const occurredAt = new Date(Date.now() - 60 * 60 * 1000);
+  return prisma.decisionEntry.create({
+    data: {
+      decisionId,
+      userId,
+      text,
+      lifecycleSnapshot: "LEARNING",
+      kind: "learning",
+      synthesis: {
+        text,
+        supportingObservationIds,
+        generatedAt: occurredAt.toISOString(),
+      },
+      occurredAt,
+      createdAt: occurredAt,
+    },
+  });
+}
+
 describe("POST /api/decisions/[id]/learn", () => {
   beforeEach(resetDb);
   afterEach(disconnectDb);
@@ -90,7 +130,7 @@ describe("POST /api/decisions/[id]/learn", () => {
     expect(events.some((e) => e.title === "Completed")).toBe(true);
   });
 
-  it("非 LEARNING（OBSERVING）→ 422", async () => {
+  it("非 LEARNING/COMPLETED（OBSERVING）→ 422", async () => {
     const { POST } = await import("./route");
     const { prisma } = await import("@/lib/db/prisma");
     const owner = await makeUser("learn-observing@example.com");
@@ -113,6 +153,86 @@ describe("POST /api/decisions/[id]/learn", () => {
       params(decision.id),
     );
     expect(res.status).toBe(422);
+    const body = await res.json();
+    expect(body.error.code).toBe("UNPROCESSABLE_ENTITY");
+    expect(body.error.message).toContain("LEARNING or COMPLETED");
+  });
+
+  it("task-51 COMPLETED + 已有 learning → POST 200 写新 entry（append-only），lifecycle 保持 COMPLETED，无重复 Completed 事件", async () => {
+    const { POST } = await import("./route");
+    const { prisma } = await import("@/lib/db/prisma");
+    const owner = await makeUser("learn-regen@example.com");
+    const decision = await createCompletedDecision(owner.id);
+    const obsId = await addObservation(decision.id, owner.id, "better");
+    const oldEntry = await addLearningEntry(
+      decision.id,
+      owner.id,
+      "old summary",
+      [obsId],
+    );
+
+    asUser(owner.id);
+    const res = await POST(
+      jsonRequest({
+        text: "new summary",
+        supportingObservationIds: [obsId],
+      }),
+      params(decision.id),
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.learning.kind).toBe("learning");
+    expect(body.learning.synthesis).toMatchObject({
+      text: "new summary",
+      supportingObservationIds: [obsId],
+    });
+    expect(body.decision.lifecycle).toBe("COMPLETED");
+
+    // append-only：写新 entry（count=2），历史 entry 内容未变
+    const entries = await prisma.decisionEntry.findMany({
+      where: { decisionId: decision.id, kind: "learning" },
+      orderBy: { occurredAt: "asc" },
+    });
+    expect(entries).toHaveLength(2);
+    const persistedOld = entries.find((e) => e.id === oldEntry.id);
+    expect(persistedOld?.text).toBe("old summary");
+    expect(persistedOld?.occurredAt?.toISOString()).toBe(
+      oldEntry.occurredAt.toISOString(),
+    );
+    expect(persistedOld?.synthesis).toMatchObject({
+      text: "old summary",
+      supportingObservationIds: [obsId],
+    });
+
+    // P-2：COMPLETED 重生成不写新 TimelineEvent
+    const events = await prisma.timelineEvent.findMany({
+      where: { decisionId: decision.id },
+    });
+    expect(events.filter((e) => e.title === "Completed")).toHaveLength(0);
+  });
+
+  it("task-51 COMPLETED（从未 learning）→ POST 200 写 entry（边界）", async () => {
+    const { POST } = await import("./route");
+    const { prisma } = await import("@/lib/db/prisma");
+    const owner = await makeUser("learn-regen-fresh@example.com");
+    const decision = await createCompletedDecision(owner.id);
+
+    asUser(owner.id);
+    const res = await POST(
+      jsonRequest({ text: "late learning", supportingObservationIds: [] }),
+      params(decision.id),
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.learning.synthesis).toMatchObject({
+      text: "late learning",
+    });
+    expect(body.decision.lifecycle).toBe("COMPLETED");
+
+    const count = await prisma.decisionEntry.count({
+      where: { decisionId: decision.id, kind: "learning" },
+    });
+    expect(count).toBe(1);
   });
 
   it("supportingObservationIds 缺省 → 空数组", async () => {
@@ -201,6 +321,24 @@ describe("GET /api/decisions/[id]/learn", () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.template.text).toContain("观察");
+  });
+
+  it("task-51 COMPLETED 态 → 200 返回模板（重生成预填回归）", async () => {
+    const { GET } = await import("./route");
+    const owner = await makeUser("learn-tpl-completed@example.com");
+    const decision = await createCompletedDecision(owner.id);
+    await addObservation(decision.id, owner.id, "better");
+    await addLearningEntry(decision.id, owner.id, "old summary", []);
+
+    asUser(owner.id);
+    const res = await GET(
+      new Request("http://test", { method: "GET" }),
+      params(decision.id),
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(Array.isArray(body.template.supportingObservationIds)).toBe(true);
+    expect(body.template.text).toContain("observation");
   });
 
   it("越权 → 404", async () => {
