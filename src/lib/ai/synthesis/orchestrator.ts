@@ -17,6 +17,7 @@ import { prisma } from "@/lib/db/prisma";
 import * as decisionRepo from "@/lib/db/repositories/decision.repo";
 import { listByDecision } from "@/lib/db/repositories/decisionHealthRecord.repo";
 import * as snapshotRepo from "@/lib/db/repositories/decisionSnapshot.repo";
+import { Prisma } from "~prisma/client";
 import { detectMaterialChange } from "./material";
 import { type DecisionRef, isRelevant } from "./relevance";
 import type { ConnectedRecordRef, Synthesizer } from "./types";
@@ -223,74 +224,87 @@ export class RegenerationOrchestrator {
     decisionId: string,
     input: RunRegenInput,
   ): Promise<RunRegenResult> {
-    const sRepo = this.deps.snapshotRepo ?? snapshotRepo;
-    const { input: synthInput, connectedRecords } = await gatherSynthesisInput(
-      decisionId,
-      input.trigger,
-      this.deps,
-    );
+    const dRepo = this.deps.decisionRepo ?? decisionRepo;
+    try {
+      const { input: synthInput, connectedRecords } =
+        await gatherSynthesisInput(decisionId, input.trigger, this.deps);
 
-    const prevConnectedRecords = await getPrevSnapshotRecords(decisionId);
-    const decision = await prisma.decision.findUniqueOrThrow({
-      where: { id: decisionId },
-    });
-    // task-50 D-2：已删 Decision 不再综合（防御性守卫，同 gatherSynthesisInput）
-    if (decision.deletedAt) throw new Error("Decision is deleted");
-
-    const materialResult = detectMaterialChange({
-      prevConnectedRecords,
-      newConnectedRecords: connectedRecords,
-      prevHealthContext: (await getPrevHealthContext(decisionId)) ?? null,
-      newHealthContext:
-        (decision.healthContext as import("./types").HealthContext | null) ??
-        null,
-      corpusVersionChanged: input.corpusVersionChanged ?? false,
-    });
-
-    if (!materialResult.material) {
-      // B1：非 material → clear pending，不建 Snapshot
-      await decisionRepo.clearPendingRegen(decisionId);
-      return { material: false, reason: materialResult.reason };
-    }
-
-    // material → synthesize + 事务性 create snapshot + bind + clear pending
-    const synth = this.deps.synthesizer;
-    const result = await synth.synthesize(synthInput);
-
-    // yourselfContextRef：快照时 Record id + summary（R3 历史可还原）
-    const yourselfContextRef = {
-      healthContextSnapshot: synthInput.decision.healthContext ?? null,
-      connectedRecordRefs: connectedRecords.map((r) => ({
-        id: r.id,
-        kind: r.kind,
-        documentClass: r.documentClass,
-        summary: r.summary,
-      })),
-    };
-
-    const snapshot = await prisma.$transaction(async (tx) => {
-      const created = await tx.decisionSnapshot.create({
-        data: {
-          decisionId,
-          yourselfContextRef,
-          sources: result.sources as never,
-          citations: result.citations as never,
-          synthesis: result.synthesis as never,
-          provenance: result.provenance,
-          changeTrigger: input.trigger,
-        },
-      });
-      await tx.decision.update({
+      const prevConnectedRecords = await getPrevSnapshotRecords(decisionId);
+      const decision = await prisma.decision.findUniqueOrThrow({
         where: { id: decisionId },
-        data: {
-          currentSnapshotId: created.id,
-          pendingRegenAt: null,
-        },
       });
-      return created;
-    });
+      // task-50 D-2：已删 Decision 不再综合（防御性守卫，同 gatherSynthesisInput）
+      if (decision.deletedAt) throw new Error("Decision is deleted");
 
-    return { material: true, snapshotId: snapshot.id };
+      const materialResult = detectMaterialChange({
+        prevConnectedRecords,
+        newConnectedRecords: connectedRecords,
+        prevHealthContext: (await getPrevHealthContext(decisionId)) ?? null,
+        newHealthContext:
+          (decision.healthContext as import("./types").HealthContext | null) ??
+          null,
+        corpusVersionChanged: input.corpusVersionChanged ?? false,
+      });
+
+      if (!materialResult.material) {
+        // B1：非 material → clear pending，不建 Snapshot；Retry 成功处理后清 FAILED
+        await prisma.$transaction([
+          prisma.decision.update({
+            where: { id: decisionId },
+            data: {
+              pendingRegenAt: null,
+              lastRegenFailedAt: null,
+              lastRegenFailure: Prisma.JsonNull,
+            },
+          }),
+        ]);
+        return { material: false, reason: materialResult.reason };
+      }
+
+      // material → synthesize + 事务性 create snapshot + bind + clear pending
+      const synth = this.deps.synthesizer;
+      const result = await synth.synthesize(synthInput);
+
+      // yourselfContextRef：快照时 Record id + summary（R3 历史可还原）
+      const yourselfContextRef = {
+        healthContextSnapshot: synthInput.decision.healthContext ?? null,
+        connectedRecordRefs: connectedRecords.map((r) => ({
+          id: r.id,
+          kind: r.kind,
+          documentClass: r.documentClass,
+          summary: r.summary,
+        })),
+      };
+
+      const snapshot = await prisma.$transaction(async (tx) => {
+        const created = await tx.decisionSnapshot.create({
+          data: {
+            decisionId,
+            yourselfContextRef,
+            sources: result.sources as never,
+            citations: result.citations as never,
+            synthesis: result.synthesis as never,
+            provenance: result.provenance,
+            changeTrigger: input.trigger,
+          },
+        });
+        await tx.decision.update({
+          where: { id: decisionId },
+          data: {
+            currentSnapshotId: created.id,
+            pendingRegenAt: null,
+            lastRegenFailedAt: null,
+            lastRegenFailure: Prisma.JsonNull,
+          },
+        });
+        return created;
+      });
+
+      return { material: true, snapshotId: snapshot.id };
+    } catch (error) {
+      await dRepo.markRegenFailed(decisionId, error);
+      throw error;
+    }
   }
 
   /**
@@ -305,44 +319,51 @@ export class RegenerationOrchestrator {
       return { created: false, snapshotId: existing.id };
     }
 
-    const { input: synthInput, connectedRecords } = await gatherSynthesisInput(
-      decisionId,
-      "initial",
-      this.deps,
-    );
-    const synth = this.deps.synthesizer;
-    const result = await synth.synthesize(synthInput);
+    const dRepo = this.deps.decisionRepo ?? decisionRepo;
+    try {
+      const { input: synthInput, connectedRecords } =
+        await gatherSynthesisInput(decisionId, "initial", this.deps);
+      const synth = this.deps.synthesizer;
+      const result = await synth.synthesize(synthInput);
 
-    const yourselfContextRef = {
-      healthContextSnapshot: synthInput.decision.healthContext ?? null,
-      connectedRecordRefs: connectedRecords.map((r) => ({
-        id: r.id,
-        kind: r.kind,
-        documentClass: r.documentClass,
-        summary: r.summary,
-      })),
-    };
+      const yourselfContextRef = {
+        healthContextSnapshot: synthInput.decision.healthContext ?? null,
+        connectedRecordRefs: connectedRecords.map((r) => ({
+          id: r.id,
+          kind: r.kind,
+          documentClass: r.documentClass,
+          summary: r.summary,
+        })),
+      };
 
-    const snapshot = await prisma.$transaction(async (tx) => {
-      const created = await tx.decisionSnapshot.create({
-        data: {
-          decisionId,
-          yourselfContextRef,
-          sources: result.sources as never,
-          citations: result.citations as never,
-          synthesis: result.synthesis as never,
-          provenance: "initial",
-          changeTrigger: "initial",
-        },
+      const snapshot = await prisma.$transaction(async (tx) => {
+        const created = await tx.decisionSnapshot.create({
+          data: {
+            decisionId,
+            yourselfContextRef,
+            sources: result.sources as never,
+            citations: result.citations as never,
+            synthesis: result.synthesis as never,
+            provenance: "initial",
+            changeTrigger: "initial",
+          },
+        });
+        await tx.decision.update({
+          where: { id: decisionId },
+          data: {
+            currentSnapshotId: created.id,
+            lastRegenFailedAt: null,
+            lastRegenFailure: Prisma.JsonNull,
+          },
+        });
+        return created;
       });
-      await tx.decision.update({
-        where: { id: decisionId },
-        data: { currentSnapshotId: created.id },
-      });
-      return created;
-    });
 
-    return { created: true, snapshotId: snapshot.id };
+      return { created: true, snapshotId: snapshot.id };
+    } catch (error) {
+      await dRepo.markRegenFailed(decisionId, error);
+      throw error;
+    }
   }
 }
 

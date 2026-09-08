@@ -444,6 +444,34 @@ export async function clearPendingRegen(decisionId: string): Promise<Decision> {
   });
 }
 
+export async function markRegenFailed(
+  decisionId: string,
+  error: unknown,
+): Promise<Decision> {
+  const message = error instanceof Error ? error.message : "Unknown error";
+  const name = error instanceof Error ? error.name : "Error";
+  return prisma.decision.update({
+    where: { id: decisionId },
+    data: {
+      lastRegenFailedAt: new Date(),
+      lastRegenFailure: {
+        name,
+        message,
+      } as Prisma.InputJsonValue,
+    },
+  });
+}
+
+export async function clearRegenFailure(decisionId: string): Promise<Decision> {
+  return prisma.decision.update({
+    where: { id: decisionId },
+    data: {
+      lastRegenFailedAt: null,
+      lastRegenFailure: Prisma.JsonNull,
+    },
+  });
+}
+
 /** §18/D6 读 pendingRegenAt；null = 无 pending（READY） */
 export async function getPendingRegen(
   decisionId: string,
@@ -469,6 +497,8 @@ export async function bindCurrentSnapshot(
     data: {
       currentSnapshotId: snapshotId,
       pendingRegenAt: null,
+      lastRegenFailedAt: null,
+      lastRegenFailure: Prisma.JsonNull,
     },
   });
 }

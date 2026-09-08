@@ -69,9 +69,6 @@ vi.mock("@/components/sections/portal/privacy/PrivacyView", () => ({
 vi.mock("@/components/sections/portal/research/ResearchView", () => ({
   ResearchView: () => <div data-testid="research" />,
 }));
-vi.mock("@/components/sections/portal/today/TodayView", () => ({
-  TodayView: () => <div data-testid="today" />,
-}));
 vi.mock("@/components/sections/portal/settings/ExportDataButton", () => ({
   ExportDataButton: () => <button type="button">Export all my data</button>,
 }));

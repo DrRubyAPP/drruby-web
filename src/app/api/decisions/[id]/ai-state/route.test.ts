@@ -95,6 +95,25 @@ describe("GET /api/decisions/[id]/ai-state", () => {
     expect(body.pendingUntil).not.toBeNull();
   });
 
+  it("lastRegenFailedAt 非空 → Yourself FAILED", async () => {
+    const { GET } = await import("./route");
+    const decisionRepo = await import("@/lib/db/repositories/decision.repo");
+    const owner = await makeUser("ai-failed@example.com");
+    const decision = await decisionRepo.create(owner.id, {
+      question: "Try HRT?",
+      topicSlug: "hrt",
+    });
+    await decisionRepo.markRegenFailed(decision.id, new Error("llm down"));
+
+    asUser(owner.id);
+    const res = await GET(bareRequest("GET"), params(decision.id));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.yourself).toBe("FAILED");
+    expect(body.others).toBe("READY");
+    expect(body.science).toBe("READY");
+  });
+
   it("有 currentSnapshot + 无 pending → Yourself READY, Others/Science READY（topicSlug 命中）", async () => {
     const { GET } = await import("./route");
     const decisionRepo = await import("@/lib/db/repositories/decision.repo");

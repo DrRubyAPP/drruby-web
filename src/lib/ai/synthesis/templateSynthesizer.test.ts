@@ -59,6 +59,37 @@ describe("TemplateSynthesizer", () => {
     expect(result.synthesis.science).toContain("Hormone therapy");
   });
 
+  it("GENERIC science 为空时不输出占位 Science 文案", async () => {
+    const generic = getDecisionCorpus(null);
+    const synth = new TemplateSynthesizer();
+    const result = await synth.synthesize(
+      makeInput({
+        decision: {
+          id: "dec1",
+          question: "What should I consider?",
+          topicSlug: null,
+          healthContext: null,
+          yourselfContext: null,
+        },
+        connectedRecords: [],
+        corpus: {
+          others: generic.others.helpful.join(" "),
+          science: generic.science.benefits[0]?.text ?? "",
+          othersVersion: "v1",
+          scienceVersion: "v1",
+        },
+      }),
+    );
+
+    expect(result.synthesis.science).toBe("");
+    expect(result.synthesis.combined).not.toMatch(
+      /placeholder|pending content/i,
+    );
+    expect(result.sources.some((source) => source.type === "science")).toBe(
+      false,
+    );
+  });
+
   it("synthesize combined：拼接 yourself/others/science", async () => {
     const synth = new TemplateSynthesizer();
     const result = await synth.synthesize(makeInput());
@@ -69,7 +100,7 @@ describe("TemplateSynthesizer", () => {
   });
 
   it("provenance=template（默认；trigger 文案 LLM 失败降级 → degraded）", async () => {
-    // LLM_TRIGGER_API_KEY 缺失 → trigger 降级
+    // OpenAI 未配置 → trigger 降级
     const synth = new TemplateSynthesizer();
     const result = await synth.synthesize(makeInput());
 

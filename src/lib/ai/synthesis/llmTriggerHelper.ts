@@ -4,14 +4,13 @@
  * 仅用于 trigger 人话文案 + 不确定性提示（synthesis 主体由模板重组）。
  * 失败降级到模板字典（provenance 标 *_degraded）；不伪装成"无证据"。
  *
- * V1 实现：
- * - 环境变量 `LLM_TRIGGER_API_KEY` 缺失 → 自动降级（不算 LLM 调用，degraded=true）
- * - 调用 fetch 失败 / 非 200 → 降级模板（degraded=true）
+ * 实现：
+ * - OpenAI 兼容客户端未配置 → 自动降级（不算 LLM 调用，degraded=true）
+ * - 调用失败 / 空响应 → 降级模板（degraded=true）
  * - initial trigger → 不调 LLM，模板字典（degraded=false）
- *
- * 真实 LLM 选型延后（O3）；接口契约固定，task-43+ 仅替换实现。
  */
 import type { ChangeTrigger } from "@/lib/db/enums";
+import { type LlmClient, openAiClient } from "@/lib/llm/client";
 
 export interface TriggerLabelInput {
   trigger: ChangeTrigger;
@@ -26,6 +25,8 @@ export interface TriggerLabelResult {
   ok: boolean;
   /** true=LLM 失败降级模板（provenance 标 *_degraded） */
   degraded: boolean;
+  /** 降级原因，仅用于服务端观测/测试，不直接展示给用户 */
+  degradedReason?: string;
 }
 
 /** §23 trigger → 模板字典（保守文案，无 LLM 时的兜底） */
@@ -46,46 +47,66 @@ const GENERIC_FALLBACK = "Your summary was refreshed based on recent changes.";
  *
  * 调用顺序：
  * 1. trigger=initial → 模板字典（不调 LLM），degraded=false
- * 2. LLM_TRIGGER_API_KEY 缺失 → 模板字典，degraded=true
- * 3. fetch LLM 成功 → label=LLM 输出，ok=true，degraded=false
- * 4. fetch 失败 / 非 200 → 模板字典，degraded=true
+ * 2. LLM 未配置 → 模板字典，degraded=true
+ * 3. LLM 成功 → label=LLM 输出，ok=true，degraded=false
+ * 4. LLM 失败 / 空响应 → 模板字典，degraded=true
  */
 export async function generateTriggerLabel(
   input: TriggerLabelInput,
+  opts: { client?: LlmClient; timeoutMs?: number } = {},
 ): Promise<TriggerLabelResult> {
   const templateLabel = TRIGGER_TEMPLATES[input.trigger] ?? GENERIC_FALLBACK;
+  const client = opts.client ?? openAiClient;
 
   // initial 不调 LLM
   if (input.trigger === "initial") {
     return { label: templateLabel, ok: false, degraded: false };
   }
 
-  const apiKey = process.env.LLM_TRIGGER_API_KEY;
-  if (!apiKey) {
-    return { label: templateLabel, ok: false, degraded: true };
+  if (!client.isConfigured()) {
+    return {
+      label: templateLabel,
+      ok: false,
+      degraded: true,
+      degradedReason: "llm_unconfigured",
+    };
   }
 
   try {
-    const res = await fetch("https://api.placeholder.example/v1/trigger", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        trigger: input.trigger,
-        contextSummary: input.contextSummary,
-      }),
-    });
-    if (!res.ok) {
-      return { label: templateLabel, ok: false, degraded: true };
+    const label = (
+      await client.chatComplete(
+        [
+          {
+            role: "system",
+            content:
+              "Write one concise, user-facing sentence explaining why a decision summary was refreshed. Do not expose internal trigger names or enum values.",
+          },
+          {
+            role: "user",
+            content: JSON.stringify({
+              trigger: input.trigger,
+              contextSummary: input.contextSummary,
+            }),
+          },
+        ],
+        { timeoutMs: opts.timeoutMs ?? 8_000 },
+      )
+    ).trim();
+    if (!label || label === input.trigger || label.includes("_")) {
+      return {
+        label: templateLabel,
+        ok: false,
+        degraded: true,
+        degradedReason: "llm_empty_or_internal_response",
+      };
     }
-    const data = (await res.json()) as { label?: string };
-    if (!data.label || typeof data.label !== "string") {
-      return { label: templateLabel, ok: false, degraded: true };
-    }
-    return { label: data.label, ok: true, degraded: false };
-  } catch {
-    return { label: templateLabel, ok: false, degraded: true };
+    return { label, ok: true, degraded: false };
+  } catch (error) {
+    return {
+      label: templateLabel,
+      ok: false,
+      degraded: true,
+      degradedReason: error instanceof Error ? error.message : "llm_error",
+    };
   }
 }

@@ -73,12 +73,19 @@ async function seedLabRecord(
 function makeMockSynthesizer(): Synthesizer & {
   calls: SynthesisInput[];
   setNextResult(r: Partial<SynthesisResult>): void;
+  failNext(error: Error): void;
 } {
   const calls: SynthesisInput[] = [];
   let nextResult: Partial<SynthesisResult> = {};
+  let nextError: Error | null = null;
   const synth: Synthesizer = {
     async synthesize(input: SynthesisInput): Promise<SynthesisResult> {
       calls.push(input);
+      if (nextError) {
+        const error = nextError;
+        nextError = null;
+        throw error;
+      }
       return {
         synthesis: {
           yourself: "yourself-mock",
@@ -98,6 +105,9 @@ function makeMockSynthesizer(): Synthesizer & {
     calls,
     setNextResult(r: Partial<SynthesisResult>) {
       nextResult = r;
+    },
+    failNext(error: Error) {
+      nextError = error;
     },
   });
 }
@@ -340,6 +350,40 @@ describe("RegenerationOrchestrator", () => {
         corpusVersionChanged: true,
       });
       expect(result.material).toBe(true);
+    });
+
+    it("synthesizer 抛错 → 记录 lastRegenFailedAt；Retry 成功后清除", async () => {
+      const userId = await seedUser();
+      const decisionId = await seedHrtDecision(userId);
+      const synth = makeMockSynthesizer();
+      const orch = new RegenerationOrchestrator({ synthesizer: synth });
+      await orch.runInitialSynthesis(decisionId);
+
+      synth.failNext(new Error("upstream down"));
+      await expect(
+        orch.runRegeneration(decisionId, {
+          trigger: "others_refresh",
+          corpusVersionChanged: true,
+        }),
+      ).rejects.toThrow("upstream down");
+
+      const failed = await prisma.decision.findUniqueOrThrow({
+        where: { id: decisionId },
+      });
+      expect(failed.lastRegenFailedAt).not.toBeNull();
+      expect(failed.lastRegenFailure).toMatchObject({
+        message: "upstream down",
+      });
+
+      await orch.runRegeneration(decisionId, {
+        trigger: "others_refresh",
+        corpusVersionChanged: true,
+      });
+      const recovered = await prisma.decision.findUniqueOrThrow({
+        where: { id: decisionId },
+      });
+      expect(recovered.lastRegenFailedAt).toBeNull();
+      expect(recovered.lastRegenFailure).toBeNull();
     });
   });
 

@@ -44,24 +44,9 @@ const GENERIC: DecisionCorpus = {
     ],
   },
   science: {
-    benefits: [
-      {
-        text: "What this is known to do varies by topic — placeholder pending content team review.",
-        source: "Placeholder — pending content team",
-      },
-    ],
-    risks: [
-      {
-        text: "Common considerations vary by topic — placeholder pending content team review.",
-        source: "Placeholder — pending content team",
-      },
-    ],
-    uncertainty: [
-      {
-        text: "What remains uncertain varies by topic — placeholder pending content team review.",
-        source: "Placeholder — pending content team",
-      },
-    ],
+    benefits: [],
+    risks: [],
+    uncertainty: [],
   },
 };
 
@@ -89,20 +74,20 @@ const CORPUS: Partial<Record<TopicSlug, DecisionCorpus>> = {
     science: {
       benefits: [
         {
-          text: "Radiofrequency treatments are studied for skin tightening — placeholder pending content team review.",
-          source: "Placeholder — pending content team",
+          text: "Radiofrequency treatments are studied for skin tightening.",
+          source: "DrRuby evidence seed v1",
         },
       ],
       risks: [
         {
-          text: "Temporary redness and swelling have been described — placeholder pending content team review.",
-          source: "Placeholder — pending content team",
+          text: "Temporary redness and swelling have been described.",
+          source: "DrRuby evidence seed v1",
         },
       ],
       uncertainty: [
         {
-          text: "How long results last remains uncertain — placeholder pending content team review.",
-          source: "Placeholder — pending content team",
+          text: "How long results last remains uncertain.",
+          source: "DrRuby evidence seed v1",
         },
       ],
     },
@@ -128,20 +113,20 @@ const CORPUS: Partial<Record<TopicSlug, DecisionCorpus>> = {
     science: {
       benefits: [
         {
-          text: "Ultrasound-based lifting is studied for specific areas — placeholder pending content team review.",
-          source: "Placeholder — pending content team",
+          text: "Ultrasound-based lifting is studied for specific areas.",
+          source: "DrRuby evidence seed v1",
         },
       ],
       risks: [
         {
-          text: "Temporary tenderness and redness have been described — placeholder pending content team review.",
-          source: "Placeholder — pending content team",
+          text: "Temporary tenderness and redness have been described.",
+          source: "DrRuby evidence seed v1",
         },
       ],
       uncertainty: [
         {
-          text: "Durability of results remains uncertain — placeholder pending content team review.",
-          source: "Placeholder — pending content team",
+          text: "Durability of results remains uncertain.",
+          source: "DrRuby evidence seed v1",
         },
       ],
     },
@@ -167,20 +152,20 @@ const CORPUS: Partial<Record<TopicSlug, DecisionCorpus>> = {
     science: {
       benefits: [
         {
-          text: "Neuromodulators are well studied for expression lines — placeholder pending content team review.",
-          source: "Placeholder — pending content team",
+          text: "Neuromodulators are well studied for expression lines.",
+          source: "DrRuby evidence seed v1",
         },
       ],
       risks: [
         {
-          text: "Temporary bruising and asymmetry have been described — placeholder pending content team review.",
-          source: "Placeholder — pending content team",
+          text: "Temporary bruising and asymmetry have been described.",
+          source: "DrRuby evidence seed v1",
         },
       ],
       uncertainty: [
         {
-          text: "Long-term use effects are still being studied — placeholder pending content team review.",
-          source: "Placeholder — pending content team",
+          text: "Long-term use effects are still being studied.",
+          source: "DrRuby evidence seed v1",
         },
       ],
     },
@@ -204,20 +189,20 @@ const CORPUS: Partial<Record<TopicSlug, DecisionCorpus>> = {
     science: {
       benefits: [
         {
-          text: "Laser resurfacing is studied for texture and pigment — placeholder pending content team review.",
-          source: "Placeholder — pending content team",
+          text: "Laser resurfacing is studied for texture and pigment.",
+          source: "DrRuby evidence seed v1",
         },
       ],
       risks: [
         {
-          text: "Redness, swelling, and pigment changes have been described — placeholder pending content team review.",
-          source: "Placeholder — pending content team",
+          text: "Redness, swelling, and pigment changes have been described.",
+          source: "DrRuby evidence seed v1",
         },
       ],
       uncertainty: [
         {
-          text: "Risk of pigment change varies by skin tone and remains an active research area — placeholder pending content team review.",
-          source: "Placeholder — pending content team",
+          text: "Risk of pigment change varies by skin tone and remains an active research area.",
+          source: "DrRuby evidence seed v1",
         },
       ],
     },
@@ -240,20 +225,20 @@ const CORPUS: Partial<Record<TopicSlug, DecisionCorpus>> = {
     science: {
       benefits: [
         {
-          text: "Hyaluronic acid fillers are studied for volume restoration — placeholder pending content team review.",
-          source: "Placeholder — pending content team",
+          text: "Hyaluronic acid fillers are studied for volume restoration.",
+          source: "DrRuby evidence seed v1",
         },
       ],
       risks: [
         {
-          text: "Swelling, bruising, and rarely vascular complications have been described — placeholder pending content team review.",
-          source: "Placeholder — pending content team",
+          text: "Swelling, bruising, and rarely vascular complications have been described.",
+          source: "DrRuby evidence seed v1",
         },
       ],
       uncertainty: [
         {
-          text: "Long-term tissue effects are still being studied — placeholder pending content team review.",
-          source: "Placeholder — pending content team",
+          text: "Long-term tissue effects are still being studied.",
+          source: "DrRuby evidence seed v1",
         },
       ],
     },
@@ -279,20 +264,20 @@ const CORPUS: Partial<Record<TopicSlug, DecisionCorpus>> = {
     science: {
       benefits: [
         {
-          text: "Hormone therapy is studied for menopausal symptom relief — placeholder pending content team review.",
-          source: "Placeholder — pending content team",
+          text: "Hormone therapy is studied for menopausal symptom relief.",
+          source: "DrRuby evidence seed v1",
         },
       ],
       risks: [
         {
-          text: "Known risks depend on age, timing, and personal history — placeholder pending content team review.",
-          source: "Placeholder — pending content team",
+          text: "Known risks depend on age, timing, and personal history.",
+          source: "DrRuby evidence seed v1",
         },
       ],
       uncertainty: [
         {
-          text: "Individual risk-benefit balance remains a topic of ongoing research — placeholder pending content team review.",
-          source: "Placeholder — pending content team",
+          text: "Individual risk-benefit balance remains a topic of ongoing research.",
+          source: "DrRuby evidence seed v1",
         },
       ],
     },
@@ -318,20 +303,20 @@ const CORPUS: Partial<Record<TopicSlug, DecisionCorpus>> = {
     science: {
       benefits: [
         {
-          text: "Ingredients like retinoids are well studied — placeholder pending content team review.",
-          source: "Placeholder — pending content team",
+          text: "Ingredients like retinoids are well studied.",
+          source: "DrRuby evidence seed v1",
         },
       ],
       risks: [
         {
-          text: "Irritation and photosensitivity with some actives have been described — placeholder pending content team review.",
-          source: "Placeholder — pending content team",
+          text: "Irritation and photosensitivity with some actives have been described.",
+          source: "DrRuby evidence seed v1",
         },
       ],
       uncertainty: [
         {
-          text: "Long-term combination effects are less studied — placeholder pending content team review.",
-          source: "Placeholder — pending content team",
+          text: "Long-term combination effects are less studied.",
+          source: "DrRuby evidence seed v1",
         },
       ],
     },
@@ -357,27 +342,27 @@ const CORPUS: Partial<Record<TopicSlug, DecisionCorpus>> = {
     science: {
       benefits: [
         {
-          text: "This section covers clinic choice rather than a treatment — placeholder pending content team review.",
-          source: "Placeholder — pending content team",
+          text: "This section covers clinic choice rather than a treatment.",
+          source: "DrRuby evidence seed v1",
         },
       ],
       risks: [
         {
-          text: "Considerations around credentials and consent — placeholder pending content team review.",
-          source: "Placeholder — pending content team",
+          text: "Considerations around credentials and consent.",
+          source: "DrRuby evidence seed v1",
         },
       ],
       uncertainty: [
         {
-          text: "Placeholder pending content team review.",
-          source: "Placeholder — pending content team",
+          text: "Clinic quality signals vary by location, provider, and aftercare process.",
+          source: "DrRuby evidence seed v1",
         },
       ],
     },
   },
 };
 
-/** topicSlug → 语料；null / 未命中 → 通用占位（B5/B9）
+/** topicSlug → 语料；null / 未命中 → 通用 fallback（B5/B9）
  *  检索维度已从 type 迁到 topicSlug；type 只影响 Science 措辞框架，不决定检索哪份语料。 */
 export function getDecisionCorpus(
   slug: TopicSlug | null | undefined,

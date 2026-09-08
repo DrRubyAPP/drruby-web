@@ -28,13 +28,26 @@ describe("getDecisionCorpus", () => {
     }
   });
 
-  it("null / undefined → 通用占位（B9）", () => {
+  it("null / undefined → 通用 fallback，science 为空以触发 INSUFFICIENT", () => {
     expect(getDecisionCorpus(null)).toBe(getDecisionCorpus(undefined));
     expect(getDecisionCorpus(null).others.helpful.length).toBeGreaterThan(0);
+    expect(getDecisionCorpus(null).science.benefits).toHaveLength(0);
+    expect(getDecisionCorpus(null).science.risks).toHaveLength(0);
+    expect(getDecisionCorpus(null).science.uncertainty).toHaveLength(0);
   });
 
-  it("未命中 slug → 通用占位（fallback GENERIC）", () => {
+  it("未命中 slug → 通用 fallback GENERIC", () => {
     // @ts-expect-error 测试未知 slug（非已知语料 key）
     expect(getDecisionCorpus("unknown-slug")).toBe(getDecisionCorpus(null));
+  });
+
+  it("不保留 content-team placeholder 文案", () => {
+    const generic = getDecisionCorpus(null);
+    const allScienceText = Object.values(generic.science)
+      .flat()
+      .map((item) => `${item.text} ${item.source}`)
+      .join(" ");
+    expect(allScienceText).not.toMatch(/placeholder pending content team/i);
+    expect(allScienceText).not.toMatch(/pending content team/i);
   });
 });

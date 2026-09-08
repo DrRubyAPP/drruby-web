@@ -49,7 +49,7 @@ describe("POST /api/decisions/[id]/check-freshness", () => {
     expect(res.status).toBe(404);
   });
 
-  it("200 写 freshnessCheckedAt=now + materialChange=false（V1 占位）", async () => {
+  it("200 写 freshnessCheckedAt=now + 无 material 变化返回 false", async () => {
     const { POST } = await import("./route");
     const decisionRepo = await import("@/lib/db/repositories/decision.repo");
     const owner = await makeUser("fresh-ok@example.com");
@@ -73,5 +73,87 @@ describe("POST /api/decisions/[id]/check-freshness", () => {
     const row = await decisionRepo.findById(decision.id);
     expect(row?.freshnessCheckedAt).not.toBe(null);
     expect(row?.freshnessCheckedAt?.getTime()).toBeGreaterThanOrEqual(before);
+  });
+
+  it("healthContext 相对 current snapshot 变化 → materialChange=true", async () => {
+    const { POST } = await import("./route");
+    const decisionRepo = await import("@/lib/db/repositories/decision.repo");
+    const snapshotRepo = await import(
+      "@/lib/db/repositories/decisionSnapshot.repo"
+    );
+    const owner = await makeUser("fresh-health-context@example.com");
+    const decision = await decisionRepo.create(owner.id, { question: "q" });
+    await decisionRepo.updateHealthContext(decision.id, {
+      healthContext: { symptoms: "old" },
+      status: "unconfirmed",
+    });
+    const snapshot = await snapshotRepo.create(decision.id, {
+      yourselfContextRef: {
+        healthContextSnapshot: { symptoms: "old" },
+        connectedRecordRefs: [],
+      },
+      sources: null,
+      citations: null,
+      synthesis: { yourself: "old", others: "", science: "", combined: "old" },
+      provenance: "initial",
+      changeTrigger: "initial",
+    });
+    await decisionRepo.bindCurrentSnapshot(decision.id, snapshot.id);
+    await decisionRepo.updateHealthContext(decision.id, {
+      healthContext: { symptoms: "new" },
+      status: "unconfirmed",
+    });
+
+    asUser(owner.id);
+    const res = await POST(
+      new Request("http://test", { method: "POST" }),
+      params(decision.id),
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.materialChange).toBe(true);
+  });
+
+  it("新增 record 类别相对 current snapshot 变化 → materialChange=true", async () => {
+    const { POST } = await import("./route");
+    const decisionRepo = await import("@/lib/db/repositories/decision.repo");
+    const snapshotRepo = await import(
+      "@/lib/db/repositories/decisionSnapshot.repo"
+    );
+    const recordRepo = await import("@/lib/db/repositories/healthRecord.repo");
+    const linkRepo = await import(
+      "@/lib/db/repositories/decisionHealthRecord.repo"
+    );
+    const owner = await makeUser("fresh-record-category@example.com");
+    const decision = await decisionRepo.create(owner.id, { question: "q" });
+    const snapshot = await snapshotRepo.create(decision.id, {
+      yourselfContextRef: {
+        healthContextSnapshot: null,
+        connectedRecordRefs: [],
+      },
+      sources: null,
+      citations: null,
+      synthesis: { yourself: "old", others: "", science: "", combined: "old" },
+      provenance: "initial",
+      changeTrigger: "initial",
+    });
+    await decisionRepo.bindCurrentSnapshot(decision.id, snapshot.id);
+    const record = await recordRepo.create(owner.id, {
+      kind: "lab",
+      title: "Estradiol panel",
+      documentClass: "Lab",
+      status: "CONFIRMED",
+      recordedAt: new Date(),
+    });
+    await linkRepo.connect(decision.id, record.id, owner.id);
+
+    asUser(owner.id);
+    const res = await POST(
+      new Request("http://test", { method: "POST" }),
+      params(decision.id),
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.materialChange).toBe(true);
   });
 });
