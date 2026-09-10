@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Jost } from "next/font/google";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
@@ -9,22 +8,29 @@ import { routing } from "@/i18n/routing";
 import { normalizeTheme, THEME_COOKIE } from "@/lib/theme";
 import "../globals.css";
 
-const cormorant = Cormorant_Garamond({
-  variable: "--font-serif",
-  subsets: ["latin"],
-  weight: ["300", "400", "500"],
-  style: ["normal", "italic"],
-  display: "swap",
-  preload: true,
-});
+let fontClasses = "";
 
-const jost = Jost({
-  variable: "--font-sans",
-  subsets: ["latin"],
-  weight: ["200", "300", "400", "500", "600", "700", "800"],
-  display: "swap",
-  preload: true,
-});
+// Only load Google Fonts in production to avoid network issues in dev
+if (process.env.NODE_ENV === "production") {
+  const { Cormorant_Garamond, Jost } = await import("next/font/google");
+
+  const cormorant = Cormorant_Garamond({
+    variable: "--font-serif",
+    subsets: ["latin"],
+    weight: ["300", "400", "500"],
+    style: ["normal", "italic"],
+    display: "swap",
+  });
+
+  const jost = Jost({
+    variable: "--font-sans",
+    subsets: ["latin"],
+    weight: ["200", "300", "400", "500", "600", "700", "800"],
+    display: "swap",
+  });
+
+  fontClasses = `${cormorant.variable} ${jost.variable}`;
+}
 
 export const metadata: Metadata = {
   title: "DrRuby.ai — Women's Healthspan Intelligence",
@@ -63,7 +69,7 @@ export default async function LocaleLayout({
     <html
       lang={locale}
       data-theme={theme}
-      className={`${cormorant.variable} ${jost.variable}`}
+      className={fontClasses}
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >

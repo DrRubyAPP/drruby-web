@@ -1090,33 +1090,6 @@
           "window"
         ]
       },
-      "CreateHealthRecordBody": {
-        "type": "object",
-        "properties": {
-          "kind": {
-            "$ref": "#/components/schemas/healthRecordKindSchema"
-          },
-          "title": {
-            "type": "string",
-            "minLength": 1
-          },
-          "source": {
-            "type": "string"
-          },
-          "objectKey": {
-            "type": "string"
-          },
-          "recordedAt": {
-            "type": "string",
-            "description": "记录时间 ISO"
-          }
-        },
-        "required": [
-          "kind",
-          "title",
-          "recordedAt"
-        ]
-      },
       "CreateInvoiceBody": {
         "type": "object",
         "properties": {
@@ -1883,6 +1856,20 @@
           "deleted"
         ]
       },
+      "DismissConnectBody": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "dismissConnect"
+            ]
+          }
+        },
+        "required": [
+          "action"
+        ]
+      },
       "documentClassSchema": {
         "type": "string",
         "enum": [
@@ -2079,6 +2066,21 @@
               "type": "string"
             }
           },
+          "error": {
+            "type": "string",
+            "nullable": true
+          },
+          "deletedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "connectDismissedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "connectedCount": {
+            "type": "number"
+          },
           "recordedAt": {
             "type": "string"
           },
@@ -2160,7 +2162,8 @@
           "PROCESSING",
           "EXTRACTED_DRAFT",
           "USER_REVIEW",
-          "CONFIRMED"
+          "CONFIRMED",
+          "FAILED"
         ]
       },
       "HealthResponse": {
@@ -2657,7 +2660,8 @@
               "required": [
                 "recordId"
               ]
-            }
+            },
+            "maxItems": 5
           },
           "recordRefs": {
             "type": "array",
@@ -2972,6 +2976,33 @@
           "pigmentation",
           "texture",
           "trend"
+        ]
+      },
+      "RecentHealthRecordDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "recordedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "kind",
+          "status",
+          "recordedAt"
         ]
       },
       "ReferralDTO": {
@@ -3833,19 +3864,9 @@
           }
         }
       },
-      "UploadSourceBody": {
+      "UploadSourceFields": {
         "type": "object",
         "properties": {
-          "fileName": {
-            "type": "string",
-            "minLength": 1
-          },
-          "mime": {
-            "type": "string"
-          },
-          "objectKey": {
-            "type": "string"
-          },
           "kind": {
             "$ref": "#/components/schemas/healthRecordKindSchema"
           },
@@ -3854,7 +3875,6 @@
           }
         },
         "required": [
-          "fileName",
           "kind",
           "recordedAt"
         ]
@@ -3927,6 +3947,12 @@
           "checkInDueCount": {
             "type": "integer",
             "minimum": 0
+          },
+          "recentHealth": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecentHealthRecordDTO"
+            }
           }
         },
         "required": [
@@ -6449,6 +6475,45 @@
             "$ref": "#/components/responses/500"
           }
         }
+      },
+      "delete": {
+        "operationId": "delete-decisions-{id}",
+        "summary": "Delete decision",
+        "description": "task-50 D-2 软删除：写 deletedAt，不物理删行（D-8 永久保留，§14 provenance）。删除后从 WMN/My Decisions/timeline 消失，保留在 /api/me/export 的 deletedDecisions 分区。重复删除/越权/不存在均 404。无恢复入口（D-9）",
+        "tags": [
+          "Decisions"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
       }
     },
     "/decisions/wmn": {
@@ -6546,7 +6611,7 @@
       "post": {
         "operationId": "post-decisions-{id}-check-freshness",
         "summary": "Check freshness",
-        "description": "V1 占位：写 freshnessCheckedAt=now，materialChange 恒 false。task-42/43 接入真实刷新 + material-change 检测后响应结构不变",
+        "description": "写 freshnessCheckedAt=now，并对 current snapshot 与当前 health context/connected records 做 material-change 检测。响应结构保持稳定",
         "tags": [
           "Decisions"
         ],
@@ -7135,7 +7200,7 @@
       "post": {
         "operationId": "post-decisions-{id}-learn",
         "summary": "Save learning summary",
-        "description": "§29 Stop→Learning 流程终态：写 kind=learning entry（append-only，synthesis 承载 {text, supportingObservationIds, generatedAt}）+ lifecycle: LEARNING → COMPLETED 原子事务。刷 lastUserActivityAt + 写 TimelineEvent。非 LEARNING 422。越权 404",
+        "description": "§29 Stop→Learning 流程终态：写 kind=learning entry（append-only，synthesis 承载 {text, supportingObservationIds, generatedAt}）。task-51 D-51-a 按 lifecycle 分派：LEARNING → 首次保存，completeAfterLearning 原子转 COMPLETED（刷 lastUserActivityAt + 写 TimelineEvent）；COMPLETED → append-only 重生成，仅写新 entry，跳过生命周期转换（P-2 不写重复 \"Completed\" 事件），lifecycle 保持 COMPLETED。其余 lifecycle 422。越权 404",
         "tags": [
           "Decisions"
         ],
@@ -7701,10 +7766,10 @@
                                                                     "description": {
                                                                       "type": "object"
                                                                     },
-                                                                    "__@toPrimitive@5589": {
+                                                                    "__@toPrimitive@5593": {
                                                                       "type": "object"
                                                                     },
-                                                                    "__@toStringTag@698": {
+                                                                    "__@toStringTag@702": {
                                                                       "type": "string"
                                                                     }
                                                                   },
@@ -7712,8 +7777,8 @@
                                                                     "toString",
                                                                     "valueOf",
                                                                     "description",
-                                                                    "__@toPrimitive@5589",
-                                                                    "__@toStringTag@698"
+                                                                    "__@toPrimitive@5593",
+                                                                    "__@toStringTag@702"
                                                                   ]
                                                                 }
                                                               ]
@@ -8002,19 +8067,19 @@
                                         "unicodeSets": {
                                           "type": "boolean"
                                         },
-                                        "__@match@6981": {
+                                        "__@match@6985": {
                                           "type": "object"
                                         },
-                                        "__@replace@6983": {
+                                        "__@replace@6987": {
                                           "type": "object"
                                         },
-                                        "__@search@6986": {
+                                        "__@search@6990": {
                                           "type": "object"
                                         },
-                                        "__@split@6988": {
+                                        "__@split@6992": {
                                           "type": "object"
                                         },
-                                        "__@matchAll@6990": {
+                                        "__@matchAll@6994": {
                                           "type": "object"
                                         }
                                       },
@@ -8033,11 +8098,11 @@
                                         "dotAll",
                                         "hasIndices",
                                         "unicodeSets",
-                                        "__@match@6981",
-                                        "__@replace@6983",
-                                        "__@search@6986",
-                                        "__@split@6988",
-                                        "__@matchAll@6990"
+                                        "__@match@6985",
+                                        "__@replace@6987",
+                                        "__@search@6990",
+                                        "__@split@6992",
+                                        "__@matchAll@6994"
                                       ]
                                     },
                                     "isst": {
@@ -8261,7 +8326,7 @@
                                                 "toWellFormed": {
                                                   "type": "object"
                                                 },
-                                                "__@iterator@468": {
+                                                "__@iterator@472": {
                                                   "type": "object"
                                                 }
                                               },
@@ -8317,7 +8382,7 @@
                                                 "at",
                                                 "isWellFormed",
                                                 "toWellFormed",
-                                                "__@iterator@468"
+                                                "__@iterator@472"
                                               ]
                                             },
                                             {
@@ -8483,10 +8548,10 @@
                                                 "isDisjointFrom": {
                                                   "type": "object"
                                                 },
-                                                "__@iterator@468": {
+                                                "__@iterator@472": {
                                                   "type": "object"
                                                 },
-                                                "__@toStringTag@698": {
+                                                "__@toStringTag@702": {
                                                   "type": "string"
                                                 }
                                               },
@@ -8507,8 +8572,8 @@
                                                 "isSubsetOf",
                                                 "isSupersetOf",
                                                 "isDisjointFrom",
-                                                "__@iterator@468",
-                                                "__@toStringTag@698"
+                                                "__@iterator@472",
+                                                "__@toStringTag@702"
                                               ]
                                             }
                                           ]
@@ -8622,10 +8687,10 @@
                                         "isDisjointFrom": {
                                           "type": "object"
                                         },
-                                        "__@iterator@468": {
+                                        "__@iterator@472": {
                                           "type": "object"
                                         },
-                                        "__@toStringTag@698": {
+                                        "__@toStringTag@702": {
                                           "type": "string"
                                         }
                                       },
@@ -8646,8 +8711,8 @@
                                         "isSubsetOf",
                                         "isSupersetOf",
                                         "isDisjointFrom",
-                                        "__@iterator@468",
-                                        "__@toStringTag@698"
+                                        "__@iterator@472",
+                                        "__@toStringTag@702"
                                       ]
                                     },
                                     "optin": {
@@ -8722,10 +8787,10 @@
                                             "isDisjointFrom": {
                                               "type": "object"
                                             },
-                                            "__@iterator@468": {
+                                            "__@iterator@472": {
                                               "type": "object"
                                             },
-                                            "__@toStringTag@698": {
+                                            "__@toStringTag@702": {
                                               "type": "string"
                                             }
                                           },
@@ -8746,8 +8811,8 @@
                                             "isSubsetOf",
                                             "isSupersetOf",
                                             "isDisjointFrom",
-                                            "__@iterator@468",
-                                            "__@toStringTag@698"
+                                            "__@iterator@472",
+                                            "__@toStringTag@702"
                                           ]
                                         }
                                       ]
@@ -8810,10 +8875,10 @@
                                               "isDisjointFrom": {
                                                 "type": "object"
                                               },
-                                              "__@iterator@468": {
+                                              "__@iterator@472": {
                                                 "type": "object"
                                               },
-                                              "__@toStringTag@698": {
+                                              "__@toStringTag@702": {
                                                 "type": "string"
                                               }
                                             },
@@ -8834,8 +8899,8 @@
                                               "isSubsetOf",
                                               "isSupersetOf",
                                               "isDisjointFrom",
-                                              "__@iterator@468",
-                                              "__@toStringTag@698"
+                                              "__@iterator@472",
+                                              "__@toStringTag@702"
                                             ]
                                           }
                                         }
@@ -9856,7 +9921,7 @@
                                                   "valueOf": {
                                                     "type": "object"
                                                   },
-                                                  "__@toStringTag@698": {
+                                                  "__@toStringTag@702": {
                                                     "type": "string",
                                                     "enum": [
                                                       "BigInt"
@@ -9867,7 +9932,7 @@
                                                   "toString",
                                                   "toLocaleString",
                                                   "valueOf",
-                                                  "__@toStringTag@698"
+                                                  "__@toStringTag@702"
                                                 ]
                                               },
                                               {
@@ -18061,10 +18126,10 @@
                                                                     "description": {
                                                                       "type": "object"
                                                                     },
-                                                                    "__@toPrimitive@5589": {
+                                                                    "__@toPrimitive@5593": {
                                                                       "type": "object"
                                                                     },
-                                                                    "__@toStringTag@698": {
+                                                                    "__@toStringTag@702": {
                                                                       "type": "string"
                                                                     }
                                                                   },
@@ -18072,8 +18137,8 @@
                                                                     "toString",
                                                                     "valueOf",
                                                                     "description",
-                                                                    "__@toPrimitive@5589",
-                                                                    "__@toStringTag@698"
+                                                                    "__@toPrimitive@5593",
+                                                                    "__@toStringTag@702"
                                                                   ]
                                                                 }
                                                               ]
@@ -18362,19 +18427,19 @@
                                         "unicodeSets": {
                                           "type": "boolean"
                                         },
-                                        "__@match@6981": {
+                                        "__@match@6985": {
                                           "type": "object"
                                         },
-                                        "__@replace@6983": {
+                                        "__@replace@6987": {
                                           "type": "object"
                                         },
-                                        "__@search@6986": {
+                                        "__@search@6990": {
                                           "type": "object"
                                         },
-                                        "__@split@6988": {
+                                        "__@split@6992": {
                                           "type": "object"
                                         },
-                                        "__@matchAll@6990": {
+                                        "__@matchAll@6994": {
                                           "type": "object"
                                         }
                                       },
@@ -18393,11 +18458,11 @@
                                         "dotAll",
                                         "hasIndices",
                                         "unicodeSets",
-                                        "__@match@6981",
-                                        "__@replace@6983",
-                                        "__@search@6986",
-                                        "__@split@6988",
-                                        "__@matchAll@6990"
+                                        "__@match@6985",
+                                        "__@replace@6987",
+                                        "__@search@6990",
+                                        "__@split@6992",
+                                        "__@matchAll@6994"
                                       ]
                                     },
                                     "isst": {
@@ -18621,7 +18686,7 @@
                                                 "toWellFormed": {
                                                   "type": "object"
                                                 },
-                                                "__@iterator@468": {
+                                                "__@iterator@472": {
                                                   "type": "object"
                                                 }
                                               },
@@ -18677,7 +18742,7 @@
                                                 "at",
                                                 "isWellFormed",
                                                 "toWellFormed",
-                                                "__@iterator@468"
+                                                "__@iterator@472"
                                               ]
                                             },
                                             {
@@ -18843,10 +18908,10 @@
                                                 "isDisjointFrom": {
                                                   "type": "object"
                                                 },
-                                                "__@iterator@468": {
+                                                "__@iterator@472": {
                                                   "type": "object"
                                                 },
-                                                "__@toStringTag@698": {
+                                                "__@toStringTag@702": {
                                                   "type": "string"
                                                 }
                                               },
@@ -18867,8 +18932,8 @@
                                                 "isSubsetOf",
                                                 "isSupersetOf",
                                                 "isDisjointFrom",
-                                                "__@iterator@468",
-                                                "__@toStringTag@698"
+                                                "__@iterator@472",
+                                                "__@toStringTag@702"
                                               ]
                                             }
                                           ]
@@ -18982,10 +19047,10 @@
                                         "isDisjointFrom": {
                                           "type": "object"
                                         },
-                                        "__@iterator@468": {
+                                        "__@iterator@472": {
                                           "type": "object"
                                         },
-                                        "__@toStringTag@698": {
+                                        "__@toStringTag@702": {
                                           "type": "string"
                                         }
                                       },
@@ -19006,8 +19071,8 @@
                                         "isSubsetOf",
                                         "isSupersetOf",
                                         "isDisjointFrom",
-                                        "__@iterator@468",
-                                        "__@toStringTag@698"
+                                        "__@iterator@472",
+                                        "__@toStringTag@702"
                                       ]
                                     },
                                     "optin": {
@@ -19082,10 +19147,10 @@
                                             "isDisjointFrom": {
                                               "type": "object"
                                             },
-                                            "__@iterator@468": {
+                                            "__@iterator@472": {
                                               "type": "object"
                                             },
-                                            "__@toStringTag@698": {
+                                            "__@toStringTag@702": {
                                               "type": "string"
                                             }
                                           },
@@ -19106,8 +19171,8 @@
                                             "isSubsetOf",
                                             "isSupersetOf",
                                             "isDisjointFrom",
-                                            "__@iterator@468",
-                                            "__@toStringTag@698"
+                                            "__@iterator@472",
+                                            "__@toStringTag@702"
                                           ]
                                         }
                                       ]
@@ -19170,10 +19235,10 @@
                                               "isDisjointFrom": {
                                                 "type": "object"
                                               },
-                                              "__@iterator@468": {
+                                              "__@iterator@472": {
                                                 "type": "object"
                                               },
-                                              "__@toStringTag@698": {
+                                              "__@toStringTag@702": {
                                                 "type": "string"
                                               }
                                             },
@@ -19194,8 +19259,8 @@
                                               "isSubsetOf",
                                               "isSupersetOf",
                                               "isDisjointFrom",
-                                              "__@iterator@468",
-                                              "__@toStringTag@698"
+                                              "__@iterator@472",
+                                              "__@toStringTag@702"
                                             ]
                                           }
                                         }
@@ -20856,7 +20921,7 @@
                                                   "valueOf": {
                                                     "type": "object"
                                                   },
-                                                  "__@toStringTag@698": {
+                                                  "__@toStringTag@702": {
                                                     "type": "string",
                                                     "enum": [
                                                       "BigInt"
@@ -20867,7 +20932,7 @@
                                                   "toString",
                                                   "toLocaleString",
                                                   "valueOf",
-                                                  "__@toStringTag@698"
+                                                  "__@toStringTag@702"
                                                 ]
                                               },
                                               {
@@ -22530,10 +22595,10 @@
                                                                       "description": {
                                                                         "type": "object"
                                                                       },
-                                                                      "__@toPrimitive@5589": {
+                                                                      "__@toPrimitive@5593": {
                                                                         "type": "object"
                                                                       },
-                                                                      "__@toStringTag@698": {
+                                                                      "__@toStringTag@702": {
                                                                         "type": "string"
                                                                       }
                                                                     },
@@ -22541,8 +22606,8 @@
                                                                       "toString",
                                                                       "valueOf",
                                                                       "description",
-                                                                      "__@toPrimitive@5589",
-                                                                      "__@toStringTag@698"
+                                                                      "__@toPrimitive@5593",
+                                                                      "__@toStringTag@702"
                                                                     ]
                                                                   }
                                                                 ]
@@ -22831,19 +22896,19 @@
                                           "unicodeSets": {
                                             "type": "boolean"
                                           },
-                                          "__@match@6981": {
+                                          "__@match@6985": {
                                             "type": "object"
                                           },
-                                          "__@replace@6983": {
+                                          "__@replace@6987": {
                                             "type": "object"
                                           },
-                                          "__@search@6986": {
+                                          "__@search@6990": {
                                             "type": "object"
                                           },
-                                          "__@split@6988": {
+                                          "__@split@6992": {
                                             "type": "object"
                                           },
-                                          "__@matchAll@6990": {
+                                          "__@matchAll@6994": {
                                             "type": "object"
                                           }
                                         },
@@ -22862,11 +22927,11 @@
                                           "dotAll",
                                           "hasIndices",
                                           "unicodeSets",
-                                          "__@match@6981",
-                                          "__@replace@6983",
-                                          "__@search@6986",
-                                          "__@split@6988",
-                                          "__@matchAll@6990"
+                                          "__@match@6985",
+                                          "__@replace@6987",
+                                          "__@search@6990",
+                                          "__@split@6992",
+                                          "__@matchAll@6994"
                                         ]
                                       },
                                       "isst": {
@@ -23090,7 +23155,7 @@
                                                   "toWellFormed": {
                                                     "type": "object"
                                                   },
-                                                  "__@iterator@468": {
+                                                  "__@iterator@472": {
                                                     "type": "object"
                                                   }
                                                 },
@@ -23146,7 +23211,7 @@
                                                   "at",
                                                   "isWellFormed",
                                                   "toWellFormed",
-                                                  "__@iterator@468"
+                                                  "__@iterator@472"
                                                 ]
                                               },
                                               {
@@ -23312,10 +23377,10 @@
                                                   "isDisjointFrom": {
                                                     "type": "object"
                                                   },
-                                                  "__@iterator@468": {
+                                                  "__@iterator@472": {
                                                     "type": "object"
                                                   },
-                                                  "__@toStringTag@698": {
+                                                  "__@toStringTag@702": {
                                                     "type": "string"
                                                   }
                                                 },
@@ -23336,8 +23401,8 @@
                                                   "isSubsetOf",
                                                   "isSupersetOf",
                                                   "isDisjointFrom",
-                                                  "__@iterator@468",
-                                                  "__@toStringTag@698"
+                                                  "__@iterator@472",
+                                                  "__@toStringTag@702"
                                                 ]
                                               }
                                             ]
@@ -23451,10 +23516,10 @@
                                           "isDisjointFrom": {
                                             "type": "object"
                                           },
-                                          "__@iterator@468": {
+                                          "__@iterator@472": {
                                             "type": "object"
                                           },
-                                          "__@toStringTag@698": {
+                                          "__@toStringTag@702": {
                                             "type": "string"
                                           }
                                         },
@@ -23475,8 +23540,8 @@
                                           "isSubsetOf",
                                           "isSupersetOf",
                                           "isDisjointFrom",
-                                          "__@iterator@468",
-                                          "__@toStringTag@698"
+                                          "__@iterator@472",
+                                          "__@toStringTag@702"
                                         ]
                                       },
                                       "optin": {
@@ -23551,10 +23616,10 @@
                                               "isDisjointFrom": {
                                                 "type": "object"
                                               },
-                                              "__@iterator@468": {
+                                              "__@iterator@472": {
                                                 "type": "object"
                                               },
-                                              "__@toStringTag@698": {
+                                              "__@toStringTag@702": {
                                                 "type": "string"
                                               }
                                             },
@@ -23575,8 +23640,8 @@
                                               "isSubsetOf",
                                               "isSupersetOf",
                                               "isDisjointFrom",
-                                              "__@iterator@468",
-                                              "__@toStringTag@698"
+                                              "__@iterator@472",
+                                              "__@toStringTag@702"
                                             ]
                                           }
                                         ]
@@ -23639,10 +23704,10 @@
                                                 "isDisjointFrom": {
                                                   "type": "object"
                                                 },
-                                                "__@iterator@468": {
+                                                "__@iterator@472": {
                                                   "type": "object"
                                                 },
-                                                "__@toStringTag@698": {
+                                                "__@toStringTag@702": {
                                                   "type": "string"
                                                 }
                                               },
@@ -23663,8 +23728,8 @@
                                                 "isSubsetOf",
                                                 "isSupersetOf",
                                                 "isDisjointFrom",
-                                                "__@iterator@468",
-                                                "__@toStringTag@698"
+                                                "__@iterator@472",
+                                                "__@toStringTag@702"
                                               ]
                                             }
                                           }
@@ -25325,7 +25390,7 @@
                                                     "valueOf": {
                                                       "type": "object"
                                                     },
-                                                    "__@toStringTag@698": {
+                                                    "__@toStringTag@702": {
                                                       "type": "string",
                                                       "enum": [
                                                         "BigInt"
@@ -25336,7 +25401,7 @@
                                                     "toString",
                                                     "toLocaleString",
                                                     "valueOf",
-                                                    "__@toStringTag@698"
+                                                    "__@toStringTag@702"
                                                   ]
                                                 },
                                                 {
@@ -27115,93 +27180,6 @@
         }
       }
     },
-    "/health/reports": {
-      "get": {
-        "operationId": "get-health-reports",
-        "summary": "List health reports",
-        "description": "当前用户的健康报告（化验/影像/体检/生命体征，最新在前）",
-        "tags": [
-          "Health"
-        ],
-        "parameters": [],
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HealthRecordListResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/400"
-          },
-          "401": {
-            "$ref": "#/components/responses/401"
-          },
-          "403": {
-            "$ref": "#/components/responses/403"
-          },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        }
-      },
-      "post": {
-        "operationId": "post-health-reports",
-        "summary": "Create health report",
-        "description": "人工录入一条健康报告（ocrStatus=manual）。非法 kind → 400",
-        "tags": [
-          "Health"
-        ],
-        "parameters": [],
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateHealthRecordBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HealthRecordDTO"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/400"
-          },
-          "401": {
-            "$ref": "#/components/responses/401"
-          },
-          "403": {
-            "$ref": "#/components/responses/403"
-          },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        }
-      }
-    },
     "/health/sources": {
       "get": {
         "operationId": "get-health-sources",
@@ -27244,7 +27222,7 @@
       "post": {
         "operationId": "post-health-sources",
         "summary": "Upload health source",
-        "description": "上传一份原件（V1 占位存储：objectKey 为本地路径/字符串）。同步建 HealthRecord（status=SOURCE_UPLOADED），由前端触发抽取推进状态机",
+        "description": "上传一份原件（multipart/form-data：file 必填 + kind + recordedAt）。服务端按魔数校验类型/大小 → storage.put → 落 objectKey/mime/fileName → 建 HealthRecord(status=SOURCE_UPLOADED)。objectKey 由服务端按 F4 规范生成，客户端不可指定",
         "tags": [
           "Health"
         ],
@@ -27254,40 +27232,7 @@
             "BearerAuth": []
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UploadSourceBody"
-              }
-            }
-          }
-        },
         "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "sourceId": {
-                      "type": "string",
-                      "nullable": false
-                    },
-                    "recordId": {
-                      "type": "string",
-                      "nullable": false
-                    }
-                  },
-                  "required": [
-                    "sourceId",
-                    "recordId"
-                  ]
-                }
-              }
-            }
-          },
           "400": {
             "$ref": "#/components/responses/400"
           },
@@ -27355,8 +27300,8 @@
       },
       "post": {
         "operationId": "post-health-records-{id}",
-        "summary": "Retry extraction",
-        "description": "重新触发抽取（FAILED 态可 Retry；INSUFFICIENT 留 task-43）。V1 走 mock 抽取",
+        "summary": "Trigger extraction（task-48 D-9：前端触发 + 轮询；并入原 Retry 语义）",
+        "description": "触发真实抽取：置 PROCESSING → 同 hash 缓存命中则复用（F6），否则跑 OpenAiExtractor → 落 EXTRACTED_DRAFT（done）或 FAILED + error（failed，原件保留）。FAILED 态可 Retry（再 POST）。非法状态转移 409。越权 404",
         "tags": [
           "Health"
         ],
@@ -27446,6 +27391,108 @@
               }
             }
           },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete-health-records-{id}",
+        "summary": "Soft-delete health record",
+        "description": "task-49 F3 软删除留痕：置 deletedAt，不物理删除。列表默认过滤、详情按 404；已连接 Decision 侧渲染层占位降级。重复删除/越权 404",
+        "tags": [
+          "Health"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ],
+                      "nullable": false
+                    }
+                  },
+                  "required": [
+                    "ok"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/health/sources/{id}/file": {
+      "get": {
+        "operationId": "get-health-sources-{id}-file",
+        "summary": "Read health source file",
+        "description": "统一读取入口（task-46 F5）。校验 session + 归属；r2 → 302 到 60s presigned；local → 直接流式响应。越权/无 objectKey → 404",
+        "tags": [
+          "Health"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "number"
+            },
+            "example": 123,
+            "description": "Path parameter: id"
+          }
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
           "400": {
             "$ref": "#/components/responses/400"
           },
