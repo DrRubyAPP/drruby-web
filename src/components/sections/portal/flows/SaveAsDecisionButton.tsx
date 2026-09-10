@@ -64,7 +64,7 @@ export function SaveAsDecisionButton({
           text: entryText,
         });
         setStep("done");
-        router.push("/portal#v-decisions");
+        router.push("/portal/decisions");
       } catch (e) {
         setStep("error-partial");
         setErrorMsg(e instanceof Error ? e.message : "Append entry failed");
@@ -92,7 +92,7 @@ export function SaveAsDecisionButton({
         text: entryText,
       });
       setStep("done");
-      router.push("/portal#v-decisions");
+      router.push("/portal/decisions");
     } catch (e) {
       setStep("error-partial");
       setErrorMsg(e instanceof Error ? e.message : "Append entry failed");
@@ -136,7 +136,7 @@ export function SaveAsDecisionButton({
             onRetry={() => retry()}
           />
           <Link
-            href="/portal#v-decisions"
+            href="/portal/decisions"
             style={{
               display: "inline-block",
               marginTop: 8,
