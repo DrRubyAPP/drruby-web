@@ -247,22 +247,6 @@
   color: #c98c8f;
 }
 /* more 次级分组（D1 视觉降级：次级标题 + 弱化，仍可点） */
-#app-portal .nav-more-label {
-  margin: 18px 0 6px 12px;
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #a89a95;
-}
-#app-portal .nav-item--more {
-  opacity: 0.72;
-}
-#app-portal .nav-item--more:hover {
-  opacity: 1;
-}
-#app-portal .nav-item--more.active {
-  opacity: 1;
-}
 /* ☆ Save 书签（§11 纯书签；与 come_back_later 等 Outcome 语义分离）。 */
 #app-portal .save-star {
   display: inline-flex;
@@ -1279,12 +1263,6 @@
 }
 #app-portal .priv-note b {
   color: var(--p-ink);
-}
-#app-portal .ufv {
-  display: none;
-}
-#app-portal .ufv.on {
-  display: block;
 }
 @media (max-width: 820px) {
   #app-portal .ufm {
