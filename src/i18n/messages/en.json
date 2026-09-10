@@ -618,13 +618,9 @@
         }
       },
       "tabs": {
-        "more": "More",
-        "today": { "label": "Home", "sub": "Today's feed" },
+        "home": { "label": "Home", "sub": "Today's feed" },
         "health": { "label": "My Health", "sub": "Your data & changes" },
-        "decisions": { "label": "My Decisions", "sub": "What you're weighing" },
-        "library": { "label": "Library", "sub": "Learn from real journeys" },
-        "research": { "label": "Research", "sub": "Studies you can join" },
-        "privacy": { "label": "Profile", "sub": "Account & privacy" }
+        "decisions": { "label": "My Decisions", "sub": "What you're weighing" }
       }
     },
     "common": {
