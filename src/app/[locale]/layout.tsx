@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Cormorant_Garamond, Jost } from "next/font/google";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
@@ -8,29 +9,25 @@ import { routing } from "@/i18n/routing";
 import { normalizeTheme, THEME_COOKIE } from "@/lib/theme";
 import "../globals.css";
 
-let fontClasses = "";
+// next/font/google 必须静态顶层调用 —— 它是构建期 loader 宏，不是运行时函数；
+// 改成运行时 `await import()` 会让产物调用未定义导出，生产 prerender 抛
+// `TypeError: c is not a function`（见收敛前的启动字体 warning 改动）。
+const cormorant = Cormorant_Garamond({
+  variable: "--font-serif",
+  subsets: ["latin"],
+  weight: ["300", "400", "500"],
+  style: ["normal", "italic"],
+  display: "swap",
+});
 
-// Only load Google Fonts in production to avoid network issues in dev
-if (process.env.NODE_ENV === "production") {
-  const { Cormorant_Garamond, Jost } = await import("next/font/google");
+const jost = Jost({
+  variable: "--font-sans",
+  subsets: ["latin"],
+  weight: ["200", "300", "400", "500", "600", "700", "800"],
+  display: "swap",
+});
 
-  const cormorant = Cormorant_Garamond({
-    variable: "--font-serif",
-    subsets: ["latin"],
-    weight: ["300", "400", "500"],
-    style: ["normal", "italic"],
-    display: "swap",
-  });
-
-  const jost = Jost({
-    variable: "--font-sans",
-    subsets: ["latin"],
-    weight: ["200", "300", "400", "500", "600", "700", "800"],
-    display: "swap",
-  });
-
-  fontClasses = `${cormorant.variable} ${jost.variable}`;
-}
+const fontClasses = `${cormorant.variable} ${jost.variable}`;
 
 export const metadata: Metadata = {
   title: "DrRuby.ai — Women's Healthspan Intelligence",

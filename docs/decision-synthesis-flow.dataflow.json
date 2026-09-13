@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "Decision 详情页 · 综合与快照数据流",
+    "subtitle": "变化 → 重生成 → 新快照 → /snapshots 与 /ai-state → 三个 UI 区域",
+    "output": "docs/decision-synthesis-flow.html",
+    "viewBox": [1200, 800]
+  },
+  "stages": [
+    { "label": "输入 & 触发" },
+    { "label": "合成 · 服务端" },
+    { "label": "存储" },
+    { "label": "读取 API" },
+    { "label": "UI 区域" }
+  ],
+  "nodes": [
+    { "id": "action", "type": "external", "label": "用户动作", "sublabel": "加记录 / 观察 / 背景变更", "stage": 0, "row": 0, "tag": "trigger" },
+    { "id": "yourself", "type": "database", "label": "Yourself 素材", "sublabel": "records + health ctx", "stage": 0, "row": 2 },
+    { "id": "corpus", "type": "database", "label": "静态语料", "sublabel": "Others / Science · topicSlug", "stage": 0, "row": 3 },
+    { "id": "orchestrator", "type": "backend", "label": "Orchestrator", "sublabel": "maybeFirePendingRegen", "stage": 1, "row": 0 },
+    { "id": "template", "type": "backend", "label": "模板合成器", "sublabel": "synthesis 四元组", "stage": 1, "row": 2 },
+    { "id": "llm", "type": "backend", "label": "触发文案", "sublabel": "LLM 人话 / 降级模板", "stage": 1, "row": 3 },
+    { "id": "snapshot", "type": "database", "label": "decision_snapshot", "sublabel": "新行 → currentSnapshotId", "stage": 2, "row": 2, "tag": "版本历史" },
+    { "id": "snapapi", "type": "backend", "label": "GET /snapshots", "sublabel": "{ current, history }", "stage": 3, "row": 0 },
+    { "id": "aistateapi", "type": "backend", "label": "GET /ai-state", "sublabel": "computeAiState 五态", "stage": 3, "row": 4 },
+    { "id": "current", "type": "frontend", "label": "Current understanding", "sublabel": "current 快照", "stage": 4, "row": 0, "width": 152 },
+    { "id": "history", "type": "frontend", "label": "What's changed", "sublabel": "history[] 版本历史", "stage": 4, "row": 2 },
+    { "id": "badge", "type": "frontend", "label": "AI 五态徽章", "sublabel": "AiStateView", "stage": 4, "row": 4 }
+  ],
+  "flows": [
+    { "from": "action", "to": "orchestrator", "label": "变化事件", "classification": "5min 窗口", "variant": "dashed", "route": "straight", "labelDy": -13 },
+    { "from": "yourself", "to": "template", "label": "Yourself 输入", "variant": "emphasis", "route": "straight", "labelDy": -13 },
+    { "from": "corpus", "to": "template", "label": "Others / Science", "classification": "V1 静态", "fromSide": "top", "toSide": "bottom" },
+    { "from": "orchestrator", "to": "snapshot", "label": "fire 重生成", "variant": "emphasis", "fromSide": "bottom", "toSide": "top" },
+    { "from": "template", "to": "snapshot", "label": "synthesis 四元组", "variant": "emphasis", "route": "straight", "labelDy": -13 },
+    { "from": "llm", "to": "snapshot", "label": "triggerHumanLabel", "fromSide": "top", "toSide": "bottom" },
+    { "from": "snapshot", "to": "snapapi", "label": "current + history", "classification": "同一次请求", "variant": "emphasis", "fromSide": "top", "toSide": "left" },
+    { "from": "snapshot", "to": "aistateapi", "label": "hasCurrentSnapshot", "variant": "dashed", "fromSide": "bottom", "toSide": "left" },
+    { "from": "snapapi", "to": "current", "label": "current", "variant": "emphasis", "route": "straight", "labelDy": -13 },
+    { "from": "snapapi", "to": "history", "label": "history[]", "fromSide": "bottom", "toSide": "left" },
+    { "from": "aistateapi", "to": "badge", "label": "五态", "route": "straight", "labelDy": -13 }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "写入侧：变化如何变成一条新快照",
+      "items": [
+        "用户动作置 pendingRegenAt，进入 5 分钟合并窗口（去抖）",
+        "下次 GET 详情时 maybeFirePendingRegen 惰性触发 runRegeneration",
+        "模板合成器产出 synthesis 四元组，LLM 生成变化原因人话",
+        "写一条新 decision_snapshot，并更新 currentSnapshotId"
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "读取侧：三个区域取数",
+      "items": [
+        "Current understanding 与 What's changed 共用一次 GET /snapshots",
+        "current → Current understanding；history[] → What's changed",
+        "AI 五态徽章走独立的 GET /ai-state（不在 /snapshots 里）",
+        "五态由 computeAiState 规则派生，不依赖 LLM"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "诚实性护栏",
+      "items": [
+        "LLM 失败 → 降级模板，provenance 标 *_degraded，界面小字提示",
+        "Others/Science 未命中 topicSlug → 通用兜底，Science 可能为空",
+        "失败态显示 Retry，不伪装成“无证据”"
+      ]
+    }
+  ]
+}

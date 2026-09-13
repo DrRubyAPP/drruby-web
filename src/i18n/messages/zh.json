@@ -670,8 +670,8 @@
     "decisionsDetail": {
       "pageTitle": "你的决策",
       "save": {
-        "save": "☆ 收藏",
-        "saved": "★ 已收藏",
+        "save": "收藏",
+        "saved": "已收藏",
         "ariaSaveLabel": "收藏 — 方便日后查找",
         "ariaSavedLabel": "已收藏 — 点击取消书签"
       },
