@@ -64,7 +64,6 @@ export function CurrentSynthesisPanel({
 
   return (
     <div className="card">
-      <div className="sec-h">{t("currentTitle")}</div>
       {PERSPECTIVES.map((p) => (
         <div key={p.key} style={{ margin: "14px 0" }}>
           <b style={{ fontSize: 14 }}>{t(p.key)}</b>
