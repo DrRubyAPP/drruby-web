@@ -37,6 +37,7 @@ describe("GET /api/decisions/wmn", () => {
       total: 0,
       actionableCount: 0,
       checkInDueCount: 0,
+      recentHealth: [],
     });
   });
 

@@ -16,7 +16,7 @@
  *   按 name 去重后补建。可安全重复运行。
  * - 枚举值严格对齐 src/lib/db/enums.ts。
  */
-import "dotenv/config";
+import "./load-env";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "./generated/client";
 

@@ -13,7 +13,7 @@
  *
  * 前置：目标邮箱须先在 /login 注册账户（emailOTP 或 Google）。
  */
-import "dotenv/config";
+import "./load-env";
 import { userAccountRepo } from "@/lib/db";
 
 async function main() {
