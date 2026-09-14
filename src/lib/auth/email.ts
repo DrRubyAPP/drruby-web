@@ -10,7 +10,11 @@ import { getAuthEnv } from "@/lib/auth/env";
 let client: Resend | null = null;
 
 function getClient(): Resend {
-  if (!client) client = new Resend(getAuthEnv().RESEND_API_KEY);
+  const { RESEND_API_KEY } = getAuthEnv();
+  if (!RESEND_API_KEY) {
+    throw new Error("Email service is not configured");
+  }
+  if (!client) client = new Resend(RESEND_API_KEY);
   return client;
 }
 

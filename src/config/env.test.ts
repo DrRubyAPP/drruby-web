@@ -47,9 +47,30 @@ describe("parseServerEnv", () => {
     ).toThrow(/DATABASE_URL/);
   });
 
-  it("throws naming the missing OPENAI_API_KEY", () => {
-    const { OPENAI_API_KEY: _omit, ...rest } = VALID;
-    expect(() => parseServerEnv(rest)).toThrow(/OPENAI_API_KEY/);
+  it("allows omitted or blank third-party integration keys", () => {
+    const {
+      RESEND_API_KEY: _resendApiKey,
+      MAILCHIMP_API_KEY: _mailchimpApiKey,
+      MAILCHIMP_SERVER_PREFIX: _mailchimpServerPrefix,
+      MAILCHIMP_AUDIENCE_ID: _mailchimpAudienceId,
+      OPENAI_API_KEY: _openAiApiKey,
+      ...rest
+    } = VALID;
+
+    const env = parseServerEnv({
+      ...rest,
+      RESEND_API_KEY: "",
+      MAILCHIMP_API_KEY: "",
+      MAILCHIMP_SERVER_PREFIX: "",
+      MAILCHIMP_AUDIENCE_ID: "",
+      OPENAI_API_KEY: "",
+    });
+
+    expect(env.RESEND_API_KEY).toBeUndefined();
+    expect(env.MAILCHIMP_API_KEY).toBeUndefined();
+    expect(env.MAILCHIMP_SERVER_PREFIX).toBeUndefined();
+    expect(env.MAILCHIMP_AUDIENCE_ID).toBeUndefined();
+    expect(env.OPENAI_API_KEY).toBeUndefined();
   });
 
   it("throws on an invalid OPENAI_BASE_URL", () => {

@@ -2,6 +2,17 @@ import "server-only";
 import { z } from "zod";
 
 /**
+ * Third-party integrations are optional for a running site. Treat blank values
+ * from `.env` files the same as an omitted variable, so each integration can
+ * report its own unavailable state when it is used.
+ */
+const optionalApiKey = z.preprocess(
+  (value) =>
+    typeof value === "string" && value.trim().length === 0 ? undefined : value,
+  z.string().min(1).optional(),
+);
+
+/**
  * 服务端环境变量的单一数据源。
  *
  * 用 Zod 定义 schema，首次引用即校验，缺失/非法早报错，避免在请求链路深处静默
@@ -17,14 +28,14 @@ const schema = z.object({
   GOOGLE_CLIENT_ID: z.string().min(1),
   GOOGLE_CLIENT_SECRET: z.string().min(1),
   // Resend（OTP 邮件）
-  RESEND_API_KEY: z.string().min(1),
+  RESEND_API_KEY: optionalApiKey,
   EMAIL_FROM: z.email(),
   // Mailchimp
-  MAILCHIMP_API_KEY: z.string().min(1),
-  MAILCHIMP_SERVER_PREFIX: z.string().min(1),
-  MAILCHIMP_AUDIENCE_ID: z.string().min(1),
+  MAILCHIMP_API_KEY: optionalApiKey,
+  MAILCHIMP_SERVER_PREFIX: optionalApiKey,
+  MAILCHIMP_AUDIENCE_ID: optionalApiKey,
   // OpenAI（Ask DrRuby 代理 + 洞察文案润色）—— 秘钥仅服务端，绝不进 NEXT_PUBLIC_*
-  OPENAI_API_KEY: z.string().min(1),
+  OPENAI_API_KEY: optionalApiKey,
   OPENAI_MODEL: z.string().min(1).default("gpt-4o-mini"),
   OPENAI_BASE_URL: z.url().default("https://api.openai.com/v1"),
   // 日志级别
