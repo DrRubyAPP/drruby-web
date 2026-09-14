@@ -23,6 +23,7 @@ import { ResearchView } from "@/components/sections/portal/research/ResearchView
 import { DeleteAccountDialog } from "@/components/sections/portal/settings/DeleteAccountDialog";
 import { ExportDataButton } from "@/components/sections/portal/settings/ExportDataButton";
 import { WhatMattersNow } from "@/components/sections/portal/today/WhatMattersNow";
+import { YourTimeline } from "@/components/sections/portal/today/YourTimeline";
 import { useApi } from "@/hooks/useApi";
 import { useMutation } from "@/hooks/useMutation";
 import { Link, useRouter } from "@/i18n/navigation";
@@ -42,15 +43,6 @@ interface MeResponse {
   memberSince: string;
   role: string;
   subscriptionTier: string;
-}
-
-interface TimelineEventDTO {
-  id: string;
-  date: string;
-  kind: string;
-  title: string;
-  detail?: string;
-  source?: string;
 }
 
 type View =
@@ -197,17 +189,6 @@ export default function PortalPage() {
         : { question: q, type: "not_sure" }, // 自由 Ask：topic/topicSlug 省略 → null
     );
   }
-
-  // Timeline：最近 5 条（按 date 倒序）
-  const {
-    data: timeline,
-    error: tlErr,
-    loading: tlLoading,
-  } = useApi<TimelineEventDTO[]>("/api/timeline");
-  const recentTimeline = (timeline ?? [])
-    .slice()
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 5);
 
   const go = (v: View) => {
     setView(v);
@@ -364,31 +345,10 @@ export default function PortalPage() {
                 </div>
               </div>
             </div>
-            <div className="sec">
-              <div className="sec-h">Your timeline</div>
-              <div className="card">
-                <div className="tl">
-                  {tlLoading && <div className="tl-empty">…</div>}
-                  {tlErr && (
-                    <ErrorState message={t("dashboard.timeline.error")} />
-                  )}
-                  {!tlLoading && !tlErr && recentTimeline.length === 0 && (
-                    <div className="tl-empty">
-                      {t("dashboard.timeline.empty")}
-                    </div>
-                  )}
-                  {recentTimeline.map((e) => (
-                    <div className="tl-item" key={e.id}>
-                      <span className="tl-dot" />
-                      <div className="tl-d">
-                        {new Date(e.date).toLocaleDateString()}
-                      </div>
-                      <div className="tl-t">{e.title}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <YourTimeline
+              emptyMessage={t("dashboard.timeline.empty")}
+              errorMessage={t("dashboard.timeline.error")}
+            />
           </div>
 
           {/* ===== MY HEALTH ===== */}

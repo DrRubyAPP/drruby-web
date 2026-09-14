@@ -6,18 +6,22 @@ import {
   healthRecordRepo,
   observationRepo,
   prisma,
+  timelineEventRepo,
 } from "@/lib/db";
 import { handle } from "@/lib/errors";
 import { openAiClient } from "@/lib/llm/client";
 import {
+  INTAKE_SYSTEM_PROMPT,
   inferLocally,
   intakeBodySchema,
-  INTAKE_SYSTEM_PROMPT,
-  parseInterpretation,
   type PendingAction,
+  parseInterpretation,
 } from "@/lib/portal-v2/intake";
 
-async function interpret(text: string, attachments: { fileName: string; mime: string }[]) {
+async function interpret(
+  text: string,
+  attachments: { fileName: string; mime: string }[],
+) {
   const fallback = inferLocally(text, attachments.length > 0);
   if (!openAiClient.isConfigured()) return fallback;
   try {
@@ -58,7 +62,10 @@ async function performPendingAction(
 ) {
   const decision = await decisionRepo.findById(pending.decisionId);
   if (!decision || decision.userId !== userId) {
-    return { message: "I could not find that decision. Please try again.", pendingAction: null };
+    return {
+      message: "I could not find that decision. Please try again.",
+      pendingAction: null,
+    };
   }
   const accepted = /^(yes|yep|yeah|sure|please|ok|okay)\b/i.test(text.trim());
   if (pending.type === "suggest_tracking") {
@@ -74,6 +81,13 @@ async function performPendingAction(
       title: pending.title,
       cadence: pending.cadence,
     });
+    await timelineEventRepo.create(userId, {
+      kind: "note",
+      title: `Started observing ${pending.title}`,
+      decisionId: decision.id,
+      source: "you",
+      occurredAt: new Date(),
+    });
     return {
       message: `I’ll help you track ${pending.title.toLowerCase()} ${pending.cadence}. Is there anything else you’d like to watch during this process?`,
       pendingAction: { type: "ask_custom_tracking", decisionId: decision.id },
@@ -82,7 +96,18 @@ async function performPendingAction(
   if (!text.trim()) {
     return { message: "What would you like to track?", pendingAction: pending };
   }
-  await observationRepo.create({ userId, decisionId: decision.id, title: text.trim() });
+  await observationRepo.create({
+    userId,
+    decisionId: decision.id,
+    title: text.trim(),
+  });
+  await timelineEventRepo.create(userId, {
+    kind: "note",
+    title: `Started observing ${text.trim()}`,
+    decisionId: decision.id,
+    source: "you",
+    occurredAt: new Date(),
+  });
   return {
     message: `Added “${text.trim()}” to what you’re tracking. You can update it whenever something changes.`,
     pendingAction: null,
@@ -113,7 +138,10 @@ export const POST = handle(async (req: Request) => {
     });
   }
 
-  if (parsed.intent === "consideration" || parsed.intent === "started_treatment") {
+  if (
+    parsed.intent === "consideration" ||
+    parsed.intent === "started_treatment"
+  ) {
     const topic = parsed.topic ?? parsed.title ?? body.text.trim();
     const existing = await prisma.decision.findFirst({
       where: { userId: user.id, topic: { equals: topic, mode: "insensitive" } },
@@ -142,6 +170,15 @@ export const POST = handle(async (req: Request) => {
         healthContext: await initialHealthContext(user.id),
         status: "unconfirmed",
       });
+      if (parsed.intent === "consideration") {
+        await timelineEventRepo.create(user.id, {
+          kind: "decision",
+          title: `Started considering ${topic}`,
+          decisionId: decision.id,
+          source: "you",
+          occurredAt: new Date(),
+        });
+      }
     }
 
     if (parsed.intent === "started_treatment") {
@@ -152,7 +189,18 @@ export const POST = handle(async (req: Request) => {
         status: "CONFIRMED",
         ocrStatus: "manual",
       });
-      await decisionHealthRecordRepo.connect(decision.id, record.id, "assistant");
+      await decisionHealthRecordRepo.connect(
+        decision.id,
+        record.id,
+        "assistant",
+      );
+      await timelineEventRepo.create(user.id, {
+        kind: "treatment",
+        title: `Started ${topic}`,
+        decisionId: decision.id,
+        source: "you",
+        occurredAt: new Date(),
+      });
       return NextResponse.json({
         message: `I’ve recorded that you started ${topic}. Many women find a weekly skin-condition check-in useful for noticing change over time. Would you like to do that?`,
         decisionId: decision.id,
@@ -174,11 +222,20 @@ export const POST = handle(async (req: Request) => {
   const attachmentTitle = body.attachments[0]?.fileName;
   const record = await healthRecordRepo.create(user.id, {
     kind: parsed.recordKind ?? "checkup",
-    title: (parsed.title ?? attachmentTitle ?? body.text.trim()) || "Health update",
+    title:
+      (parsed.title ?? attachmentTitle ?? body.text.trim()) || "Health update",
     recordedAt: new Date(),
     status: "CONFIRMED",
     ocrStatus: "manual",
     objectKey: attachmentTitle ?? null,
+  });
+  await timelineEventRepo.create(user.id, {
+    kind: parsed.recordKind === "lab" ? "lab" : "note",
+    title: attachmentTitle
+      ? `Added ${attachmentTitle} to health history`
+      : `Added health update: ${record.title}`,
+    source: "you",
+    occurredAt: new Date(),
   });
   return NextResponse.json({
     message: attachmentTitle

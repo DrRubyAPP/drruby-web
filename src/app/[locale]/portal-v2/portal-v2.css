@@ -43,6 +43,15 @@
   border-color: var(--p-red);
 }
 
+#app-portal .portal-v2__wmn-item {
+  color: inherit;
+  text-decoration: none;
+}
+
+#app-portal .portal-v2__wmn-item:hover h4 {
+  color: var(--p-red);
+}
+
 #app-portal .portal-v2__decision h3,
 #app-portal .portal-v2__body-group h3 {
   font-family: var(--p-serif);

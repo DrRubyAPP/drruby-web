@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/session";
-import { decisionRepo, timelineEventRepo } from "@/lib/db";
+import { decisionRepo, prisma, timelineEventRepo } from "@/lib/db";
 import { timelineKindSchema } from "@/lib/db/enums";
 import { AppError, handle } from "@/lib/errors";
+import {
+  type DecisionTimelineContext,
+  describeTimelineTitle,
+} from "@/lib/timeline/describe";
 import type { TimelineEvent } from "~prisma/client";
 
 /** App `types.ts` TimelineEvent（`date ← occurredAt`） */
@@ -27,12 +31,15 @@ export const CreateTimelineBody = z.object({
   decisionId: z.string().optional().describe("关联决策（须属当前用户）"),
 });
 
-function toDTO(row: TimelineEvent): z.infer<typeof TimelineEventDTO> {
+function toDTO(
+  row: TimelineEvent,
+  decision?: DecisionTimelineContext | null,
+): z.infer<typeof TimelineEventDTO> {
   return {
     id: row.id,
     date: row.occurredAt.toISOString(),
     kind: timelineKindSchema.parse(row.kind),
-    title: row.title,
+    title: describeTimelineTitle(row.title, decision),
     detail: row.detail ?? undefined,
     source: row.source ?? undefined,
   };
@@ -49,7 +56,30 @@ function toDTO(row: TimelineEvent): z.infer<typeof TimelineEventDTO> {
 export const GET = handle(async () => {
   const user = await requireUser();
   const rows = await timelineEventRepo.listByUser(user.id);
-  return NextResponse.json(TimelineListResponse.parse(rows.map(toDTO)));
+  const decisionIds = [
+    ...new Set(
+      rows.map((row) => row.decisionId).filter((id): id is string => !!id),
+    ),
+  ];
+  const decisions = decisionIds.length
+    ? await prisma.decision.findMany({
+        where: { userId: user.id, id: { in: decisionIds } },
+        select: {
+          id: true,
+          topic: true,
+          question: true,
+          observeBaseline: true,
+        },
+      })
+    : [];
+  const byId = new Map(decisions.map((decision) => [decision.id, decision]));
+  return NextResponse.json(
+    TimelineListResponse.parse(
+      rows.map((row) =>
+        toDTO(row, row.decisionId ? byId.get(row.decisionId) : null),
+      ),
+    ),
+  );
 });
 
 /**

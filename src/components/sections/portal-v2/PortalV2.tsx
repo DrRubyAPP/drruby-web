@@ -2,8 +2,12 @@
 
 import { useRef, useState } from "react";
 import { EmptyState, ErrorState, Skeleton } from "@/components/api";
-import type { DecisionDto } from "@/components/sections/portal/decisions/dto";
+import type {
+  DecisionDto,
+  WmnResponse,
+} from "@/components/sections/portal/decisions/dto";
 import type { HealthRecordDto } from "@/components/sections/portal/health/dto";
+import { YourTimeline } from "@/components/sections/portal/today/YourTimeline";
 import { useApi } from "@/hooks/useApi";
 import { Link, useRouter } from "@/i18n/navigation";
 import { apiClient } from "@/lib/api/client";
@@ -82,11 +86,8 @@ export function PortalV2() {
 }
 
 function HomeView({ refreshKey }: { refreshKey: number }) {
-  const { data, error, loading, refetch } = useApi<DecisionDto[]>(
-    `/api/decisions?portalV2=${refreshKey}`,
-  );
-  const active = (data ?? []).filter(
-    (decision) => !["CLOSED", "COMPLETED"].includes(decision.lifecycle),
+  const { data, error, loading, refetch } = useApi<WmnResponse>(
+    `/api/decisions/wmn?portalV2=${refreshKey}`,
   );
   return (
     <section className="portal-v2__content">
@@ -95,24 +96,42 @@ function HomeView({ refreshKey }: { refreshKey: number }) {
       <div className="lede">A quiet place to notice what is changing.</div>
       <div className="sec">
         <div className="sec-h">What matters now</div>
-        <div className="card matter">
-          <h3>Start with what is real for you today.</h3>
-          <p>
-            Add a thought, a treatment update, a symptom, or a document below.
-            DrRuby will organize it without making you choose a folder.
-          </p>
-        </div>
-      </div>
-      <div className="sec">
-        <div className="sec-h">Currently in motion</div>
         {loading ? (
           <Skeleton lines={3} />
         ) : error ? (
           <ErrorState message={error.message} onRetry={refetch} />
-        ) : active.length ? (
-          active.slice(0, 3).map((decision) => (
-            <DecisionCard decision={decision} key={decision.id} />
-          ))
+        ) : data?.cards.length ? (
+          <div className="card">
+            {data.cards.map((decision, index) => {
+              const observationDue = index < data.checkInDueCount;
+              return (
+                <Link
+                  className={`dec portal-v2__wmn-item${index === 0 ? " mn-primary" : ""}`}
+                  href={
+                    observationDue
+                      ? `/portal/decisions/${decision.id}`
+                      : `/portal-v2/decisions/${decision.id}`
+                  }
+                  key={decision.id}
+                >
+                  <div>
+                    <h4>{decision.question}</h4>
+                    <div className="st">
+                      {observationDue ? "Observation due" : "Updated"}{" "}
+                      {new Date(
+                        observationDue && decision.nextCheckInAt
+                          ? decision.nextCheckInAt
+                          : decision.lastUserActivityAt,
+                      ).toLocaleDateString()}
+                    </div>
+                  </div>
+                  <span className="arr" aria-hidden="true">
+                    &rsaquo;
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
         ) : (
           <div className="cm2-note">
             Nothing needs your attention yet. Use the box below whenever you
@@ -120,6 +139,7 @@ function HomeView({ refreshKey }: { refreshKey: number }) {
           </div>
         )}
       </div>
+      <YourTimeline refreshKey={refreshKey} />
     </section>
   );
 }

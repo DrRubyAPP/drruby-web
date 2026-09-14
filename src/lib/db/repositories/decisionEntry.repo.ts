@@ -7,6 +7,7 @@ import {
   observationDirectionSchema,
 } from "@/lib/db/enums";
 import { prisma } from "@/lib/db/prisma";
+import { describeObservationAction } from "@/lib/timeline/describe";
 import type { DecisionEntry } from "~prisma/client";
 import { Prisma } from "~prisma/client";
 import {
@@ -109,7 +110,7 @@ export async function createObservation(
     // 2. 顺延 nextCheckInAt（按 observeBaseline.freq 推算；无 freq 则不写）
     const decision = await tx.decision.findUnique({
       where: { id: input.decisionId },
-      select: { observeBaseline: true },
+      select: { observeBaseline: true, topic: true, question: true },
     });
     const freq = (decision?.observeBaseline as { freq?: string } | null)?.freq;
     if (freq) {
@@ -139,6 +140,17 @@ export async function createObservation(
         data: { lastUserActivityAt: now },
       });
     }
+    await tx.timelineEvent.create({
+      data: {
+        userId: input.userId,
+        decisionId: input.decisionId,
+        kind: "note",
+        title: describeObservationAction("Recorded observation for", decision),
+        detail: input.text,
+        source: "you",
+        occurredAt: new Date(),
+      },
+    });
     return entry;
   });
 }

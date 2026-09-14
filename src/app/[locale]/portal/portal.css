@@ -1164,6 +1164,11 @@
   font-size: 14px;
   margin-top: 2px;
 }
+#app-portal .tl-detail {
+  color: var(--p-mid);
+  font-size: 12.5px;
+  margin-top: 3px;
+}
 #app-portal .data-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

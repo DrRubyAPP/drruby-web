@@ -195,19 +195,25 @@ export const POST = handle(async (req: Request, ctx: Ctx) => {
   try {
     // 若 body 未传 decisionKind 但提交了 outcome，用 existing kind 兜底校验
     // outcome↔kind 一致性（req F2：outcome 前须先 classify）。
-    row = await decisionRepo.update(id, {
-      question: body.question,
-      type: body.type,
-      topic: body.topic,
-      topicSlug: body.topicSlug,
-      lifecycle: body.lifecycle,
-      decisionKind: body.decisionKind ?? existingKind,
-      outcome: body.outcome,
-      nextStep: body.nextStep,
-      saved: body.saved,
-      yourselfContext: body.yourselfContext,
-      decidedAt: derivedDecidedAt,
-    });
+    row = await decisionRepo.update(
+      id,
+      {
+        question: body.question,
+        type: body.type,
+        topic: body.topic,
+        topicSlug: body.topicSlug,
+        lifecycle: body.lifecycle,
+        decisionKind: body.decisionKind ?? existingKind,
+        outcome: body.outcome,
+        nextStep: body.nextStep,
+        saved: body.saved,
+        yourselfContext: body.yourselfContext,
+        decidedAt: derivedDecidedAt,
+      },
+      body.outcome && body.outcome !== existingOutcome
+        ? { outcome: body.outcome, detail: body.nextStep }
+        : undefined,
+    );
   } catch (err) {
     // repo 的 assertOutcomeForKind / route 的 assertLifecycleForOutcome 抛普通 Error → 非法组合
     if (err instanceof AppError) throw err;

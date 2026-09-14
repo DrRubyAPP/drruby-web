@@ -26,6 +26,7 @@ import {
   topicSlugSchema,
 } from "@/lib/db/enums";
 import { prisma } from "@/lib/db/prisma";
+import { describeDecisionOutcome } from "@/lib/timeline/describe";
 import type { Decision } from "~prisma/client";
 import { Prisma } from "~prisma/client";
 
@@ -212,22 +213,37 @@ export async function create(
 export async function update(
   id: string,
   input: UpdateDecisionInput,
+  activity?: { outcome: DecisionOutcome; detail?: string | null },
 ): Promise<Decision> {
   validateType(input.type);
   validateTopicSlug(input.topicSlug);
   validateKindOutcome(input.decisionKind, input.outcome);
   const { brief, ...rest } = input;
   const touched = MEANINGFUL_UPDATE_KEYS.some((k) => input[k] !== undefined);
-  return prisma.decision.update({
-    where: { id },
-    data: {
-      ...rest,
-      ...(touched ? { lastUserActivityAt: new Date() } : {}),
-      brief:
-        brief === undefined
-          ? undefined
-          : (brief as unknown as Prisma.InputJsonValue),
-    },
+  const data = {
+    ...rest,
+    ...(touched ? { lastUserActivityAt: new Date() } : {}),
+    brief:
+      brief === undefined
+        ? undefined
+        : (brief as unknown as Prisma.InputJsonValue),
+  };
+  if (!activity) return prisma.decision.update({ where: { id }, data });
+
+  return prisma.$transaction(async (tx) => {
+    const row = await tx.decision.update({ where: { id }, data });
+    await tx.timelineEvent.create({
+      data: {
+        userId: row.userId,
+        decisionId: row.id,
+        kind: "decision",
+        title: describeDecisionOutcome(activity.outcome, row),
+        detail: activity.detail ?? null,
+        source: "you",
+        occurredAt: new Date(),
+      },
+    });
+    return row;
   });
 }
 
