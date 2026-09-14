@@ -604,11 +604,17 @@ model HealthRecord {
   userId        String   @map("user_id")
   sourceId      String   @unique @map("source_id") // Source 1:1 Record（V1 简化）
   kind          String   // lab|imaging|checkup|vitals|medication|symptom|treatment
+  /// Canonical code from the definition table for this record's kind. Every
+  /// definition table reserves `other`, so unsupported entries stay valid.
+  /// A database trigger verifies that the code belongs to the matching kind.
+  metricCode    String   @default("other") @map("metric_code")
   documentClass String?  @map("document_class") // Lab|Imaging|Pathology|Procedure|VisitSummary|Unknown
   title         String
   status        String   @default("SOURCE_UPLOADED") // 状态机 SOURCE_UPLOADED→PROCESSING→EXTRACTED_DRAFT→USER_REVIEW→CONFIRMED
   confidence    String?  // High|Low|Unrecognized|Conflicting
-  parsedValues  Json?    @map("parsed_values") // 带类型 + 逐项置信
+  /// Latest extracted/manual values. Numeric metrics use `{ items: [{ name,
+  /// value, unit }] }`; see the linked metricCode for their stable identity.
+  parsedValues  Json?    @map("parsed_values")
   recordedAt    DateTime @map("recorded_at") @db.Timestamptz
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz
@@ -630,8 +636,87 @@ model HealthRecord {
   observationEntries ObservationEntry[]
 
   @@index([userId, recordedAt], map: "health_record_user_recorded_idx")
+  @@index([userId, metricCode, recordedAt], map: "health_record_user_metric_recorded_idx")
   @@index([userId, status], map: "health_record_user_status_idx")
   @@map("health_record")
+}
+
+/// Per-kind catalogs deliberately remain small. `other` is present in every
+/// table so raw user input can be retained before a concept is curated.
+model HealthVitalMetricDefinition {
+  metricCode    String   @id @map("metric_code")
+  displayName   String   @map("display_name")
+  aliases       String[] @default([])
+  valueType     String   @default("numeric") @map("value_type")
+  canonicalUnit String?  @map("canonical_unit")
+  isChartable   Boolean  @default(false) @map("is_chartable")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("health_vital_metric_definition")
+}
+
+model HealthMedicationMetricDefinition {
+  metricCode  String   @id @map("metric_code")
+  displayName String   @map("display_name")
+  aliases     String[] @default([])
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("health_medication_metric_definition")
+}
+
+model HealthTreatmentMetricDefinition {
+  metricCode  String   @id @map("metric_code")
+  displayName String   @map("display_name")
+  aliases     String[] @default([])
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("health_treatment_metric_definition")
+}
+
+model HealthSymptomMetricDefinition {
+  metricCode  String   @id @map("metric_code")
+  displayName String   @map("display_name")
+  aliases     String[] @default([])
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("health_symptom_metric_definition")
+}
+
+model HealthCheckupMetricDefinition {
+  metricCode  String   @id @map("metric_code")
+  displayName String   @map("display_name")
+  aliases     String[] @default([])
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("health_checkup_metric_definition")
+}
+
+model HealthLabMetricDefinition {
+  metricCode    String   @id @map("metric_code")
+  displayName   String   @map("display_name")
+  aliases       String[] @default([])
+  valueType     String   @default("numeric") @map("value_type")
+  canonicalUnit String?  @map("canonical_unit")
+  isChartable   Boolean  @default(false) @map("is_chartable")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("health_lab_metric_definition")
+}
+
+model HealthImagingMetricDefinition {
+  metricCode  String   @id @map("metric_code")
+  displayName String   @map("display_name")
+  aliases     String[] @default([])
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("health_imaging_metric_definition")
 }
 
 /// 原件层（Contract §12 Source）— task-42 新建

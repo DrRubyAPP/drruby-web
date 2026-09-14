@@ -30,6 +30,7 @@ export const HealthRecordDTO = z.object({
   id: z.string(),
   sourceId: z.string(),
   kind: healthRecordKindSchema,
+  metricCode: z.string(),
   documentClass: documentClassSchema.nullable().optional(),
   title: z.string(),
   status: healthRecordStatusSchema,
@@ -144,6 +145,7 @@ export function toRecordDTO(
     id: row.id,
     sourceId: row.sourceId,
     kind: healthRecordKindSchema.parse(row.kind),
+    metricCode: row.metricCode,
     documentClass: row.documentClass
       ? documentClassSchema.parse(row.documentClass)
       : null,

@@ -26,6 +26,8 @@ export type HealthRecordWithSource = Prisma.HealthRecordGetPayload<{
 
 export interface CreateHealthRecordInput {
   kind: HealthRecordKind;
+  /** Canonical code for this kind; unsupported records remain `other`. */
+  metricCode?: string;
   title: string;
   source?: string | null;
   objectKey?: string | null;
@@ -86,6 +88,7 @@ export async function create(
       userId,
       sourceId,
       kind: input.kind,
+      metricCode: input.metricCode ?? "other",
       title: input.title,
       documentClass: input.documentClass ?? null,
       status,
