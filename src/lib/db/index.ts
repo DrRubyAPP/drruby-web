@@ -36,6 +36,7 @@ export * as healthSourceRepo from "./repositories/healthSource.repo";
 export * as hormoneReadingRepo from "./repositories/hormoneReading.repo";
 export * as journeyRepo from "./repositories/journey.repo";
 export * as notificationPreferenceRepo from "./repositories/notificationPreference.repo";
+export * as observationRepo from "./repositories/observation.repo";
 export * as researchStudyRepo from "./repositories/researchStudy.repo";
 export * as signalRepo from "./repositories/signal.repo";
 export * as skinScanRepo from "./repositories/skinScan.repo";

@@ -52,6 +52,8 @@ model UserAccount {
   signals          Signal[]
   decisions        Decision[]
   decisionEntries  DecisionEntry[]
+  observations     Observation[]
+  observationEntries ObservationEntry[]
   studyEnrollments StudyEnrollment[]
   consentSettings  ConsentSetting[]
   bodyInsights     BodyInsight[]
@@ -334,6 +336,7 @@ model Decision {
   timelineEvents TimelineEvent[]
   connectedHealthRecords DecisionHealthRecord[]
   snapshots      DecisionSnapshot[]
+  observations   Observation[]
 
   @@index([userId, lastUserActivityAt], map: "decision_user_activity_idx")
   @@index([userId, saved], map: "decision_user_saved_idx")
@@ -394,6 +397,51 @@ model DecisionEntry {
   @@index([decisionId, occurredAt], map: "decision_entry_decision_occurred_idx")
   @@index([userId], map: "decision_entry_user_id_idx")
   @@map("decision_entry")
+}
+
+/// 用户可追踪的一项观察。它属于用户，可选地关联到某个 Decision；并不依附于
+/// Decision 的生命周期。实际记录落在 ObservationEntry，必要时指向 HealthRecord。
+model Observation {
+  id         String    @id @default(cuid(2))
+  userId     String    @map("user_id")
+  decisionId String?   @map("decision_id")
+  title      String
+  cadence    String?   // daily|weekly|monthly|custom
+  status     String    @default("active") // active|paused|completed
+  startedAt  DateTime  @default(now()) @map("started_at") @db.Timestamptz
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  user       UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+  decision   Decision?   @relation(fields: [decisionId], references: [id], onDelete: SetNull)
+  entries    ObservationEntry[]
+
+  @@index([userId, status], map: "observation_user_status_idx")
+  @@index([decisionId], map: "observation_decision_id_idx")
+  @@map("observation")
+}
+
+/// 一次观察的值或备注。健康记录仍是原始事实来源；healthRecordId 让观察可以引用它，
+/// 而无需把记录复制进 DecisionEntry。
+model ObservationEntry {
+  id             String    @id @default(cuid(2))
+  observationId  String    @map("observation_id")
+  userId         String    @map("user_id")
+  healthRecordId String?   @map("health_record_id")
+  value          String?
+  unit           String?
+  note           String?
+  observedAt     DateTime  @default(now()) @map("observed_at") @db.Timestamptz
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  observation    Observation   @relation(fields: [observationId], references: [id], onDelete: Cascade)
+  user           UserAccount   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  healthRecord   HealthRecord? @relation(fields: [healthRecordId], references: [id], onDelete: SetNull)
+
+  @@index([observationId, observedAt], map: "observation_entry_observation_time_idx")
+  @@index([userId, observedAt], map: "observation_entry_user_time_idx")
+  @@index([healthRecordId], map: "observation_entry_record_id_idx")
+  @@map("observation_entry")
 }
 
 /// 研究目录（消费者可见的招募）— backend_v5 §2.5
@@ -579,6 +627,7 @@ model HealthRecord {
   photos       Photo[]
   revisions    HealthRecordRevision[]
   decisions    DecisionHealthRecord[]
+  observationEntries ObservationEntry[]
 
   @@index([userId, recordedAt], map: "health_record_user_recorded_idx")
   @@index([userId, status], map: "health_record_user_status_idx")

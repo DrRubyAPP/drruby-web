@@ -1,0 +1,189 @@
+#app-portal.portal-v2 {
+  padding-bottom: 150px;
+}
+
+#app-portal .portal-v2__shell {
+  min-height: 100vh;
+}
+
+#app-portal .portal-v2__main {
+  padding-bottom: 90px;
+}
+
+#app-portal .portal-v2__content,
+#app-portal .portal-v2__detail-inner {
+  max-width: 760px;
+}
+
+#app-portal .portal-v2__eyebrow {
+  color: var(--p-red);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  margin: 0 0 10px;
+}
+
+#app-portal .portal-v2__quiet-link,
+#app-portal .portal-v2__back {
+  color: var(--p-mid);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+#app-portal .portal-v2__decision {
+  align-items: center;
+  color: inherit;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  text-decoration: none;
+}
+
+#app-portal .portal-v2__decision:hover {
+  border-color: var(--p-red);
+}
+
+#app-portal .portal-v2__decision h3,
+#app-portal .portal-v2__body-group h3 {
+  font-family: var(--p-serif);
+  font-size: 21px;
+  margin: 0 0 4px;
+}
+
+#app-portal .portal-v2__decision p,
+#app-portal .portal-v2__body-group p {
+  color: var(--p-mid);
+  font-size: 13px;
+  margin: 0;
+}
+
+#app-portal .portal-v2__body-group {
+  margin-bottom: 10px;
+}
+
+#app-portal .portal-v2__trend-link {
+  background: transparent;
+  border: 0;
+  color: var(--p-red);
+  cursor: pointer;
+  font-family: var(--p-sans);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 0;
+}
+
+#app-portal .portal-v2__composer-wrap {
+  bottom: 18px;
+  left: calc(50% + 116px);
+  max-width: 720px;
+  position: fixed;
+  transform: translateX(-50%);
+  width: calc(100% - 300px);
+  z-index: 20;
+}
+
+#app-portal .portal-v2__composer,
+#app-portal .portal-v2__chat {
+  background: rgba(255, 253, 251, .98);
+  border: 1px solid var(--p-border);
+  box-shadow: var(--p-shadow);
+}
+
+#app-portal .portal-v2__composer {
+  border-radius: 16px;
+  padding: 10px 12px 8px;
+}
+
+#app-portal .portal-v2__composer textarea {
+  background: transparent;
+  border: 0;
+  box-sizing: border-box;
+  color: var(--p-ink);
+  font: 14px/1.45 var(--p-sans);
+  min-height: 46px;
+  outline: 0;
+  padding: 5px;
+  resize: none;
+  width: 100%;
+}
+
+#app-portal .portal-v2__composer-actions {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+#app-portal .portal-v2__composer-actions button {
+  background: transparent;
+  border: 0;
+  color: var(--p-mid);
+  cursor: pointer;
+  font: 12px var(--p-sans);
+  padding: 5px;
+}
+
+#app-portal .portal-v2__composer-actions button:last-child {
+  background: var(--p-red);
+  border-radius: 7px;
+  color: white;
+  padding: 7px 14px;
+}
+
+#app-portal .portal-v2__composer-actions button:disabled {
+  cursor: default;
+  opacity: .5;
+}
+
+#app-portal .portal-v2__attachment {
+  background: #f7edeb;
+  border-radius: 5px;
+  display: inline-flex;
+  font-size: 12px;
+  gap: 8px;
+  margin: 2px 4px 5px;
+  padding: 4px 7px;
+}
+
+#app-portal .portal-v2__attachment button {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+#app-portal .portal-v2__chat {
+  border-radius: 14px;
+  margin-bottom: 8px;
+  max-height: 220px;
+  overflow: auto;
+  padding: 10px;
+}
+
+#app-portal .portal-v2__message {
+  border-radius: 9px;
+  font-size: 13px;
+  line-height: 1.45;
+  margin: 5px 0;
+  padding: 8px 10px;
+}
+
+#app-portal .portal-v2__message--assistant { background: #f6f1ee; }
+#app-portal .portal-v2__message--user { background: #f9e8ea; margin-left: 40px; }
+#app-portal .portal-v2__composer-error { color: var(--p-red); font-size: 12px; margin: 4px; }
+
+#app-portal .portal-v2__detail { min-height: 100vh; }
+#app-portal .portal-v2__detail-inner { margin: 0 auto; padding: 42px 24px 80px; }
+#app-portal .portal-v2__back { display: inline-block; margin-bottom: 34px; }
+#app-portal .portal-v2__filter { display: grid; font-size: 13px; gap: 7px; margin: 28px 0 20px; }
+#app-portal .portal-v2__filter select { border: 1px solid var(--p-border); border-radius: 6px; font: 14px var(--p-sans); padding: 10px; }
+#app-portal .portal-v2__trend-chart { height: 240px; overflow: hidden; position: relative; }
+#app-portal .portal-v2__trend-chart::after { background: var(--p-border); bottom: 55px; content: ""; height: 1px; left: 7%; position: absolute; right: 7%; }
+#app-portal .portal-v2__trend-point { bottom: 55px; position: absolute; text-align: center; transform: translateX(-50%); width: 90px; }
+#app-portal .portal-v2__trend-point span { background: var(--p-red); border: 3px solid white; border-radius: 50%; display: block; height: 12px; margin: 0 auto 12px; position: relative; z-index: 1; width: 12px; }
+#app-portal .portal-v2__trend-point small { color: var(--p-mid); font-size: 10px; }
+
+@media (max-width: 760px) {
+  #app-portal .portal-v2__composer-wrap { left: 12px; transform: none; width: calc(100% - 24px); }
+  #app-portal .portal-v2__shell .side { display: none; }
+  #app-portal .portal-v2__main { padding: 26px 18px 110px; }
+}

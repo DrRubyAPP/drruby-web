@@ -7701,7 +7701,7 @@
                                                                     "description": {
                                                                       "type": "object"
                                                                     },
-                                                                    "__@toPrimitive@5589": {
+                                                                    "__@toPrimitive@5599": {
                                                                       "type": "object"
                                                                     },
                                                                     "__@toStringTag@698": {
@@ -7712,7 +7712,7 @@
                                                                     "toString",
                                                                     "valueOf",
                                                                     "description",
-                                                                    "__@toPrimitive@5589",
+                                                                    "__@toPrimitive@5599",
                                                                     "__@toStringTag@698"
                                                                   ]
                                                                 }
@@ -8002,19 +8002,19 @@
                                         "unicodeSets": {
                                           "type": "boolean"
                                         },
-                                        "__@match@6981": {
+                                        "__@match@6991": {
                                           "type": "object"
                                         },
-                                        "__@replace@6983": {
+                                        "__@replace@6993": {
                                           "type": "object"
                                         },
-                                        "__@search@6986": {
+                                        "__@search@6996": {
                                           "type": "object"
                                         },
-                                        "__@split@6988": {
+                                        "__@split@6998": {
                                           "type": "object"
                                         },
-                                        "__@matchAll@6990": {
+                                        "__@matchAll@7000": {
                                           "type": "object"
                                         }
                                       },
@@ -8033,11 +8033,11 @@
                                         "dotAll",
                                         "hasIndices",
                                         "unicodeSets",
-                                        "__@match@6981",
-                                        "__@replace@6983",
-                                        "__@search@6986",
-                                        "__@split@6988",
-                                        "__@matchAll@6990"
+                                        "__@match@6991",
+                                        "__@replace@6993",
+                                        "__@search@6996",
+                                        "__@split@6998",
+                                        "__@matchAll@7000"
                                       ]
                                     },
                                     "isst": {
@@ -18061,7 +18061,7 @@
                                                                     "description": {
                                                                       "type": "object"
                                                                     },
-                                                                    "__@toPrimitive@5589": {
+                                                                    "__@toPrimitive@5599": {
                                                                       "type": "object"
                                                                     },
                                                                     "__@toStringTag@698": {
@@ -18072,7 +18072,7 @@
                                                                     "toString",
                                                                     "valueOf",
                                                                     "description",
-                                                                    "__@toPrimitive@5589",
+                                                                    "__@toPrimitive@5599",
                                                                     "__@toStringTag@698"
                                                                   ]
                                                                 }
@@ -18362,19 +18362,19 @@
                                         "unicodeSets": {
                                           "type": "boolean"
                                         },
-                                        "__@match@6981": {
+                                        "__@match@6991": {
                                           "type": "object"
                                         },
-                                        "__@replace@6983": {
+                                        "__@replace@6993": {
                                           "type": "object"
                                         },
-                                        "__@search@6986": {
+                                        "__@search@6996": {
                                           "type": "object"
                                         },
-                                        "__@split@6988": {
+                                        "__@split@6998": {
                                           "type": "object"
                                         },
-                                        "__@matchAll@6990": {
+                                        "__@matchAll@7000": {
                                           "type": "object"
                                         }
                                       },
@@ -18393,11 +18393,11 @@
                                         "dotAll",
                                         "hasIndices",
                                         "unicodeSets",
-                                        "__@match@6981",
-                                        "__@replace@6983",
-                                        "__@search@6986",
-                                        "__@split@6988",
-                                        "__@matchAll@6990"
+                                        "__@match@6991",
+                                        "__@replace@6993",
+                                        "__@search@6996",
+                                        "__@split@6998",
+                                        "__@matchAll@7000"
                                       ]
                                     },
                                     "isst": {
@@ -22530,7 +22530,7 @@
                                                                       "description": {
                                                                         "type": "object"
                                                                       },
-                                                                      "__@toPrimitive@5589": {
+                                                                      "__@toPrimitive@5599": {
                                                                         "type": "object"
                                                                       },
                                                                       "__@toStringTag@698": {
@@ -22541,7 +22541,7 @@
                                                                       "toString",
                                                                       "valueOf",
                                                                       "description",
-                                                                      "__@toPrimitive@5589",
+                                                                      "__@toPrimitive@5599",
                                                                       "__@toStringTag@698"
                                                                     ]
                                                                   }
@@ -22831,19 +22831,19 @@
                                           "unicodeSets": {
                                             "type": "boolean"
                                           },
-                                          "__@match@6981": {
+                                          "__@match@6991": {
                                             "type": "object"
                                           },
-                                          "__@replace@6983": {
+                                          "__@replace@6993": {
                                             "type": "object"
                                           },
-                                          "__@search@6986": {
+                                          "__@search@6996": {
                                             "type": "object"
                                           },
-                                          "__@split@6988": {
+                                          "__@split@6998": {
                                             "type": "object"
                                           },
-                                          "__@matchAll@6990": {
+                                          "__@matchAll@7000": {
                                             "type": "object"
                                           }
                                         },
@@ -22862,11 +22862,11 @@
                                           "dotAll",
                                           "hasIndices",
                                           "unicodeSets",
-                                          "__@match@6981",
-                                          "__@replace@6983",
-                                          "__@search@6986",
-                                          "__@split@6988",
-                                          "__@matchAll@6990"
+                                          "__@match@6991",
+                                          "__@replace@6993",
+                                          "__@search@6996",
+                                          "__@split@6998",
+                                          "__@matchAll@7000"
                                         ]
                                       },
                                       "isst": {
@@ -27994,6 +27994,25 @@
         }
       }
     },
+    "/portal-v2/intake": {
+      "post": {
+        "operationId": "post-portal-v2-intake",
+        "summary": "AI-first portal capture. The model may interpret free text, but this route",
+        "description": "",
+        "tags": [
+          "Portal-v2"
+        ],
+        "parameters": [],
+        "responses": {
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
     "/signals": {
       "get": {
         "operationId": "get-signals",
@@ -28361,6 +28380,9 @@
     },
     {
       "name": "Notification-preferences"
+    },
+    {
+      "name": "Portal-v2"
     },
     {
       "name": "Signals"

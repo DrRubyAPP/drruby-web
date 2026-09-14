@@ -14,7 +14,7 @@ export default defineConfig({
   schema: path.join("prisma", "schema.prisma"),
   datasource: {
     url: env("DATABASE_URL"),
-    // shadowDatabaseUrl: env("SHADOW_DATABASE_URL"), // migrate dev 需要影子库时启用
+    shadowDatabaseUrl: env("SHADOW_DATABASE_URL"), // migrate dev 需要影子库时启用
   },
   migrations: {
     path: path.join("prisma", "migrations"),
