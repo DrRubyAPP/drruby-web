@@ -19,7 +19,11 @@ import { listByDecision } from "@/lib/db/repositories/decisionHealthRecord.repo"
 import * as snapshotRepo from "@/lib/db/repositories/decisionSnapshot.repo";
 import { detectMaterialChange } from "./material";
 import { type DecisionRef, isRelevant } from "./relevance";
-import type { ConnectedRecordRef, Synthesizer } from "./types";
+import type {
+  ConnectedRecordRef,
+  CurrentHealthRecord,
+  Synthesizer,
+} from "./types";
 
 export interface OrchestratorDeps {
   synthesizer: Synthesizer;
@@ -92,6 +96,19 @@ async function gatherSynthesisInput(
     // V1：用 title 作 summary；后续可改成从 parsedValues 构造更结构化的摘要
     summary: link.healthRecord.title,
   }));
+  const healthRecords = await prisma.healthRecord.findMany({
+    where: { userId: decision.userId },
+    orderBy: { recordedAt: "desc" },
+    take: 30,
+    select: {
+      id: true,
+      title: true,
+      kind: true,
+      documentClass: true,
+      parsedValues: true,
+      recordedAt: true,
+    },
+  });
 
   const corpus = getDecisionCorpus(
     decision.topicSlug as Parameters<typeof getDecisionCorpus>[0],
@@ -114,6 +131,10 @@ async function gatherSynthesisInput(
       yourselfContext: decision.yourselfContext,
     },
     connectedRecords,
+    currentHealthRecords: healthRecords.map((record) => ({
+      ...record,
+      recordedAt: record.recordedAt.toISOString(),
+    })),
     corpus: {
       others: corpusOthers,
       science: corpusScience,
@@ -204,6 +225,56 @@ export class RegenerationOrchestrator {
     // 窗口已过 → fire regeneration
     await this.runRegeneration(decisionId, { trigger: "new_record" });
     return { fired: true, state: "READY" };
+  }
+
+  /**
+   * The decision detail refreshes its Current Understanding at most once per
+   * UTC day. The generated text remains in decision_snapshot, so repeat opens
+   * reuse it and never make another model request that day.
+   */
+  async ensureDailySynthesis(decisionId: string): Promise<RunInitialResult> {
+    const sRepo = this.deps.snapshotRepo ?? snapshotRepo;
+    const existing = await sRepo.findCurrent(decisionId);
+    const now = new Date();
+    if (
+      existing &&
+      existing.createdAt.toISOString().slice(0, 10) ===
+        now.toISOString().slice(0, 10)
+    ) {
+      return { created: false, snapshotId: existing.id };
+    }
+    if (!existing) return this.runInitialSynthesis(decisionId);
+
+    const { input: synthInput, connectedRecords } = await gatherSynthesisInput(
+      decisionId,
+      "health_context_update",
+      this.deps,
+    );
+    const result = await this.deps.synthesizer.synthesize(synthInput);
+    const yourselfContextRef = {
+      healthContextSnapshot: synthInput.decision.healthContext ?? null,
+      connectedRecordRefs: connectedRecords,
+      currentHealthRecordRefs: synthInput.currentHealthRecords ?? [],
+    };
+    const snapshot = await prisma.$transaction(async (tx) => {
+      const created = await tx.decisionSnapshot.create({
+        data: {
+          decisionId,
+          yourselfContextRef: yourselfContextRef as never,
+          sources: result.sources as never,
+          citations: result.citations as never,
+          synthesis: result.synthesis as never,
+          provenance: result.provenance,
+          changeTrigger: "health_context_update",
+        },
+      });
+      await tx.decision.update({
+        where: { id: decisionId },
+        data: { currentSnapshotId: created.id, pendingRegenAt: null },
+      });
+      return created;
+    });
+    return { created: true, snapshotId: snapshot.id };
   }
 
   /**

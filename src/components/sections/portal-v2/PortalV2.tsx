@@ -8,6 +8,7 @@ import type {
 } from "@/components/sections/portal/decisions/dto";
 import type { HealthRecordDto } from "@/components/sections/portal/health/dto";
 import {
+  healthRecordExitStatus,
   healthRecordHighlight,
   healthRecordMetricKey,
 } from "@/components/sections/portal/health/mappers";
@@ -15,6 +16,7 @@ import { YourTimeline } from "@/components/sections/portal/today/YourTimeline";
 import { useApi } from "@/hooks/useApi";
 import { Link } from "@/i18n/navigation";
 import { apiClient } from "@/lib/api/client";
+import { decisionStatusLabel } from "./decisionStatus";
 import { HealthRecordValueCue } from "./HealthRecordValueCue";
 import { MetricHistoryDialog } from "./MetricHistoryDialog";
 
@@ -79,6 +81,32 @@ export function PortalV2() {
   const [refreshKey, setRefreshKey] = useState(0);
 
   return (
+    <PortalV2Frame
+      activeTab={tab}
+      onChanged={() => setRefreshKey((value) => value + 1)}
+      onTabChange={setTab}
+    >
+      {tab === "home" && <HomeView refreshKey={refreshKey} />}
+      {tab === "health" && <HealthView refreshKey={refreshKey} />}
+      {tab === "decisions" && <DecisionsView refreshKey={refreshKey} />}
+    </PortalV2Frame>
+  );
+}
+
+/** Shared portal chrome keeps detail routes in the same working space as the
+ * main portal: navigation on the left and the persistent composer below. */
+export function PortalV2Frame({
+  activeTab,
+  children,
+  onChanged,
+  onTabChange,
+}: {
+  activeTab: Tab;
+  children: React.ReactNode;
+  onChanged: () => void;
+  onTabChange?: (tab: Tab) => void;
+}) {
+  return (
     <div id="app-portal" className="portal-v2">
       <div className="ufw portal-v2__shell">
         <aside className="side">
@@ -89,9 +117,9 @@ export function PortalV2() {
           <nav className="nav" aria-label="Portal navigation">
             {NAV.map((item) => (
               <button
-                className={`nav-item${tab === item.id ? " active" : ""}`}
+                className={`nav-item${activeTab === item.id ? " active" : ""}`}
                 key={item.id}
-                onClick={() => setTab(item.id)}
+                onClick={() => onTabChange?.(item.id)}
                 type="button"
               >
                 <span className="ni-ic" aria-hidden="true">
@@ -111,13 +139,9 @@ export function PortalV2() {
           </div>
         </aside>
 
-        <main className="ufm portal-v2__main">
-          {tab === "home" && <HomeView refreshKey={refreshKey} />}
-          {tab === "health" && <HealthView refreshKey={refreshKey} />}
-          {tab === "decisions" && <DecisionsView refreshKey={refreshKey} />}
-        </main>
+        <main className="ufm portal-v2__main">{children}</main>
       </div>
-      <FloatingComposer onChanged={() => setRefreshKey((value) => value + 1)} />
+      <FloatingComposer onChanged={onChanged} />
     </div>
   );
 }
@@ -183,12 +207,14 @@ function HomeView({ refreshKey }: { refreshKey: number }) {
 
 function HealthView({ refreshKey }: { refreshKey: number }) {
   const [selectedMetric, setSelectedMetric] = useState<HealthRecordDto | null>(null);
+  const [showAll, setShowAll] = useState(false);
   const { data, error, loading, refetch } = useApi<HealthRecordDto[]>(
     `/api/health/records?portalV2=${refreshKey}`,
   );
   const records = data ?? [];
   const groups = [
     { title: "Vitals", kinds: ["vitals"] },
+    { title: "Labs", kinds: ["lab"] },
     { title: "Medication", kinds: ["medication"] },
     { title: "Conditions", kinds: ["symptom"] },
     { title: "Treatments", kinds: ["treatment"] },
@@ -202,7 +228,17 @@ function HealthView({ refreshKey }: { refreshKey: number }) {
         same box wherever you are in the portal.
       </div>
       <div className="sec">
-        <div className="sec-h">Your body right now</div>
+        <div className="portal-v2__health-section-heading">
+          <div className="sec-h">Your body right now</div>
+          <label className="portal-v2__show-all">
+            <input
+              checked={showAll}
+              onChange={(event) => setShowAll(event.target.checked)}
+              type="checkbox"
+            />
+            Show all
+          </label>
+        </div>
         {loading ? (
           <Skeleton lines={5} />
         ) : error ? (
@@ -213,13 +249,17 @@ function HealthView({ refreshKey }: { refreshKey: number }) {
               const matches = records.filter((record) =>
                 group.kinds.includes(record.kind),
               );
-              const latestByMetric = latestRecordsByMetric(matches);
+              const latestByMetric = latestRecordsByMetric(matches).filter(
+                (record) => showAll || !healthRecordExitStatus(record),
+              );
               return (
                 <div className="card portal-v2__body-group" key={group.title}>
                   <h3>{group.title}</h3>
                   {latestByMetric.length ? (
                     latestByMetric.map((record) => {
                       const highlight = healthRecordHighlight(record);
+                      const ended = healthRecordExitStatus(record);
+                      const name = record.displayName ?? record.title;
                       return (
                         <button
                           className="sub-row portal-v2__metric-row"
@@ -227,9 +267,15 @@ function HealthView({ refreshKey }: { refreshKey: number }) {
                           onClick={() => setSelectedMetric(record)}
                           type="button"
                         >
-                          <span>{record.displayName ?? record.title}</span>
+                          <span
+                            aria-label={ended ? `${name} — ${ended}` : undefined}
+                            className={ended ? "portal-v2__metric-name--ended" : undefined}
+                            title={ended ? ended : undefined}
+                          >
+                            {name}
+                          </span>
                           <span className="portal-v2__record-meta">
-                            {highlight && (
+                            {!ended && highlight && (
                               <HealthRecordValueCue highlight={highlight} />
                             )}
                             <span className="arr">
@@ -335,7 +381,10 @@ function DecisionCard({ decision }: { decision: DecisionDto }) {
         <h3>{decision.topic || decision.question}</h3>
         <p>{decision.question}</p>
       </div>
-      <span aria-hidden="true">›</span>
+      <div className="portal-v2__decision-meta">
+        <span className="portal-v2__status">{decisionStatusLabel(decision.lifecycle)}</span>
+        <span aria-hidden="true">›</span>
+      </div>
     </Link>
   );
 }

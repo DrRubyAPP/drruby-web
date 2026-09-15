@@ -1,9 +1,5 @@
 /**
- * task-43 §15–§26 综合层类型定义（D1：模板为主 + 小处 LLM）
- *
- * 接口风格对齐 task-42 `Extractor`（src/lib/health/extractor.ts）。
- * 真实 LLM synthesis 整体重写延后到 V1 之后（O3）；本接口契约固定，
- * task-43+ 仅替换实现不改接口（plan.md R10）。
+ * task-43 §15–§26 综合层类型定义。
  */
 import type {
   ChangeTrigger,
@@ -20,6 +16,16 @@ export interface ConnectedRecordRef {
   kind: string;
   documentClass?: string | null;
   summary: string;
+}
+
+/** A compact, current health-record view supplied to the Yourself summary. */
+export interface CurrentHealthRecord {
+  id: string;
+  title: string;
+  kind: string;
+  documentClass?: string | null;
+  parsedValues?: unknown;
+  recordedAt: string;
 }
 
 /** snapshot sources 数组项 */
@@ -48,6 +54,8 @@ export interface SynthesisInput {
     yourselfContext?: string | null;
   };
   connectedRecords: ConnectedRecordRef[];
+  /** All of the member's current health records, rather than only linked ones. */
+  currentHealthRecords?: CurrentHealthRecord[];
   /** 静态语料（Others/Science）— 从 decision-corpus.ts 取 */
   corpus: {
     others?: string;

@@ -151,7 +151,7 @@ describe("PortalV2 What matters now", () => {
 describe("PortalV2 My Health", () => {
   beforeEach(() => vi.resetAllMocks());
 
-  it("shows symptoms as conditions and treatments in their own section", () => {
+  it("shows labs, symptoms, and treatments in their own sections", () => {
     vi.mocked(useApi).mockImplementation((path) => ({
       data: (path?.startsWith("/api/health/records")
         ? [
@@ -208,6 +208,26 @@ describe("PortalV2 My Health", () => {
               recordedAt: "2026-09-01T09:00:00.000Z",
             },
             {
+              id: "stopped-medication",
+              sourceId: "source-stopped-medication",
+              kind: "medication",
+              title: "Stopped biotin",
+              status: "CONFIRMED",
+              parsedValues: { dosage: "5 mg", status: "stopped" },
+              recordedAt: "2026-09-11T09:00:00.000Z",
+            },
+            {
+              id: "estradiol-lab",
+              sourceId: "source-estradiol-lab",
+              kind: "lab",
+              metricCode: "estradiol",
+              displayName: "Estradiol",
+              title: "Estradiol blood test",
+              status: "CONFIRMED",
+              parsedValues: { value: 42, unit: "pg/mL" },
+              recordedAt: "2026-09-10T09:00:00.000Z",
+            },
+            {
               id: "symptom",
               sourceId: "source-symptom",
               kind: "symptom",
@@ -215,6 +235,15 @@ describe("PortalV2 My Health", () => {
               status: "CONFIRMED",
               parsedValues: { severity: "moderate" },
               recordedAt: "2026-09-02T09:00:00.000Z",
+            },
+            {
+              id: "resolved-symptom",
+              sourceId: "source-resolved-symptom",
+              kind: "symptom",
+              title: "Resolved rash",
+              status: "CONFIRMED",
+              parsedValues: { severity: "mild", status: "resolved" },
+              recordedAt: "2026-09-03T09:00:00.000Z",
             },
             {
               id: "checkup",
@@ -232,6 +261,33 @@ describe("PortalV2 My Health", () => {
               status: "CONFIRMED",
               parsedValues: { frequency: "monthly" },
               recordedAt: "2026-09-14T09:00:00.000Z",
+            },
+            {
+              id: "stopped-treatment",
+              sourceId: "source-stopped-treatment",
+              kind: "treatment",
+              title: "Stopped retinol peel",
+              status: "CONFIRMED",
+              parsedValues: { status: "stopped" },
+              recordedAt: "2026-09-04T09:00:00.000Z",
+            },
+            {
+              id: "prior-thermage-plan",
+              sourceId: "source-prior-thermage-plan",
+              kind: "treatment",
+              title: "Thermage maintenance plan",
+              status: "CONFIRMED",
+              parsedValues: { frequency: "every 6 months" },
+              recordedAt: "2026-09-01T09:00:00.000Z",
+            },
+            {
+              id: "stopped-thermage-plan",
+              sourceId: "source-stopped-thermage-plan",
+              kind: "treatment",
+              title: "Thermage maintenance plan",
+              status: "CONFIRMED",
+              parsedValues: { status: "stopped" },
+              recordedAt: "2026-09-05T09:00:00.000Z",
             },
           ]
         : path?.startsWith("/api/timeline")
@@ -257,10 +313,18 @@ describe("PortalV2 My Health", () => {
     expect(screen.getByText("Started Thermage")).toBeVisible();
     expect(screen.getByText("Blood pressure")).toBeVisible();
     expect(screen.getByText("120 / 80 mmHg")).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Labs" })).toBeVisible();
+    expect(screen.getByText("Estradiol")).toBeVisible();
+    expect(screen.getByText("42 pg/mL")).toBeVisible();
     expect(screen.getByText("0.025%")).toBeVisible();
     expect(screen.getByText("CoQ10")).toBeVisible();
     expect(screen.getByText("monthly")).toBeVisible();
     expect(screen.getByLabelText("Severity: moderate")).toBeVisible();
+    expect(screen.getByRole("checkbox", { name: "Show all" })).not.toBeChecked();
+    expect(screen.queryByText("Resolved rash")).toBeNull();
+    expect(screen.queryByText("Stopped retinol peel")).toBeNull();
+    expect(screen.queryByText("Stopped biotin")).toBeNull();
+    expect(screen.queryByText("Thermage maintenance plan")).toBeNull();
     expect(screen.queryByText("Morning BP check-in")).toBeNull();
     expect(screen.queryByText("Evening BP check-in")).toBeNull();
 
@@ -297,5 +361,23 @@ describe("PortalV2 My Health", () => {
     expect(
       screen.getByRole("dialog").querySelector(".portal-v2__chart-tooltip"),
     ).toHaveTextContent("Severity: moderate");
+
+    fireEvent.click(screen.getByLabelText("Close history"));
+    fireEvent.click(screen.getByRole("checkbox", { name: "Show all" }));
+    expect(screen.getByText("Resolved rash")).toBeVisible();
+    expect(screen.getByText("Stopped retinol peel")).toBeVisible();
+    expect(screen.getByText("Stopped biotin")).toBeVisible();
+    expect(screen.getByText("Thermage maintenance plan")).toBeVisible();
+    expect(screen.getByLabelText("Resolved rash — resolved")).toHaveClass(
+      "portal-v2__metric-name--ended",
+    );
+    expect(screen.getByLabelText("Stopped retinol peel — stopped")).toHaveClass(
+      "portal-v2__metric-name--ended",
+    );
+    expect(screen.getByLabelText("Stopped biotin — stopped")).toHaveClass(
+      "portal-v2__metric-name--ended",
+    );
+    expect(screen.queryByLabelText("Severity: mild")).toBeNull();
+    expect(screen.queryByText("5 mg")).toBeNull();
   });
 });

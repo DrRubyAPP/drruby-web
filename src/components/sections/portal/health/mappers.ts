@@ -191,8 +191,10 @@ export function mapHealthRecords(dtos: HealthRecordDto[]): HealthRecordRow[] {
 }
 
 export type HealthRecordHighlight =
-  | { type: "vitals" | "medication" | "treatment"; value: string }
+  | { type: "vitals" | "lab" | "medication" | "treatment"; value: string }
   | { type: "symptom"; value: string; level: number };
+
+export type HealthRecordExitStatus = "stopped" | "resolved";
 
 type ParsedRecord = {
   items?: unknown;
@@ -203,10 +205,32 @@ type ParsedRecord = {
   frequency?: unknown;
   cadence?: unknown;
   severity?: unknown;
+  status?: unknown;
 };
 
 function asRecord(value: unknown): ParsedRecord | null {
   return value && typeof value === "object" ? (value as ParsedRecord) : null;
+}
+
+/** Returns a terminal state only for the kinds that support one. */
+export function healthRecordExitStatus(
+  dto: HealthRecordDto,
+): HealthRecordExitStatus | null {
+  if (
+    dto.kind !== "medication" &&
+    dto.kind !== "treatment" &&
+    dto.kind !== "symptom"
+  ) return null;
+  const parsed = asRecord(dto.parsedValues);
+  const status = parsed?.status;
+  if (typeof status !== "string") return null;
+  const normalized = status.trim().toLowerCase();
+  if (
+    (dto.kind === "medication" || dto.kind === "treatment") &&
+    normalized === "stopped"
+  ) return "stopped";
+  if (dto.kind === "symptom" && normalized === "resolved") return "resolved";
+  return null;
 }
 
 function asDisplayValue(value: unknown, unit?: unknown): string | null {
@@ -321,6 +345,11 @@ export function healthRecordHighlight(
       asDisplayValue(parsed.value, parsed.unit) ??
       firstItemValue(parsed);
     return value ? { type: "vitals", value } : null;
+  }
+  if (dto.kind === "lab") {
+    const value =
+      asDisplayValue(parsed.value, parsed.unit) ?? firstItemValue(parsed);
+    return value ? { type: "lab", value } : null;
   }
   if (dto.kind === "medication") {
     const value =

@@ -154,6 +154,9 @@ describe("healthRecordHighlight", () => {
       ),
     ).toEqual({ type: "vitals", value: "120 / 80 mmHg" });
     expect(
+      healthRecordHighlight(record("lab", { value: 42, unit: "pg/mL" })),
+    ).toEqual({ type: "lab", value: "42 pg/mL" });
+    expect(
       healthRecordHighlight(record("medication", { dosage: "5 mg" })),
     ).toEqual({
       type: "medication",

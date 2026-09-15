@@ -75,6 +75,15 @@ export const DecisionDTO = z.object({
 /** 详情：Decision + append-only entries（App 只消费 Decision 字段，entries 为附加） */
 export const DecisionDetailDTO = DecisionDTO.extend({
   entries: z.array(DecisionEntryDTO),
+  currentUnderstanding: z
+    .object({
+      yourself: z.string(),
+      others: z.string(),
+      science: z.string(),
+      generatedAt: z.string(),
+    })
+    .nullable()
+    .optional(),
 });
 
 /** brief 存 JSON，可空/缺失；仅当存在时解析形状（P2 前为快照/占位） */

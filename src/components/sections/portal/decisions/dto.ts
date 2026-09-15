@@ -66,7 +66,8 @@ export type SynthesisProvenance =
   | "template"
   | "template+llm_trigger"
   | "template+llm_trigger_degraded"
-  | "initial";
+  | "initial"
+  | "llm";
 
 /** decision.health_context_status — §20 永不自动从 unconfirmed 转 confirmed */
 export type HealthContextStatus = "confirmed" | "unconfirmed";
@@ -262,6 +263,12 @@ export interface UpdateHealthContextInput {
 /** 详情：Decision + entries */
 export interface DecisionDetailDto extends DecisionDto {
   entries: DecisionEntryDto[];
+  currentUnderstanding?: {
+    yourself: string;
+    others: string;
+    science: string;
+    generatedAt: string;
+  } | null;
 }
 
 /** POST /api/decisions 入参（goal 可选，对齐 server CreateDecisionBody；幂等走服务端 60s 去重，不传 requestId） */

@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { HealthRecordDto } from "@/components/sections/portal/health/dto";
 import {
   bloodPressureRecordValues,
+  healthRecordExitStatus,
   healthRecordHighlight,
   numericHealthRecordValue,
 } from "@/components/sections/portal/health/mappers";
@@ -13,11 +14,29 @@ type PlotPoint = {
   value: number | null;
   plottedValue: number;
   isImputed: boolean;
+  isExit: boolean;
 };
 
 type ChartTooltip = { x: number; y: number; label: string };
+type HistoryValue = { value: number | null; isExit: boolean };
+
+function chartDomain(values: number[]): { min: number; max: number } {
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  if (min !== max) return { min, max };
+
+  // A flat series needs a meaningful visual domain. For the common positive
+  // case (for example, a medication dose), place the value halfway between
+  // zero and twice that value.
+  if (min > 0) return { min: 0, max: min * 2 };
+  if (min < 0) return { min: min * 2, max: 0 };
+
+  // Zero has no proportional range, so use a small symmetric fallback.
+  return { min: -1, max: 1 };
+}
 
 function axisLabel(value: number): string {
+  if (Math.abs(value) < 1) return value.toFixed(2);
   return Math.abs(value) < 10 ? value.toFixed(1) : `${Math.round(value)}`;
 }
 
@@ -41,8 +60,8 @@ function ChartAxis({
   const ticks = [max, (max + min) / 2, min];
   return (
     <g className="portal-v2__chart-axis">
-      {ticks.map((value) => (
-        <g key={value}>
+      {ticks.map((value, index) => (
+        <g key={`axis-tick-${index}`}>
           <line x1={left} x2={width - right} y1={y(value)} y2={y(value)} />
           <text textAnchor="end" x={left - 7} y={y(value) + 4}>
             {axisLabel(value)}
@@ -72,26 +91,28 @@ function FloatingTooltip({ tooltip, width, height }: {
 
 function interpolatePoints(
   sorted: HealthRecordDto[],
-  values: Array<number | null>,
+  values: HistoryValue[],
 ): PlotPoint[] {
   return sorted.map((record, index) => {
-    const value = values[index];
+    const entry = values[index]!;
+    const value = entry.value;
     if (value !== null) {
       return {
         date: new Date(record.recordedAt),
         value,
         plottedValue: value,
         isImputed: false,
+        isExit: entry.isExit,
       };
     }
     const beforeIndex = values.findLastIndex(
-      (item, itemIndex) => itemIndex < index && item !== null,
+      (item, itemIndex) => itemIndex < index && item.value !== null,
     );
     const afterIndex = values.findIndex(
-      (item, itemIndex) => itemIndex > index && item !== null,
+      (item, itemIndex) => itemIndex > index && item.value !== null,
     );
-    const before = beforeIndex >= 0 ? values[beforeIndex] : null;
-    const after = afterIndex >= 0 ? values[afterIndex] : null;
+    const before = beforeIndex >= 0 ? values[beforeIndex]!.value : null;
+    const after = afterIndex >= 0 ? values[afterIndex]!.value : null;
     let plottedValue = before ?? after ?? 0;
     if (before !== null && after !== null && beforeIndex >= 0 && afterIndex >= 0) {
       const beforeTime = new Date(sorted[beforeIndex]!.recordedAt).getTime();
@@ -108,6 +129,7 @@ function interpolatePoints(
       value: null,
       plottedValue,
       isImputed: true,
+      isExit: false,
     };
   });
 }
@@ -123,13 +145,18 @@ function NumericHistory({ records }: { records: HealthRecordDto[] }) {
   const sorted = sortedRecords(records);
   const points = interpolatePoints(
     sorted,
-    sorted.map((record) => numericHealthRecordValue(record)?.value ?? null),
+    sorted.map((record) => {
+      const exit = healthRecordExitStatus(record);
+      return {
+        value: exit ? 0 : (numericHealthRecordValue(record)?.value ?? null),
+        isExit: !!exit,
+      };
+    }),
   );
   const unit = records.map(numericHealthRecordValue).find(Boolean)?.unit;
   const values = points.map((point) => point.plottedValue);
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const range = max - min || Math.max(Math.abs(max) * 0.15, 1);
+  const { min, max } = chartDomain(values);
+  const range = max - min;
   const start = new Date(sorted[0]!.recordedAt).getTime();
   const end = new Date(sorted.at(-1)!.recordedAt).getTime();
   const width = 480;
@@ -169,11 +196,35 @@ function NumericHistory({ records }: { records: HealthRecordDto[] }) {
               record.kind === "symptom"
                 ? healthRecordHighlight(record)?.value
                 : null;
-            const label = point.isImputed
+            const exit = healthRecordExitStatus(record);
+            const label = point.isExit
+              ? `${point.date.toLocaleDateString()} · ${exit}`
+              : point.isImputed
               ? `${point.date.toLocaleDateString()} · no numeric value · interpolated to ${point.plottedValue.toFixed(1)}${unit ? ` ${unit}` : ""}`
               : severity
                 ? `${point.date.toLocaleDateString()} · Severity: ${severity}`
               : `${point.date.toLocaleDateString()} · ${point.value}${unit ? ` ${unit}` : ""}`;
+            if (point.isExit) {
+              const crossSize = 3;
+              return (
+                <path
+                  aria-label={`${exit} marker`}
+                  className="portal-v2__chart-point--exit"
+                  d={`M${x(point) - crossSize} ${y(point) - crossSize}L${x(point) + crossSize} ${y(point) + crossSize}M${x(point) + crossSize} ${y(point) - crossSize}L${x(point) - crossSize} ${y(point) + crossSize}`}
+                  fill="none"
+                  key={`${point.date.toISOString()}-${index}`}
+                  onBlur={() => setTooltip(null)}
+                  onFocus={() => setTooltip({ x: x(point), y: y(point), label })}
+                  onMouseEnter={() => setTooltip({ x: x(point), y: y(point), label })}
+                  onMouseLeave={() => setTooltip(null)}
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                  tabIndex={0}
+                >
+                  <title>{label}</title>
+                </path>
+              );
+            }
             return (
               <circle
                 className={point.isImputed ? "portal-v2__chart-point--missing" : "portal-v2__chart-point"}
@@ -208,17 +259,22 @@ function BloodPressureHistory({ records }: { records: HealthRecordDto[] }) {
   const readings = sorted.map(bloodPressureRecordValues);
   const systolic = interpolatePoints(
     sorted,
-    readings.map((reading) => reading?.systolic ?? null),
+    readings.map((reading) => ({
+      value: reading?.systolic ?? null,
+      isExit: false,
+    })),
   );
   const diastolic = interpolatePoints(
     sorted,
-    readings.map((reading) => reading?.diastolic ?? null),
+    readings.map((reading) => ({
+      value: reading?.diastolic ?? null,
+      isExit: false,
+    })),
   );
   const unit = readings.find((reading) => reading?.unit)?.unit;
   const values = [...systolic, ...diastolic].map((point) => point.plottedValue);
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const range = max - min || Math.max(Math.abs(max) * 0.15, 1);
+  const { min, max } = chartDomain(values);
+  const range = max - min;
   const start = new Date(sorted[0]!.recordedAt).getTime();
   const end = new Date(sorted.at(-1)!.recordedAt).getTime();
   const width = 480;
@@ -308,11 +364,12 @@ function TextHistory({ records }: { records: HealthRecordDto[] }) {
   return (
     <div className="portal-v2__metric-list">
       {[...records].reverse().map((record) => {
+        const exit = healthRecordExitStatus(record);
         const highlight = healthRecordHighlight(record);
         return (
           <div key={record.id}>
             <span>{new Date(record.recordedAt).toLocaleDateString()}</span>
-            <b>{highlight?.value ?? record.title}</b>
+            <b>{exit ?? highlight?.value ?? record.title}</b>
           </div>
         );
       })}

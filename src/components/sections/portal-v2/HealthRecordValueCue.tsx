@@ -27,6 +27,8 @@ export function HealthRecordValueCue({
   const icon =
     highlight.type === "vitals"
       ? "⌁"
+      : highlight.type === "lab"
+        ? "◈"
       : highlight.type === "medication"
         ? "●"
         : "↻";

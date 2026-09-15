@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { getDecisionCorpus } from "@/config/decision-corpus";
 import { TemplateSynthesizer } from "./templateSynthesizer";
+import type { LlmClient } from "@/lib/llm/client";
 import type { SynthesisInput } from "./types";
 
 function makeInput(overrides: Partial<SynthesisInput> = {}): SynthesisInput {
@@ -28,6 +29,15 @@ function makeInput(overrides: Partial<SynthesisInput> = {}): SynthesisInput {
         summary: "Estradiol 50 pg/mL, FSH 80",
       },
     ],
+    currentHealthRecords: [
+      {
+        id: "rec1",
+        kind: "lab",
+        documentClass: "Lab",
+        title: "Estradiol 50 pg/mL, FSH 80",
+        recordedAt: "2026-09-15T00:00:00.000Z",
+      },
+    ],
     corpus: {
       others: [corpus.others.helpful[0], corpus.others.difficult[0]].join(" "),
       science: corpus.science.benefits[0]?.text ?? "",
@@ -51,12 +61,14 @@ describe("TemplateSynthesizer", () => {
     expect(result.synthesis.yourself).toContain("improve sleep quality");
   });
 
-  it("synthesize Others/Science：含 corpus 片段", async () => {
+  it("synthesize Others/Science：使用 v1 占位文案", async () => {
     const synth = new TemplateSynthesizer();
     const result = await synth.synthesize(makeInput());
 
     expect(result.synthesis.others).toContain("Some people");
-    expect(result.synthesis.science).toContain("Hormone therapy");
+    expect(result.synthesis.science).toContain(
+      "placeholder pending content team review",
+    );
   });
 
   it("synthesize combined：拼接 yourself/others/science", async () => {
@@ -92,6 +104,7 @@ describe("TemplateSynthesizer", () => {
           yourselfContext: "Perimenopausal, considering HRT for sleep.",
         },
         connectedRecords: [],
+        currentHealthRecords: [],
       }),
     );
 
@@ -112,6 +125,7 @@ describe("TemplateSynthesizer", () => {
           yourselfContext: null,
         },
         connectedRecords: [],
+        currentHealthRecords: [],
       }),
     );
 
@@ -128,6 +142,21 @@ describe("TemplateSynthesizer", () => {
     expect(result.provenance).toBe("initial");
     // initial 不算降级，模板文案即可
     expect(result.triggerHumanLabel).toMatch(/initial|first/i);
+  });
+
+  it("uses the LLM to summarize the initial context against current health records", async () => {
+    const llm: LlmClient = {
+      isConfigured: () => true,
+      chatComplete: async () => "Since the decision, a lab record was added.",
+    };
+    const result = await new TemplateSynthesizer({ llm }).synthesize(
+      makeInput(),
+    );
+
+    expect(result.synthesis.yourself).toBe(
+      "Since the decision, a lab record was added.",
+    );
+    expect(result.provenance).toBe("llm");
   });
 
   it("sources 含 connected Records + corpus 引用", async () => {

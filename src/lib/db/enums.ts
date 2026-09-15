@@ -482,6 +482,7 @@ export const synthesisProvenanceSchema = z.enum([
   "template+llm_trigger",
   "template+llm_trigger_degraded",
   "initial",
+  "llm",
 ]);
 export type SynthesisProvenance = z.infer<typeof synthesisProvenanceSchema>;
 

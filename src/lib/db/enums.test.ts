@@ -398,16 +398,17 @@ describe("task-43 综合/状态机枚举 - 有效值通过", () => {
     expect(() => healthContextCategorySchema.parse("symptom")).toThrow();
   });
 
-  it("synthesisProvenanceSchema 接受 4 值（含 degraded + initial sentinel）", () => {
+  it("synthesisProvenanceSchema 接受 5 值（含 LLM + degraded + initial sentinel）", () => {
     for (const v of [
       "template",
       "template+llm_trigger",
       "template+llm_trigger_degraded",
       "initial",
+      "llm",
     ]) {
       expect(synthesisProvenanceSchema.parse(v)).toBe(v);
     }
-    expect(() => synthesisProvenanceSchema.parse("llm")).toThrow();
+    expect(() => synthesisProvenanceSchema.parse("unknown")).toThrow();
   });
 });
 
@@ -590,7 +591,7 @@ describe("enum schemas - 无效值抛错", () => {
       "symptom",
       "health_context_category（单数非法）",
     ],
-    ["synthesisProvenanceSchema", "llm", "provenance"],
+    ["synthesisProvenanceSchema", "unknown", "provenance"],
     ["journeySourceTypeSchema", "blog", "source_type"],
     ["followUpStatusSchema", "closed", "status"],
     ["clinicPlanTierSchema", "premium", "plan_tier"],

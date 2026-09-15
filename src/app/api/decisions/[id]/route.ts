@@ -5,7 +5,11 @@ import {
   RegenerationOrchestrator,
 } from "@/lib/ai/synthesis";
 import { requireUser } from "@/lib/auth/session";
-import { decisionEntryRepo, decisionRepo } from "@/lib/db";
+import {
+  decisionEntryRepo,
+  decisionRepo,
+  decisionSnapshotRepo,
+} from "@/lib/db";
 import {
   assertLifecycleForOutcome,
   type DecisionKind,
@@ -73,33 +77,40 @@ export const GET = handle(async (_req: Request, ctx: Ctx) => {
   // - pendingRegenAt 已过 → runRegeneration
   // - pendingRegenAt 未过 → 不 fire（前端按 STALE_UPDATE_AVAILABLE 显示）
   // 注：lazy fire 失败不阻塞 GET 返回（前端降级到 STALE/FAILED）；orchestrator 内部已清 pending。
-  if (!row.currentSnapshotId) {
-    try {
-      const orch = new RegenerationOrchestrator({
-        synthesizer: createSynthesizer(),
-      });
-      await orch.runInitialSynthesis(id);
-    } catch {
-      // 首版 synthesis 失败 → 不阻塞 GET；前端按 INSUFFICIENT/FAILED 显示
-    }
-  } else if (row.pendingRegenAt) {
-    try {
-      const orch = new RegenerationOrchestrator({
-        synthesizer: createSynthesizer(),
-      });
-      await orch.maybeFirePendingRegen(id);
-    } catch {
-      // lazy fire 失败 → 不阻塞 GET；前端按 STALE/FAILED 显示
-    }
+  try {
+    const orch = new RegenerationOrchestrator({
+      synthesizer: createSynthesizer(),
+    });
+    await orch.ensureDailySynthesis(id);
+  } catch {
+    // A summary failure must never prevent access to the decision.
   }
 
   // 重新读取（lazy fire 可能已更新 currentSnapshotId / pendingRegenAt）
   const freshRow = await decisionRepo.findByIdWithEntries(id);
   const detailRow = freshRow ?? row;
 
+  const currentSnapshot = await decisionSnapshotRepo.findCurrent(id);
+  const synthesis = currentSnapshot?.synthesis as {
+    yourself?: string;
+    others?: string;
+    science?: string;
+  } | null;
   const dto: z.infer<typeof DecisionDetailDTO> = {
     ...toDecisionDTO(detailRow, { withBrief: true }),
     entries: detailRow.entries.map(toEntryDTO),
+    currentUnderstanding:
+      synthesis?.yourself &&
+      synthesis.others &&
+      synthesis.science &&
+      currentSnapshot
+        ? {
+            yourself: synthesis.yourself,
+            others: synthesis.others,
+            science: synthesis.science,
+            generatedAt: currentSnapshot.createdAt.toISOString(),
+          }
+        : null,
   };
   return NextResponse.json(DecisionResponse.parse(dto));
 });
