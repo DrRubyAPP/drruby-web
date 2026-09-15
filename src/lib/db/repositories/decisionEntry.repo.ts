@@ -145,6 +145,7 @@ export async function createObservation(
         userId: input.userId,
         decisionId: input.decisionId,
         kind: "note",
+        importance: "minor",
         title: describeObservationAction("Recorded observation for", decision),
         detail: input.text,
         source: "you",

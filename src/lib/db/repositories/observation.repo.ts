@@ -76,6 +76,7 @@ export async function createSkinConditionTracking(input: {
         userId: input.userId,
         decisionId: input.decisionId,
         kind: "note",
+        importance: "minor",
         title: "Started observing Skin condition",
         source: "you",
         occurredAt: now,

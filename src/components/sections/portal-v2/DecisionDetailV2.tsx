@@ -119,13 +119,13 @@ export function DecisionDetailV2({ id }: { id: string }) {
         </section>
 
         <section className="sec">
-          <div className="sec-h">Tracking</div>
+          <div className="sec-h">Related health trend</div>
           <Link
             className="card portal-v2__tracking-link"
             href={`/portal-v2/decisions/${id}/trends`}
           >
             <span>
-              <strong>See what’s changed</strong>
+              <strong>View related health trend</strong>
               <small>
                 Follow your events and view your health at each point in time.
               </small>

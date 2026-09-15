@@ -285,6 +285,7 @@ async function main() {
       {
         userId,
         kind: "note",
+        importance: "minor",
         title: "Felt more jawline laxity in the mornings",
         detail: "Especially noticeable after poor sleep nights.",
         source: "you",
@@ -294,6 +295,7 @@ async function main() {
         userId,
         decisionId: thermage.id,
         kind: "decision",
+        importance: "minor",
         title: "Considering Thermage",
         source: "you",
         occurredAt: daysAgo(40),
@@ -301,6 +303,7 @@ async function main() {
       {
         userId,
         kind: "lab",
+        importance: "minor",
         title: "Blood panel uploaded",
         detail: "Includes estradiol and FSH.",
         source: "your doctor",
@@ -309,6 +312,7 @@ async function main() {
       {
         userId,
         kind: "treatment",
+        importance: "important",
         title: "Started tretinoin 0.025%",
         source: "you",
         occurredAt: daysAgo(20),
@@ -316,6 +320,7 @@ async function main() {
       {
         userId,
         kind: "photo",
+        importance: "minor",
         title: "Front-facing skin photo",
         source: "you",
         occurredAt: daysAgo(14),
@@ -324,6 +329,7 @@ async function main() {
         userId,
         decisionId: thermage.id,
         kind: "outcome",
+        importance: "important",
         title: "Thermage consultation completed",
         detail: "Clinician recommended a single session.",
         source: "your doctor",

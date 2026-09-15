@@ -229,20 +229,6 @@ function HealthView({ refreshKey }: { refreshKey: number }) {
         Your records are organized here. Add words, a photo, or a PDF from the
         same box wherever you are in the portal.
       </div>
-      <Link
-        className="card portal-v2__tracking-link"
-        href="/portal-v2/health/trends"
-      >
-        <span>
-          <strong>View your tracking timeline</strong>
-          <small>
-            See every change event and your health at each point in time.
-          </small>
-        </span>
-        <span className="arr" aria-hidden="true">
-          ›
-        </span>
-      </Link>
       <div className="sec">
         <div className="portal-v2__health-section-heading">
           <div className="sec-h">Your body right now</div>
@@ -316,6 +302,20 @@ function HealthView({ refreshKey }: { refreshKey: number }) {
           </div>
         )}
       </div>
+      <Link
+        className="card portal-v2__tracking-link"
+        href="/portal-v2/health/trends"
+      >
+        <span>
+          <strong>View your health trend</strong>
+          <small>
+            See every change event and your health at each point in time.
+          </small>
+        </span>
+        <span className="arr" aria-hidden="true">
+          ›
+        </span>
+      </Link>
       {selectedMetric && (
         <MetricHistoryDialog
           onClose={() => setSelectedMetric(null)}

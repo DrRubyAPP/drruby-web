@@ -240,6 +240,8 @@ model TimelineEvent {
   userId     String    @map("user_id")
   decisionId String?   @map("decision_id")
   kind       String    // note|treatment|photo|lab|decision|outcome
+  /// important = starts/stops/terminal decisions; medium = regimen changes; minor = logs/comments
+  importance String    @default("minor")
   title      String
   detail     String?
   source     String?   // you|wearable|your doctor

@@ -1,9 +1,16 @@
-import { type TimelineKind, timelineKindSchema } from "@/lib/db/enums";
+import {
+  type TimelineImportance,
+  type TimelineKind,
+  timelineImportanceSchema,
+  timelineKindSchema,
+} from "@/lib/db/enums";
 import { prisma } from "@/lib/db/prisma";
 import type { TimelineEvent } from "~prisma/client";
 
 export interface CreateTimelineEventInput {
   kind: TimelineKind;
+  /** Defaults to minor for ordinary logs and backwards-compatible callers. */
+  importance?: TimelineImportance;
   title: string;
   detail?: string | null;
   source?: string | null;
@@ -16,7 +23,12 @@ export async function create(
   input: CreateTimelineEventInput,
 ): Promise<TimelineEvent> {
   timelineKindSchema.parse(input.kind);
-  return prisma.timelineEvent.create({ data: { userId, ...input } });
+  if (input.importance !== undefined) {
+    timelineImportanceSchema.parse(input.importance);
+  }
+  return prisma.timelineEvent.create({
+    data: { userId, importance: "minor", ...input },
+  });
 }
 
 /** 按用户列出，最新在前 */

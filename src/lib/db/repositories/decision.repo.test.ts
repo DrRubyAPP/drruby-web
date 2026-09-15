@@ -347,6 +347,7 @@ describe("task-44 startObserving/stopObserving/markCompleted/completeAfterLearni
     });
     expect(tl).toBeTruthy();
     expect(tl?.title).toBe("Started observing");
+    expect(tl?.importance).toBe("important");
   });
 
   it("startObserving: CLOSED throws（不可观察）", async () => {
@@ -449,6 +450,7 @@ describe("task-44 startObserving/stopObserving/markCompleted/completeAfterLearni
       where: { decisionId, userId },
     });
     expect(tl?.title).toBe("Marked as completed");
+    expect(tl?.importance).toBe("important");
   });
 
   it("markCompleted: ACTIVE throws（不可直跳 COMPLETED）", async () => {

@@ -7,6 +7,7 @@ export interface TimelineEventDto {
   id: string;
   date: string;
   kind: string;
+  importance: "important" | "medium" | "minor";
   title: string;
   detail?: string;
   source?: string;

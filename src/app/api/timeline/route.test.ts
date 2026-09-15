@@ -56,10 +56,32 @@ describe("POST /api/timeline", () => {
     );
     expect(created.status).toBe(201);
     const list = await GET();
-    const rows: Array<{ title: string; kind: string }> = await list.json();
+    const rows: Array<{
+      title: string;
+      kind: string;
+      importance: string;
+    }> = await list.json();
     expect(rows[0]).toMatchObject({
       title: "Started tretinoin",
       kind: "treatment",
+      importance: "minor",
+    });
+  });
+
+  it("accepts an explicit importance", async () => {
+    const { POST } = await import("./route");
+    const user = await makeUser("tl-importance@example.com");
+    asUser(user.id);
+    const res = await POST(
+      jsonRequest({
+        kind: "treatment",
+        importance: "important",
+        title: "Started tretinoin",
+      }),
+    );
+    expect(res.status).toBe(201);
+    await expect(res.json()).resolves.toMatchObject({
+      importance: "important",
     });
   });
 });

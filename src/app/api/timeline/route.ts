@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/session";
 import { decisionRepo, prisma, timelineEventRepo } from "@/lib/db";
-import { timelineKindSchema } from "@/lib/db/enums";
+import { timelineImportanceSchema, timelineKindSchema } from "@/lib/db/enums";
 import { AppError, handle } from "@/lib/errors";
 import {
   type DecisionTimelineContext,
@@ -15,6 +15,7 @@ export const TimelineEventDTO = z.object({
   id: z.string(),
   date: z.string(),
   kind: timelineKindSchema,
+  importance: timelineImportanceSchema,
   title: z.string(),
   detail: z.string().optional(),
   source: z.string().optional(),
@@ -27,6 +28,7 @@ const TimelineListQuery = z.object({
 /** 新增时间线事件入参 */
 export const CreateTimelineBody = z.object({
   kind: timelineKindSchema,
+  importance: timelineImportanceSchema.optional().default("minor"),
   title: z.string().min(1),
   detail: z.string().optional(),
   source: z.string().optional(),
@@ -42,6 +44,7 @@ function toDTO(
     id: row.id,
     date: row.occurredAt.toISOString(),
     kind: timelineKindSchema.parse(row.kind),
+    importance: timelineImportanceSchema.parse(row.importance),
     title: describeTimelineTitle(row.title, decision),
     detail: row.detail ?? undefined,
     source: row.source ?? undefined,
@@ -119,6 +122,7 @@ export const POST = handle(async (req: Request) => {
 
   const row = await timelineEventRepo.create(user.id, {
     kind: body.kind,
+    importance: body.importance,
     title: body.title,
     detail: body.detail ?? null,
     source: body.source ?? null,

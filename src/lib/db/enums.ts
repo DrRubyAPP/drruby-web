@@ -115,6 +115,14 @@ export const timelineKindSchema = z.enum([
 ]);
 export type TimelineKind = z.infer<typeof timelineKindSchema>;
 
+/** timeline_event.importance — the user-facing significance of an event. */
+export const timelineImportanceSchema = z.enum([
+  "important",
+  "medium",
+  "minor",
+]);
+export type TimelineImportance = z.infer<typeof timelineImportanceSchema>;
+
 /** signal.confidence — App ConfidenceLevel（注意连字符 not-assessable） */
 export const signalConfidenceSchema = z.enum([
   "observed",

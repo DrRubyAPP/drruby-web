@@ -27,6 +27,7 @@ describe("timelineEvent.repo", () => {
     });
     await create(userId, {
       kind: "treatment",
+      importance: "important",
       title: "First session",
       source: "your doctor",
       occurredAt: new Date("2026-06-10T00:00:00Z"),
@@ -34,6 +35,7 @@ describe("timelineEvent.repo", () => {
     const rows = await listByUser(userId);
     expect(rows).toHaveLength(2);
     expect(rows[0].title).toBe("First session"); // 最新在前
+    expect(rows[0].importance).toBe("important");
   });
 
   it("listByDecision 只返回该决策关联事件（正序）", async () => {

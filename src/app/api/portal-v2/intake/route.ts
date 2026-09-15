@@ -98,6 +98,7 @@ async function performPendingAction(
     });
     await timelineEventRepo.create(userId, {
       kind: "note",
+      importance: "minor",
       title: `Started observing ${pending.title}`,
       decisionId: decision.id,
       source: "you",
@@ -118,6 +119,7 @@ async function performPendingAction(
   });
   await timelineEventRepo.create(userId, {
     kind: "note",
+    importance: "minor",
     title: `Started observing ${text.trim()}`,
     decisionId: decision.id,
     source: "you",
@@ -188,6 +190,7 @@ export const POST = handle(async (req: Request) => {
       if (parsed.intent === "consideration") {
         await timelineEventRepo.create(user.id, {
           kind: "decision",
+          importance: "minor",
           title: `Started considering ${topic}`,
           decisionId: decision.id,
           source: "you",
@@ -211,6 +214,7 @@ export const POST = handle(async (req: Request) => {
       );
       await timelineEventRepo.create(user.id, {
         kind: "treatment",
+        importance: "important",
         title: `Started ${topic}`,
         decisionId: decision.id,
         source: "you",
@@ -246,6 +250,7 @@ export const POST = handle(async (req: Request) => {
   });
   await timelineEventRepo.create(user.id, {
     kind: parsed.recordKind === "lab" ? "lab" : "note",
+    importance: "minor",
     title: attachmentTitle
       ? `Added ${attachmentTitle} to health history`
       : `Added health update: ${record.title}`,
