@@ -31,6 +31,7 @@ export * as decisionHealthRecordRepo from "./repositories/decisionHealthRecord.r
 export * as decisionSnapshotRepo from "./repositories/decisionSnapshot.repo";
 export * as experimentRepo from "./repositories/experiment.repo";
 export * as healthRecordRepo from "./repositories/healthRecord.repo";
+export * as healthMetricDefinitionRepo from "./repositories/healthMetricDefinition.repo";
 export * as healthRecordRevisionRepo from "./repositories/healthRecordRevision.repo";
 export * as healthSourceRepo from "./repositories/healthSource.repo";
 export * as hormoneReadingRepo from "./repositories/hormoneReading.repo";

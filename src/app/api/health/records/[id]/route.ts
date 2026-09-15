@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/session";
-import { healthRecordRepo, healthRecordRevisionRepo } from "@/lib/db";
+import {
+  healthMetricDefinitionRepo,
+  healthRecordRepo,
+  healthRecordRevisionRepo,
+} from "@/lib/db";
 import { AppError, handle } from "@/lib/errors";
 import { AdvanceStatusBody, CorrectRecordBody, toRecordDTO } from "../../dto";
 
@@ -24,7 +28,12 @@ export const GET = handle(async (_req: Request, ctx: Ctx) => {
   if (!row || row.userId !== user.id) {
     throw new AppError("NOT_FOUND", "记录不存在", 404);
   }
-  return NextResponse.json(toRecordDTO(row));
+  return NextResponse.json(
+    toRecordDTO(
+      row,
+      await healthMetricDefinitionRepo.resolveDisplayName(row),
+    ),
+  );
 });
 
 /**
@@ -51,8 +60,12 @@ export const PATCH = handle(async (req: Request, ctx: Ctx) => {
 
   if (body.action === "advance") {
     const updated = await healthRecordRepo.advanceStatus(id, body.status);
+    const row = { ...updated, healthSource: existing.healthSource };
     return NextResponse.json(
-      toRecordDTO({ ...updated, healthSource: existing.healthSource }),
+      toRecordDTO(
+        row,
+        await healthMetricDefinitionRepo.resolveDisplayName(row),
+      ),
     );
   }
 
@@ -67,7 +80,12 @@ export const PATCH = handle(async (req: Request, ctx: Ctx) => {
   });
 
   const updated = await healthRecordRepo.findById(id);
-  return NextResponse.json(toRecordDTO(updated!));
+  return NextResponse.json(
+    toRecordDTO(
+      updated!,
+      await healthMetricDefinitionRepo.resolveDisplayName(updated!),
+    ),
+  );
 });
 
 /**
@@ -90,7 +108,11 @@ export const POST = handle(async (_req: Request, ctx: Ctx) => {
   // task-42 V1：Retry 仅推进状态机回 PROCESSING；真实抽取由前端 / 异步任务调用 Extractor
   // 这里不直接调用 Extractor（route 保持无副作用；mock 抽取在测试中通过 repo.updateExtraction 推进）
   const updated = await healthRecordRepo.advanceStatus(id, "PROCESSING");
+  const row = { ...updated, healthSource: existing.healthSource };
   return NextResponse.json(
-    toRecordDTO({ ...updated, healthSource: existing.healthSource }),
+    toRecordDTO(
+      row,
+      await healthMetricDefinitionRepo.resolveDisplayName(row),
+    ),
   );
 });

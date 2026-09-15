@@ -76,6 +76,8 @@ export interface HealthRecordDto {
   id: string;
   sourceId: string;
   kind: HealthRecordKind;
+  metricCode?: string;
+  displayName?: string;
   documentClass?: DocumentClass | null;
   title: string;
   status: HealthRecordStatus;

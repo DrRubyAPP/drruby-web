@@ -2,12 +2,14 @@ import { describe, expect, it } from "vitest";
 import type { ExtractionConfidence, HealthRecordStatus } from "@/lib/db/enums";
 import {
   confidenceKey,
+  healthRecordHighlight,
   mapHormones,
   mapSignals,
   mapSkin,
   needsConfirm,
   statusKey,
 } from "./mappers";
+import type { HealthRecordDto } from "./dto";
 
 describe("mapSignals", () => {
   it("joins value+unit and normalizes trend", () => {
@@ -117,6 +119,63 @@ describe("mapSkin", () => {
       date: "2026-07-01",
       headline: "Improving",
       zones: [{ name: "T-zone", status: "clear" }],
+    });
+  });
+});
+
+describe("healthRecordHighlight", () => {
+  function record(
+    kind: HealthRecordDto["kind"],
+    parsedValues: unknown,
+  ): HealthRecordDto {
+    return {
+      id: "r1",
+      sourceId: "s1",
+      kind,
+      title: "Record",
+      status: "CONFIRMED",
+      recordedAt: "2026-09-14T00:00:00.000Z",
+      parsedValues,
+    };
+  }
+
+  it("selects the dashboard value appropriate to each supported kind", () => {
+    expect(
+      healthRecordHighlight(
+        {
+          ...record("vitals", {
+            items: [
+              { name: "Systolic blood pressure", value: 120, unit: "mmHg" },
+              { name: "Diastolic blood pressure", value: 80, unit: "mmHg" },
+            ],
+          }),
+          metricCode: "blood_pressure",
+        },
+      ),
+    ).toEqual({ type: "vitals", value: "120 / 80 mmHg" });
+    expect(
+      healthRecordHighlight(record("medication", { dosage: "5 mg" })),
+    ).toEqual({
+      type: "medication",
+      value: "5 mg",
+    });
+    expect(
+      healthRecordHighlight(
+        record("medication", { dose: { value: 240, unit: "mg" } }),
+      ),
+    ).toEqual({ type: "medication", value: "240 mg" });
+    expect(
+      healthRecordHighlight(record("treatment", { frequency: "monthly" })),
+    ).toEqual({
+      type: "treatment",
+      value: "monthly",
+    });
+    expect(
+      healthRecordHighlight(record("symptom", { severity: "moderate" })),
+    ).toEqual({
+      type: "symptom",
+      value: "moderate",
+      level: 3,
     });
   });
 });

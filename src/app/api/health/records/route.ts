@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireUser } from "@/lib/auth/session";
-import { healthRecordRepo } from "@/lib/db";
+import { healthMetricDefinitionRepo, healthRecordRepo } from "@/lib/db";
 import { handle } from "@/lib/errors";
 import { HealthRecordListResponse, ManualLogBody, toRecordDTO } from "../dto";
 
@@ -16,7 +16,16 @@ export const GET = handle(async () => {
   const user = await requireUser();
   const rows = await healthRecordRepo.listByUser(user.id);
   return NextResponse.json(
-    HealthRecordListResponse.parse(rows.map((r) => toRecordDTO(r))),
+    HealthRecordListResponse.parse(
+      await Promise.all(
+        rows.map(async (row) =>
+          toRecordDTO(
+            row,
+            await healthMetricDefinitionRepo.resolveDisplayName(row),
+          ),
+        ),
+      ),
+    ),
   );
 });
 
@@ -43,5 +52,11 @@ export const POST = handle(async (req: Request) => {
     recordedAt: new Date(body.recordedAt),
   });
 
-  return NextResponse.json(toRecordDTO(row), { status: 201 });
+  return NextResponse.json(
+    toRecordDTO(
+      row,
+      await healthMetricDefinitionRepo.resolveDisplayName(row),
+    ),
+    { status: 201 },
+  );
 });

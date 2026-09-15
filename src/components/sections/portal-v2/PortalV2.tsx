@@ -7,10 +7,16 @@ import type {
   WmnResponse,
 } from "@/components/sections/portal/decisions/dto";
 import type { HealthRecordDto } from "@/components/sections/portal/health/dto";
+import {
+  healthRecordHighlight,
+  healthRecordMetricKey,
+} from "@/components/sections/portal/health/mappers";
 import { YourTimeline } from "@/components/sections/portal/today/YourTimeline";
 import { useApi } from "@/hooks/useApi";
-import { Link, useRouter } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
 import { apiClient } from "@/lib/api/client";
+import { HealthRecordValueCue } from "./HealthRecordValueCue";
+import { MetricHistoryDialog } from "./MetricHistoryDialog";
 
 type Tab = "home" | "health" | "decisions";
 
@@ -33,10 +39,39 @@ type IntakeResponse = {
 
 type ChatMessage = { role: "assistant" | "user"; content: string };
 
-const NAV: { id: Tab; title: string; sub: string }[] = [
-  { id: "home", title: "Home", sub: "Today, in context" },
-  { id: "health", title: "My Health", sub: "Your body, together" },
-  { id: "decisions", title: "My Decisions", sub: "What you are weighing" },
+const NAV: { id: Tab; title: string; sub: string; icon: React.ReactNode }[] = [
+  {
+    id: "home",
+    title: "Home",
+    sub: "Today, in context",
+    icon: (
+      <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 11l8-7 8 7" />
+        <path d="M6 10v10h12V10" />
+      </svg>
+    ),
+  },
+  {
+    id: "health",
+    title: "My Health",
+    sub: "Your body, together",
+    icon: (
+      <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 20s-7.5-4.35-9.5-8.5C.8 8 2.3 4.5 6 4.5c2 0 3.6 1.2 6 3.8 2.4-2.6 4-3.8 6-3.8 3.7 0 5.2 3.5 3.5 7C19.5 15.65 12 20 12 20z" />
+      </svg>
+    ),
+  },
+  {
+    id: "decisions",
+    title: "My Decisions",
+    sub: "What you are weighing",
+    icon: (
+      <svg viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 11l3 3 8-8" />
+        <path d="M20 12v6a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h9" />
+      </svg>
+    ),
+  },
 ];
 
 export function PortalV2() {
@@ -59,7 +94,9 @@ export function PortalV2() {
                 onClick={() => setTab(item.id)}
                 type="button"
               >
-                <span className="ni-ic" aria-hidden="true">○</span>
+                <span className="ni-ic" aria-hidden="true">
+                  {item.icon}
+                </span>
                 <span className="ni-tx">
                   <b>{item.title}</b>
                   <small>{item.sub}</small>
@@ -145,7 +182,7 @@ function HomeView({ refreshKey }: { refreshKey: number }) {
 }
 
 function HealthView({ refreshKey }: { refreshKey: number }) {
-  const router = useRouter();
+  const [selectedMetric, setSelectedMetric] = useState<HealthRecordDto | null>(null);
   const { data, error, loading, refetch } = useApi<HealthRecordDto[]>(
     `/api/health/records?portalV2=${refreshKey}`,
   );
@@ -153,7 +190,8 @@ function HealthView({ refreshKey }: { refreshKey: number }) {
   const groups = [
     { title: "Vitals", kinds: ["vitals"] },
     { title: "Medication", kinds: ["medication"] },
-    { title: "Conditions", kinds: ["symptom", "checkup"] },
+    { title: "Conditions", kinds: ["symptom"] },
+    { title: "Treatments", kinds: ["treatment"] },
   ];
   return (
     <section className="portal-v2__content">
@@ -170,41 +208,77 @@ function HealthView({ refreshKey }: { refreshKey: number }) {
         ) : error ? (
           <ErrorState message={error.message} onRetry={refetch} />
         ) : (
-          groups.map((group) => {
-            const matches = records.filter((record) =>
-              group.kinds.includes(record.kind),
-            );
-            return (
-              <div className="card portal-v2__body-group" key={group.title}>
-                <h3>{group.title}</h3>
-                {matches.length ? (
-                  matches.slice(0, 3).map((record) => (
-                    <div className="sub-row" key={record.id}>
-                      <span>{record.title}</span>
-                      <span className="arr">
-                        {new Date(record.recordedAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                  ))
-                ) : (
-                  <p>No records yet.</p>
-                )}
-              </div>
-            );
-          })
+          <div className="portal-v2__health-grid">
+            {groups.map((group) => {
+              const matches = records.filter((record) =>
+                group.kinds.includes(record.kind),
+              );
+              const latestByMetric = latestRecordsByMetric(matches);
+              return (
+                <div className="card portal-v2__body-group" key={group.title}>
+                  <h3>{group.title}</h3>
+                  {latestByMetric.length ? (
+                    latestByMetric.map((record) => {
+                      const highlight = healthRecordHighlight(record);
+                      return (
+                        <button
+                          className="sub-row portal-v2__metric-row"
+                          key={record.id}
+                          onClick={() => setSelectedMetric(record)}
+                          type="button"
+                        >
+                          <span>{record.displayName ?? record.title}</span>
+                          <span className="portal-v2__record-meta">
+                            {highlight && (
+                              <HealthRecordValueCue highlight={highlight} />
+                            )}
+                            <span className="arr">
+                              {new Date(record.recordedAt).toLocaleDateString()}
+                            </span>
+                          </span>
+                        </button>
+                      );
+                    })
+                  ) : (
+                    <p>No records yet.</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
-      <div className="sec">
-        <button
-          className="portal-v2__trend-link"
-          onClick={() => router.push("/portal-v2/health/trends")}
-          type="button"
-        >
-          View trends <span aria-hidden="true">→</span>
-        </button>
-      </div>
+      {selectedMetric && (
+        <MetricHistoryDialog
+          onClose={() => setSelectedMetric(null)}
+          records={records.filter(
+            (record) => healthRecordMetricKey(record) === healthRecordMetricKey(selectedMetric),
+          )}
+          title={selectedMetric.displayName ?? selectedMetric.title}
+        />
+      )}
     </section>
   );
+}
+
+/**
+ * "Your body right now" shows one current record per supported metric. Raw
+ * `other` records deliberately use their title as identity because no catalog
+ * concept exists yet. Sort locally instead of depending on API ordering.
+ */
+function latestRecordsByMetric(records: HealthRecordDto[]): HealthRecordDto[] {
+  const seen = new Set<string>();
+  return [...records]
+    .sort(
+      (a, b) =>
+        new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime(),
+    )
+    .filter((record) => {
+      const key = healthRecordMetricKey(record);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
 }
 
 function DecisionsView({ refreshKey }: { refreshKey: number }) {
@@ -232,7 +306,9 @@ function DecisionsView({ refreshKey }: { refreshKey: number }) {
         ) : error ? (
           <ErrorState message={error.message} onRetry={refetch} />
         ) : active.length ? (
-          active.map((decision) => <DecisionCard decision={decision} key={decision.id} />)
+          active.map((decision) => (
+            <DecisionCard decision={decision} key={decision.id} />
+          ))
         ) : (
           <div className="cm2-note">Nothing in progress yet.</div>
         )}
@@ -251,7 +327,10 @@ function DecisionsView({ refreshKey }: { refreshKey: number }) {
 
 function DecisionCard({ decision }: { decision: DecisionDto }) {
   return (
-    <Link className="card portal-v2__decision" href={`/portal-v2/decisions/${decision.id}`}>
+    <Link
+      className="card portal-v2__decision"
+      href={`/portal-v2/decisions/${decision.id}`}
+    >
       <div>
         <h3>{decision.topic || decision.question}</h3>
         <p>{decision.question}</p>
@@ -278,13 +357,21 @@ function FloatingComposer({ onChanged }: { onChanged: () => void }) {
     setSending(true);
     setMessages((items) => [...items, { role: "user", content: message }]);
     try {
-      const result = await apiClient.post<IntakeResponse>("/api/portal-v2/intake", {
-        text: message,
-        attachments: attachment
-          ? [{ fileName: attachment.name, mime: attachment.type || "application/octet-stream" }]
-          : [],
-        pendingAction: pendingAction ?? undefined,
-      });
+      const result = await apiClient.post<IntakeResponse>(
+        "/api/portal-v2/intake",
+        {
+          text: message,
+          attachments: attachment
+            ? [
+                {
+                  fileName: attachment.name,
+                  mime: attachment.type || "application/octet-stream",
+                },
+              ]
+            : [],
+          pendingAction: pendingAction ?? undefined,
+        },
+      );
       setAttachment(null);
       setPendingAction(result.pendingAction);
       setMessages((items) => [
@@ -304,7 +391,10 @@ function FloatingComposer({ onChanged }: { onChanged: () => void }) {
       {messages.length > 0 && (
         <div className="portal-v2__chat" aria-live="polite">
           {messages.slice(-4).map((message, index) => (
-            <p className={`portal-v2__message portal-v2__message--${message.role}`} key={`${message.role}-${index}`}>
+            <p
+              className={`portal-v2__message portal-v2__message--${message.role}`}
+              key={`${message.role}-${index}`}
+            >
               {message.content}
             </p>
           ))}
@@ -314,7 +404,9 @@ function FloatingComposer({ onChanged }: { onChanged: () => void }) {
         {attachment && (
           <div className="portal-v2__attachment">
             {attachment.name}
-            <button onClick={() => setAttachment(null)} type="button">×</button>
+            <button onClick={() => setAttachment(null)} type="button">
+              ×
+            </button>
           </div>
         )}
         <textarea
@@ -340,7 +432,11 @@ function FloatingComposer({ onChanged }: { onChanged: () => void }) {
           <button onClick={() => fileInput.current?.click()} type="button">
             Add photo or PDF
           </button>
-          <button disabled={sending || (!text.trim() && !attachment)} onClick={submit} type="button">
+          <button
+            disabled={sending || (!text.trim() && !attachment)}
+            onClick={submit}
+            type="button"
+          >
             {sending ? "Saving…" : "Send"}
           </button>
         </div>

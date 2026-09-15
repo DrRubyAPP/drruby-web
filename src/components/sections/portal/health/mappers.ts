@@ -190,6 +190,267 @@ export function mapHealthRecords(dtos: HealthRecordDto[]): HealthRecordRow[] {
   return dtos.map(mapHealthRecord);
 }
 
+export type HealthRecordHighlight =
+  | { type: "vitals" | "medication" | "treatment"; value: string }
+  | { type: "symptom"; value: string; level: number };
+
+type ParsedRecord = {
+  items?: unknown;
+  value?: unknown;
+  unit?: unknown;
+  dosage?: unknown;
+  dose?: unknown;
+  frequency?: unknown;
+  cadence?: unknown;
+  severity?: unknown;
+};
+
+function asRecord(value: unknown): ParsedRecord | null {
+  return value && typeof value === "object" ? (value as ParsedRecord) : null;
+}
+
+function asDisplayValue(value: unknown, unit?: unknown): string | null {
+  if (value && typeof value === "object") {
+    const nested = value as { value?: unknown; unit?: unknown };
+    return asDisplayValue(nested.value, nested.unit);
+  }
+  if (typeof value !== "string" && typeof value !== "number") return null;
+  const suffix = typeof unit === "string" && unit.trim() ? ` ${unit}` : "";
+  return `${value}${suffix}`;
+}
+
+function namedItemValue(parsed: ParsedRecord, names: string[]): string | null {
+  if (!Array.isArray(parsed.items)) return null;
+  for (const item of parsed.items) {
+    if (!item || typeof item !== "object") continue;
+    const candidate = item as {
+      name?: unknown;
+      value?: unknown;
+      unit?: unknown;
+    };
+    if (
+      typeof candidate.name === "string" &&
+      names.includes(candidate.name.trim().toLowerCase())
+    ) {
+      return asDisplayValue(candidate.value, candidate.unit);
+    }
+  }
+  return null;
+}
+
+function firstItemValue(parsed: ParsedRecord): string | null {
+  if (!Array.isArray(parsed.items)) return null;
+  for (const item of parsed.items) {
+    if (!item || typeof item !== "object") continue;
+    const candidate = item as { value?: unknown; unit?: unknown };
+    const value = asDisplayValue(candidate.value, candidate.unit);
+    if (value) return value;
+  }
+  return null;
+}
+
+function bloodPressureValue(parsed: ParsedRecord): string | null {
+  const directSystolic = asDisplayValue(
+    (parsed as { systolic?: unknown }).systolic,
+  );
+  const directDiastolic = asDisplayValue(
+    (parsed as { diastolic?: unknown }).diastolic,
+  );
+  if (directSystolic && directDiastolic) {
+    return `${directSystolic} / ${directDiastolic}${
+      typeof parsed.unit === "string" && parsed.unit.trim()
+        ? ` ${parsed.unit}`
+        : ""
+    }`;
+  }
+
+  if (!Array.isArray(parsed.items)) return null;
+  const values = parsed.items.reduce<{
+    systolic?: string;
+    diastolic?: string;
+    unit?: string;
+  }>((result, item) => {
+    if (!item || typeof item !== "object") return result;
+    const candidate = item as {
+      name?: unknown;
+      value?: unknown;
+      unit?: unknown;
+    };
+    if (typeof candidate.name !== "string") return result;
+    const value = asDisplayValue(candidate.value);
+    if (!value) return result;
+    const unit = typeof candidate.unit === "string" ? candidate.unit : undefined;
+    if (candidate.name.toLowerCase().includes("systolic")) {
+      return { ...result, systolic: value, unit };
+    }
+    if (candidate.name.toLowerCase().includes("diastolic")) {
+      return { ...result, diastolic: value, unit: result.unit ?? unit };
+    }
+    return result;
+  }, {});
+  return values.systolic && values.diastolic
+    ? `${values.systolic} / ${values.diastolic}${values.unit ? ` ${values.unit}` : ""}`
+    : null;
+}
+
+function severityLevel(value: string): number {
+  const normalized = value.trim().toLowerCase();
+  const numeric = Number(normalized);
+  if (Number.isFinite(numeric))
+    return Math.max(1, Math.min(5, Math.round(numeric)));
+  if (/none|clear|absent/.test(normalized)) return 1;
+  if (/mild|low|slight/.test(normalized)) return 2;
+  if (/moderate|medium/.test(normalized)) return 3;
+  if (/very severe|extreme/.test(normalized)) return 5;
+  if (/severe|high|marked/.test(normalized)) return 4;
+  return 0;
+}
+
+/** Extract the current dashboard value from direct fields or V1 item values. */
+export function healthRecordHighlight(
+  dto: HealthRecordDto,
+): HealthRecordHighlight | null {
+  const parsed = asRecord(dto.parsedValues);
+  if (!parsed) return null;
+
+  if (dto.kind === "vitals") {
+    const value =
+      (dto.metricCode === "blood_pressure"
+        ? bloodPressureValue(parsed)
+        : null) ??
+      asDisplayValue(parsed.value, parsed.unit) ??
+      firstItemValue(parsed);
+    return value ? { type: "vitals", value } : null;
+  }
+  if (dto.kind === "medication") {
+    const value =
+      asDisplayValue(parsed.dosage) ??
+      asDisplayValue(parsed.dose) ??
+      namedItemValue(parsed, ["dosage", "dose"]);
+    return value ? { type: "medication", value } : null;
+  }
+  if (dto.kind === "treatment") {
+    const value =
+      asDisplayValue(parsed.frequency) ??
+      asDisplayValue(parsed.cadence) ??
+      namedItemValue(parsed, ["frequency", "cadence"]);
+    return value ? { type: "treatment", value } : null;
+  }
+  if (dto.kind === "symptom") {
+    const value =
+      asDisplayValue(parsed.severity) ?? namedItemValue(parsed, ["severity"]);
+    return value
+      ? { type: "symptom", value, level: severityLevel(value) }
+      : null;
+  }
+  return null;
+}
+
+/** Stable identity used to group a metric's current value and history. */
+export function healthRecordMetricKey(dto: HealthRecordDto): string {
+  return dto.metricCode && dto.metricCode !== "other"
+    ? `metric:${dto.kind}:${dto.metricCode}`
+    : `other:${dto.kind}:${dto.title.trim().toLocaleLowerCase()}`;
+}
+
+function numericValue(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string") {
+    const parsed = Number.parseFloat(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  if (value && typeof value === "object") {
+    return numericValue((value as { value?: unknown }).value);
+  }
+  return null;
+}
+
+/**
+ * Returns a chartable value when a record includes one. Blood pressure uses
+ * systolic pressure as the plotted series; the dashboard still displays both
+ * systolic and diastolic values together.
+ */
+export function numericHealthRecordValue(
+  dto: HealthRecordDto,
+): { value: number; unit?: string } | null {
+  const parsed = asRecord(dto.parsedValues);
+  if (!parsed) return null;
+  if (dto.kind === "symptom") {
+    const severity = asDisplayValue(parsed.severity) ??
+      namedItemValue(parsed, ["severity"]);
+    const value = severity ? severityLevel(severity) : 0;
+    return value ? { value, unit: "severity" } : null;
+  }
+
+  if (Array.isArray(parsed.items)) {
+    const preferred = dto.metricCode === "blood_pressure"
+      ? parsed.items.find(
+          (item) =>
+            !!item &&
+            typeof item === "object" &&
+            typeof (item as { name?: unknown }).name === "string" &&
+            (item as { name: string }).name.toLowerCase().includes("systolic"),
+        )
+      : parsed.items[0];
+    if (preferred && typeof preferred === "object") {
+      const item = preferred as { value?: unknown; unit?: unknown };
+      const value = numericValue(item.value);
+      if (value !== null) {
+        return { value, unit: typeof item.unit === "string" ? item.unit : undefined };
+      }
+    }
+  }
+
+  const candidates = [parsed.value, parsed.dosage, parsed.dose, parsed.frequency];
+  for (const candidate of candidates) {
+    const value = numericValue(candidate);
+    if (value !== null) return { value, unit: typeof parsed.unit === "string" ? parsed.unit : undefined };
+  }
+  return null;
+}
+
+/** The two independently chartable series that make up a blood-pressure reading. */
+export function bloodPressureRecordValues(
+  dto: HealthRecordDto,
+): { systolic: number | null; diastolic: number | null; unit?: string } | null {
+  if (dto.kind !== "vitals" || dto.metricCode !== "blood_pressure") return null;
+  const parsed = asRecord(dto.parsedValues);
+  if (!parsed) return { systolic: null, diastolic: null };
+  if (Array.isArray(parsed.items)) {
+    const values = parsed.items.reduce<{
+      systolic: number | null;
+      diastolic: number | null;
+      unit?: string;
+    }>(
+      (result, item) => {
+        if (!item || typeof item !== "object") return result;
+        const candidate = item as {
+          name?: unknown;
+          value?: unknown;
+          unit?: unknown;
+        };
+        if (typeof candidate.name !== "string") return result;
+        const name = candidate.name.toLowerCase();
+        const unit = typeof candidate.unit === "string" ? candidate.unit : result.unit;
+        if (name.includes("systolic")) {
+          return { ...result, systolic: numericValue(candidate.value), unit };
+        }
+        if (name.includes("diastolic")) {
+          return { ...result, diastolic: numericValue(candidate.value), unit };
+        }
+        return result;
+      },
+      { systolic: null, diastolic: null },
+    );
+    return values;
+  }
+  return {
+    systolic: numericValue((parsed as { systolic?: unknown }).systolic),
+    diastolic: numericValue((parsed as { diastolic?: unknown }).diastolic),
+    unit: typeof parsed.unit === "string" ? parsed.unit : undefined,
+  };
+}
+
 /** Connected Record → 行视图（healthRecord 字段映射 + 连接元数据）。 */
 export interface ConnectedRecordRow {
   id: string; // 连接记录 id（decision_health_record.id）

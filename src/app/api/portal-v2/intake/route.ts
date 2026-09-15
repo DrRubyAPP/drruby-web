@@ -75,6 +75,21 @@ async function performPendingAction(
         pendingAction: { type: "ask_custom_tracking", decisionId: decision.id },
       };
     }
+    // "Skin condition" is a qualitative symptom metric, not a distinct
+    // record kind. Persist the start of tracking in My Health as well as in
+    // the observation plan, so the decision and longitudinal health history
+    // share a durable, explicitly connected reference point.
+    if (pending.title.trim().toLowerCase() === "skin condition") {
+      await observationRepo.createSkinConditionTracking({
+        userId,
+        decisionId: decision.id,
+        cadence: pending.cadence,
+      });
+      return {
+        message: `I’ll help you track ${pending.title.toLowerCase()} ${pending.cadence}. Is there anything else you’d like to watch during this process?`,
+        pendingAction: { type: "ask_custom_tracking", decisionId: decision.id },
+      };
+    }
     await observationRepo.create({
       userId,
       decisionId: decision.id,

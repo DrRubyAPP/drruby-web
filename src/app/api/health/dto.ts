@@ -31,6 +31,7 @@ export const HealthRecordDTO = z.object({
   sourceId: z.string(),
   kind: healthRecordKindSchema,
   metricCode: z.string(),
+  displayName: z.string(),
   documentClass: documentClassSchema.nullable().optional(),
   title: z.string(),
   status: healthRecordStatusSchema,
@@ -140,12 +141,14 @@ export function toRecordDTO(
       reason: string | null;
     }>;
   },
+  displayName = row.title,
 ): z.infer<typeof HealthRecordDTO> {
   return {
     id: row.id,
     sourceId: row.sourceId,
     kind: healthRecordKindSchema.parse(row.kind),
     metricCode: row.metricCode,
+    displayName,
     documentClass: row.documentClass
       ? documentClassSchema.parse(row.documentClass)
       : null,

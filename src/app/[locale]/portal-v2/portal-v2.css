@@ -67,8 +67,239 @@
 }
 
 #app-portal .portal-v2__body-group {
-  margin-bottom: 10px;
+  margin: 0;
+  padding: 18px 20px;
 }
+
+#app-portal .portal-v2__health-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+#app-portal .portal-v2__body-group h3 {
+  color: var(--p-red-d);
+  font-family: var(--p-sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+#app-portal .portal-v2__body-group .sub-row {
+  font-size: 13.5px;
+  min-height: 28px;
+  padding: 8px 0;
+}
+
+#app-portal .portal-v2__body-group .sub-row > span:first-child {
+  color: var(--p-ink);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+#app-portal .portal-v2__record-meta {
+  align-items: center;
+  display: inline-flex;
+  gap: 9px;
+}
+
+#app-portal .portal-v2__value-cue {
+  align-items: center;
+  background: #f7edeb;
+  border-radius: 999px;
+  color: var(--p-red);
+  display: inline-flex;
+  font-size: 11px;
+  gap: 5px;
+  line-height: 1;
+  padding: 5px 7px;
+}
+
+#app-portal .portal-v2__value-cue > i {
+  font-size: 14px;
+  font-style: normal;
+  line-height: .7;
+}
+
+#app-portal .portal-v2__value-cue > b {
+  color: var(--p-ink);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+#app-portal .portal-v2__value-cue--severity {
+  gap: 3px;
+  padding: 6px 7px;
+}
+
+#app-portal .portal-v2__value-cue--severity > i {
+  background: #ddc9c2;
+  border-radius: 50%;
+  height: 6px;
+  width: 6px;
+}
+
+#app-portal .portal-v2__value-cue--severity > i.is-active {
+  background: var(--p-red);
+}
+
+#app-portal .portal-v2__metric-row {
+  background: transparent;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  width: 100%;
+}
+
+#app-portal .portal-v2__metric-row:hover > span:first-child {
+  color: var(--p-red);
+}
+
+#app-portal .portal-v2__history-overlay {
+  align-items: center;
+  background: rgba(42, 32, 28, .35);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 20px;
+  position: fixed;
+  z-index: 50;
+}
+
+#app-portal .portal-v2__history-dialog {
+  background: var(--p-white);
+  border: 1px solid var(--p-border);
+  border-radius: 18px;
+  box-shadow: 0 18px 56px rgba(43, 27, 22, .18);
+  box-sizing: border-box;
+  max-width: 580px;
+  padding: 26px;
+  position: relative;
+  width: 100%;
+}
+
+#app-portal .portal-v2__history-dialog h2 {
+  font-family: var(--p-serif);
+  font-size: 28px;
+  font-weight: 400;
+  margin: 0 0 18px;
+}
+
+#app-portal .portal-v2__history-close {
+  background: transparent;
+  border: 0;
+  color: var(--p-mid);
+  cursor: pointer;
+  font-size: 26px;
+  line-height: 1;
+  padding: 4px;
+  position: absolute;
+  right: 14px;
+  top: 12px;
+}
+
+#app-portal .portal-v2__chart-legend {
+  color: var(--p-mid);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 11px;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+
+#app-portal .portal-v2__legend-dot {
+  background: var(--p-red);
+  border-radius: 50%;
+  display: inline-block;
+  height: 7px;
+  margin-right: 4px;
+  width: 7px;
+}
+
+#app-portal .portal-v2__legend-dot--missing {
+  background: var(--p-white);
+  border: 1px solid var(--p-red);
+  box-sizing: border-box;
+}
+
+#app-portal .portal-v2__legend-dot--systolic { background: var(--p-red); }
+#app-portal .portal-v2__legend-dot--diastolic { background: #7c628f; }
+
+#app-portal .portal-v2__metric-chart {
+  display: block;
+  height: auto;
+  overflow: visible;
+  width: 100%;
+}
+
+#app-portal .portal-v2__chart-wrap { position: relative; }
+
+#app-portal .portal-v2__chart-axis line {
+  stroke: var(--p-border);
+  stroke-width: 1;
+}
+
+#app-portal .portal-v2__chart-axis text {
+  fill: var(--p-mid);
+  font: 10px var(--p-sans);
+}
+
+#app-portal .portal-v2__chart-tooltip {
+  background: var(--p-ink);
+  border-radius: 6px;
+  color: white;
+  font-size: 11px;
+  max-width: 220px;
+  padding: 6px 8px;
+  pointer-events: none;
+  position: absolute;
+  transform: translate(-50%, calc(-100% - 10px));
+  white-space: nowrap;
+  z-index: 1;
+}
+
+#app-portal .portal-v2__chart-line {
+  stroke: var(--p-red);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+#app-portal .portal-v2__chart-line--diastolic { stroke: #7c628f; }
+
+#app-portal .portal-v2__chart-point { fill: var(--p-red); }
+#app-portal .portal-v2__chart-point--missing { fill: var(--p-white); stroke: var(--p-red); stroke-width: 2; }
+#app-portal .portal-v2__chart-point--systolic { fill: var(--p-red); }
+#app-portal .portal-v2__chart-point--diastolic { fill: #7c628f; }
+#app-portal .portal-v2__chart-point--systolic.is-missing { fill: var(--p-white); stroke: var(--p-red); stroke-width: 2; }
+#app-portal .portal-v2__chart-point--diastolic.is-missing { fill: var(--p-white); stroke: #7c628f; stroke-width: 2; }
+#app-portal .portal-v2__metric-chart circle { cursor: pointer; }
+#app-portal .portal-v2__metric-chart circle:focus { outline: none; stroke-width: 3; }
+
+#app-portal .portal-v2__chart-dates {
+  color: var(--p-mid);
+  display: flex;
+  font-size: 11px;
+  justify-content: space-between;
+}
+
+#app-portal .portal-v2__metric-list > div {
+  align-items: baseline;
+  border-bottom: 1px solid var(--p-border);
+  display: flex;
+  font-size: 14px;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 11px 0;
+}
+
+#app-portal .portal-v2__metric-list > div:last-child { border-bottom: 0; }
+#app-portal .portal-v2__metric-list span { color: var(--p-mid); font-size: 12px; }
 
 #app-portal .portal-v2__trend-link {
   background: transparent;
@@ -192,6 +423,7 @@
 #app-portal .portal-v2__trend-point small { color: var(--p-mid); font-size: 10px; }
 
 @media (max-width: 760px) {
+  #app-portal .portal-v2__health-grid { grid-template-columns: 1fr; }
   #app-portal .portal-v2__composer-wrap { left: 12px; transform: none; width: calc(100% - 24px); }
   #app-portal .portal-v2__shell .side { display: none; }
   #app-portal .portal-v2__main { padding: 26px 18px 110px; }

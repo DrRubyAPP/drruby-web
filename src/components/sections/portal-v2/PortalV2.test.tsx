@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type {
@@ -145,5 +145,157 @@ describe("PortalV2 What matters now", () => {
       "Started observing skin condition",
     ]);
     expect(items[0]).toHaveTextContent("After discussing with my clinician");
+  });
+});
+
+describe("PortalV2 My Health", () => {
+  beforeEach(() => vi.resetAllMocks());
+
+  it("shows symptoms as conditions and treatments in their own section", () => {
+    vi.mocked(useApi).mockImplementation((path) => ({
+      data: (path?.startsWith("/api/health/records")
+        ? [
+            {
+              id: "blood-pressure",
+              sourceId: "source-blood-pressure",
+              kind: "vitals",
+              metricCode: "blood_pressure",
+              displayName: "Blood pressure",
+              title: "Morning BP check-in",
+              status: "CONFIRMED",
+              parsedValues: {
+                items: [
+                  {
+                    name: "Systolic blood pressure",
+                    value: 120,
+                    unit: "mmHg",
+                  },
+                  {
+                    name: "Diastolic blood pressure",
+                    value: 80,
+                    unit: "mmHg",
+                  },
+                ],
+              },
+              recordedAt: "2026-09-13T09:00:00.000Z",
+            },
+            {
+              id: "older-blood-pressure",
+              sourceId: "source-older-blood-pressure",
+              kind: "vitals",
+              metricCode: "blood_pressure",
+              displayName: "Blood pressure",
+              title: "Evening BP check-in",
+              status: "CONFIRMED",
+              recordedAt: "2026-09-01T09:00:00.000Z",
+            },
+            {
+              id: "medication",
+              sourceId: "source-medication",
+              kind: "medication",
+              title: "Tretinoin",
+              status: "CONFIRMED",
+              parsedValues: { dosage: "0.025%" },
+              recordedAt: "2026-09-12T09:00:00.000Z",
+            },
+            {
+              id: "medication-extra",
+              sourceId: "source-medication-extra",
+              kind: "medication",
+              title: "CoQ10",
+              status: "CONFIRMED",
+              parsedValues: { dosage: "100 mg" },
+              recordedAt: "2026-09-01T09:00:00.000Z",
+            },
+            {
+              id: "symptom",
+              sourceId: "source-symptom",
+              kind: "symptom",
+              title: "Hot flashes check-in",
+              status: "CONFIRMED",
+              parsedValues: { severity: "moderate" },
+              recordedAt: "2026-09-02T09:00:00.000Z",
+            },
+            {
+              id: "checkup",
+              sourceId: "source-checkup",
+              kind: "checkup",
+              title: "Annual wellness visit",
+              status: "CONFIRMED",
+              recordedAt: "2026-09-11T09:00:00.000Z",
+            },
+            {
+              id: "treatment",
+              sourceId: "source-treatment",
+              kind: "treatment",
+              title: "Started Thermage",
+              status: "CONFIRMED",
+              parsedValues: { frequency: "monthly" },
+              recordedAt: "2026-09-14T09:00:00.000Z",
+            },
+          ]
+        : path?.startsWith("/api/timeline")
+          ? []
+          : {
+              cards: [],
+              total: 0,
+              actionableCount: 0,
+              checkInDueCount: 0,
+            }) as never,
+      error: null,
+      loading: false,
+      refetch: vi.fn(),
+    }));
+
+    render(<PortalV2 />);
+    fireEvent.click(screen.getByRole("button", { name: /My Health/ }));
+
+    expect(screen.getByRole("heading", { name: "Conditions" })).toBeVisible();
+    expect(screen.getByText("Hot flashes check-in")).toBeVisible();
+    expect(screen.queryByText("Annual wellness visit")).toBeNull();
+    expect(screen.getByRole("heading", { name: "Treatments" })).toBeVisible();
+    expect(screen.getByText("Started Thermage")).toBeVisible();
+    expect(screen.getByText("Blood pressure")).toBeVisible();
+    expect(screen.getByText("120 / 80 mmHg")).toBeVisible();
+    expect(screen.getByText("0.025%")).toBeVisible();
+    expect(screen.getByText("CoQ10")).toBeVisible();
+    expect(screen.getByText("monthly")).toBeVisible();
+    expect(screen.getByLabelText("Severity: moderate")).toBeVisible();
+    expect(screen.queryByText("Morning BP check-in")).toBeNull();
+    expect(screen.queryByText("Evening BP check-in")).toBeNull();
+
+    fireEvent.click(screen.getByText("Blood pressure"));
+    expect(screen.getByRole("dialog")).toHaveTextContent("Blood pressure");
+    expect(
+      screen.getByRole("img", { name: "Blood pressure history line chart" }),
+    ).toBeVisible();
+    expect(screen.getByText(/Systolic/)).toBeVisible();
+    expect(screen.getByText(/Diastolic/)).toBeVisible();
+    const systolicPoint = screen
+      .getByRole("dialog")
+      .querySelector(".portal-v2__chart-point--systolic:not(.is-missing)");
+    expect(systolicPoint).not.toBeNull();
+    fireEvent.mouseEnter(systolicPoint!);
+    expect(
+      screen.getByRole("dialog").querySelector(".portal-v2__chart-tooltip"),
+    ).toHaveTextContent(/systolic 120 mmHg/);
+
+    fireEvent.click(screen.getByLabelText("Close history"));
+    fireEvent.click(screen.getByText("Started Thermage"));
+    expect(screen.getByRole("dialog")).toHaveTextContent("monthly");
+    expect(
+      screen.queryByRole("img", { name: "Metric history line chart" }),
+    ).toBeNull();
+
+    fireEvent.click(screen.getByLabelText("Close history"));
+    fireEvent.click(screen.getByText("Hot flashes check-in"));
+    const severityPoint = screen
+      .getByRole("dialog")
+      .querySelector(".portal-v2__chart-point");
+    expect(severityPoint).not.toBeNull();
+    fireEvent.mouseEnter(severityPoint!);
+    expect(
+      screen.getByRole("dialog").querySelector(".portal-v2__chart-tooltip"),
+    ).toHaveTextContent("Severity: moderate");
   });
 });
