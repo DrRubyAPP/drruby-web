@@ -6,7 +6,10 @@ import type {
   WmnResponse,
 } from "@/components/sections/portal/decisions/dto";
 import type { TimelineEventDto } from "@/components/sections/portal/today/YourTimeline";
-import { PortalV2 } from "@/components/sections/portal-v2/PortalV2";
+import {
+  PortalV2,
+  PortalV2Frame,
+} from "@/components/sections/portal-v2/PortalV2";
 import { useApi } from "@/hooks/useApi";
 
 vi.mock("@/hooks/useApi", () => ({ useApi: vi.fn() }));
@@ -145,6 +148,26 @@ describe("PortalV2 What matters now", () => {
       "Started observing skin condition",
     ]);
     expect(items[0]).toHaveTextContent("After discussing with my clinician");
+  });
+});
+
+describe("PortalV2Frame navigation", () => {
+  it("calls the tab handler when a navigation item is clicked", () => {
+    const onTabChange = vi.fn();
+
+    render(
+      <PortalV2Frame
+        activeTab="decisions"
+        onChanged={() => {}}
+        onTabChange={onTabChange}
+      >
+        <div />
+      </PortalV2Frame>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /My Health/ }));
+
+    expect(onTabChange).toHaveBeenCalledWith("health");
   });
 });
 

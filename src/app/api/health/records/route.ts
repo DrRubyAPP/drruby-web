@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { requireUser } from "@/lib/auth/session";
 import { healthMetricDefinitionRepo, healthRecordRepo } from "@/lib/db";
 import { handle } from "@/lib/errors";
@@ -12,9 +13,18 @@ import { HealthRecordListResponse, ManualLogBody, toRecordDTO } from "../dto";
  * @responseSet auth
  * @openapi
  */
-export const GET = handle(async () => {
+const HealthRecordListQuery = z.object({
+  at: z.iso.datetime().optional(),
+});
+
+export const GET = handle(async (req?: Request) => {
   const user = await requireUser();
-  const rows = await healthRecordRepo.listByUser(user.id);
+  const { at } = HealthRecordListQuery.parse(
+    req ? Object.fromEntries(new URL(req.url).searchParams) : {},
+  );
+  const rows = await healthRecordRepo.listByUser(user.id, {
+    recordedAtOrBefore: at ? new Date(at) : undefined,
+  });
   return NextResponse.json(
     HealthRecordListResponse.parse(
       await Promise.all(
@@ -53,10 +63,7 @@ export const POST = handle(async (req: Request) => {
   });
 
   return NextResponse.json(
-    toRecordDTO(
-      row,
-      await healthMetricDefinitionRepo.resolveDisplayName(row),
-    ),
+    toRecordDTO(row, await healthMetricDefinitionRepo.resolveDisplayName(row)),
     { status: 201 },
   );
 });

@@ -531,8 +531,14 @@
   min-height: 100vh;
 }
 #app-portal .portal-v2__detail-inner {
-  margin: 0 auto;
-  padding: 42px 24px 80px;
+  margin: 0;
+  padding: 0 0 80px;
+}
+#app-portal .portal-v2__decision-detail {
+  margin: 0;
+  padding-left: 0;
+  padding-right: 0;
+  padding-top: 0;
 }
 #app-portal .portal-v2__back {
   display: inline-block;
@@ -587,6 +593,77 @@
   font-size: 10px;
 }
 
+#app-portal .portal-v2__tracking-link {
+  align-items: center;
+  color: inherit;
+  display: flex;
+  justify-content: space-between;
+  text-decoration: none;
+}
+#app-portal .portal-v2__tracking-link:hover strong {
+  color: var(--p-red);
+}
+#app-portal .portal-v2__tracking-link strong,
+#app-portal .portal-v2__tracking-link small {
+  display: block;
+}
+#app-portal .portal-v2__tracking-link small {
+  color: var(--p-mid);
+  font-size: 13px;
+  margin-top: 4px;
+}
+#app-portal .portal-v2__tracking-timeline {
+  padding: 0 20px;
+}
+#app-portal .portal-v2__tracking-event {
+  align-items: center;
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+  padding: 18px 0;
+}
+#app-portal .portal-v2__tracking-event + .portal-v2__snapshot-button {
+  display: block;
+  margin: -3px auto 12px;
+}
+#app-portal .portal-v2__tracking-event-copy time {
+  color: var(--p-mid);
+  display: block;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+#app-portal .portal-v2__tracking-event-copy strong {
+  display: block;
+  font-size: 14px;
+}
+#app-portal .portal-v2__tracking-event-copy p,
+#app-portal .portal-v2__snapshot-empty {
+  color: var(--p-mid);
+  font-size: 13px;
+  margin: 5px 0 0;
+}
+#app-portal .portal-v2__snapshot-button {
+  background: transparent;
+  border: 1px solid var(--p-border);
+  border-radius: 999px;
+  color: var(--p-red-d);
+  cursor: pointer;
+  flex: 0 0 auto;
+  font: 600 11px var(--p-sans);
+  padding: 8px 10px;
+}
+#app-portal .portal-v2__snapshot-button:hover {
+  border-color: var(--p-red);
+  color: var(--p-red);
+}
+#app-portal .portal-v2__snapshot-dialog {
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+}
+#app-portal .portal-v2__snapshot-dialog .portal-v2__health-grid {
+  margin-top: 12px;
+}
+
 @media (max-width: 760px) {
   #app-portal .portal-v2__health-grid {
     grid-template-columns: 1fr;
@@ -601,5 +678,10 @@
   }
   #app-portal .portal-v2__main {
     padding: 26px 18px 110px;
+  }
+  #app-portal .portal-v2__tracking-event {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
   }
 }

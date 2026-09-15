@@ -20,6 +20,9 @@ export const TimelineEventDTO = z.object({
   source: z.string().optional(),
 });
 export const TimelineListResponse = z.array(TimelineEventDTO);
+const TimelineListQuery = z.object({
+  decisionId: z.string().min(1).optional(),
+});
 
 /** 新增时间线事件入参 */
 export const CreateTimelineBody = z.object({
@@ -53,9 +56,20 @@ function toDTO(
  * @responseSet auth
  * @openapi
  */
-export const GET = handle(async () => {
+export const GET = handle(async (req?: Request) => {
   const user = await requireUser();
-  const rows = await timelineEventRepo.listByUser(user.id);
+  const { decisionId } = TimelineListQuery.parse(
+    req ? Object.fromEntries(new URL(req.url).searchParams) : {},
+  );
+  if (decisionId) {
+    const decision = await decisionRepo.findById(decisionId);
+    if (!decision || decision.userId !== user.id) {
+      throw new AppError("NOT_FOUND", "关联决策不存在", 404);
+    }
+  }
+  const rows = decisionId
+    ? await timelineEventRepo.listByDecision(decisionId)
+    : await timelineEventRepo.listByUser(user.id);
   const decisionIds = [
     ...new Set(
       rows.map((row) => row.decisionId).filter((id): id is string => !!id),

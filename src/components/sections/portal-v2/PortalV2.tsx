@@ -76,8 +76,8 @@ const NAV: { id: Tab; title: string; sub: string; icon: React.ReactNode }[] = [
   },
 ];
 
-export function PortalV2() {
-  const [tab, setTab] = useState<Tab>("home");
+export function PortalV2({ initialTab = "home" }: { initialTab?: Tab }) {
+  const [tab, setTab] = useState<Tab>(initialTab);
   const [refreshKey, setRefreshKey] = useState(0);
 
   return (
@@ -104,7 +104,7 @@ export function PortalV2Frame({
   activeTab: Tab;
   children: React.ReactNode;
   onChanged: () => void;
-  onTabChange?: (tab: Tab) => void;
+  onTabChange: (tab: Tab) => void;
 }) {
   return (
     <div id="app-portal" className="portal-v2">
@@ -119,7 +119,7 @@ export function PortalV2Frame({
               <button
                 className={`nav-item${activeTab === item.id ? " active" : ""}`}
                 key={item.id}
-                onClick={() => onTabChange?.(item.id)}
+                onClick={() => onTabChange(item.id)}
                 type="button"
               >
                 <span className="ni-ic" aria-hidden="true">
@@ -206,7 +206,9 @@ function HomeView({ refreshKey }: { refreshKey: number }) {
 }
 
 function HealthView({ refreshKey }: { refreshKey: number }) {
-  const [selectedMetric, setSelectedMetric] = useState<HealthRecordDto | null>(null);
+  const [selectedMetric, setSelectedMetric] = useState<HealthRecordDto | null>(
+    null,
+  );
   const [showAll, setShowAll] = useState(false);
   const { data, error, loading, refetch } = useApi<HealthRecordDto[]>(
     `/api/health/records?portalV2=${refreshKey}`,
@@ -227,6 +229,20 @@ function HealthView({ refreshKey }: { refreshKey: number }) {
         Your records are organized here. Add words, a photo, or a PDF from the
         same box wherever you are in the portal.
       </div>
+      <Link
+        className="card portal-v2__tracking-link"
+        href="/portal-v2/health/trends"
+      >
+        <span>
+          <strong>View your tracking timeline</strong>
+          <small>
+            See every change event and your health at each point in time.
+          </small>
+        </span>
+        <span className="arr" aria-hidden="true">
+          ›
+        </span>
+      </Link>
       <div className="sec">
         <div className="portal-v2__health-section-heading">
           <div className="sec-h">Your body right now</div>
@@ -268,8 +284,14 @@ function HealthView({ refreshKey }: { refreshKey: number }) {
                           type="button"
                         >
                           <span
-                            aria-label={ended ? `${name} — ${ended}` : undefined}
-                            className={ended ? "portal-v2__metric-name--ended" : undefined}
+                            aria-label={
+                              ended ? `${name} — ${ended}` : undefined
+                            }
+                            className={
+                              ended
+                                ? "portal-v2__metric-name--ended"
+                                : undefined
+                            }
                             title={ended ? ended : undefined}
                           >
                             {name}
@@ -298,7 +320,9 @@ function HealthView({ refreshKey }: { refreshKey: number }) {
         <MetricHistoryDialog
           onClose={() => setSelectedMetric(null)}
           records={records.filter(
-            (record) => healthRecordMetricKey(record) === healthRecordMetricKey(selectedMetric),
+            (record) =>
+              healthRecordMetricKey(record) ===
+              healthRecordMetricKey(selectedMetric),
           )}
           title={selectedMetric.displayName ?? selectedMetric.title}
         />
@@ -382,7 +406,9 @@ function DecisionCard({ decision }: { decision: DecisionDto }) {
         <p>{decision.question}</p>
       </div>
       <div className="portal-v2__decision-meta">
-        <span className="portal-v2__status">{decisionStatusLabel(decision.lifecycle)}</span>
+        <span className="portal-v2__status">
+          {decisionStatusLabel(decision.lifecycle)}
+        </span>
         <span aria-hidden="true">›</span>
       </div>
     </Link>

@@ -12,13 +12,14 @@ import {
   healthRecordMetricKey,
 } from "@/components/sections/portal/health/mappers";
 import { useApi } from "@/hooks/useApi";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { decisionStatusLabel } from "./decisionStatus";
 import { HealthRecordValueCue } from "./HealthRecordValueCue";
 import { MetricHistoryDialog } from "./MetricHistoryDialog";
 import { PortalV2Frame } from "./PortalV2";
 
 export function DecisionDetailV2({ id }: { id: string }) {
+  const router = useRouter();
   const [selectedMetric, setSelectedMetric] = useState<HealthRecordDto | null>(
     null,
   );
@@ -39,19 +40,12 @@ export function DecisionDetailV2({ id }: { id: string }) {
       <EmptyState hint="It may have been removed." title="Decision not found" />
     );
   } else {
-    const context = data.healthContext as {
-      records?: { id: string; title: string; kind: string }[];
-    } | null;
-    const entries = data.entries.filter(
-      (entry) => entry.kind === "observation",
-    );
-    const observedRecord = observationMetric(
-      connectedRecords.data ?? [],
-    );
+    const observedRecord = observationMetric(connectedRecords.data ?? []);
     const metricHistory = observedRecord
       ? (healthRecords.data ?? []).filter(
           (record) =>
-            healthRecordMetricKey(record) === healthRecordMetricKey(observedRecord),
+            healthRecordMetricKey(record) ===
+            healthRecordMetricKey(observedRecord),
         )
       : [];
     const currentMetric = latestRecord(metricHistory) ?? observedRecord;
@@ -60,8 +54,8 @@ export function DecisionDetailV2({ id }: { id: string }) {
       : null;
 
     content = (
-      <div className="portal-v2__detail-inner">
-        <Link className="portal-v2__back" href="/portal-v2">
+      <div className="portal-v2__detail-inner portal-v2__decision-detail">
+        <Link className="portal-v2__back" href="/portal-v2?tab=decisions">
           ← Back to decisions
         </Link>
         <div className="portal-v2__detail-heading">
@@ -111,9 +105,7 @@ export function DecisionDetailV2({ id }: { id: string }) {
                 <span>{currentMetric.displayName ?? currentMetric.title}</span>
                 <span className="portal-v2__record-meta">
                   {currentMetricHighlight && (
-                    <HealthRecordValueCue
-                      highlight={currentMetricHighlight}
-                    />
+                    <HealthRecordValueCue highlight={currentMetricHighlight} />
                   )}
                   <span className="arr">
                     {new Date(currentMetric.recordedAt).toLocaleDateString()}
@@ -127,50 +119,32 @@ export function DecisionDetailV2({ id }: { id: string }) {
         </section>
 
         <section className="sec">
-          <div className="sec-h">Initial health context</div>
-          <div className="card">
-            {context?.records?.length ? (
-              context.records.slice(0, 6).map((record) => (
-                <div className="sub-row" key={record.id}>
-                  <span>{record.title}</span>
-                  <span className="arr">{record.kind}</span>
-                </div>
-              ))
-            ) : (
-              <p>
-                We will bring in relevant records from My Health as you add
-                them.
-              </p>
-            )}
-          </div>
-        </section>
-
-        <section className="sec">
-          <div className="sec-h">What’s changed</div>
-          <div className="card">
-            {entries.length ? (
-              entries.map((entry) => (
-                <div className="sub-row" key={entry.id}>
-                  <span>{entry.text}</span>
-                  <span className="arr">
-                    {new Date(entry.occurredAt).toLocaleDateString()}
-                  </span>
-                </div>
-              ))
-            ) : (
-              <p>
-                Share updates in the chat box from the main portal whenever
-                something changes.
-              </p>
-            )}
-          </div>
+          <div className="sec-h">Tracking</div>
+          <Link
+            className="card portal-v2__tracking-link"
+            href={`/portal-v2/decisions/${id}/trends`}
+          >
+            <span>
+              <strong>See what’s changed</strong>
+              <small>
+                Follow your events and view your health at each point in time.
+              </small>
+            </span>
+            <span className="arr" aria-hidden="true">
+              ›
+            </span>
+          </Link>
         </section>
       </div>
     );
   }
 
   return (
-    <PortalV2Frame activeTab="decisions" onChanged={refetch}>
+    <PortalV2Frame
+      activeTab="decisions"
+      onChanged={refetch}
+      onTabChange={(tab) => router.push(`/portal-v2?tab=${tab}`)}
+    >
       {content}
       {selectedMetric && (
         <MetricHistoryDialog
@@ -207,7 +181,10 @@ function observationMetric(
       typeof values.observationId === "string"
     );
   });
-  return tracked?.healthRecord ?? (links.length === 1 ? links[0]!.healthRecord : null);
+  return (
+    tracked?.healthRecord ??
+    (links.length === 1 ? links[0]!.healthRecord : null)
+  );
 }
 
 function latestRecord(records: HealthRecordDto[]): HealthRecordDto | null {

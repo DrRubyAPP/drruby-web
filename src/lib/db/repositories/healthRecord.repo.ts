@@ -109,9 +109,15 @@ export async function create(
 /** 按 recordedAt 倒序列出某用户的健康记录（含 healthSource） */
 export async function listByUser(
   userId: string,
+  options?: { recordedAtOrBefore?: Date },
 ): Promise<HealthRecordWithSource[]> {
   return prisma.healthRecord.findMany({
-    where: { userId },
+    where: {
+      userId,
+      ...(options?.recordedAtOrBefore
+        ? { recordedAt: { lte: options.recordedAtOrBefore } }
+        : {}),
+    },
     orderBy: { recordedAt: "desc" },
     include: { healthSource: true },
   });
