@@ -6,6 +6,11 @@ config({ path: ".env" });
 import path from "node:path";
 import { defineConfig, env } from "prisma/config";
 
+const useTestingDatabase = process.env.USE_TESTING_DATABASE === "true";
+const databaseUrl = useTestingDatabase
+  ? env("TESTING_DATABASE_URL")
+  : env("DATABASE_URL");
+
 /**
  * Prisma 7 配置（CLI 不再自动读取 .env，需手动 dotenv 加载）。
  * 数据库 URL 从 datasource 块迁移至此，migrate / generate 均读取这里。
@@ -13,8 +18,12 @@ import { defineConfig, env } from "prisma/config";
 export default defineConfig({
   schema: path.join("prisma", "schema.prisma"),
   datasource: {
-    url: env("DATABASE_URL"),
-    shadowDatabaseUrl: env("SHADOW_DATABASE_URL"), // migrate dev 需要影子库时启用
+    url: databaseUrl,
+    // `migrate deploy` for the test DB only applies checked-in migrations;
+    // it does not need, or share, the development migration shadow database.
+    ...(useTestingDatabase
+      ? {}
+      : { shadowDatabaseUrl: env("SHADOW_DATABASE_URL") }),
   },
   migrations: {
     path: path.join("prisma", "migrations"),
