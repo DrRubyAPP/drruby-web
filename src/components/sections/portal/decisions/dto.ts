@@ -180,8 +180,8 @@ export interface DecisionDto {
   /** §18/D6 合并窗口到期时间戳；非空 → STALE_UPDATE_AVAILABLE */
   pendingRegenAt?: string | null;
   // task-44 Observe / Learn（§27/§30）
-  /** §30 到期 check-in 时间戳（OBSERVING 状态下由 freq 顺延；Stop/Learn 时清空） */
-  nextCheckInAt?: string | null;
+  /** 最新 Observation 记录与 cadence 计算出的到期时间（非持久化） */
+  observationDueAt?: string | null;
   /** §27 Start Observing 时存的 baseline（{text, baselineRecordId?, freq}） */
   observeBaseline?: ObserveBaselineDto | null;
 }

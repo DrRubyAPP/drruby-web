@@ -219,18 +219,20 @@ describe("task-44 createObservation/updateObservation/createLearning/listByDecis
                 text: "baseline",
                 freq: "weekly",
               },
-              nextCheckInAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
             }),
       },
     });
     return { userId: u.id, decisionId: d.id };
   }
 
-  it("createObservation 写 entry + 顺延 nextCheckInAt（按 freq=weekly 推 7 天）", async () => {
+  it("createObservation 写 entry 并刷新 decision activity", async () => {
     const { userId, decisionId } = await seedObservingDecision(
       "create-obs@example.com",
     );
-    const callTime = Date.now();
+    const before = await prisma.decision.findUnique({
+      where: { id: decisionId },
+      select: { lastUserActivityAt: true },
+    });
 
     const entry = await createObservation({
       decisionId,
@@ -253,12 +255,11 @@ describe("task-44 createObservation/updateObservation/createLearning/listByDecis
 
     const after = await prisma.decision.findUnique({
       where: { id: decisionId },
-      select: { nextCheckInAt: true },
+      select: { lastUserActivityAt: true },
     });
-    // 新的 nextCheckInAt ≈ createObservation 调用时刻 + 7 天
-    const delta = after!.nextCheckInAt!.getTime() - callTime;
-    expect(delta).toBeGreaterThanOrEqual(6 * 24 * 60 * 60 * 1000);
-    expect(delta).toBeLessThanOrEqual(8 * 24 * 60 * 60 * 1000);
+    expect(after!.lastUserActivityAt.getTime()).toBeGreaterThanOrEqual(
+      before!.lastUserActivityAt.getTime(),
+    );
   });
 
   it("createObservation: direction 非必填（允许无方向）", async () => {
@@ -274,16 +275,15 @@ describe("task-44 createObservation/updateObservation/createLearning/listByDecis
     expect(entry.direction).toBeNull();
   });
 
-  it("createObservation: 无 freq 时 nextCheckInAt 不写但仍刷 lastUserActivityAt", async () => {
+  it("createObservation: 无 freq 时仍刷 lastUserActivityAt", async () => {
     const { userId, decisionId } = await seedObservingDecision(
       "create-obs-no-freq@example.com",
       { withFreq: false },
     );
     const before = await prisma.decision.findUnique({
       where: { id: decisionId },
-      select: { lastUserActivityAt: true, nextCheckInAt: true },
+      select: { lastUserActivityAt: true },
     });
-    expect(before?.nextCheckInAt).toBeNull();
 
     await createObservation({
       decisionId,

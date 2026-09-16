@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type {
+  DecisionDetailDto,
   DecisionDto,
   WmnResponse,
 } from "@/components/sections/portal/decisions/dto";
@@ -10,6 +11,7 @@ import {
   PortalV2,
   PortalV2Frame,
 } from "@/components/sections/portal-v2/PortalV2";
+import { DecisionDetailV2 } from "@/components/sections/portal-v2/DecisionDetailV2";
 import { useApi } from "@/hooks/useApi";
 
 vi.mock("@/hooks/useApi", () => ({ useApi: vi.fn() }));
@@ -70,7 +72,7 @@ describe("PortalV2 What matters now", () => {
       cards: [
         decision("due", "Check skin condition", {
           lifecycle: "OBSERVING",
-          nextCheckInAt: "2026-09-13T12:00:00.000Z",
+          observationDueAt: "2026-09-13T12:00:00.000Z",
         }),
         decision("recent", "Consider Thermage", {
           lastUserActivityAt: "2026-09-14T12:00:00.000Z",
@@ -170,6 +172,106 @@ describe("PortalV2Frame navigation", () => {
     fireEvent.click(screen.getByRole("button", { name: /My Health/ }));
 
     expect(onTabChange).toHaveBeenCalledWith("health");
+  });
+});
+
+describe("DecisionDetailV2 observations", () => {
+  beforeEach(() => vi.resetAllMocks());
+
+  it("shows the latest user comment first and expands the remaining comments", () => {
+    const detail: DecisionDetailDto = {
+      ...decision("decision-1", "Should I continue this treatment?"),
+      entries: [],
+    };
+    vi.mocked(useApi).mockImplementation((path) => {
+      const data = path?.endsWith("/observations")
+        ? {
+            observations: [
+              {
+                id: "older",
+                text: "The first check-in",
+                lifecycleSnapshot: "OBSERVING",
+                kind: "observation",
+                occurredAt: "2026-09-01T12:00:00.000Z",
+              },
+              {
+                id: "newer",
+                text: "The most recent check-in",
+                lifecycleSnapshot: "OBSERVING",
+                kind: "observation",
+                occurredAt: "2026-09-14T12:00:00.000Z",
+              },
+            ],
+          }
+        : path === "/api/decisions/decision-1"
+          ? detail
+          : [];
+      return { data: data as never, error: null, loading: false, refetch: vi.fn() };
+    });
+
+    const { container } = render(<DecisionDetailV2 id="decision-1" />);
+
+    expect(screen.getByText("The most recent check-in")).toBeVisible();
+    expect(screen.queryByText("The first check-in")).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Show more" }));
+
+    const comments = Array.from(
+      container.querySelectorAll(".portal-v2__decision-comments article"),
+    );
+    expect(comments.map((comment) => comment.textContent)).toEqual([
+      expect.stringContaining("The most recent check-in"),
+      expect.stringContaining("The first check-in"),
+    ]);
+  });
+
+  it("marks a past-due observation and seeds the focused composer", () => {
+    const detail: DecisionDetailDto = {
+      ...decision("decision-1", "Should I continue this treatment?", {
+        lifecycle: "OBSERVING",
+        observationDueAt: new Date(Date.now() - 60_000).toISOString(),
+      }),
+      entries: [],
+    };
+    const metric = {
+      id: "skin-hydration",
+      sourceId: "source-1",
+      observationId: "observation-1",
+      kind: "vitals" as const,
+      displayName: "Skin hydration",
+      title: "Skin hydration check-in",
+      status: "CONFIRMED" as const,
+      recordedAt: "2026-09-14T12:00:00.000Z",
+    };
+    vi.mocked(useApi).mockImplementation((path) => {
+      const data = path === "/api/decisions/decision-1"
+        ? detail
+        : path?.endsWith("/health-records")
+          ? [
+              {
+                id: "link-1",
+                decisionId: "decision-1",
+                healthRecordId: metric.id,
+                connectedBy: "user",
+                connectedAt: "2026-09-14T12:00:00.000Z",
+                healthRecord: metric,
+              },
+            ]
+          : path === "/api/health/records"
+            ? [metric]
+            : [];
+      return { data: data as never, error: null, loading: false, refetch: vi.fn() };
+    });
+
+    render(<DecisionDetailV2 id="decision-1" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "(due)" }));
+
+    const composer = screen.getByRole("textbox", {
+      name: "Tell DrRuby what is changing",
+    });
+    expect(composer).toHaveValue("Update observation Skin hydration: ");
+    expect(composer).toHaveFocus();
   });
 });
 

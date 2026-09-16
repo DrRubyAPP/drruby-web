@@ -11,7 +11,6 @@ import {
   authorizationStatusSchema,
   authProviderSchema,
   bodyInsightKindSchema,
-  CHECK_IN_FREQ_MS,
   changeTriggerSchema,
   checkInFrequencySchema,
   clinicPlanTierSchema,
@@ -430,16 +429,11 @@ describe("task-44 observe/learn 枚举 + 守卫", () => {
     expect(() => observationDirectionSchema.parse("BETTER")).toThrow();
   });
 
-  it("checkInFrequencySchema has 5 values + CHECK_IN_FREQ_MS map", () => {
+  it("checkInFrequencySchema has 5 values", () => {
     for (const v of ["daily", "3days", "weekly", "2weeks", "monthly"]) {
       expect(checkInFrequencySchema.parse(v)).toBe(v);
     }
     expect(() => checkInFrequencySchema.parse("biweekly")).toThrow();
-    expect(CHECK_IN_FREQ_MS.daily).toBe(24 * 60 * 60 * 1000);
-    expect(CHECK_IN_FREQ_MS["3days"]).toBe(3 * 24 * 60 * 60 * 1000);
-    expect(CHECK_IN_FREQ_MS.weekly).toBe(7 * 24 * 60 * 60 * 1000);
-    expect(CHECK_IN_FREQ_MS["2weeks"]).toBe(14 * 24 * 60 * 60 * 1000);
-    expect(CHECK_IN_FREQ_MS.monthly).toBe(30 * 24 * 60 * 60 * 1000);
   });
 
   it("assertCanStartObserving only allows DECIDED", () => {

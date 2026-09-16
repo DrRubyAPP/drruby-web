@@ -103,7 +103,6 @@ describe("POST /api/decisions/[id]/learn", () => {
         outcome: "decided_to_do_it",
         decidedAt: new Date(),
         observeBaseline: { text: "x", freq: "weekly" },
-        nextCheckInAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       },
     });
 

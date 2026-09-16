@@ -125,6 +125,44 @@ describe("MetricHistoryDialog", () => {
     expect(screen.getByLabelText("stopped marker")).toBeVisible();
   });
 
+  it("renders only in-range important event markers without changing metric x positions", () => {
+    render(
+      <MetricHistoryDialog
+        events={[
+          {
+            id: "in-range",
+            date: "2026-08-02T09:00:00.000Z",
+            importance: "important",
+            title: "Started a new treatment",
+            detail: "Monthly check-in",
+          },
+          {
+            id: "out-of-range",
+            date: "2026-08-04T09:00:00.000Z",
+            importance: "important",
+            title: "Later event",
+          },
+        ]}
+        onClose={vi.fn()}
+        records={[
+          severityRecord("new", "2026-08-03T09:00:00.000Z", "severe"),
+          severityRecord("old", "2026-08-01T09:00:00.000Z", "mild"),
+        ]}
+        title="Skin condition"
+      />,
+    );
+
+    const chart = screen.getByRole("img", { name: "Metric history line chart" });
+    expect(chart.querySelectorAll(".portal-v2__chart-event-marker")).toHaveLength(1);
+    expect(screen.getByLabelText("Important event: Started a new treatment")).toHaveAttribute("x1", "256");
+    expect(chart.querySelectorAll(".portal-v2__chart-point")).toHaveLength(2);
+
+    fireEvent.mouseEnter(
+      screen.getByLabelText("Important event: Started a new treatment"),
+    );
+    expect(screen.getByText(/Monthly check-in/, { selector: ".portal-v2__chart-tooltip" })).toBeVisible();
+  });
+
   it("prioritizes an end-state signal over frequency in text history", () => {
     render(
       <MetricHistoryDialog

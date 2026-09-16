@@ -34,7 +34,7 @@ export function YourTimeline({
 
   return (
     <section className="sec">
-      <div className="sec-h">Your timeline</div>
+      <div className="sec-h">Recent timeline</div>
       <div className="card">
         <div className="tl">
           {loading ? (

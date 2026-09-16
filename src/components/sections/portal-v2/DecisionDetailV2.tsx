@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { EmptyState, ErrorState, Skeleton } from "@/components/api";
-import type { DecisionDetailDto } from "@/components/sections/portal/decisions/dto";
+import type {
+  DecisionDetailDto,
+  DecisionEntryDto,
+} from "@/components/sections/portal/decisions/dto";
 import type {
   DecisionHealthRecordDto,
   HealthRecordDto,
@@ -15,14 +18,20 @@ import { useApi } from "@/hooks/useApi";
 import { Link, useRouter } from "@/i18n/navigation";
 import { decisionStatusLabel } from "./decisionStatus";
 import { HealthRecordValueCue } from "./HealthRecordValueCue";
-import { MetricHistoryDialog } from "./MetricHistoryDialog";
-import { PortalV2Frame } from "./PortalV2";
+import {
+  type MetricHistoryEvent,
+  MetricHistoryDialog,
+} from "./MetricHistoryDialog";
+import { type ComposerRequest, PortalV2Frame } from "./PortalV2";
 
 export function DecisionDetailV2({ id }: { id: string }) {
   const router = useRouter();
   const [selectedMetric, setSelectedMetric] = useState<HealthRecordDto | null>(
     null,
   );
+  const [showAllComments, setShowAllComments] = useState(false);
+  const [composerRequest, setComposerRequest] =
+    useState<ComposerRequest | null>(null);
   const { data, error, loading, refetch } = useApi<DecisionDetailDto>(
     `/api/decisions/${id}`,
   );
@@ -30,6 +39,13 @@ export function DecisionDetailV2({ id }: { id: string }) {
     `/api/decisions/${id}/health-records`,
   );
   const healthRecords = useApi<HealthRecordDto[]>("/api/health/records");
+  const timeline = useApi<MetricHistoryEvent[]>(`/api/timeline?decisionId=${id}`);
+  const observationComments = useApi<{ observations: DecisionEntryDto[] }>(
+    `/api/decisions/${id}/observations`,
+  );
+
+  useEffect(() => setShowAllComments(false), [id]);
+
   let content: ReactNode;
   if (loading) {
     content = <Skeleton lines={7} />;
@@ -44,14 +60,22 @@ export function DecisionDetailV2({ id }: { id: string }) {
     const metricHistory = observedRecord
       ? (healthRecords.data ?? []).filter(
           (record) =>
-            healthRecordMetricKey(record) ===
-            healthRecordMetricKey(observedRecord),
+            observedRecord.observationId
+              ? record.observationId === observedRecord.observationId
+              : healthRecordMetricKey(record) ===
+                healthRecordMetricKey(observedRecord),
         )
       : [];
     const currentMetric = latestRecord(metricHistory) ?? observedRecord;
     const currentMetricHighlight = currentMetric
       ? healthRecordHighlight(currentMetric)
       : null;
+    const observationDue = Boolean(data.observationDueAt);
+    const comments = [...(observationComments.data?.observations ?? [])].sort(
+      (a, b) =>
+        new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime(),
+    );
+    const visibleComments = showAllComments ? comments : comments.slice(0, 1);
 
     content = (
       <div className="portal-v2__detail-inner portal-v2__decision-detail">
@@ -97,29 +121,70 @@ export function DecisionDetailV2({ id }: { id: string }) {
             {connectedRecords.loading || healthRecords.loading ? (
               <Skeleton lines={1} />
             ) : currentMetric ? (
-              <button
-                className="sub-row portal-v2__metric-row"
-                onClick={() => setSelectedMetric(currentMetric)}
-                type="button"
-              >
-                <span>{currentMetric.displayName ?? currentMetric.title}</span>
-                <span className="portal-v2__record-meta">
-                  {currentMetricHighlight && (
-                    <HealthRecordValueCue highlight={currentMetricHighlight} />
-                  )}
-                  <span className="arr">
-                    {new Date(currentMetric.recordedAt).toLocaleDateString()}
+              <div className="sub-row portal-v2__metric-row">
+                <button
+                  className="portal-v2__metric-button"
+                  onClick={() => setSelectedMetric(currentMetric)}
+                  type="button"
+                >
+                  <span>{currentMetric.displayName ?? currentMetric.title}</span>
+                  <span className="portal-v2__record-meta">
+                    {currentMetricHighlight && (
+                      <HealthRecordValueCue highlight={currentMetricHighlight} />
+                    )}
+                    <span className="arr">
+                      {new Date(currentMetric.recordedAt).toLocaleDateString()}
+                    </span>
                   </span>
-                </span>
-              </button>
+                </button>
+                {observationDue && (
+                  <button
+                    className="portal-v2__observation-due"
+                    onClick={() =>
+                      setComposerRequest((current) => ({
+                        prompt: `Update observation ${currentMetric.displayName ?? currentMetric.title}: `,
+                        requestId: (current?.requestId ?? 0) + 1,
+                      }))
+                    }
+                    type="button"
+                  >
+                    (due)
+                  </button>
+                )}
+              </div>
             ) : (
               <p>No health metric is being observed for this decision yet.</p>
             )}
+
+            {observationComments.loading ? (
+              <Skeleton lines={1} />
+            ) : visibleComments.length > 0 ? (
+              <div className="portal-v2__decision-comments">
+                <h3>Your comments</h3>
+                {visibleComments.map((comment) => (
+                  <article key={comment.id}>
+                    <p>{comment.text}</p>
+                    <time dateTime={comment.occurredAt}>
+                      {new Date(comment.occurredAt).toLocaleDateString()}
+                    </time>
+                  </article>
+                ))}
+                {comments.length > 1 && !showAllComments && (
+                  <button
+                    className="portal-v2__show-more"
+                    onClick={() => setShowAllComments(true)}
+                    type="button"
+                  >
+                    Show more
+                  </button>
+                )}
+              </div>
+            ) : null}
           </div>
         </section>
 
         <section className="sec">
-          <div className="sec-h">Related health trend</div>
+          <div className="sec-h">More health trend</div>
           <Link
             className="card portal-v2__tracking-link"
             href={`/portal-v2/decisions/${id}/trends`}
@@ -127,7 +192,7 @@ export function DecisionDetailV2({ id }: { id: string }) {
             <span>
               <strong>View related health trend</strong>
               <small>
-                Follow your events and view your health at each point in time.
+                Follow your events and view your <b>complete</b> health shape at each point in time.
               </small>
             </span>
             <span className="arr" aria-hidden="true">
@@ -142,18 +207,24 @@ export function DecisionDetailV2({ id }: { id: string }) {
   return (
     <PortalV2Frame
       activeTab="decisions"
+      composerRequest={composerRequest}
       onChanged={refetch}
       onTabChange={(tab) => router.push(`/portal-v2?tab=${tab}`)}
     >
       {content}
       {selectedMetric && (
         <MetricHistoryDialog
+          events={(timeline.data ?? []).filter(
+            (event) => event.importance === "important",
+          )}
           onClose={() => setSelectedMetric(null)}
           records={
             healthRecords.data?.filter(
               (record) =>
-                healthRecordMetricKey(record) ===
-                healthRecordMetricKey(selectedMetric),
+                selectedMetric.observationId
+                  ? record.observationId === selectedMetric.observationId
+                  : healthRecordMetricKey(record) ===
+                    healthRecordMetricKey(selectedMetric),
             ) ?? [selectedMetric]
           }
           title={selectedMetric.displayName ?? selectedMetric.title}
@@ -164,23 +235,14 @@ export function DecisionDetailV2({ id }: { id: string }) {
 }
 
 /**
- * Tracking records have an observationId in their structured payload. This
- * distinguishes a metric started for observation from other health context
- * records connected to the same decision. Older data has no marker, so a
- * single connected record remains a compatible fallback.
+ * Tracking records carry a relational observationId. This distinguishes a
+ * metric collected for observation from other health context connected to the
+ * same decision. A single unmarked legacy record remains a compatible fallback.
  */
 function observationMetric(
   links: DecisionHealthRecordDto[],
 ): HealthRecordDto | null {
-  const tracked = links.find((link) => {
-    const values = link.healthRecord.parsedValues;
-    return (
-      !!values &&
-      typeof values === "object" &&
-      "observationId" in values &&
-      typeof values.observationId === "string"
-    );
-  });
+  const tracked = links.find((link) => link.healthRecord.observationId);
   return (
     tracked?.healthRecord ??
     (links.length === 1 ? links[0]!.healthRecord : null)

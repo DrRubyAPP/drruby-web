@@ -54,7 +54,7 @@ function normalizeSynthesis(body: {
 
 /**
  * Create observation
- * @description §28 check-in Observation：direction 四态（非必填）+ 文本 + synthesis {photos, recordRefs}。仅 OBSERVING 状态可提交（route 预检）。append-only：保存一条 Observation 不创建新 Decision。顺延 nextCheckInAt（按 observeBaseline.freq）。刷 lastUserActivityAt（§8）。越权 404
+ * @description §28 check-in Observation：direction 四态（非必填）+ 文本 + synthesis {photos, recordRefs}。仅 OBSERVING 状态可提交（route 预检）。append-only：保存一条 Observation 不创建新 Decision。刷 lastUserActivityAt（§8）；到期状态由最新记录与 Observation cadence 派生。越权 404
  * @body CreateObservationBody
  * @response EntryResponse
  * @auth bearer

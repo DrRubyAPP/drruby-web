@@ -730,7 +730,7 @@
           "errorBaselineRequired": "Please describe the baseline"
         },
         "observing": {
-          "hint": "Next check-in: {next}",
+          "hint": "Check-in timing is based on your latest observation.",
           "baselineLabel": "Baseline"
         },
         "observation": {

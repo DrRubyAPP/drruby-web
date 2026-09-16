@@ -29,6 +29,7 @@ export const HealthSourceListResponse = z.array(HealthSourceDTO);
 export const HealthRecordDTO = z.object({
   id: z.string(),
   sourceId: z.string(),
+  observationId: z.string().nullable().optional(),
   kind: healthRecordKindSchema,
   metricCode: z.string(),
   displayName: z.string(),
@@ -91,7 +92,9 @@ export const UploadSourceBody = z.object({
 export const ManualLogBody = z.object({
   kind: healthRecordKindSchema,
   title: z.string().min(1),
+  observationId: z.string().min(1).optional(),
   parsedValues: z.unknown().optional(),
+  /** Time at which the metric was measured, rather than when it was logged. */
   recordedAt: z.string(),
 });
 
@@ -146,6 +149,7 @@ export function toRecordDTO(
   return {
     id: row.id,
     sourceId: row.sourceId,
+    observationId: row.observationId,
     kind: healthRecordKindSchema.parse(row.kind),
     metricCode: row.metricCode,
     displayName,

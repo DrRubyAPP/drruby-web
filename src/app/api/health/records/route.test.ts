@@ -59,6 +59,36 @@ describe("POST /api/health/records 手动录入", () => {
     expect(rows.some((r) => r.status === "CONFIRMED")).toBe(true);
   });
 
+  it("accepts the measured recordedAt and links a manual metric to its observation", async () => {
+    const { POST, GET } = await import("./route");
+    const { prisma } = await import("@/lib/db/prisma");
+    const user = await makeUser("hr-observation@example.com");
+    asUser(user.id);
+    const observation = await prisma.observation.create({
+      data: { userId: user.id, title: "Blood pressure", cadence: "weekly" },
+    });
+    const res = await POST(
+      jsonRequest({
+        ...validManual,
+        observationId: observation.id,
+        recordedAt: "2026-02-15T08:30:00.000Z",
+      }),
+    );
+    expect(res.status).toBe(201);
+    const body = await res.json();
+    expect(body.observationId).toBe(observation.id);
+    expect(body.recordedAt).toBe("2026-02-15T08:30:00.000Z");
+
+    const list = await GET(
+      new Request(
+        `http://test/api/health/records?observationId=${observation.id}`,
+      ),
+    );
+    const records = await list.json();
+    expect(records).toHaveLength(1);
+    expect(records[0].id).toBe(body.id);
+  });
+
   it("GET 列表仅返回当前用户", async () => {
     const { POST, GET } = await import("./route");
     const u1 = await makeUser("hr-u1@example.com");

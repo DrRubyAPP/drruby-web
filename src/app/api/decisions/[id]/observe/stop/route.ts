@@ -14,7 +14,7 @@ async function assertDecisionOwner(userId: string, decisionId: string) {
 
 /**
  * Stop observing
- * @description §27 Stop Observing：OBSERVING → LEARNING（有 observations）或 COMPLETED（无 observations）原子事务。清 nextCheckInAt；observeBaseline 保留到 markCompleted 时清空（D7 不删历史）。刷 lastUserActivityAt + 写 TimelineEvent。非 OBSERVING 422。越权 404
+ * @description §27 Stop Observing：OBSERVING → LEARNING（有 observations）或 COMPLETED（无 observations）原子事务。observeBaseline 保留到 markCompleted 时清空（D7 不删历史）。刷 lastUserActivityAt + 写 TimelineEvent。非 OBSERVING 422。越权 404
  * @response { lifecycle: "LEARNING" | "COMPLETED", hasObservations: boolean }
  * @auth bearer
  * @responseSet auth

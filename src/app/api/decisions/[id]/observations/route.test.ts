@@ -28,7 +28,6 @@ async function createObservingDecision(
       outcome: "decided_to_do_it",
       decidedAt: new Date(),
       observeBaseline: { text: "baseline", freq: "weekly" },
-      nextCheckInAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       ...overrides,
     },
   });
@@ -38,7 +37,7 @@ describe("POST /api/decisions/[id]/observations", () => {
   beforeEach(resetDb);
   afterEach(disconnectDb);
 
-  it("OBSERVING + 提交 observation → 201 + kind=observation + direction 落库 + nextCheckInAt 顺延 7 天", async () => {
+  it("OBSERVING + 提交 observation → 201 + kind=observation + direction 落库", async () => {
     const { POST } = await import("./route");
     const { prisma } = await import("@/lib/db/prisma");
     const owner = await makeUser("obs-create@example.com");
@@ -55,15 +54,6 @@ describe("POST /api/decisions/[id]/observations", () => {
     expect(body.direction).toBe("better");
     expect(body.text).toBe("feeling better");
 
-    // nextCheckInAt 顺延 7 天（weekly freq）
-    const updated = await prisma.decision.findUnique({
-      where: { id: decision.id },
-    });
-    expect(updated?.nextCheckInAt).not.toBeNull();
-    const deltaDays =
-      (updated!.nextCheckInAt!.getTime() - Date.now()) / (24 * 60 * 60 * 1000);
-    expect(deltaDays).toBeGreaterThan(6.9);
-    expect(deltaDays).toBeLessThan(7.1);
   });
 
   it("direction 非必填：仅文本 observation → 201 + direction === null", async () => {

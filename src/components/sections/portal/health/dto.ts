@@ -75,6 +75,8 @@ export interface RecordRevisionDto {
 export interface HealthRecordDto {
   id: string;
   sourceId: string;
+  /** Observation plan this measurement fulfils, if any. */
+  observationId?: string | null;
   kind: HealthRecordKind;
   metricCode?: string;
   displayName?: string;

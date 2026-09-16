@@ -9,6 +9,7 @@ import {
   decisionEntryRepo,
   decisionRepo,
   decisionSnapshotRepo,
+  observationRepo,
 } from "@/lib/db";
 import {
   assertLifecycleForOutcome,
@@ -91,6 +92,7 @@ export const GET = handle(async (_req: Request, ctx: Ctx) => {
   const detailRow = freshRow ?? row;
 
   const currentSnapshot = await decisionSnapshotRepo.findCurrent(id);
+  const dueObservation = await observationRepo.findDueByDecision(user.id, id);
   const synthesis = currentSnapshot?.synthesis as {
     yourself?: string;
     others?: string;
@@ -98,6 +100,7 @@ export const GET = handle(async (_req: Request, ctx: Ctx) => {
   } | null;
   const dto: z.infer<typeof DecisionDetailDTO> = {
     ...toDecisionDTO(detailRow, { withBrief: true }),
+    observationDueAt: dueObservation?.dueAt.toISOString() ?? null,
     entries: detailRow.entries.map(toEntryDTO),
     currentUnderstanding:
       synthesis?.yourself &&

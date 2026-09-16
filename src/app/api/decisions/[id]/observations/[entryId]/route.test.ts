@@ -27,7 +27,6 @@ async function createObservingDecisionWithObservation(userId: string) {
       outcome: "decided_to_do_it",
       decidedAt: new Date(),
       observeBaseline: { text: "baseline", freq: "weekly" },
-      nextCheckInAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     },
   });
   const occurredAt = new Date("2026-01-01T00:00:00.000Z");

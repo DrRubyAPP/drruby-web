@@ -79,7 +79,7 @@ export async function findLastArchivedEntry(
 // =============================================================================
 
 /**
- * §28 新建 Observation + 顺延 nextCheckInAt（D6）+ 刷 lastUserActivityAt（§8）。
+ * §28 新建 Observation + 刷 lastUserActivityAt（§8）。
  * 不创建新 Decision（走专属端点 /api/decisions/[id]/observations）。
  */
 export async function createObservation(
@@ -107,39 +107,15 @@ export async function createObservation(
         createdAt: now,
       },
     });
-    // 2. 顺延 nextCheckInAt（按 observeBaseline.freq 推算；无 freq 则不写）
+    // 2. 到期时间由 Observation 的最新 HealthRecord + cadence 按需推导；仅刷 activity。
     const decision = await tx.decision.findUnique({
       where: { id: input.decisionId },
-      select: { observeBaseline: true, topic: true, question: true },
+      select: { topic: true, question: true },
     });
-    const freq = (decision?.observeBaseline as { freq?: string } | null)?.freq;
-    if (freq) {
-      const ms =
-        freq === "daily"
-          ? 24 * 60 * 60 * 1000
-          : freq === "3days"
-            ? 3 * 24 * 60 * 60 * 1000
-            : freq === "weekly"
-              ? 7 * 24 * 60 * 60 * 1000
-              : freq === "2weeks"
-                ? 14 * 24 * 60 * 60 * 1000
-                : freq === "monthly"
-                  ? 30 * 24 * 60 * 60 * 1000
-                  : 7 * 24 * 60 * 60 * 1000; // 兜底 weekly
-      await tx.decision.update({
-        where: { id: input.decisionId },
-        data: {
-          nextCheckInAt: new Date(now.getTime() + ms),
-          lastUserActivityAt: now,
-        },
-      });
-    } else {
-      // 无 freq 也刷 activity
-      await tx.decision.update({
-        where: { id: input.decisionId },
-        data: { lastUserActivityAt: now },
-      });
-    }
+    await tx.decision.update({
+      where: { id: input.decisionId },
+      data: { lastUserActivityAt: now },
+    });
     await tx.timelineEvent.create({
       data: {
         userId: input.userId,

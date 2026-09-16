@@ -18,7 +18,7 @@
  */
 import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "./generated/client";
+import { PrismaClient, type Prisma } from "./generated/client";
 
 const DEMO_EMAIL = process.env.SEED_USER_EMAIL ?? "kissjing4003@163.com";
 
@@ -76,11 +76,14 @@ async function main() {
   console.log(`[seed] clinic id = ${clinic.id}`);
 
   // 2) 幂等清理：先删子表再删父表（外键安全顺序）
+  await prisma.observationEntry.deleteMany({ where: { userId } });
+  await prisma.observation.deleteMany({ where: { userId } });
   await prisma.decisionEntry.deleteMany({ where: { userId } });
   await prisma.timelineEvent.deleteMany({ where: { userId } });
   await prisma.decision.deleteMany({ where: { userId } });
   await prisma.photo.deleteMany({ where: { userId } });
   await prisma.healthRecord.deleteMany({ where: { userId } });
+  await prisma.healthSource.deleteMany({ where: { userId } });
   await prisma.signal.deleteMany({ where: { userId } });
   await prisma.bodyInsight.deleteMany({ where: { userId } });
   await prisma.skinScan.deleteMany({ where: { userId } });
@@ -158,6 +161,83 @@ async function main() {
     };
   });
   await prisma.wearableDaily.createMany({ data: wearableDailies });
+
+  // 5b) 让趋势图有稳定、可读的 metric identity。迁移已经提供常用 vitals；
+  // demo 额外补充本场景用到的治疗、症状和化验指标。
+  await Promise.all([
+    prisma.healthTreatmentMetricDefinition.upsert({
+      where: { metricCode: "tretinoin" },
+      update: { displayName: "Tretinoin" },
+      create: {
+        metricCode: "tretinoin",
+        displayName: "Tretinoin",
+        aliases: ["tretinoin 0.025%", "retinoid"],
+      },
+    }),
+    prisma.healthSymptomMetricDefinition.upsert({
+      where: { metricCode: "jawline_firmness" },
+      update: { displayName: "Jawline firmness" },
+      create: {
+        metricCode: "jawline_firmness",
+        displayName: "Jawline firmness",
+        aliases: ["jawline laxity", "lower-face firmness"],
+      },
+    }),
+    prisma.healthSymptomMetricDefinition.upsert({
+      where: { metricCode: "sleep_quality" },
+      update: { displayName: "Sleep quality" },
+      create: {
+        metricCode: "sleep_quality",
+        displayName: "Sleep quality",
+        aliases: ["sleep", "sleep score"],
+      },
+    }),
+    prisma.healthLabMetricDefinition.upsert({
+      where: { metricCode: "ldl_cholesterol" },
+      update: { displayName: "LDL cholesterol", isChartable: true },
+      create: {
+        metricCode: "ldl_cholesterol",
+        displayName: "LDL cholesterol",
+        aliases: ["ldl", "ldl-c"],
+        canonicalUnit: "mg/dL",
+        isChartable: true,
+      },
+    }),
+  ]);
+
+  async function createConfirmedRecord(input: {
+    kind: string;
+    metricCode: string;
+    title: string;
+    recordedAt: Date;
+    parsedValues: Prisma.InputJsonValue;
+    source?: string;
+    documentClass?: string;
+  }) {
+    const source = await prisma.healthSource.create({
+      data: {
+        userId,
+        fileName: `${input.title} — ${input.recordedAt.toISOString().slice(0, 10)}`,
+        provenance: { seeded: true },
+      },
+    });
+    return prisma.healthRecord.create({
+      data: {
+        userId,
+        sourceId: source.id,
+        kind: input.kind,
+        metricCode: input.metricCode,
+        title: input.title,
+        source: input.source ?? "you",
+        documentClass: input.documentClass ?? null,
+        status: "CONFIRMED",
+        confidence: "High",
+        ocrStatus: "manual",
+        parsedValues: input.parsedValues,
+        recordedAt: input.recordedAt,
+      },
+    });
+  }
 
   // 6) 决策（3 条）+ 决策条目（append-only）+ 关联时间线
   const thermage = await prisma.decision.create({
@@ -279,14 +359,16 @@ async function main() {
     ],
   });
 
-  // 7) 身体时间线事件（部分关联决策）
+  // 7) 身体时间线：全局事件与每条 decision 的事件使用同一日期脉络。
+  // decisionId 只在该事件确实属于该决策时填写，供 Related Health Trend 使用。
   await prisma.timelineEvent.createMany({
     data: [
       {
         userId,
+        decisionId: thermage.id,
         kind: "note",
         importance: "minor",
-        title: "Felt more jawline laxity in the mornings",
+        title: "Logged jawline firmness baseline",
         detail: "Especially noticeable after poor sleep nights.",
         source: "you",
         occurredAt: daysAgo(45),
@@ -295,7 +377,7 @@ async function main() {
         userId,
         decisionId: thermage.id,
         kind: "decision",
-        importance: "minor",
+        importance: "medium",
         title: "Considering Thermage",
         source: "you",
         occurredAt: daysAgo(40),
@@ -303,19 +385,40 @@ async function main() {
       {
         userId,
         kind: "lab",
-        importance: "minor",
-        title: "Blood panel uploaded",
-        detail: "Includes estradiol and FSH.",
+        importance: "medium",
+        title: "LDL cholesterol improved to 128 mg/dL",
+        detail: "Follow-up panel after nutrition changes.",
         source: "your doctor",
-        occurredAt: daysAgo(30),
+        occurredAt: daysAgo(60),
       },
       {
         userId,
+        decisionId: retinoid.id,
         kind: "treatment",
         importance: "important",
         title: "Started tretinoin 0.025%",
         source: "you",
         occurredAt: daysAgo(20),
+      },
+      {
+        userId,
+        decisionId: thermage.id,
+        kind: "note",
+        importance: "minor",
+        title: "Jawline firmness check-in",
+        detail: "More noticeable after several short nights.",
+        source: "you",
+        occurredAt: daysAgo(21),
+      },
+      {
+        userId,
+        decisionId: hrt.id,
+        kind: "decision",
+        importance: "medium",
+        title: "Started considering HRT",
+        detail: "Sleep changes and clinician questions recorded.",
+        source: "you",
+        occurredAt: daysAgo(9),
       },
       {
         userId,
@@ -334,6 +437,35 @@ async function main() {
         detail: "Clinician recommended a single session.",
         source: "your doctor",
         occurredAt: daysAgo(12),
+      },
+      {
+        userId,
+        decisionId: thermage.id,
+        kind: "note",
+        importance: "minor",
+        title: "Jawline firmness stable this week",
+        detail: "No treatment started; continuing weekly observation.",
+        source: "you",
+        occurredAt: daysAgo(7),
+      },
+      {
+        userId,
+        kind: "lab",
+        importance: "important",
+        title: "LDL cholesterol improved to 116 mg/dL",
+        detail: "Latest follow-up panel.",
+        source: "your doctor",
+        occurredAt: daysAgo(7),
+      },
+      {
+        userId,
+        decisionId: retinoid.id,
+        kind: "outcome",
+        importance: "medium",
+        title: "Increased tretinoin to three nights weekly",
+        detail: "Mild dryness only; skin tolerance observation remains active.",
+        source: "you",
+        occurredAt: daysAgo(3),
       },
     ],
   });
@@ -659,52 +791,182 @@ async function main() {
     ],
   });
 
-  // 16) 健康记录 + 照片（task-42：先建 HealthSource 原件，再建 Record）
-  const bloodPanelSource = await prisma.healthSource.create({
-    data: {
-      userId,
-      fileName: "Comprehensive hormone panel.pdf",
-      objectKey: "mock/health-records/hormone-panel.pdf",
+  // 16) Longitudinal health records. Each metric has multiple points so the
+  // My Health dialogs render actual trajectories rather than isolated values.
+  const [weight120, weight90, weight60, weight30, weight7] = await Promise.all(
+    [
+      [120, 67.2],
+      [90, 66.5],
+      [60, 65.8],
+      [30, 65.2],
+      [7, 64.8],
+    ].map(([ago, value]) =>
+      createConfirmedRecord({
+        kind: "vitals",
+        metricCode: "body_weight",
+        title: "Body weight",
+        recordedAt: daysAgo(ago as number),
+        parsedValues: { value, unit: "kg" },
+      }),
+    ),
+  );
+  const [bp120, bp60, bp7] = await Promise.all(
+    [
+      [120, 132, 86],
+      [60, 126, 82],
+      [7, 118, 76],
+    ].map(([ago, systolic, diastolic]) =>
+      createConfirmedRecord({
+        kind: "vitals",
+        metricCode: "blood_pressure",
+        title: "Blood pressure",
+        recordedAt: daysAgo(ago as number),
+        parsedValues: { systolic, diastolic, unit: "mmHg" },
+      }),
+    ),
+  );
+  const [hr90, hr45, hr7] = await Promise.all(
+    [
+      [90, 72],
+      [45, 66],
+      [7, 61],
+    ].map(([ago, value]) =>
+      createConfirmedRecord({
+        kind: "vitals",
+        metricCode: "heart_rate",
+        title: "Resting heart rate",
+        recordedAt: daysAgo(ago as number),
+        parsedValues: { value, unit: "bpm" },
+        source: "wearable",
+      }),
+    ),
+  );
+  const [ldl120, ldl60, ldl7] = await Promise.all(
+    [
+      [120, 142],
+      [60, 128],
+      [7, 116],
+    ].map(([ago, value]) =>
+      createConfirmedRecord({
+        kind: "lab",
+        metricCode: "ldl_cholesterol",
+        title: "LDL cholesterol",
+        recordedAt: daysAgo(ago as number),
+        parsedValues: { value, unit: "mg/dL" },
+        source: "your doctor",
+        documentClass: "Lab",
+      }),
+    ),
+  );
+  const [firmness45, firmness21, firmness7] = await Promise.all(
+    [
+      [45, 2, "Mild laxity in the morning"],
+      [21, 3, "More noticeable after poor sleep"],
+      [7, 2, "Stable with consistent sleep"],
+    ].map(([ago, severity, note]) =>
+      createConfirmedRecord({
+        kind: "symptom",
+        metricCode: "jawline_firmness",
+        title: "Jawline firmness",
+        recordedAt: daysAgo(ago as number),
+        parsedValues: { severity, note },
+      }),
+    ),
+  );
+  const tretinoinStart = await createConfirmedRecord({
+    kind: "treatment",
+    metricCode: "tretinoin",
+    title: "Tretinoin 0.025%",
+    recordedAt: daysAgo(20),
+    parsedValues: {
+      dosage: "0.025%",
+      frequency: "2 nights per week",
+      status: "active",
     },
   });
-  const bloodPanel = await prisma.healthRecord.create({
-    data: {
-      userId,
-      sourceId: bloodPanelSource.id,
-      kind: "lab",
-      title: "Comprehensive hormone panel",
-      source: "your doctor",
-      objectKey: "mock/health-records/hormone-panel.pdf",
-      ocrStatus: "done",
-      status: "CONFIRMED",
-      parsedValues: {
-        estradiol: "38 pg/mL",
-        fsh: "18 mIU/mL",
-        progesterone: "0.8 ng/mL",
+  const tretinoinCurrent = await createConfirmedRecord({
+    kind: "treatment",
+    metricCode: "tretinoin",
+    title: "Tretinoin 0.025%",
+    recordedAt: daysAgo(3),
+    parsedValues: {
+      dosage: "0.025%",
+      frequency: "3 nights per week",
+      status: "active",
+    },
+  });
+
+  // Explicit links distinguish decisions supported by a treatment/record from
+  // decisions that remain exploratory. Retinoid has treatment records; the
+  // Thermage observation link is added once its tracking plan exists below.
+  await prisma.decisionHealthRecord.createMany({
+    data: [
+      {
+        decisionId: retinoid.id,
+        healthRecordId: tretinoinStart.id,
+        connectedBy: "you",
+        connectedAt: daysAgo(20),
       },
-      recordedAt: daysAgo(30),
-    },
+      {
+        decisionId: retinoid.id,
+        healthRecordId: tretinoinCurrent.id,
+        connectedBy: "you",
+        connectedAt: daysAgo(3),
+      },
+    ],
   });
-  const faceBaselineSource = await prisma.healthSource.create({
+
+  // Thermage and the retinoid decision each have observations; HRT has none.
+  const jawlineObservation = await prisma.observation.create({
     data: {
       userId,
-      fileName: "face-baseline.jpg",
-      objectKey: "mock/health-records/face-baseline.jpg",
+      decisionId: thermage.id,
+      title: "Jawline firmness",
+      cadence: "weekly",
+      startedAt: daysAgo(45),
     },
   });
-  await prisma.healthRecord.create({
+  const retinoidObservation = await prisma.observation.create({
     data: {
       userId,
-      sourceId: faceBaselineSource.id,
-      kind: "imaging",
-      title: "Baseline face photo set",
-      source: "you",
-      objectKey: "mock/health-records/face-baseline.jpg",
-      ocrStatus: "manual",
-      status: "CONFIRMED",
-      recordedAt: daysAgo(45),
+      decisionId: retinoid.id,
+      title: "Skin tolerance on tretinoin",
+      cadence: "weekly",
+      startedAt: daysAgo(20),
     },
   });
+  // HealthRecord is the complete observation history. ObservationEntry is a
+  // legacy table and deliberately receives no new seed data.
+  await prisma.healthRecord.updateMany({
+    where: { id: { in: [firmness45.id, firmness21.id, firmness7.id] } },
+    data: { observationId: jawlineObservation.id },
+  });
+  await prisma.healthRecord.updateMany({
+    where: { id: { in: [tretinoinStart.id, tretinoinCurrent.id] } },
+    data: { observationId: retinoidObservation.id },
+  });
+
+  // The latest health record is the decision-facing tracking reference.
+  await prisma.healthRecord.update({
+    where: { id: firmness7.id },
+    data: {
+      parsedValues: {
+        severity: 2,
+        note: "Stable with consistent sleep",
+        cadence: "weekly",
+      },
+    },
+  });
+  await prisma.decisionHealthRecord.create({
+    data: {
+      decisionId: thermage.id,
+      healthRecordId: firmness7.id,
+      connectedBy: "assistant",
+      connectedAt: daysAgo(7),
+    },
+  });
+
+  const bloodPanel = ldl60;
   await prisma.photo.createMany({
     data: [
       {

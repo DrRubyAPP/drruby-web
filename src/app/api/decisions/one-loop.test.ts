@@ -55,17 +55,10 @@ describe("task-44 One Loop · DECIDED → Start → Observation → Stop → Lea
     expect(startRes.status).toBe(200);
     const started = await startRes.json();
     expect(started.lifecycle).toBe("OBSERVING");
-    expect(started.nextCheckInAt).toBeTruthy();
     expect(started.observeBaseline).toMatchObject({
       text: "Sleep 6h, energy 4/10",
       freq: "weekly",
     });
-    // nextCheckInAt 在未来 7 天内（weekly）
-    const nextCheckIn = new Date(started.nextCheckInAt);
-    const daysAhead =
-      (nextCheckIn.getTime() - Date.now()) / (24 * 60 * 60 * 1000);
-    expect(daysAhead).toBeGreaterThan(6);
-    expect(daysAhead).toBeLessThan(8);
 
     // TimelineEvent 写入（Start Observing）
     const startEvents = await prisma.timelineEvent.findMany({
@@ -99,11 +92,9 @@ describe("task-44 One Loop · DECIDED → Start → Observation → Stop → Lea
     const obs2 = await obs2Res.json();
     expect(obs2.direction).toBeNull();
 
-    // 顺延 nextCheckInAt（提交 observation 后 = now + 7d）
     const afterObs = await prisma.decision.findUnique({
       where: { id: decision.id },
     });
-    expect(afterObs?.nextCheckInAt).toBeTruthy();
     expect(afterObs?.lastUserActivityAt.getTime()).toBeGreaterThan(
       started.lastUserActivityAt
         ? new Date(started.lastUserActivityAt).getTime()
@@ -190,7 +181,6 @@ describe("task-44 One Loop · DECIDED → Start → Observation → Stop → Lea
       where: { id: decision.id },
     });
     expect(completed?.observeBaseline).toBeNull();
-    expect(completed?.nextCheckInAt).toBeNull();
     expect(completed?.lifecycle).toBe("COMPLETED");
 
     // TimelineEvent 写入 Completed
@@ -220,8 +210,7 @@ describe("task-44 One Loop · DECIDED → Start → Observation → Stop → Lea
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.lifecycle).toBe("COMPLETED");
-    // nextCheckInAt + observeBaseline 应为 null
-    expect(body.nextCheckInAt).toBeNull();
+    // observeBaseline 应为 null
     expect(body.observeBaseline).toBeNull();
   });
 
@@ -251,11 +240,11 @@ describe("task-44 One Loop · DECIDED → Start → Observation → Stop → Lea
     expect(res.status).toBe(422);
   });
 
-  it("WMN P1：到期 check-in 出现在 cards；COMPLETED/CLOSED 不出现", async () => {
+  it("WMN P1：健康记录逾期的 observation 出现在 cards；COMPLETED/CLOSED 不出现", async () => {
     const { prisma } = await import("@/lib/db/prisma");
     const owner = await makeUser("task44-oneloop-4@example.com");
 
-    // ── 到期的 OBSERVING decision（nextCheckInAt 已过去） ──
+    // ── 到期的 OBSERVING decision（latest health record 已超过 cadence） ──
     const dueDecision = await prisma.decision.create({
       data: {
         userId: owner.id,
@@ -265,8 +254,24 @@ describe("task-44 One Loop · DECIDED → Start → Observation → Stop → Lea
         outcome: "decided_to_do_it",
         decidedAt: new Date(),
         observeBaseline: { text: "x", freq: "weekly" },
-        nextCheckInAt: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 天前
       },
+    });
+    const observation = await prisma.observation.create({
+      data: {
+        userId: owner.id,
+        decisionId: dueDecision.id,
+        title: "Due check-in",
+        cadence: "weekly",
+      },
+    });
+    const { create: createHealthRecord } = await import(
+      "@/lib/db/repositories/healthRecord.repo"
+    );
+    await createHealthRecord(owner.id, {
+      kind: "symptom",
+      title: "Due check-in",
+      observationId: observation.id,
+      recordedAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
     });
     // ── COMPLETED decision（不应出现） ──
     await prisma.decision.create({
@@ -321,7 +326,6 @@ describe("task-44 One Loop · DECIDED → Start → Observation → Stop → Lea
         outcome: "decided_to_do_it",
         decidedAt: new Date(),
         observeBaseline: { text: "x", freq: "weekly" },
-        nextCheckInAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       },
     });
     asUser(owner.id);

@@ -8,7 +8,6 @@ import {
   listByUser,
   listByUserActionable,
   listByUserHistory,
-  listDueForCheckIn,
   markCompleted,
   reopenAtomic,
   startObserving,
@@ -317,7 +316,7 @@ describe("task-44 startObserving/stopObserving/markCompleted/completeAfterLearni
     return d.id;
   }
 
-  it("startObserving: DECIDED → OBSERVING, 设 nextCheckInAt + observeBaseline + TimelineEvent", async () => {
+  it("startObserving: DECIDED → OBSERVING, 设 observeBaseline + TimelineEvent", async () => {
     const userId = await seedUser("start-ok@example.com");
     const decisionId = await seedDecidedDecision(userId);
 
@@ -330,11 +329,6 @@ describe("task-44 startObserving/stopObserving/markCompleted/completeAfterLearni
     });
 
     expect(row.lifecycle).toBe("OBSERVING");
-    expect(row.nextCheckInAt).not.toBeNull();
-    // weekly = 7 days ≈ 604800000ms
-    const delta = row.nextCheckInAt!.getTime() - Date.now();
-    expect(delta).toBeGreaterThan(6 * 24 * 60 * 60 * 1000);
-    expect(delta).toBeLessThan(8 * 24 * 60 * 60 * 1000);
     expect(row.observeBaseline).toMatchObject({
       text: "skin firmness baseline",
       baselineRecordId: "rec-1",
@@ -384,7 +378,7 @@ describe("task-44 startObserving/stopObserving/markCompleted/completeAfterLearni
     ).rejects.toThrow(/forbidden/);
   });
 
-  it("stopObserving: OBSERVING with observations → LEARNING + 清 nextCheckInAt", async () => {
+  it("stopObserving: OBSERVING with observations → LEARNING", async () => {
     const userId = await seedUser("stop-with-obs@example.com");
     const decisionId = await seedDecidedDecision(userId);
     await startObserving({
@@ -407,11 +401,6 @@ describe("task-44 startObserving/stopObserving/markCompleted/completeAfterLearni
     expect(result.lifecycle).toBe("LEARNING");
     expect(result.hasObservations).toBe(true);
 
-    const row = await prisma.decision.findUnique({
-      where: { id: decisionId },
-      select: { nextCheckInAt: true },
-    });
-    expect(row?.nextCheckInAt).toBeNull();
   });
 
   it("stopObserving: OBSERVING without observations → COMPLETED", async () => {
@@ -443,7 +432,6 @@ describe("task-44 startObserving/stopObserving/markCompleted/completeAfterLearni
 
     const row = await markCompleted({ decisionId, userId });
     expect(row.lifecycle).toBe("COMPLETED");
-    expect(row.nextCheckInAt).toBeNull();
     expect(row.observeBaseline).toBeNull();
 
     const tl = await prisma.timelineEvent.findFirst({
@@ -499,70 +487,4 @@ describe("task-44 startObserving/stopObserving/markCompleted/completeAfterLearni
     );
   });
 
-  it("listDueForCheckIn: 返回到期 OBSERVING decisions（按 nextCheckInAt ASC）", async () => {
-    const userId = await seedUser("due@example.com");
-    // 创建两个 DECIDED → Start Observing（weekly，立即到期，因 nextCheckInAt 设为 now+7d 但下面用 future now）
-    const d1 = await prisma.decision.create({
-      data: {
-        userId,
-        question: "due1",
-        lifecycle: "DECIDED",
-        decisionKind: "action",
-        outcome: "decided_to_do_it",
-      },
-    });
-    const d2 = await prisma.decision.create({
-      data: {
-        userId,
-        question: "due2",
-        lifecycle: "DECIDED",
-        decisionKind: "action",
-        outcome: "decided_to_do_it",
-      },
-    });
-    // d1 早到期（昨天），d2 晚到期（今天）
-    await prisma.decision.update({
-      where: { id: d1.id },
-      data: {
-        lifecycle: "OBSERVING",
-        nextCheckInAt: new Date(Date.now() - 60 * 60 * 1000),
-      },
-    });
-    await prisma.decision.update({
-      where: { id: d2.id },
-      data: {
-        lifecycle: "OBSERVING",
-        nextCheckInAt: new Date(Date.now() - 30 * 60 * 1000),
-      },
-    });
-
-    const due = await listDueForCheckIn(userId);
-    expect(due).toHaveLength(2);
-    // ASC 排序：早到期的在前
-    expect(due[0].id).toBe(d1.id);
-    expect(due[1].id).toBe(d2.id);
-  });
-
-  it("listDueForCheckIn: 不返回 COMPLETED/CLOSED/DECIDED", async () => {
-    const userId = await seedUser("due-filter@example.com");
-    const completed = await prisma.decision.create({
-      data: {
-        userId,
-        question: "completed",
-        lifecycle: "COMPLETED",
-        nextCheckInAt: new Date(Date.now() - 60 * 60 * 1000),
-      },
-    });
-    const decided = await prisma.decision.create({
-      data: {
-        userId,
-        question: "decided",
-        lifecycle: "DECIDED",
-        nextCheckInAt: new Date(Date.now() - 60 * 60 * 1000),
-      },
-    });
-    const due = await listDueForCheckIn(userId);
-    expect(due.find((d) => d.id === completed.id)).toBeUndefined();
-    expect(due.find((d) => d.id === decided.id)).toBeUndefined();
-  });
 });

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
+import { normalizeMedicationParsedValues } from "@/lib/db/medicationDose";
 import type { Prisma } from "~prisma/client";
 
 export interface CreateRevisionInput {
@@ -21,6 +22,14 @@ export interface CreateRevisionInput {
  */
 export async function create(input: CreateRevisionInput) {
   return prisma.$transaction(async (tx) => {
+    const record = await tx.healthRecord.findUniqueOrThrow({
+      where: { id: input.recordId },
+      select: { kind: true },
+    });
+    const newParsedValues =
+      record.kind === "medication"
+        ? normalizeMedicationParsedValues(input.newParsedValues)
+        : input.newParsedValues;
     const revision = await tx.healthRecordRevision.create({
       data: {
         recordId: input.recordId,
@@ -34,7 +43,7 @@ export async function create(input: CreateRevisionInput) {
     await tx.healthRecord.update({
       where: { id: input.recordId },
       data: {
-        parsedValues: input.newParsedValues as Prisma.InputJsonValue,
+        parsedValues: newParsedValues as Prisma.InputJsonValue,
       },
     });
     return revision;

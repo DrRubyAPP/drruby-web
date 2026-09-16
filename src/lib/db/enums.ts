@@ -281,15 +281,6 @@ export const checkInFrequencySchema = z.enum([
 ]);
 export type CheckInFrequency = z.infer<typeof checkInFrequencySchema>;
 
-/** 频率 → 毫秒数（用于 nextCheckInAt 计算） */
-export const CHECK_IN_FREQ_MS: Record<CheckInFrequency, number> = {
-  daily: 24 * 60 * 60 * 1000,
-  "3days": 3 * 24 * 60 * 60 * 1000,
-  weekly: 7 * 24 * 60 * 60 * 1000,
-  "2weeks": 14 * 24 * 60 * 60 * 1000,
-  monthly: 30 * 24 * 60 * 60 * 1000,
-};
-
 // =============================================================================
 // task-44 lifecycle 守卫（OBSERVE/LEARN/COMPLETED 转移校验，§27/§29）
 // 与 task-39 assertLifecycleForOutcome（outcome 驱动）互补，本组为非 outcome 驱动的

@@ -119,18 +119,21 @@ describe("GET /api/decisions/wmn", () => {
   });
 });
 
-describe("task-44 P1 check-in due (§30)", () => {
+describe("P1 due observations", () => {
   beforeEach(resetDb);
   afterEach(disconnectDb);
 
-  /** 直接造 OBSERVING + 指定 nextCheckInAt 的 decision */
-  async function createObservingDecision(
+  /** A decision with a weekly observation and its latest collected metric. */
+  async function createObservedDecision(
     userId: string,
-    nextCheckInAt: Date,
+    recordedAt: Date,
     question = "observing",
   ) {
     const { prisma } = await import("@/lib/db/prisma");
-    return prisma.decision.create({
+    const { create: createHealthRecord } = await import(
+      "@/lib/db/repositories/healthRecord.repo"
+    );
+    const decision = await prisma.decision.create({
       data: {
         userId,
         question,
@@ -139,16 +142,28 @@ describe("task-44 P1 check-in due (§30)", () => {
         outcome: "decided_to_do_it",
         decidedAt: new Date(),
         observeBaseline: { text: "baseline", freq: "weekly" },
-        nextCheckInAt,
       },
     });
+    const observation = await prisma.observation.create({
+      data: { userId, decisionId: decision.id, title: question, cadence: "weekly" },
+    });
+    await createHealthRecord(userId, {
+      kind: "symptom",
+      title: question,
+      observationId: observation.id,
+      recordedAt,
+    });
+    return decision;
   }
 
-  it("OBSERVING + nextCheckInAt<=now 出现在 P1", async () => {
+  it("latest linked HealthRecord older than cadence appears in P1", async () => {
     const { GET } = await import("./route");
     const user = await makeUser("wmn-p1-due@example.com");
     asUser(user.id);
-    await createObservingDecision(user.id, new Date(Date.now() - 1000));
+    await createObservedDecision(
+      user.id,
+      new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
+    );
     const res = await GET();
     const body = await res.json();
     expect(body.cards.map((c: { question: string }) => c.question)).toContain(
@@ -157,13 +172,13 @@ describe("task-44 P1 check-in due (§30)", () => {
     expect(body.checkInDueCount).toBe(1);
   });
 
-  it("OBSERVING + 未来 nextCheckInAt 不计入 checkInDueCount（仍作 P2 出现）", async () => {
+  it("a recent linked HealthRecord is not due (but its decision remains actionable)", async () => {
     const { GET } = await import("./route");
     const user = await makeUser("wmn-p1-future@example.com");
     asUser(user.id);
-    await createObservingDecision(
+    await createObservedDecision(
       user.id,
-      new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
     );
     const res = await GET();
     const body = await res.json();
@@ -174,12 +189,12 @@ describe("task-44 P1 check-in due (§30)", () => {
     expect(body.cards[0].question).toBe("observing");
   });
 
-  it("COMPLETED 即使 nextCheckInAt 过去（legacy）也不出现在 P1", async () => {
+  it("completed decisions are not promoted even if their observation is due", async () => {
     const { GET } = await import("./route");
     const { prisma } = await import("@/lib/db/prisma");
     const user = await makeUser("wmn-p1-stale@example.com");
     asUser(user.id);
-    await prisma.decision.create({
+    const decision = await prisma.decision.create({
       data: {
         userId: user.id,
         question: "completed-stale",
@@ -188,8 +203,19 @@ describe("task-44 P1 check-in due (§30)", () => {
         outcome: "decided_to_do_it",
         decidedAt: new Date(),
         observeBaseline: { text: "x", freq: "weekly" },
-        nextCheckInAt: new Date(Date.now() - 1000),
       },
+    });
+    const observation = await prisma.observation.create({
+      data: { userId: user.id, decisionId: decision.id, title: "completed", cadence: "weekly" },
+    });
+    const { create: createHealthRecord } = await import(
+      "@/lib/db/repositories/healthRecord.repo"
+    );
+    await createHealthRecord(user.id, {
+      kind: "symptom",
+      title: "completed",
+      observationId: observation.id,
+      recordedAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
     });
     const res = await GET();
     const body = await res.json();
@@ -197,15 +223,15 @@ describe("task-44 P1 check-in due (§30)", () => {
     expect(body.checkInDueCount).toBe(0);
   });
 
-  it("多个到期 OBSERVING 按 nextCheckInAt ASC 排序 + ≤3 卡上限", async () => {
+  it("orders several due observations by oldest collected record + caps cards at 3", async () => {
     const { GET } = await import("./route");
     const user = await makeUser("wmn-p1-cap@example.com");
     asUser(user.id);
-    // 5 个全部到期（now - (5-i)*1000），i=0 最早到期，i=4 最近到期
+    // Five weekly observations, oldest metric first.
     for (let i = 0; i < 5; i++) {
-      await createObservingDecision(
+      await createObservedDecision(
         user.id,
-        new Date(Date.now() - (5 - i) * 1000),
+        new Date(Date.now() - (12 - i) * 24 * 60 * 60 * 1000),
         `obs-${i}`,
       );
     }
@@ -213,7 +239,7 @@ describe("task-44 P1 check-in due (§30)", () => {
     const body = await res.json();
     expect(body.cards).toHaveLength(3); // ≤3 卡上限
     expect(body.checkInDueCount).toBe(5); // 全部 5 个到期
-    // 按 nextCheckInAt ASC：obs-0 最早到期，排第一
+    // The earliest last measurement is due first.
     expect(body.cards[0].question).toBe("obs-0");
     expect(body.cards[1].question).toBe("obs-1");
     expect(body.cards[2].question).toBe("obs-2");
@@ -223,10 +249,10 @@ describe("task-44 P1 check-in due (§30)", () => {
     const { GET } = await import("./route");
     const user = await makeUser("wmn-p1-priority@example.com");
     asUser(user.id);
-    // P1：OBSERVING + 到期
-    await createObservingDecision(
+    // P1: observation whose newest metric is overdue.
+    await createObservedDecision(
       user.id,
-      new Date(Date.now() - 1000),
+      new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
       "p1-due",
     );
     // P2：ACTIVE（actionable）

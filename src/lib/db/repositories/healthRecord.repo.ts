@@ -10,6 +10,7 @@ import {
   type OcrStatus,
   ocrStatusSchema,
 } from "@/lib/db/enums";
+import { normalizeMedicationParsedValues } from "@/lib/db/medicationDose";
 import { prisma } from "@/lib/db/prisma";
 import type { HealthRecord, Prisma } from "~prisma/client";
 
@@ -26,6 +27,8 @@ export type HealthRecordWithSource = Prisma.HealthRecordGetPayload<{
 
 export interface CreateHealthRecordInput {
   kind: HealthRecordKind;
+  /** Optional observation plan that this measurement fulfils. */
+  observationId?: string | null;
   /** Canonical code for this kind; unsupported records remain `other`. */
   metricCode?: string;
   title: string;
@@ -62,6 +65,16 @@ export async function create(
   if (input.documentClass) documentClassSchema.parse(input.documentClass);
   if (input.confidence) extractionConfidenceSchema.parse(input.confidence);
 
+  // The foreign key ensures the observation exists; this ownership check keeps
+  // a caller from attaching a record to another member's observation.
+  if (input.observationId) {
+    const observation = await prisma.observation.findFirst({
+      where: { id: input.observationId, userId },
+      select: { id: true },
+    });
+    if (!observation) throw new Error("observation not found");
+  }
+
   // 若未传 sourceId，自动建 placeholder Source（task-42 兼容路径）
   let sourceId = input.sourceId;
   if (!sourceId) {
@@ -86,6 +99,7 @@ export async function create(
   return prisma.healthRecord.create({
     data: {
       userId,
+      observationId: input.observationId ?? null,
       sourceId,
       kind: input.kind,
       metricCode: input.metricCode ?? "other",
@@ -97,7 +111,9 @@ export async function create(
       source: input.source ?? null,
       objectKey: input.objectKey ?? null,
       ocrStatus,
-      parsedValues: (input.parsedValues ?? undefined) as
+      parsedValues: (input.kind === "medication"
+        ? normalizeMedicationParsedValues(input.parsedValues)
+        : input.parsedValues ?? undefined) as
         | Prisma.InputJsonValue
         | undefined,
       recordedAt: input.recordedAt,
@@ -109,13 +125,16 @@ export async function create(
 /** 按 recordedAt 倒序列出某用户的健康记录（含 healthSource） */
 export async function listByUser(
   userId: string,
-  options?: { recordedAtOrBefore?: Date },
+  options?: { recordedAtOrBefore?: Date; observationId?: string },
 ): Promise<HealthRecordWithSource[]> {
   return prisma.healthRecord.findMany({
     where: {
       userId,
       ...(options?.recordedAtOrBefore
         ? { recordedAt: { lte: options.recordedAtOrBefore } }
+        : {}),
+      ...(options?.observationId
+        ? { observationId: options.observationId }
         : {}),
     },
     orderBy: { recordedAt: "desc" },
@@ -171,13 +190,21 @@ export async function updateExtraction(
   if (input.status) healthRecordStatusSchema.parse(input.status);
   if (input.confidence) extractionConfidenceSchema.parse(input.confidence);
   if (input.documentClass) documentClassSchema.parse(input.documentClass);
+  const existing = input.parsedValues
+    ? await prisma.healthRecord.findUnique({
+        where: { id: recordId },
+        select: { kind: true },
+      })
+    : null;
   return prisma.healthRecord.update({
     where: { id: recordId },
     data: {
       status: input.status,
       confidence: input.confidence ?? undefined,
       documentClass: input.documentClass ?? undefined,
-      parsedValues: (input.parsedValues ?? undefined) as
+      parsedValues: (existing?.kind === "medication"
+        ? normalizeMedicationParsedValues(input.parsedValues)
+        : input.parsedValues ?? undefined) as
         | Prisma.InputJsonValue
         | undefined,
     },

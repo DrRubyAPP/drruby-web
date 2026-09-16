@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { EmptyState, ErrorState, Skeleton } from "@/components/api";
 import type {
   DecisionDto,
@@ -18,7 +18,10 @@ import { Link } from "@/i18n/navigation";
 import { apiClient } from "@/lib/api/client";
 import { decisionStatusLabel } from "./decisionStatus";
 import { HealthRecordValueCue } from "./HealthRecordValueCue";
-import { MetricHistoryDialog } from "./MetricHistoryDialog";
+import {
+  type MetricHistoryEvent,
+  MetricHistoryDialog,
+} from "./MetricHistoryDialog";
 
 type Tab = "home" | "health" | "decisions";
 
@@ -40,6 +43,11 @@ type IntakeResponse = {
 };
 
 type ChatMessage = { role: "assistant" | "user"; content: string };
+
+export type ComposerRequest = {
+  prompt: string;
+  requestId: number;
+};
 
 const NAV: { id: Tab; title: string; sub: string; icon: React.ReactNode }[] = [
   {
@@ -98,11 +106,13 @@ export function PortalV2({ initialTab = "home" }: { initialTab?: Tab }) {
 export function PortalV2Frame({
   activeTab,
   children,
+  composerRequest,
   onChanged,
   onTabChange,
 }: {
   activeTab: Tab;
   children: React.ReactNode;
+  composerRequest?: ComposerRequest | null;
   onChanged: () => void;
   onTabChange: (tab: Tab) => void;
 }) {
@@ -141,7 +151,7 @@ export function PortalV2Frame({
 
         <main className="ufm portal-v2__main">{children}</main>
       </div>
-      <FloatingComposer onChanged={onChanged} />
+      <FloatingComposer composerRequest={composerRequest} onChanged={onChanged} />
     </div>
   );
 }
@@ -164,7 +174,7 @@ function HomeView({ refreshKey }: { refreshKey: number }) {
         ) : data?.cards.length ? (
           <div className="card">
             {data.cards.map((decision, index) => {
-              const observationDue = index < data.checkInDueCount;
+              const observationDue = Boolean(decision.observationDueAt);
               return (
                 <Link
                   className={`dec portal-v2__wmn-item${index === 0 ? " mn-primary" : ""}`}
@@ -180,8 +190,8 @@ function HomeView({ refreshKey }: { refreshKey: number }) {
                     <div className="st">
                       {observationDue ? "Observation due" : "Updated"}{" "}
                       {new Date(
-                        observationDue && decision.nextCheckInAt
-                          ? decision.nextCheckInAt
+                        observationDue && decision.observationDueAt
+                          ? decision.observationDueAt
                           : decision.lastUserActivityAt,
                       ).toLocaleDateString()}
                     </div>
@@ -212,6 +222,9 @@ function HealthView({ refreshKey }: { refreshKey: number }) {
   const [showAll, setShowAll] = useState(false);
   const { data, error, loading, refetch } = useApi<HealthRecordDto[]>(
     `/api/health/records?portalV2=${refreshKey}`,
+  );
+  const timeline = useApi<MetricHistoryEvent[]>(
+    `/api/timeline?portalV2=${refreshKey}`,
   );
   const records = data ?? [];
   const groups = [
@@ -302,22 +315,28 @@ function HealthView({ refreshKey }: { refreshKey: number }) {
           </div>
         )}
       </div>
-      <Link
-        className="card portal-v2__tracking-link"
-        href="/portal-v2/health/trends"
-      >
-        <span>
-          <strong>View your health trend</strong>
-          <small>
-            See every change event and your health at each point in time.
-          </small>
-        </span>
-        <span className="arr" aria-hidden="true">
-          ›
-        </span>
-      </Link>
+      <section className="sec">
+        <div className="sec-h">Health Trend</div>
+        <Link
+          className="card portal-v2__tracking-link"
+          href="/portal-v2/health/trends"
+        >
+          <span>
+            <strong>View your health trend</strong>
+            <small>
+              See every change event and your health at each point in time.
+            </small>
+          </span>
+          <span className="arr" aria-hidden="true">
+            ›
+          </span>
+        </Link>
+      </section>
       {selectedMetric && (
         <MetricHistoryDialog
+          events={(timeline.data ?? []).filter(
+            (event) => event.importance === "important",
+          )}
           onClose={() => setSelectedMetric(null)}
           records={records.filter(
             (record) =>
@@ -415,7 +434,13 @@ function DecisionCard({ decision }: { decision: DecisionDto }) {
   );
 }
 
-function FloatingComposer({ onChanged }: { onChanged: () => void }) {
+function FloatingComposer({
+  composerRequest,
+  onChanged,
+}: {
+  composerRequest?: ComposerRequest | null;
+  onChanged: () => void;
+}) {
   const [text, setText] = useState("");
   const [attachment, setAttachment] = useState<File | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -423,6 +448,13 @@ function FloatingComposer({ onChanged }: { onChanged: () => void }) {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+  const textarea = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (!composerRequest) return;
+    setText(composerRequest.prompt);
+    textarea.current?.focus();
+  }, [composerRequest]);
 
   async function submit() {
     if ((!text.trim() && !attachment) || sending) return;
@@ -494,6 +526,7 @@ function FloatingComposer({ onChanged }: { onChanged: () => void }) {
             }
           }}
           placeholder="Tell DrRuby what is changing, what you started, or what you are considering…"
+          ref={textarea}
           value={text}
         />
         <div className="portal-v2__composer-actions">

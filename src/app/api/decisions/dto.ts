@@ -35,7 +35,7 @@ export const DecisionEntryDTO = z.object({
 /** App `types.ts` Decision（`updated ← updatedAt`；列表省 brief，详情含 brief+entries）
  *  task-43 新增字段（currentSnapshotId/healthContext/healthContextStatus/healthContextConfirmedAt/pendingRegenAt）
  *  全部可选 nullable，task-37/42 存量不破坏（R1/R11）。
- *  task-44 新增 nextCheckInAt/observeBaseline，同样可选 nullable，task-43 存量不破坏。 */
+ *  task-44 新增 observeBaseline，同样可选 nullable，task-43 存量不破坏。 */
 export const DecisionDTO = z.object({
   id: z.string(),
   question: z.string(),
@@ -60,8 +60,9 @@ export const DecisionDTO = z.object({
   healthContextStatus: healthContextStatusSchema.nullable().optional(),
   healthContextConfirmedAt: z.string().nullable().optional(),
   pendingRegenAt: z.string().nullable().optional(),
-  // task-44 Observe / Learn（§27/§30）
-  nextCheckInAt: z.string().nullable().optional(),
+  // 从 Observation + 最新 HealthRecord 派生；不持久化到 Decision。
+  observationDueAt: z.string().nullable().optional(),
+  // task-44 Observe / Learn（§27）
   observeBaseline: z
     .object({
       text: z.string(),
@@ -128,8 +129,7 @@ export function toDecisionDTO(
     pendingRegenAt: row.pendingRegenAt
       ? row.pendingRegenAt.toISOString()
       : null,
-    // task-44 Observe / Learn
-    nextCheckInAt: row.nextCheckInAt ? row.nextCheckInAt.toISOString() : null,
+    // 到期时间由 Observation + 最新 HealthRecord 派生，见 detail/WMN routes。
     observeBaseline:
       (row.observeBaseline as z.infer<typeof DecisionDTO>["observeBaseline"]) ??
       null,

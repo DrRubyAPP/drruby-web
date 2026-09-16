@@ -5,6 +5,11 @@ import { EmptyState, ErrorState, Skeleton } from "@/components/api";
 import type { DecisionDetailDto } from "@/components/sections/portal/decisions/dto";
 import { HealthSnapshotDialog } from "@/components/sections/portal-v2/HealthSnapshotDialog";
 import { PortalV2Frame } from "@/components/sections/portal-v2/PortalV2";
+import {
+  includesTimelineEvent,
+  TimelineImportanceScale,
+  type TimelineImportanceFilter,
+} from "@/components/sections/portal-v2/TimelineImportanceScale";
 import type { TimelineEventDto } from "@/components/sections/portal/today/YourTimeline";
 import { useApi } from "@/hooks/useApi";
 import { Link, useRouter } from "@/i18n/navigation";
@@ -16,6 +21,8 @@ export default function DecisionTrendPage({
 }) {
   const router = useRouter();
   const [snapshotAt, setSnapshotAt] = useState<string | null>(null);
+  const [importanceFilter, setImportanceFilter] =
+    useState<TimelineImportanceFilter>("important");
   const { id: decisionId } = use(params);
   const { data, error, loading, refetch } = useApi<TimelineEventDto[]>(
     `/api/timeline?decisionId=${encodeURIComponent(decisionId)}`,
@@ -25,6 +32,9 @@ export default function DecisionTrendPage({
   );
   const events = [...(data ?? [])].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  );
+  const visibleEvents = events.filter((event) =>
+    includesTimelineEvent(event, importanceFilter),
   );
 
   return (
@@ -52,24 +62,37 @@ export default function DecisionTrendPage({
           at each point in time.
         </div>
         <section className="sec">
-          <div className="sec-h">What’s changed</div>
+          <div className="portal-v2__trend-section-heading">
+            <div className="sec-h">What’s changed</div>
+            <TimelineImportanceScale
+              onChange={setImportanceFilter}
+              value={importanceFilter}
+            />
+          </div>
           {loading ? (
             <Skeleton lines={5} />
           ) : error ? (
             <ErrorState message={error.message} onRetry={refetch} />
-          ) : events.length ? (
+          ) : visibleEvents.length ? (
             <div className="card portal-v2__trend-timeline">
-              {events.map((event) => (
+              {visibleEvents.map((event) => (
                 <article className="portal-v2__trend-event" key={event.id}>
-                  <button
-                    aria-label={`View health snapshot for ${new Date(event.date).toLocaleDateString()}`}
-                    className="portal-v2__snapshot-button"
-                    onClick={() => setSnapshotAt(event.date)}
-                    title="View health snapshot"
-                    type="button"
-                  >
-                    <span aria-hidden="true" />
-                  </button>
+                  {event.importance === "minor" ? (
+                    <span
+                      aria-hidden="true"
+                      className="portal-v2__trend-dot portal-v2__trend-dot--minor"
+                    />
+                  ) : (
+                    <button
+                      aria-label={`View health snapshot for ${new Date(event.date).toLocaleDateString()}`}
+                      className="portal-v2__snapshot-button"
+                      onClick={() => setSnapshotAt(event.date)}
+                      title="View health snapshot"
+                      type="button"
+                    >
+                      <span aria-hidden="true" />
+                    </button>
+                  )}
                   <div className="portal-v2__trend-event-copy">
                     <time dateTime={event.date}>
                       {new Date(event.date).toLocaleDateString()}
@@ -82,8 +105,14 @@ export default function DecisionTrendPage({
             </div>
           ) : (
             <EmptyState
-              hint="Updates connected to this decision will appear here."
-              title="No decision changes yet"
+              hint={
+                events.length
+                  ? "Choose a broader importance level to view more events."
+                  : "Updates connected to this decision will appear here."
+              }
+              title={
+                events.length ? "No events at this level" : "No decision changes yet"
+              }
             />
           )}
         </section>

@@ -15,7 +15,7 @@ async function assertDecisionOwner(userId: string, decisionId: string) {
 
 /**
  * Mark as completed
- * @description D5 Mark as completed：DECIDED → COMPLETED 直接路径（不需观察的完成）。清 nextCheckInAt + observeBaseline + 刷 lastUserActivityAt + 写 TimelineEvent。非 DECIDED 422（OBSERVING 必须 Stop；ACTIVE 必须 Decide）。越权 404
+ * @description D5 Mark as completed：DECIDED → COMPLETED 直接路径（不需观察的完成）。清 observeBaseline + 刷 lastUserActivityAt + 写 TimelineEvent。非 DECIDED 422（OBSERVING 必须 Stop；ACTIVE 必须 Decide）。越权 404
  * @response DecisionDTO
  * @auth bearer
  * @responseSet auth

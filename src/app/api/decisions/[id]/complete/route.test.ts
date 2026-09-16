@@ -29,7 +29,7 @@ describe("POST /api/decisions/[id]/complete", () => {
   beforeEach(resetDb);
   afterEach(disconnectDb);
 
-  it("DECIDED → COMPLETED + 清 nextCheckInAt/observeBaseline", async () => {
+  it("DECIDED → COMPLETED + 清 observeBaseline", async () => {
     const { POST } = await import("./route");
     const { prisma } = await import("@/lib/db/prisma");
     const owner = await makeUser("complete-ok@example.com");
@@ -47,7 +47,6 @@ describe("POST /api/decisions/[id]/complete", () => {
     const updated = await prisma.decision.findUnique({
       where: { id: decision.id },
     });
-    expect(updated?.nextCheckInAt).toBeNull();
     expect(updated?.observeBaseline).toBeNull();
 
     // TimelineEvent 写入
@@ -91,7 +90,6 @@ describe("POST /api/decisions/[id]/complete", () => {
         outcome: "decided_to_do_it",
         decidedAt: new Date(),
         observeBaseline: { text: "x", freq: "weekly" },
-        nextCheckInAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       },
     });
 

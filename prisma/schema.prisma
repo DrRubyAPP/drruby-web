@@ -325,8 +325,6 @@ model Decision {
   pendingRegenAt DateTime? @map("pending_regen_at") @db.Timestamptz
 
   // ---- task-44 Observe / Learn（Contract §27–§30）----
-  /// §27/§30 下次 check-in 时间（OBSERVING 状态才有值；Start 时设、Stop/COMPLETED 时清）
-  nextCheckInAt  DateTime?  @map("next_check_in_at")  @db.Timestamptz
   /// §27 观察计划 baseline：{ text: string, baselineRecordId?: string, freq: CheckInFrequency }
   observeBaseline  Json?    @map("observe_baseline")
 
@@ -345,8 +343,6 @@ model Decision {
   @@index([userId, topicSlug], map: "decision_user_topic_slug_idx")
   /// §18/D6 lazy fire 扫描：按 (userId, pendingRegenAt) 检索到期 regen
   @@index([userId, pendingRegenAt], map: "decision_pending_regen_idx")
-  /// §30 WMN P1 查询：按 (userId, nextCheckInAt) 检索到期 check-in
-  @@index([userId, nextCheckInAt], map: "decision_next_checkin_idx")
   @@map("decision")
 }
 
@@ -402,7 +398,7 @@ model DecisionEntry {
 }
 
 /// 用户可追踪的一项观察。它属于用户，可选地关联到某个 Decision；并不依附于
-/// Decision 的生命周期。实际记录落在 ObservationEntry，必要时指向 HealthRecord。
+/// Decision 的生命周期。实际记录由关联的 HealthRecord 构成。
 model Observation {
   id         String    @id @default(cuid(2))
   userId     String    @map("user_id")
@@ -417,14 +413,15 @@ model Observation {
   user       UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
   decision   Decision?   @relation(fields: [decisionId], references: [id], onDelete: SetNull)
   entries    ObservationEntry[]
+  healthRecords HealthRecord[]
 
   @@index([userId, status], map: "observation_user_status_idx")
   @@index([decisionId], map: "observation_decision_id_idx")
   @@map("observation")
 }
 
-/// 一次观察的值或备注。健康记录仍是原始事实来源；healthRecordId 让观察可以引用它，
-/// 而无需把记录复制进 DecisionEntry。
+/// Legacy observation log. Portal v2 writes and reads HealthRecord directly;
+/// retain this table temporarily for existing data only.
 model ObservationEntry {
   id             String    @id @default(cuid(2))
   observationId  String    @map("observation_id")
@@ -604,6 +601,9 @@ model Contribution {
 model HealthRecord {
   id            String   @id @default(cuid(2))
   userId        String   @map("user_id")
+  /// Optional observation plan this measurement fulfils. The HealthRecord is
+  /// the source-of-truth event; one observation can collect many records.
+  observationId String?  @map("observation_id")
   sourceId      String   @unique @map("source_id") // Source 1:1 Record（V1 简化）
   kind          String   // lab|imaging|checkup|vitals|medication|symptom|treatment
   /// Canonical code from the definition table for this record's kind. Every
@@ -631,6 +631,7 @@ model HealthRecord {
   ocrStatus    String   @default("pending") @map("ocr_status")
 
   user         UserAccount           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  observation  Observation?          @relation(fields: [observationId], references: [id], onDelete: SetNull)
   healthSource HealthSource          @relation(fields: [sourceId], references: [id], onDelete: Cascade)
   photos       Photo[]
   revisions    HealthRecordRevision[]
@@ -638,6 +639,7 @@ model HealthRecord {
   observationEntries ObservationEntry[]
 
   @@index([userId, recordedAt], map: "health_record_user_recorded_idx")
+  @@index([observationId, recordedAt], map: "health_record_observation_recorded_idx")
   @@index([userId, metricCode, recordedAt], map: "health_record_user_metric_recorded_idx")
   @@index([userId, status], map: "health_record_user_status_idx")
   @@map("health_record")

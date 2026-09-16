@@ -34,7 +34,6 @@ function makeDecisionRow(overrides: Partial<Decision> = {}): Decision {
     healthContextConfirmedAt: null,
     pendingRegenAt: null,
     // task-44
-    nextCheckInAt: new Date("2026-09-07T00:00:00Z"),
     observeBaseline: {
       text: "baseline text",
       baselineRecordId: "rec1",
@@ -47,9 +46,9 @@ function makeDecisionRow(overrides: Partial<Decision> = {}): Decision {
 }
 
 describe("task-44 DecisionDTO/EntryDTO 新字段", () => {
-  it("DecisionDTO 包含 nextCheckInAt + observeBaseline schema 字段", () => {
+  it("DecisionDTO 包含 observationDueAt + observeBaseline schema 字段", () => {
     const shape = DecisionDTO.shape;
-    expect(shape.nextCheckInAt).toBeDefined();
+    expect(shape.observationDueAt).toBeDefined();
     expect(shape.observeBaseline).toBeDefined();
   });
 
@@ -58,10 +57,9 @@ describe("task-44 DecisionDTO/EntryDTO 新字段", () => {
     expect(shape.direction).toBeDefined();
   });
 
-  it("toDecisionDTO 输出 nextCheckInAt ISO + observeBaseline 对象", () => {
+  it("toDecisionDTO 输出 observeBaseline 对象", () => {
     const row = makeDecisionRow();
     const dto = toDecisionDTO(row, { withBrief: false });
-    expect(dto.nextCheckInAt).toBe("2026-09-07T00:00:00.000Z");
     expect(dto.observeBaseline).toEqual({
       text: "baseline text",
       baselineRecordId: "rec1",
@@ -69,13 +67,11 @@ describe("task-44 DecisionDTO/EntryDTO 新字段", () => {
     });
   });
 
-  it("toDecisionDTO nextCheckInAt=null/observeBaseline=null 安全透传", () => {
+  it("toDecisionDTO observeBaseline=null 安全透传", () => {
     const row = makeDecisionRow({
-      nextCheckInAt: null,
       observeBaseline: null,
     });
     const dto = toDecisionDTO(row, { withBrief: false });
-    expect(dto.nextCheckInAt).toBeNull();
     expect(dto.observeBaseline).toBeNull();
   });
 

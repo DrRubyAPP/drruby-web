@@ -774,11 +774,7 @@ export function DecisionDetailView({ id }: { id: string }) {
           {data.lifecycle === "OBSERVING" && (
             <div className="card">
               <p style={{ fontSize: 13.5, color: "#7c746f" }}>
-                {tr("observe.observing.hint", {
-                  next: data.nextCheckInAt
-                    ? new Date(data.nextCheckInAt).toLocaleDateString()
-                    : "—",
-                })}
+                {tr("observe.observing.hint")}
               </p>
               {data.observeBaseline && (
                 <p style={{ fontSize: 13, color: "#524d49", marginTop: 8 }}>

@@ -23,7 +23,6 @@ async function createObservingDecision(userId: string) {
       outcome: "decided_to_do_it",
       decidedAt: new Date(),
       observeBaseline: { text: "baseline", freq: "weekly" },
-      nextCheckInAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     },
   });
 }
@@ -69,12 +68,10 @@ describe("POST /api/decisions/[id]/observe/stop", () => {
     expect(body.lifecycle).toBe("LEARNING");
     expect(body.hasObservations).toBe(true);
 
-    // nextCheckInAt 清空
+    // observeBaseline 保留（D7 不删历史；completeAfterLearning 时才清）
     const updated = await prisma.decision.findUnique({
       where: { id: decision.id },
     });
-    expect(updated?.nextCheckInAt).toBeNull();
-    // observeBaseline 保留（D7 不删历史；completeAfterLearning 时才清）
     expect(updated?.observeBaseline).not.toBeNull();
 
     // TimelineEvent 写入

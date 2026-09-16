@@ -20,6 +20,14 @@ type PlotPoint = {
 type ChartTooltip = { x: number; y: number; label: string };
 type HistoryValue = { value: number | null; isExit: boolean };
 
+export type MetricHistoryEvent = {
+  id: string;
+  date: string;
+  importance: "important" | "medium" | "minor";
+  title: string;
+  detail?: string;
+};
+
 function chartDomain(values: number[]): { min: number; max: number } {
   const min = Math.min(...values);
   const max = Math.max(...values);
@@ -89,6 +97,60 @@ function FloatingTooltip({ tooltip, width, height }: {
   );
 }
 
+/**
+ * Events deliberately use the metric series' existing time domain. Filtering
+ * happens before rendering so an event can never extend or otherwise alter
+ * the x-axis definition.
+ */
+function ImportantEventMarkers({
+  events,
+  start,
+  end,
+  x,
+  top,
+  bottom,
+  height,
+  setTooltip,
+}: {
+  events: MetricHistoryEvent[];
+  start: number;
+  end: number;
+  x: (date: Date) => number;
+  top: number;
+  bottom: number;
+  height: number;
+  setTooltip: (tooltip: ChartTooltip | null) => void;
+}) {
+  return events
+    .filter((event) => {
+      const occurredAt = new Date(event.date).getTime();
+      return Number.isFinite(occurredAt) && occurredAt >= start && occurredAt <= end;
+    })
+    .map((event) => {
+      const date = new Date(event.date);
+      const markerX = x(date);
+      const label = `${date.toLocaleDateString()} · ${event.title}${event.detail ? ` · ${event.detail}` : ""}`;
+      return (
+        <line
+          aria-label={`Important event: ${event.title}`}
+          className="portal-v2__chart-event-marker"
+          key={event.id}
+          onBlur={() => setTooltip(null)}
+          onFocus={() => setTooltip({ x: markerX, y: top, label })}
+          onMouseEnter={() => setTooltip({ x: markerX, y: top, label })}
+          onMouseLeave={() => setTooltip(null)}
+          tabIndex={0}
+          x1={markerX}
+          x2={markerX}
+          y1={top}
+          y2={height - bottom}
+        >
+          <title>{label}</title>
+        </line>
+      );
+    });
+}
+
 function interpolatePoints(
   sorted: HealthRecordDto[],
   values: HistoryValue[],
@@ -140,7 +202,7 @@ function sortedRecords(records: HealthRecordDto[]) {
   );
 }
 
-function NumericHistory({ records }: { records: HealthRecordDto[] }) {
+function NumericHistory({ records, events }: { records: HealthRecordDto[]; events: MetricHistoryEvent[] }) {
   const [tooltip, setTooltip] = useState<ChartTooltip | null>(null);
   const sorted = sortedRecords(records);
   const points = interpolatePoints(
@@ -165,7 +227,7 @@ function NumericHistory({ records }: { records: HealthRecordDto[] }) {
   const right = 20;
   const top = 18;
   const bottom = 26;
-  const x = (point: PlotPoint) => {
+  const x = (point: Pick<PlotPoint, "date">) => {
     if (start === end) return width / 2;
     return left + ((point.date.getTime() - start) / (end - start)) * (width - left - right);
   };
@@ -189,6 +251,7 @@ function NumericHistory({ records }: { records: HealthRecordDto[] }) {
           viewBox={`0 0 ${width} ${height}`}
         >
           <ChartAxis height={height} left={left} max={max} min={min} right={right} width={width} y={axisY} />
+          <ImportantEventMarkers bottom={bottom} end={end} events={events} height={height} setTooltip={setTooltip} start={start} top={top} x={(date) => x({ date })} />
           <path className="portal-v2__chart-line" d={path} fill="none" />
           {points.map((point, index) => {
             const record = sorted[index]!;
@@ -253,7 +316,7 @@ function NumericHistory({ records }: { records: HealthRecordDto[] }) {
   );
 }
 
-function BloodPressureHistory({ records }: { records: HealthRecordDto[] }) {
+function BloodPressureHistory({ records, events }: { records: HealthRecordDto[]; events: MetricHistoryEvent[] }) {
   const [tooltip, setTooltip] = useState<ChartTooltip | null>(null);
   const sorted = sortedRecords(records);
   const readings = sorted.map(bloodPressureRecordValues);
@@ -283,7 +346,7 @@ function BloodPressureHistory({ records }: { records: HealthRecordDto[] }) {
   const right = 20;
   const top = 18;
   const bottom = 26;
-  const x = (point: PlotPoint) =>
+  const x = (point: Pick<PlotPoint, "date">) =>
     start === end
       ? width / 2
       : left +
@@ -345,6 +408,7 @@ function BloodPressureHistory({ records }: { records: HealthRecordDto[] }) {
           viewBox={`0 0 ${width} ${height}`}
         >
           <ChartAxis height={height} left={left} max={max} min={min} right={right} width={width} y={axisY} />
+          <ImportantEventMarkers bottom={bottom} end={end} events={events} height={height} setTooltip={setTooltip} start={start} top={top} x={(date) => x({ date })} />
           <path className="portal-v2__chart-line portal-v2__chart-line--systolic" d={path(systolic)} fill="none" />
           <path className="portal-v2__chart-line portal-v2__chart-line--diastolic" d={path(diastolic)} fill="none" />
           {renderPoints(systolic, "systolic")}
@@ -380,10 +444,12 @@ function TextHistory({ records }: { records: HealthRecordDto[] }) {
 export function MetricHistoryDialog({
   title,
   records,
+  events = [],
   onClose,
 }: {
   title: string;
   records: HealthRecordDto[];
+  events?: MetricHistoryEvent[];
   onClose: () => void;
 }) {
   const hasNumericData = records.some((record) => numericHealthRecordValue(record));
@@ -401,9 +467,9 @@ export function MetricHistoryDialog({
         <p className="portal-v2__eyebrow">METRIC HISTORY</p>
         <h2 id="metric-history-title">{title}</h2>
         {isBloodPressure ? (
-          <BloodPressureHistory records={records} />
+          <BloodPressureHistory events={events} records={records} />
         ) : hasNumericData ? (
-          <NumericHistory records={records} />
+          <NumericHistory events={events} records={records} />
         ) : (
           <TextHistory records={records} />
         )}

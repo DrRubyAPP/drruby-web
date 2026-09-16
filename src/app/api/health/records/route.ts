@@ -15,15 +15,17 @@ import { HealthRecordListResponse, ManualLogBody, toRecordDTO } from "../dto";
  */
 const HealthRecordListQuery = z.object({
   at: z.iso.datetime().optional(),
+  observationId: z.string().min(1).optional(),
 });
 
 export const GET = handle(async (req?: Request) => {
   const user = await requireUser();
-  const { at } = HealthRecordListQuery.parse(
+  const { at, observationId } = HealthRecordListQuery.parse(
     req ? Object.fromEntries(new URL(req.url).searchParams) : {},
   );
   const rows = await healthRecordRepo.listByUser(user.id, {
     recordedAtOrBefore: at ? new Date(at) : undefined,
+    observationId,
   });
   return NextResponse.json(
     HealthRecordListResponse.parse(
@@ -56,6 +58,7 @@ export const POST = handle(async (req: Request) => {
   const row = await healthRecordRepo.create(user.id, {
     kind: body.kind,
     title: body.title,
+    observationId: body.observationId,
     parsedValues: body.parsedValues ? (body.parsedValues as never) : undefined,
     status: "CONFIRMED",
     ocrStatus: "manual", // 兼容字段

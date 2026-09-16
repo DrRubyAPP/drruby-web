@@ -24,7 +24,7 @@ async function assertDecisionOwner(userId: string, decisionId: string) {
 
 /**
  * Start observing
- * @description §27 Start Observing：DECIDED → OBSERVING 原子事务。写 observeBaseline（text/recordId/freq）+ 设 nextCheckInAt=now+freq + 刷 lastUserActivityAt + 写 TimelineEvent。CLOSED/COMPLETED 等终态 422。越权 404
+ * @description §27 Start Observing：DECIDED → OBSERVING 原子事务。写 observeBaseline（text/recordId/freq）+ 刷 lastUserActivityAt + 写 TimelineEvent。CLOSED/COMPLETED 等终态 422。越权 404
  * @body StartObservingBody
  * @response DecisionDTO
  * @auth bearer

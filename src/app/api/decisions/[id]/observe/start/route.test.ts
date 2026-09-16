@@ -31,7 +31,7 @@ describe("POST /api/decisions/[id]/observe/start", () => {
   beforeEach(resetDb);
   afterEach(disconnectDb);
 
-  it("DECIDED → OBSERVING + 设 nextCheckInAt + observeBaseline 落库", async () => {
+  it("DECIDED → OBSERVING + observeBaseline 落库", async () => {
     const { POST } = await import("./route");
     const { prisma } = await import("@/lib/db/prisma");
     const owner = await makeUser("start-ok@example.com");
@@ -45,20 +45,10 @@ describe("POST /api/decisions/[id]/observe/start", () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.lifecycle).toBe("OBSERVING");
-    expect(body.nextCheckInAt).not.toBeNull();
     expect(body.observeBaseline).toMatchObject({
       text: "LDL=130",
       freq: "weekly",
     });
-
-    // nextCheckInAt ≈ now + 7 天
-    const updated = await prisma.decision.findUnique({
-      where: { id: decision.id },
-    });
-    const deltaDays =
-      (updated!.nextCheckInAt!.getTime() - Date.now()) / (24 * 60 * 60 * 1000);
-    expect(deltaDays).toBeGreaterThan(6.9);
-    expect(deltaDays).toBeLessThan(7.1);
 
     // TimelineEvent 写入
     const events = await prisma.timelineEvent.findMany({

@@ -4,7 +4,6 @@ import {
   assertCanStartObserving,
   assertCanStopObserving,
   assertOutcomeForKind,
-  CHECK_IN_FREQ_MS,
   type ChangeTrigger,
   type CheckInFrequency,
   changeTriggerSchema,
@@ -464,8 +463,7 @@ export type { ChangeTrigger, SynthesisProvenance };
 // =============================================================================
 
 /**
- * §27 Start Observing：DECIDED → OBSERVING，原子写 observeBaseline +
- * 设 nextCheckInAt + 写 TimelineEvent。
+ * §27 Start Observing：DECIDED → OBSERVING，原子写 observeBaseline + 写 TimelineEvent。
  * 前置：lifecycle === DECIDED（assertCanStartObserving 校验）。
  */
 export async function startObserving(
@@ -481,14 +479,10 @@ export async function startObserving(
     assertCanStartObserving(decisionLifecycleSchema.parse(decision.lifecycle));
 
     const now = new Date();
-    const nextCheckInAt = new Date(
-      now.getTime() + CHECK_IN_FREQ_MS[input.freq],
-    );
     const updated = await tx.decision.update({
       where: { id: input.decisionId },
       data: {
         lifecycle: "OBSERVING",
-        nextCheckInAt,
         observeBaseline: {
           text: input.baselineText,
           ...(input.baselineRecordId
@@ -517,7 +511,7 @@ export async function startObserving(
  * §27 Stop Observing：OBSERVING → LEARNING 或 COMPLETED。
  * - 有 observation records → LEARNING（UI 弹 Learning summary 表单）
  * - 无 observation records → COMPLETED（直接完成，不弹表单）
- * 清 nextCheckInAt；observeBaseline 保留到 markCompleted 时清空（D7 不删历史）。
+ * observeBaseline 保留到 markCompleted 时清空（D7 不删历史）。
  */
 export async function stopObserving(input: {
   decisionId: string;
@@ -545,7 +539,6 @@ export async function stopObserving(input: {
       where: { id: input.decisionId },
       data: {
         lifecycle: nextLifecycle,
-        nextCheckInAt: null,
         lastUserActivityAt: now,
       },
     });
@@ -565,7 +558,7 @@ export async function stopObserving(input: {
 
 /**
  * D5 Mark as completed：DECIDED → COMPLETED 直接路径（不需观察的完成）。
- * 清 nextCheckInAt + observeBaseline（此时 baseline 不再有用）。
+ * 清 observeBaseline（此时 baseline 不再有用）。
  * 不允许从 ACTIVE/OBSERVING/LEARNING 直跳 COMPLETED（违反 §5 单向）。
  */
 export async function markCompleted(
@@ -584,7 +577,6 @@ export async function markCompleted(
       where: { id: input.decisionId },
       data: {
         lifecycle: "COMPLETED",
-        nextCheckInAt: null,
         observeBaseline: Prisma.JsonNull,
         lastUserActivityAt: now,
       },
@@ -605,8 +597,7 @@ export async function markCompleted(
 
 /**
  * §29 Stop→Learning 流程终态：保存 Learning summary 后调用，
- * lifecycle: LEARNING → COMPLETED。清 observeBaseline；nextCheckInAt 已在
- * stopObserving 时清空。
+ * lifecycle: LEARNING → COMPLETED。清 observeBaseline。
  */
 export async function completeAfterLearning(input: {
   decisionId: string;
@@ -642,24 +633,5 @@ export async function completeAfterLearning(input: {
       },
     });
     return updated;
-  });
-}
-
-/**
- * §30 task-44 WMN P1 查询：lifecycle=OBSERVING && nextCheckInAt<=now &&
- * deletedAt IS NULL（Decision 无软删，但留接口）。
- * 按 nextCheckInAt ASC 排序（最早的到期在前）。
- */
-export async function listDueForCheckIn(
-  userId: string,
-  now: Date = new Date(),
-): Promise<Decision[]> {
-  return prisma.decision.findMany({
-    where: {
-      userId,
-      lifecycle: "OBSERVING",
-      nextCheckInAt: { lte: now },
-    },
-    orderBy: { nextCheckInAt: "asc" },
   });
 }
